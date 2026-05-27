@@ -1,0 +1,3 @@
+﻿role,name,email,password,class,roll,gender,dob,blood,fee_status,monthly_fee,father_name,father_phone,mother_name,whatsapp,address,parent_name,parent_email,photo
+student,Ali Khan,ali001@school.edu,CHANGE_ME_STRONG_PASSWORD,Class 1,001,Male,2016-02-14,O+,Pending,5000,Mr Khan,03001234567,Mrs Khan,923001234567,"House 12 Karachi",Khan Family,parent1@school.edu,https://example.com/ali.jpg
+student,Sara Ahmed,sara002@school.edu,CHANGE_ME_STRONG_PASSWORD,Class 1,002,Female,2016-06-20,A+,Pending,6500,Mr Ahmed,03002222222,Mrs Ahmed,923002222222,"House 45 Karachi",Ahmed Family,parent2@school.edu,
