@@ -379,8 +379,23 @@
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
     }
     function monthlyFeeAmount(stu) {
+      if (!stu) return 0;
       const fee = (DB.fees.items || []).find(f => f.id === 'f1') || { amount: 0 };
-      return num(stu?.customFee) || num(fee.amount);
+      const base = num(fee.amount);
+      if (stu.feeType === 'scholarship') return 0;
+      if (stu.feeType === 'discount' && num(stu.feeDiscount) > 0) {
+        const disc = Math.min(100, num(stu.feeDiscount));
+        return num(stu.customFee) || Math.round(base * (1 - disc / 100));
+      }
+      return num(stu.customFee) || base;
+    }
+        function feeBadgeHtml(stu) {
+      const base = num((DB.fees.items || []).find(f => f.id === 'f1')?.amount || 0);
+      const cur = DB.settings?.currency || 'PKR';
+      if (stu.feeType === 'scholarship') return `<span style="display:inline-flex;align-items:center;gap:3px;background:#d1fae5;color:#059669;border-radius:6px;padding:2px 8px;font-size:.63rem;font-weight:800;">🎓 Scholarship</span>`;
+      if (stu.feeType === 'discount' && num(stu.feeDiscount) > 0) return `<span style="display:inline-flex;align-items:center;gap:3px;background:#f5f3ff;color:#7c3aed;border-radius:6px;padding:2px 8px;font-size:.63rem;font-weight:800;">↓${num(stu.feeDiscount)}% ${cur} ${monthlyFeeAmount(stu).toLocaleString()}</span>`;
+      if (num(stu.customFee) && num(stu.customFee) !== base) return `<span style="display:inline-flex;align-items:center;gap:3px;background:#fff2df;color:#ff8a00;border-radius:6px;padding:2px 8px;font-size:.63rem;font-weight:800;">★ ${cur} ${num(stu.customFee).toLocaleString()}</span>`;
+      return `<span style="display:inline-flex;align-items:center;gap:3px;background:#f1f5f9;color:#64748b;border-radius:6px;padding:2px 8px;font-size:.63rem;font-weight:800;">${cur} ${base.toLocaleString()}</span>`;
     }
     function ensureMonthlyFeeLedger() {
       if (!DB?.fees) return;
