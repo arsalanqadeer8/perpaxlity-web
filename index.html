@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -6,22 +6,14 @@
 <title>The School - Where Learning Meets Fun!</title>
 <meta name="description" content="A complete school website and portal for students, parents, teachers, fees, attendance, results, notices, and reports." />
 <meta name="theme-color" content="#ff8a00" />
-<meta name="robots" content="index, follow" />
-<meta property="og:type" content="website" />
-<meta property="og:title" content="The School - Where Learning Meets Fun!" />
-<meta property="og:description" content="Complete school management portal with attendance, grades, fees, and more." />
-<meta property="og:site_name" content="EduNova School" />
-<meta name="twitter:card" content="summary" />
-<meta name="twitter:title" content="The School - Where Learning Meets Fun!" />
-<meta name="twitter:description" content="Complete school management portal with attendance, grades, fees, and more." />
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>" />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="dns-prefetch" href="https://owojgzrzstigmumsehdw.supabase.co" />
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+    href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap"
+    rel="stylesheet">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script defer src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
     * {
       margin: 0;
@@ -2960,20 +2952,14 @@
 @media(max-width:920px){ .welcome-block,.admission-wrap{grid-template-columns:1fr}.program-strip{grid-template-columns:repeat(2,1fr)}.clean-hero.hero-slideshow{height:520px}.clean-nav{padding:12px 16px}.clean-shell{padding:32px 18px 24px} }
 @media(max-width:620px){ .land-links{display:none}.clean-hero .hs-title{font-size:2.7rem}.welcome-photo,.welcome-photo img{min-height:300px}.program-strip,.admission-grid,.clean-stats{grid-template-columns:1fr}.clean-stats div{border-right:0;border-bottom:1px solid #edf0e5}.clean-stats div:last-child{border-bottom:0} }
 
-    /* FORGOT PASSWORD LINK */
-    .forgot-link { display:block; margin-top:10px; text-align:center; font-size:.72rem; font-weight:700; color:rgba(255,255,255,.35); cursor:pointer; border:none; background:transparent; font-family:var(--font); transition:color .15s; text-decoration:underline; text-underline-offset:2px; }
+    .forgot-link { display:block;margin-top:10px;text-align:center;font-size:.72rem;font-weight:700;color:rgba(255,255,255,.35);cursor:pointer;border:none;background:transparent;font-family:var(--font);transition:color .15s;text-decoration:underline;text-underline-offset:2px; }
     .forgot-link:hover { color:var(--p); }
-
-    /* LOADING SPINNER */
-    .app-loader { position:fixed; inset:0; z-index:99999; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; transition:opacity .4s; }
-    .app-loader.hidden { opacity:0; pointer-events:none; }
-    .loader-spin { width:36px; height:36px; border:3px solid var(--border); border-top-color:var(--p); border-radius:50%; animation:spin .7s linear infinite; }
-    .loader-text { font-size:.78rem; font-weight:700; color:var(--ink3); }
-
-    /* OFFLINE BANNER */
-    .offline-banner { position:fixed; top:0; left:0; right:0; z-index:99998; background:var(--r); color:#fff; text-align:center; font-size:.74rem; font-weight:700; padding:6px 12px; display:none; }
+    .app-loader { position:fixed;inset:0;z-index:99999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity .4s; }
+    .app-loader.hidden { opacity:0;pointer-events:none; }
+    .loader-spin { width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--p);border-radius:50%;animation:spin .7s linear infinite; }
+    .loader-text { font-size:.78rem;font-weight:700;color:var(--ink3); }
+    .offline-banner { position:fixed;top:0;left:0;right:0;z-index:99998;background:var(--r);color:#fff;text-align:center;font-size:.74rem;font-weight:700;padding:6px 12px;display:none; }
     .offline-banner.show { display:block; }
-
 </style>
 </head>
 
@@ -2992,9 +2978,9 @@
 <div id="landing-page" class="clean-landing">
   <header class="clean-nav reveal in-view">
     <div class="land-brand">
-      <div class="land-mark" id="land-mark"></div>
+      <div class="land-mark" id="land-mark" style="background:transparent;"></div>
       <div>
-        <div class="land-name" id="land-name">EduNova</div>
+        <div class="land-name" id="land-name">My School</div>
         <div class="land-copy" id="land-copy">School & admissions</div>
       </div>
     </div>
@@ -3009,7 +2995,7 @@
 
   <section class="clean-hero hero-slideshow">
     <div class="hs-slides" id="hs-slides">
-      <div class="hs-slide active" style="background-image:linear-gradient(rgba(17,24,39,.36),rgba(17,24,39,.42)),url('https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1800&q=80');">
+      <div class="hs-slide active" style="background-image:linear-gradient(rgba(17,24,39,.36),rgba(17,24,39,.42)),url('https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1200&q=70');">
         <div class="hs-overlay">
           <div class="hs-tag">The Best Start</div>
           <h2 class="hs-title">Learning That Feels Personal</h2>
@@ -3036,21 +3022,21 @@
         </div>
       </div>
       <div class="welcome-photo">
-        <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1200&q=80" alt="Students learning in classroom">
+        <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=800&q=70" alt="Students learning in classroom">
       </div>
     </section>
 
     <section class="program-strip reveal" id="land-programs">
       <article>
-        <img src="https://images.unsplash.com/photo-1540479859555-17af45c78602?auto=format&fit=crop&w=700&q=80" alt="Sports activity">
+        <img src="https://images.unsplash.com/photo-1540479859555-17af45c78602?auto=format&fit=crop&w=500&q=65" alt="Sports activity" loading="lazy">
         <span>Sports</span>
       </article>
       <article>
-        <img src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=700&q=80" alt="Art class">
+        <img src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=500&q=65" alt="Art class" loading="lazy">
         <span>Creative Arts</span>
       </article>
       <article>
-        <img src="https://images.unsplash.com/photo-1588072432836-e10032774350?auto=format&fit=crop&w=700&q=80" alt="Classroom study">
+        <img src="https://images.unsplash.com/photo-1588072432836-e10032774350?auto=format&fit=crop&w=500&q=65" alt="Classroom study" loading="lazy">
         <span>Academics</span>
       </article>
       <article>
@@ -3212,7 +3198,7 @@
     let _loginAttempts = 0;
     let _loginLockUntil = 0;
     let _idleTimer = null;
-    const IDLE_TIMEOUT = 30 * 60 * 1000; // 30 min auto-logout
+    const IDLE_TIMEOUT = 30 * 60 * 1000;
 
     // -- local read / write ----------------------------------------------
     function loadDB() {
@@ -3689,14 +3675,13 @@
       if (!em || !pw) { showToast('Enter email and password', 'tw2'); return; }
       if (!em.includes('@')) { showToast('Supabase Auth login must use the Login Email saved in the portal.', 'te', 5200); return; }
       if (!_sb) { showToast('Supabase Auth is not configured', 'te'); return; }
-      // Rate limiting
-      if (Date.now() < _loginLockUntil) { showToast('Too many attempts. Try again in ' + Math.ceil((_loginLockUntil - Date.now()) / 1000) + 's', 'te', 3000); return; }
+      if (Date.now() < _loginLockUntil) { showToast('Too many attempts. Wait ' + Math.ceil((_loginLockUntil-Date.now())/1000) + 's', 'te', 3000); return; }
       _loginAttempts++;
       const btn = document.querySelector('.login-btn');
       if (btn) { btn.disabled = true; btn.textContent = 'Signing in...'; }
       try {
         const { error } = await _sb.auth.signInWithPassword({ email: em, password: pw });
-        if (error) { if (_loginAttempts >= 5) { _loginLockUntil = Date.now() + 60000; _loginAttempts = 0; showToast('Too many failed attempts. Locked for 60 seconds.', 'te', 5200); } else { showToast(error.message || 'Incorrect email or password', 'te', 5200); } return; }
+        if (error) { if (_loginAttempts >= 5) { _loginLockUntil = Date.now() + 60000; _loginAttempts = 0; showToast('Too many failed attempts. Locked 60s.','te',5200); } else { showToast(error.message||'Incorrect email or password','te',5200); } return; }
         _loginAttempts = 0;
         const cloud = await loadCloudDB();
         if (cloud) DB = cloud;
@@ -3748,17 +3733,6 @@
       document.getElementById('login-page').style.display = 'flex';
       const btn = [...document.querySelectorAll('.rtab')].find(b => b.textContent.toLowerCase().includes(prefillRole));
       if (btn) setRole(prefillRole, btn);
-    }
-
-    async function forgotPassword() {
-      const em = (document.getElementById('l-email').value || '').trim().toLowerCase();
-      if (!em || !em.includes('@')) { showToast('Enter your email address first, then click Forgot Password', 'tw2', 4000); return; }
-      if (!_sb) { showToast('Supabase Auth is not configured', 'te'); return; }
-      try {
-        const { error } = await _sb.auth.resetPasswordForEmail(em);
-        if (error) { showToast(error.message || 'Could not send reset email', 'te', 5000); return; }
-        showToast('Password reset email sent! Check your inbox.', 'ts', 5000);
-      } catch (e) { showToast('Network error. Try again.', 'te'); }
     }
     function openManualParentWhatsApp() {
       const phone = normalizePhone(DB.school?.whatsapp || DB.school?.phone || '');
@@ -3849,7 +3823,7 @@
     function slideStyle(slide, i) {
       const accent = slide.accent || ['#1e3a5f', '#166534', '#7c2d6b', '#b45309'][i % 4];
       const fallbackImages = [
-        'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1800&q=80',
+        'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1200&q=70',
         'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1800&q=80',
         'https://images.unsplash.com/photo-1588072432836-e10032774350?auto=format&fit=crop&w=1800&q=80',
         'https://images.unsplash.com/photo-1540479859555-17af45c78602?auto=format&fit=crop&w=1800&q=80'
@@ -4227,7 +4201,7 @@
 <div class="card fu d2" style="padding:0;overflow:hidden;">
   <div class="tw">
     <table>
-      <thead><tr><th>#</th><th>Photo</th><th>Name</th><th>Roll No.</th><th>Gender</th><th>Avg</th><th>Att%</th><th>Fees</th><th>Login</th><th>Actions</th></tr></thead>
+      <thead><tr><th>#</th><th>Photo</th><th>Name</th><th>Roll No.</th><th>Gender</th><th>Avg</th><th>Att%</th><th>Monthly Fee</th><th>Fees</th><th>Login</th><th>Actions</th></tr></thead>
       <tbody>
           ${sts.length === 0 ? `<tr><td colspan="10" style="text-align:center;padding:28px;"><div style="color:var(--ink4);margin-bottom:10px;">No students yet</div><button class="btn btn-p btn-sm" onclick="openAddStudentModal()">+ Add First Student</button></td></tr>` : ''}
           ${sts.map((s, i) => {
@@ -4239,6 +4213,7 @@
           <td>${s.gender ? `<span class="badge ${s.gender === 'Male' ? 'bb2' : 'bpk2'}">${s.gender}</span>` : '-'}</td>
           <td><b style="color:${sCol(av)};">${av || 0}%</b> <span style="font-size:.62rem;color:var(--ink4);">${lGrade(av)}</span></td>
           <td><b style="color:${ap >= 90 ? 'var(--g)' : ap >= 75 ? 'var(--o)' : 'var(--r)'};">${ap}%</b></td>
+          <td>${feeBadgeHtml(s)}${s.feeNote ? <div style='font-size:.6rem;color:var(--ink4);margin-top:2px;'>+s.feeNote+</div> : ''}</td>
           <td><span class="badge ${s.fees === 'Paid' ? 'bg2' : 'br2'}">${s.fees || 'Pending'}</span></td>
           <td>${s.loginEmail ? `<span class="badge bg2" style="font-size:.6rem;">Active</span>` : `<span class="badge br2" style="font-size:.6rem;">No Login</span>`}</td>
           <td><div style="display:flex;gap:3px;flex-wrap:wrap;">
@@ -4404,7 +4379,29 @@
   </div>
   <div class="fg2">
     <div class="fg"><label class="fl">Mother's Name</label><input class="fi" id="m-mother" value="${s?.mother || ''}" placeholder="Mrs. ..."/></div>
-    <div class="fg"><label class="fl">Parent WhatsApp</label><input class="fi" id="m-wa" value="${s?.whatsapp || ''}" placeholder="923XXXXXXXXX (with code)"/></div><div class="fg"><label class="fl">Monthly Fee</label><input class="fi" type="number" id="m-customfee" value="${num(s?.customFee || 0) || ''}" placeholder="Use default fee"/></div>
+    <div class="fg"><label class="fl">Parent WhatsApp</label><input class="fi" id="m-wa" value="${s?.whatsapp || ''}" placeholder="923XXXXXXXXX (with code)"/></div>
+  </div>
+  <div class="div"></div>
+  <div style="font-weight:700;font-size:.78rem;color:var(--p);margin-bottom:8px;">💰 Fee Configuration</div>
+  <div class="fg2">
+    <div class="fg"><label class="fl">Fee Type</label>
+      <select class="fi" id="m-feetype" onchange="updateFeePreview()">
+        <option value="default" ${(!s?.feeType||s?.feeType==='default')?'selected':''}>Default (Class Fee)</option>
+        <option value="custom" ${s?.feeType==='custom'?'selected':''}>Custom Amount</option>
+        <option value="discount" ${s?.feeType==='discount'?'selected':''}>Partial Discount %</option>
+        <option value="scholarship" ${s?.feeType==='scholarship'?'selected':''}>Full Scholarship (Free)</option>
+      </select>
+    </div>
+    <div class="fg" id="m-fee-amount-wrap" style="${s?.feeType==='scholarship'?'opacity:.4;pointer-events:none;':''}">
+      <label class="fl" id="m-fee-label">${s?.feeType==='discount'?'Discount %':'Monthly Fee (PKR)'}</label>
+      <input class="fi" type="number" id="m-customfee" min="0" max="100" value="${s?.feeType==='discount'?num(s?.feeDiscount||0):num(s?.customFee||0)||''}" placeholder="${s?.feeType==='discount'?'e.g. 50 for 50% off':'Leave blank for default'}" oninput="updateFeePreview()"/>
+    </div>
+  </div>
+  <div class="fg"><label class="fl">Fee Note (internal only)</label><input class="fi" id="m-feenote" value="${s?.feeNote||''}" placeholder="e.g. Staff child — 50% waiver"/></div>
+  <div id="m-fee-preview" style="background:var(--pl);border:1px solid var(--pl2);border-radius:8px;padding:8px 12px;font-size:.75rem;font-weight:700;color:var(--p);margin-bottom:4px;">
+    ${(()=>{const base=num((DB.fees.items||[]).find(f=>f.id==='f1')?.amount||0);const cur=DB.settings?.currency||'PKR';if(s?.feeType==='scholarship')return '🎓 Full Scholarship — Fee: '+cur+' 0';if(s?.feeType==='discount'&&num(s?.feeDiscount)>0){const d=Math.min(100,num(s.feeDiscount));return '↓ '+num(s.feeDiscount)+'% Discount — Fee: '+cur+' '+Math.round(base*(1-d/100)).toLocaleString();}if(num(s?.customFee))return '★ Custom — Fee: '+cur+' '+num(s.customFee).toLocaleString();return 'Default — Fee: '+cur+' '+base.toLocaleString();})()}
+  </div>
+  <div class="fg2" style="display:none">
   </div>
   <div class="fg"><label class="fl">Address</label><textarea class="fi" id="m-addr" style="min-height:50px;">${s?.address || ''}</textarea></div>
   <div class="div"></div>
@@ -4441,6 +4438,25 @@
     }
     function clearStuPhoto() { document.getElementById('m-pd').value = ''; const p = document.getElementById('m-pup'); if (p) p.innerHTML = '<div class="pup-ic"></div><div class="pup-tx">Add Photo</div>'; }
 
+    function updateFeePreview() {
+      var type = (document.getElementById('m-feetype')||{}).value || 'default';
+      var wrap = document.getElementById('m-fee-amount-wrap');
+      var lbl = document.getElementById('m-fee-label');
+      var inp = document.getElementById('m-customfee');
+      var prev = document.getElementById('m-fee-preview');
+      var base = num(((DB.fees.items||[]).find(function(f){return f.id==='f1'})||{}).amount||0);
+      var cur = (DB.settings||{}).currency || 'PKR';
+      if (wrap) { wrap.style.opacity = type==='scholarship'?'.4':'1'; wrap.style.pointerEvents = type==='scholarship'?'none':''; }
+      if (lbl) lbl.textContent = type==='discount'?'Discount %':'Monthly Fee ('+cur+')';
+      if (inp) { inp.placeholder = type==='discount'?'e.g. 50 for 50% off':'Leave blank for default'; }
+      if (prev) {
+        var v = num((inp||{}).value||0);
+        if (type==='scholarship') prev.innerHTML = '🎓 Full Scholarship — Fee: '+cur+' 0';
+        else if (type==='discount'&&v>0) prev.innerHTML = '↓ '+v+'% Discount — Pays: '+cur+' '+Math.round(base*(1-v/100)).toLocaleString()+'/mo';
+        else if (type==='custom'&&v>0) prev.innerHTML = '★ Custom — Fee: '+cur+' '+v.toLocaleString()+'/mo';
+        else prev.innerHTML = 'Default — Fee: '+cur+' '+base.toLocaleString()+'/mo';
+      }
+    }
     function saveStu(editId) {
       const name = (document.getElementById('m-name')?.value || '').trim();
       if (!name) { showToast(' Name is required', 'te'); return; }
@@ -4461,7 +4477,7 @@
         DB.families[familyId] = { id: familyId, parentName: famName, phone: document.getElementById('m-fphone')?.value || '', email: loginEmail, address: '', studentIds: [], whatsapp: wa };
       }
 
-      const data = { name, roll, classId, gender: document.getElementById('m-gender')?.value || '', dob: document.getElementById('m-dob')?.value || '', blood: document.getElementById('m-blood')?.value || '', fees: document.getElementById('m-fees')?.value || 'Pending', father: (document.getElementById('m-father')?.value || '').trim(), fphone: (document.getElementById('m-fphone')?.value || '').trim(), mother: (document.getElementById('m-mother')?.value || '').trim(), address: (document.getElementById('m-addr')?.value || '').trim(), whatsapp: wa, photo, familyId, loginEmail, customFee: num(document.getElementById('m-customfee')?.value || 0) };
+      const data = { name, roll, classId, gender: document.getElementById('m-gender')?.value || '', dob: document.getElementById('m-dob')?.value || '', blood: document.getElementById('m-blood')?.value || '', fees: document.getElementById('m-fees')?.value || 'Pending', father: (document.getElementById('m-father')?.value || '').trim(), fphone: (document.getElementById('m-fphone')?.value || '').trim(), mother: (document.getElementById('m-mother')?.value || '').trim(), address: (document.getElementById('m-addr')?.value || '').trim(), whatsapp: wa, photo, familyId, loginEmail, customFee: (function(){var t=(document.getElementById('m-feetype')||{}).value||'default';return t==='custom'?num((document.getElementById('m-customfee')||{}).value||0):0;})(), feeType: (document.getElementById('m-feetype')||{}).value||'default', feeDiscount: (function(){var t=(document.getElementById('m-feetype')||{}).value||'default';return t==='discount'?num((document.getElementById('m-customfee')||{}).value||0):0;})(), feeNote: ((document.getElementById('m-feenote')||{}).value||'').trim() };
 
       if (editId) {
         const old = allStus().find(x => x.id === editId); if (!old) { showToast('Not found', 'te'); return; }
@@ -4686,90 +4702,35 @@
       const isAdmin = curRole === 'admin';
       const teachers = DB.users.filter(u => u.role === 'teacher');
       const d = today();
-      // If teacher, show own record
       if (!isAdmin) {
         const myRec = DB.teacherAttendance[curUser?.id] || {};
         const entries = Object.entries(myRec).sort((a, b) => b[0].localeCompare(a[0]));
         const P = entries.filter(([, v]) => v.status === 'Present').length;
         const La = entries.filter(([, v]) => v.status === 'Late').length;
         const A = entries.filter(([, v]) => v.status === 'Absent').length;
+        const Lv = entries.filter(([, v]) => v.status === 'Leave').length;
         return `
-  <div class="ph fu"><div class="ph-tag"> My Attendance</div><h1>Teacher Attendance</h1><div class="ph-sub">Late threshold: after ${DB.lateAfter || '08:00'} AM</div></div>
-  <div class="sg fu d1">
-    <div class="sc sg2"><div class="sc-ic"></div><div class="sc-val" style="color:var(--g);">${P}</div><div class="sc-lbl">Present Days</div></div>
-    <div class="sc sv"><div class="sc-ic"></div><div class="sc-val" style="color:var(--y);">${La}</div><div class="sc-lbl">Late Arrivals</div></div>
-    <div class="sc sr"><div class="sc-ic"></div><div class="sc-val" style="color:var(--r);">${A}</div><div class="sc-lbl">Absent Days</div></div>
-    <div class="sc sp"><div class="sc-ic"></div><div class="sc-val" style="color:var(--p);">${entries.length}</div><div class="sc-lbl">Total Recorded</div></div>
-  </div>
-  <div class="card fu d2">
-    <div class="ch"><div class="ct"> Attendance History</div></div>
-      ${entries.length === 0 ? `<div class="empty"><div class="empty-ic"></div><div class="empty-t">No records yet</div></div>` :
-            entries.map(([date, rec]) => `<div class="ta-row">
-      <div class="ta-time" style="font-size:.75rem;color:var(--ink3);font-weight:600;">${fmtDate(date)}</div>
-      <div class="ta-name">${rec.checkIn ? `Check-in: ${rec.checkIn}` : '-'}</div>
-      <span class="badge ${rec.status === 'Present' ? 'bg2' : rec.status === 'Late' ? 'by2' : rec.status === 'Leave' ? 'bb2' : 'br2'}">${rec.status === 'Late' ? '? ' + rec.status : rec.status}</span>
-    </div>`).join('')}
+  <div class="ph ph-row fu"><div><div class="ph-tag"> My Attendance</div><h1>Teacher Attendance</h1><div class="ph-sub">Late after ${DB.lateAfter||'08:00'} AM</div></div><button class="btn btn-gh btn-sm" onclick="markTeacherAtt('Leave')">📋 Apply Leave</button></div>
+  <div class="sg fu d1"><div class="sc sg2"><div class="sc-ic"></div><div class="sc-val" style="color:var(--g);">${P}</div><div class="sc-lbl">Present</div></div><div class="sc sv"><div class="sc-ic"></div><div class="sc-val" style="color:var(--y);">${La}</div><div class="sc-lbl">Late</div></div><div class="sc sr"><div class="sc-ic"></div><div class="sc-val" style="color:var(--r);">${A}</div><div class="sc-lbl">Absent</div></div><div class="sc sp"><div class="sc-ic"></div><div class="sc-val" style="color:#2563eb;">${Lv}</div><div class="sc-lbl">Leave</div></div></div>
+  <div class="card fu d2"><div class="ch"><div class="ct"> Attendance History</div></div>
+    ${entries.length===0?`<div class="empty"><div class="empty-ic"></div><div class="empty-t">No records yet</div></div>`:entries.map(([date,rec])=>`<div class="ta-row"><div class="ta-time" style="font-size:.75rem;color:var(--ink3);font-weight:600;">${fmtDate(date)}</div><div class="ta-name">${rec.checkIn?`Check-in: ${rec.checkIn}`:rec.status==='Leave'?'📋 Leave':'-'}${rec.note?`<div style="font-size:.65rem;color:var(--ink4);">${rec.note}</div>`:''}</div><span class="badge ${rec.status==='Present'?'bg2':rec.status==='Late'?'by2':rec.status==='Leave'?'bb2':'br2'}">${rec.status==='Late'?'⏰ Late':rec.status}</span></div>`).join('')}
   </div>`;
       }
-
-      // Admin view - all teachers
       return `
-<div class="ph ph-row fu">
-  <div><div class="ph-tag"> Teacher Attendance</div><h1>Staff Attendance</h1><div class="ph-sub">Late after ${DB.lateAfter || '08:00'} - Today: ${fmtDate(d)}</div></div>
-  <button class="btn btn-gh btn-sm" onclick="openLateThreshModal()">? Set Late Time</button>
+<div class="ph ph-row fu"><div><div class="ph-tag"> Teacher Attendance</div><h1>Staff Attendance</h1><div class="ph-sub">Late after ${DB.lateAfter||'08:00'} - Today: ${fmtDate(d)}</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;"><button class="btn btn-p btn-sm" onclick="startScanner()">📷 Scan QR</button><button class="btn btn-gh btn-sm" onclick="openMarkTeacherModal()">✏️ Manual Mark</button><button class="btn btn-gh btn-sm" onclick="openLateThreshModal()">⚙ Set Late Time</button></div></div>
+<div class="card fu d1"><div class="ch"><div class="ct">Today Status - ${fmtDate(d)}</div></div>
+${teachers.length===0?`<div class="empty"><div class="empty-ic"></div><div class="empty-t">No teachers added</div></div>`:`<div style="display:flex;flex-direction:column;gap:2px;">${teachers.map(t=>{const rec=(DB.teacherAttendance[t.id]||{})[d];return `<div class="ta-row"><div class="ava" style="width:32px;height:32px;border-radius:8px;background:${gc(t.name)};font-size:.58rem;flex-shrink:0;">${t.photo?`<img src="${t.photo}"/>`  :ini(t.name)}</div><div class="ta-name">${t.name}<div style="font-size:.66rem;color:var(--ink4);">${t.subject||''-''}</div></div><div class="ta-time">${rec?.checkIn?`In: ${rec.checkIn}`:rec?.status==='Leave'?'📋 Leave':'-'}</div><span class="badge ${rec?rec.status==='Present'?'bg2':rec.status==='Late'?'by2':rec.status==='Leave'?'bb2':'br2':'bo2'}">${rec?rec.status==='Late'?'⏰ Late':rec.status:'Not Marked'}</span><div style="display:flex;gap:3px;margin-left:auto;flex-wrap:wrap;"><button class="btn btn-xs btn-g" onclick="adminMarkTeacher('${t.id}','Present')">P</button><button class="btn btn-xs" style="background:var(--yl);color:var(--y);font-size:.64rem;font-weight:700;padding:3px 7px;border-radius:6px;cursor:pointer;" onclick="adminMarkTeacher('${t.id}','Late')">L</button><button class="btn btn-xs btn-r" onclick="adminMarkTeacher('${t.id}','Absent')">A</button><button class="btn btn-xs" style="background:#dbeafe;color:#2563eb;font-size:.64rem;font-weight:700;padding:3px 7px;border-radius:6px;cursor:pointer;" onclick="adminMarkTeacherLeave('${t.id}')">Leave</button></div></div>`;}).join('')}  </div>`}
 </div>
-<div class="card fu d1">
-  <div class="ch"><div class="ct">Today's Status - ${fmtDate(d)}</div></div>
-    ${teachers.length === 0 ? `<div class="empty"><div class="empty-ic"></div><div class="empty-t">No teachers added</div></div>` : `
-  <div style="display:flex;flex-direction:column;gap:2px;">
-      ${teachers.map(t => {
-        const rec = (DB.teacherAttendance[t.id] || {})[d];
-        return `<div class="ta-row">
-        <div class="ava" style="width:32px;height:32px;border-radius:8px;background:${gc(t.name)};font-size:.58rem;flex-shrink:0;">${t.photo ? `<img src="${t.photo}"/>` : ini(t.name)}</div>
-        <div class="ta-name">${t.name}<div style="font-size:.66rem;color:var(--ink4);">${t.subject || '-'}</div></div>
-        <div class="ta-time">${rec?.checkIn ? `In: ${rec.checkIn}` : '-'}</div>
-        <span class="badge ${rec ? rec.status === 'Present' ? 'bg2' : rec.status === 'Late' ? 'by2' : rec.status === 'Leave' ? 'bb2' : 'br2' : 'bo2'}">${rec ? rec.status === 'Late' ? '? Late' : rec.status : 'Not Marked'}</span>
-          ${curRole === 'admin' ? `<div style="display:flex;gap:3px;margin-left:8px;">
-          <button class="btn btn-xs btn-g" onclick="adminMarkTeacher('${t.id}','Present')">P</button>
-          <button class="btn btn-xs" style="background:var(--yl);color:var(--y);font-size:.64rem;font-weight:700;padding:3px 7px;border-radius:6px;cursor:pointer;" onclick="adminMarkTeacher('${t.id}','Late')">L</button>
-          <button class="btn btn-xs btn-r" onclick="adminMarkTeacher('${t.id}','Absent')">A</button>
-        </div>`: ''}
-      </div>`;
-      }).join('')}
-  </div>`}
-</div>
-<div class="card fu d2">
-  <div class="ch"><div class="ct"> Monthly Summary</div></div>
-  <div class="tw" style="border:none;"><table>
-    <thead><tr><th>Teacher</th><th>Present</th><th>Late</th><th>Absent</th><th>Leave</th><th>Att%</th></tr></thead>
-    <tbody>${teachers.map(t => {
-        const rec = DB.teacherAttendance[t.id] || {};
-        const P = Object.values(rec).filter(v => v.status === 'Present').length;
-        const La = Object.values(rec).filter(v => v.status === 'Late').length;
-        const A = Object.values(rec).filter(v => v.status === 'Absent').length;
-        const Lv = Object.values(rec).filter(v => v.status === 'Leave').length;
-        const tot = Object.values(rec).length;
-        const pct = tot ? Math.round((P + La) / tot * 100) : 0;
-        return `<tr><td><b>${t.name}</b><div style="font-size:.65rem;color:var(--ink4);">${t.subject || '-'}</div></td><td><b style="color:var(--g);">${P}</b></td><td><b style="color:var(--y);">${La}</b></td><td><b style="color:var(--r);">${A}</b></td><td>${Lv}</td><td><b style="color:${pct >= 90 ? 'var(--g)' : pct >= 75 ? 'var(--o)' : 'var(--r)'};">${pct}%</b></td></tr>`;
-      }).join('')}
-    </tbody></table></div>
-</div>`;
+<div class="card fu d2"><div class="ch"><div class="ct"> Monthly Summary</div></div><div class="tw" style="border:none;"><table><thead><tr><th>Teacher</th><th>Present</th><th>Late</th><th>Absent</th><th>Leave</th><th>Att%</th></tr></thead><tbody>${teachers.map(t=>{const rec=DB.teacherAttendance[t.id]||{};const P=Object.values(rec).filter(v=>v.status==='Present').length;const La=Object.values(rec).filter(v=>v.status==='Late').length;const A=Object.values(rec).filter(v=>v.status==='Absent').length;const Lv=Object.values(rec).filter(v=>v.status==='Leave').length;const tot=Object.values(rec).length;const pct=tot?Math.round((P+La)/tot*100):0;return `<tr><td><b>${t.name}</b><div style="font-size:.65rem;color:var(--ink4);">${t.subject||'-''}</div></td><td><b style="color:var(--g);">${P}</b></td><td><b style="color:var(--y);">${La}</b></td><td><b style="color:var(--r);">${A}</b></td><td><b style="color:#2563eb;">${Lv}</b></td><td><b style="color:${pct>=90?'var(--g)':pct>=75?'var(--o)':'var(--r)'};"> ${pct}%</b></td></tr>`;}).join('')}
+</tbody></table></div></div>`;
     }
-
-    function adminMarkTeacher(uid2, status) {
-      const d = today(); const t = nowHHMM();
-      if (!DB.teacherAttendance[uid2]) DB.teacherAttendance[uid2] = {};
-      DB.teacherAttendance[uid2][d] = { checkIn: t, status };
-      saveDB(); showToast(`? ${status} marked`, 'ts'); goPage('teacheratt');
-    }
-    function openLateThreshModal() {
-      openModal(`
-  <h3>? Late Arrival Threshold</h3>
-  <div class="ibox">Teachers who check in after this time will be marked <b>Late</b> instead of Present.</div>
-  <div class="fg"><label class="fl">Late After (Time)</label><input class="fi" type="time" id="lt-time" value="${DB.lateAfter || '08:00'}"/></div>
-  <div class="m-btns"><button class="btn btn-p" onclick="saveLateThresh()"> Save</button><button class="btn btn-gh" onclick="closeModal()">Cancel</button></div>`);
-    }
-    function saveLateThresh() { DB.lateAfter = document.getElementById('lt-time')?.value || '08:00'; saveDB(); closeModal(); showToast(`? Late threshold set to ${DB.lateAfter}`, 'ts'); goPage('teacheratt'); }
+    function adminMarkTeacher(uid2,status){const d=today();const t=nowHHMM();if(!DB.teacherAttendance[uid2])DB.teacherAttendance[uid2]={};DB.teacherAttendance[uid2][d]={checkIn:t,status};saveDB();showToast('✅ '+status+' marked','ts');goPage('teacheratt');}
+    function adminMarkTeacherLeave(uid2){const tname=(DB.users.find(u=>u.id===uid2)||{}).name||'';openModal(`<h3>📋 Mark Leave</h3><div class="fg"><label class="fl">Teacher</label><input class="fi" value="${tname}" readonly/></div><div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="tl-date" value="${today()}"/></div><div class="fg"><label class="fl">Reason</label><input class="fi" id="tl-reason" placeholder="Sick, Emergency..."/></div><div class="m-btns"><button class="btn btn-p" onclick="saveTeacherLeave('${uid2}')"> Save</button><button class="btn btn-gh" onclick="closeModal()">Cancel</button></div>`);}
+    function saveTeacherLeave(uid2){const d=document.getElementById('tl-date')?.value||today();const note=(document.getElementById('tl-reason')?.value||'').trim();if(!DB.teacherAttendance[uid2])DB.teacherAttendance[uid2]={};DB.teacherAttendance[uid2][d]={checkIn:'',status:'Leave',note,source:'admin'};saveDB();closeModal();showToast('📋 Leave marked','ts');goPage('teacheratt');}
+    function openMarkTeacherModal(){const teachers=DB.users.filter(u=>u.role==='teacher');if(!teachers.length){showToast('No teachers','te');return;}openModal(`<h3>✏️ Manual Mark</h3><div class="fg"><label class="fl">Teacher</label><select class="fi" id="mt-teacher">${teachers.map(t=>`<option value="${t.id}">${t.name} — ${t.subject||'No Subject'}</option>`).join('')}</select></div><div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="mt-date" value="${today()}"/></div><div class="fg"><label class="fl">Status</label><select class="fi" id="mt-status"><option value="Present">✅ Present</option><option value="Late">⏰ Late</option><option value="Absent">❌ Absent</option><option value="Leave">📋 Leave</option></select></div><div class="fg"><label class="fl">Time</label><input class="fi" type="time" id="mt-time" value="${nowHHMM()}"/></div><div class="fg"><label class="fl">Note</label><input class="fi" id="mt-note" placeholder="note..."/></div><div class="m-btns"><button class="btn btn-p" onclick="saveManualTeacherAtt()"> Save</button><button class="btn btn-gh" onclick="closeModal()">Cancel</button></div>`);}
+    function saveManualTeacherAtt(){const uid2=document.getElementById('mt-teacher')?.value;const d=document.getElementById('mt-date')?.value||today();const status=document.getElementById('mt-status')?.value||'Present';const t=document.getElementById('mt-time')?.value||nowHHMM();const note=(document.getElementById('mt-note')?.value||'').trim();if(!uid2){showToast('Select a teacher','te');return;}if(!DB.teacherAttendance[uid2])DB.teacherAttendance[uid2]={};DB.teacherAttendance[uid2][d]={checkIn:t,status,note,source:'manual'};saveDB();closeModal();showToast('✅ '+status+' marked','ts');goPage('teacheratt');}
+    function openLateThreshModal(){openModal(`<h3>⚙ Late Threshold</h3><div class="ibox">Teachers checking in after this time are marked <b>Late</b>.</div><div class="fg"><label class="fl">Late After</label><input class="fi" type="time" id="lt-time" value="${DB.lateAfter||'08:00'}"/></div><div class="m-btns"><button class="btn btn-p" onclick="saveLateThresh()"> Save</button><button class="btn btn-gh" onclick="closeModal()">Cancel</button></div>`);}
+    function saveLateThresh(){DB.lateAfter=document.getElementById('lt-time')?.value||'08:00';saveDB();closeModal();showToast('⚙ Late threshold: '+DB.lateAfter,'ts');goPage('teacheratt');}
 
     /* ------------------------------- GRADES ------------------------------- */
     function pgGrades() {
@@ -5629,56 +5590,6 @@
       _hsIdx = (n + slides.length) % slides.length;
       slides[_hsIdx]?.classList.add('active');
       dots[_hsIdx]?.classList.add('active');
-    function closeModal() { document.getElementById('modal-bg').classList.remove('open'); }
-
-    let _toastTimer = null;
-    function showToast(msg, type = '', dur = 2800) {
-      const t = document.getElementById('toast'); t.textContent = msg; t.className = 'toast show' + (type ? ' ' + type : '');
-      clearTimeout(_toastTimer); _toastTimer = setTimeout(() => t.className = 'toast', dur);
-    }
-
-    function buildNotifPanel() {
-      const notifs = [
-        ...(curRole === 'admin' ? (DB.admissions || []).filter(a => (a.status || 'new') === 'new').slice(0, 3).map(a => ({ ic: '', tx: `New admission: ${a.studentName}`, tm: fmtDate(a.createdAt), bg: 'var(--pl)' })) : []),
-        ...DB.notices.slice(-3).map(n => ({ ic: '', tx: n.title, tm: fmtDate(n.date), bg: 'var(--pl)' })),
-        ...allStus().filter(s => !(DB.fees.payments[s.id] || {})['f1']?.paid).slice(0, 2).map(s => ({ ic: '', tx: `Fee pending: ${s.name}`, tm: '', bg: 'var(--rl)' })),
-      ];
-      const np = document.getElementById('np-list');
-      if (np) np.innerHTML = notifs.map(n => `<div class="np-it"><div class="np-ic" style="background:${n.bg};">${n.ic}</div><div><div class="np-tx">${n.tx}</div><div class="np-tm">${n.tm}</div></div></div>`).join('') || '<div style="padding:14px;text-align:center;font-size:.78rem;color:var(--ink4);">All clear ?</div>';
-      const cnt = document.getElementById('np-cnt'); if (cnt) cnt.textContent = notifs.length ? `? ${notifs.length} new` : '';
-      const dot = document.getElementById('ndot'); if (dot) dot.style.display = notifs.length ? 'block' : 'none';
-    }
-    function toggleNotif() { document.getElementById('np').classList.toggle('open'); }
-    function closeNotif() { document.getElementById('np').classList.remove('open'); }
-    document.addEventListener('click', e => { const np = document.getElementById('np'); if (np?.classList.contains('open') && !np.contains(e.target) && !e.target.closest('.ic-btn')) closeNotif(); });
-    function waMsg(wa, msg) { openWhatsAppMessage(wa, msg); }
-    /* INIT handled after initDB() resolves above */
-</script>
-<script>
-
-    function initScrollReveals() {
-      const items = document.querySelectorAll('.reveal');
-      if (!items.length) return;
-      if (!('IntersectionObserver' in window)) { items.forEach(el => el.classList.add('in-view')); return; }
-      const io = new IntersectionObserver(entries => {
-        entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('in-view'); io.unobserve(entry.target); } });
-      }, { threshold: .16 });
-      items.forEach(el => io.observe(el));
-    }
-    window.addEventListener('load', initScrollReveals);
-    /* -- HERO SLIDESHOW -- */
-    let _hsIdx = 0;
-    let _hsTimer = null;
-
-    function goSlide(n) {
-      const slides = document.querySelectorAll('.hs-slide');
-      const dots = document.querySelectorAll('.hs-dot');
-      if (!slides.length) return;
-      slides[_hsIdx]?.classList.remove('active');
-      dots[_hsIdx]?.classList.remove('active');
-      _hsIdx = (n + slides.length) % slides.length;
-      slides[_hsIdx]?.classList.add('active');
-      dots[_hsIdx]?.classList.add('active');
     }
 
     function changeSlide(dir) {
@@ -5693,43 +5604,51 @@
     }
 
     startHsTimer();
+    async function forgotPassword() {
+      const em = (document.getElementById('l-email').value || '').trim().toLowerCase();
+      if (!em || !em.includes('@')) { showToast('Enter your email first, then click Forgot Password', 'tw2', 4000); return; }
+      if (!_sb) { showToast('Supabase Auth not configured', 'te'); return; }
+      try {
+        const { error } = await _sb.auth.resetPasswordForEmail(em);
+        if (error) { showToast(error.message || 'Could not send reset email', 'te', 5000); return; }
+        showToast('Password reset email sent! Check your inbox.', 'ts', 5000);
+      } catch (e) { showToast('Network error. Try again.', 'te'); }
+    }
 </script>
 <script>
-    'use strict';
-    /* ------------------------------- PRODUCTION HARDENING ------------------------------- */
-    window.onerror = function(msg, url, line, col, error) {
-      console.error('Global error:', msg, url, line, col, error);
-      return false;
-    };
-    window.addEventListener('unhandledrejection', function(e) {
-      console.error('Unhandled promise rejection:', e.reason);
-    });
-    function updateOnlineStatus() {
-      var banner = document.getElementById('offline-banner');
-      if (!banner) return;
-      if (!navigator.onLine) { banner.classList.add('show'); }
-      else { banner.classList.remove('show'); if (typeof _sbPending !== 'undefined' && _sbPending && typeof pushCloudDB === 'function') pushCloudDB(); }
+    /* PRODUCTION HARDENING */
+    window.onerror = function(m,u,l){ console.error('Error:',m,u,l); return false; };
+    window.addEventListener('unhandledrejection',function(e){ console.error('Unhandled:',e.reason); });
+    function updateOnlineStatus(){
+      var b=document.getElementById('offline-banner');if(!b)return;
+      if(!navigator.onLine){b.classList.add('show');}
+      else{b.classList.remove('show');if(typeof _sbPending!=='undefined'&&_sbPending&&typeof pushCloudDB==='function')pushCloudDB();}
     }
-    window.addEventListener('online', updateOnlineStatus);
-    window.addEventListener('offline', updateOnlineStatus);
+    window.addEventListener('online',updateOnlineStatus);
+    window.addEventListener('offline',updateOnlineStatus);
     updateOnlineStatus();
-    function resetIdleTimer() {
-      if (typeof _idleTimer !== 'undefined') clearTimeout(_idleTimer);
-      if (typeof curUser === 'undefined' || !curUser) return;
-      _idleTimer = setTimeout(function() {
-        if (typeof curUser !== 'undefined' && curUser && typeof logout === 'function') {
-          logout(); if (typeof showToast === 'function') showToast('Session expired due to inactivity.', 'tw2', 5000);
+    function resetIdleTimer(){
+      if(typeof _idleTimer!=='undefined')clearTimeout(_idleTimer);
+      if(typeof curUser==='undefined'||!curUser)return;
+      _idleTimer=setTimeout(function(){
+        if(typeof curUser!=='undefined'&&curUser&&typeof logout==='function'){
+          logout();if(typeof showToast==='function')showToast('Session expired. Please sign in again.','tw2',5000);
         }
-      }, typeof IDLE_TIMEOUT !== 'undefined' ? IDLE_TIMEOUT : 1800000);
+      },typeof IDLE_TIMEOUT!=='undefined'?IDLE_TIMEOUT:1800000);
     }
-    ['mousemove','keydown','click','scroll','touchstart'].forEach(function(e){ document.addEventListener(e, resetIdleTimer, {passive:true}); });
-    window.addEventListener('beforeunload', function(e) {
-      if (typeof _sbPending !== 'undefined' && _sbPending) { e.preventDefault(); e.returnValue = 'Unsaved changes syncing to cloud.'; }
+    ['mousemove','keydown','click','scroll','touchstart'].forEach(function(e){document.addEventListener(e,resetIdleTimer,{passive:true});});
+    window.addEventListener('beforeunload',function(e){if(typeof _sbPending!=='undefined'&&_sbPending){e.preventDefault();e.returnValue='Sync in progress.';}});
+    window.addEventListener('load',function(){
+      var l=document.getElementById('app-loader');
+      if(l){setTimeout(function(){l.classList.add('hidden');setTimeout(function(){l.remove();},500);},600);}
     });
-    window.addEventListener('load', function() {
-      var loader = document.getElementById('app-loader');
-      if (loader) { setTimeout(function(){ loader.classList.add('hidden'); setTimeout(function(){ loader.remove(); }, 500); }, 600); }
-    });
-</script>
 </body>
+
 </html>
+
+
+
+
+
+
+
