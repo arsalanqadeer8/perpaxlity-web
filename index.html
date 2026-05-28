@@ -2445,24 +2445,43 @@
         display: none !important;
       }
       
-      /* Print formatting for Payslips and Receipts */
+      /* Print formatting for Payslips and Receipts - Premium Design */
+      @page { margin: 0; }
       body.printing-doc > :not(#print-container) { display: none !important; }
-      body.printing-doc { background: #fff !important; margin: 0; padding: 0; }
-      #print-container { display: none; width: 100%; max-width: 800px; margin: 0 auto; background: #fff; }
+      body.printing-doc { background: #fff !important; margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; font-family: 'Inter', system-ui, sans-serif; }
+      #print-container { display: none; width: 100%; max-width: 790px; margin: 0 auto; background: #fff; }
       body.printing-doc #print-container { display: block !important; }
-      .print-half { height: 49vh; padding: 25px; box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden; page-break-inside: avoid; }
-      .print-divider { border-top: 2px dashed #999; margin: 0; padding: 0; height: 0; width: 100%; }
-      .print-header { display: flex; align-items: center; gap: 20px; border-bottom: 2px solid #000; padding-bottom: 12px; margin-bottom: 15px; }
-      .print-logo { width: 70px; height: 70px; border-radius: 10px; object-fit: contain; }
-      .print-title { flex: 1; }
-      .print-title h2 { margin: 0; font-size: 1.6rem; font-weight: 900; color: #000; letter-spacing: -0.5px; }
-      .print-title p { margin: 3px 0 0; font-size: .85rem; color: #444; }
-      .print-table { width: 100%; border-collapse: collapse; margin-top: 15px; border: 1px solid #000; }
-      .print-table th, .print-table td { border: 1px solid #000; padding: 10px 14px; text-align: left; font-size: .9rem; color: #000; }
-      .print-table th { background: #f1f5f9; font-weight: 800; text-transform: uppercase; font-size: .8rem; color: #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      .print-row-total th, .print-row-total td { font-weight: 900; font-size: 1.05rem; border-top: 2px solid #000; background: #f8fafc; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      .print-footer { margin-top: auto; display: flex; justify-content: space-between; font-size: .8rem; color: #333; padding-top: 25px; }
-      .print-sign { border-top: 1px solid #000; padding-top: 6px; width: 180px; text-align: center; font-weight: 600; }
+      .print-half { position: relative; height: 48.5vh; margin: 0.25vh 0; padding: 25px 35px; box-sizing: border-box; display: flex; flex-direction: column; page-break-inside: avoid; border: 2px solid #e2e8f0; border-radius: 12px; overflow: hidden; }
+      .print-divider { border-top: 2px dashed #cbd5e1; margin: 0; width: 100%; height: 0; }
+      .print-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 25px; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; z-index: 2; position: relative; }
+      .print-logo-box { display: flex; align-items: center; gap: 20px; }
+      .print-logo { max-height: 70px; max-width: 180px; object-fit: contain; }
+      .print-school-info h2 { margin: 0 0 6px; font-size: 1.65rem; font-weight: 900; color: #0f172a; text-transform: uppercase; letter-spacing: -0.5px; }
+      .print-school-info p { margin: 0; font-size: 0.85rem; color: #64748b; font-weight: 500; }
+      .print-doc-title { text-align: right; }
+      .print-doc-title h3 { margin: 0 0 8px; font-size: 1.5rem; font-weight: 900; color: #3b82f6; letter-spacing: 1px; text-transform: uppercase; }
+      .print-doc-title .copy-badge { display: inline-block; padding: 4px 10px; background: #f1f5f9; color: #475569; font-size: 0.75rem; font-weight: 700; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid #e2e8f0; }
+      .print-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; z-index: 2; position: relative; }
+      .print-meta-box { border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 18px; background: #f8fafc; box-shadow: inset 0 2px 4px rgba(0,0,0,0.01); }
+      .print-meta-row { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 6px; color: #334155; }
+      .print-meta-row:last-child { margin-bottom: 0; }
+      .print-meta-lbl { color: #64748b; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+      .print-meta-val { font-weight: 800; color: #0f172a; }
+      .print-table { width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; margin-bottom: auto; z-index: 2; position: relative; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
+      .print-table th, .print-table td { border-bottom: 1px solid #e2e8f0; padding: 12px 18px; text-align: left; font-size: 0.85rem; color: #1e293b; }
+      .print-table th { background: #f8fafc; font-weight: 800; color: #475569; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; border-right: 1px solid #e2e8f0; }
+      .print-table th:last-child { border-right: none; }
+      .print-table td { border-right: 1px solid #e2e8f0; }
+      .print-table td:last-child { border-right: none; }
+      .print-table tbody tr:last-child td { border-bottom: none; }
+      .print-table .amt-col { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+      .print-row-total td { background: #eff6ff; font-weight: 900; font-size: 1.1rem; color: #1d4ed8; border-top: 2px solid #bfdbfe; }
+      .print-footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 25px; z-index: 2; position: relative; }
+      .print-sign-box { text-align: center; }
+      .print-sign-line { width: 180px; border-top: 2px dashed #cbd5e1; margin-bottom: 8px; }
+      .print-sign-txt { font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+      .print-watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-25deg); font-size: 11rem; font-weight: 900; color: rgba(241, 245, 249, 0.7); z-index: 0; pointer-events: none; letter-spacing: 15px; user-select: none; }
+      .print-meta-note { margin-top: 15px; font-size: 0.75rem; color: #64748b; text-align: center; }
 
       body.printing-idcards .pw {
         padding: 0 !important;
@@ -4918,44 +4937,58 @@ ${teachers.length===0?`<div class="empty"><div class="empty-ic"></div><div class
 
       const receiptHtml = (copyType) => `
         <div class="print-half">
-          <div class="print-header">
-            ${school.logo ? `<img src="${school.logo}" class="print-logo"/>` : `<div class="print-logo" style="background:var(--p);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:1.5rem;">${school.name.charAt(0)}</div>`}
-            <div class="print-title">
-              <h2>${school.name}</h2>
-              <p>${school.address} ${school.phone ? ' | Ph: ' + school.phone : ''}</p>
+          <div class="print-watermark">PAID</div>
+          <div class="print-content-wrap">
+            <div class="print-header">
+              <div class="print-logo-box">
+                ${school.logo ? `<img src="${school.logo}" class="print-logo"/>` : `<div class="print-logo" style="background:#1d4ed8;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:2rem;border-radius:12px;width:70px;height:70px;">${school.name.charAt(0)}</div>`}
+                <div class="print-school-info">
+                  <h2>${school.name}</h2>
+                  <p>${school.address}</p>
+                  ${school.phone ? `<p>Ph: ${school.phone}</p>` : ''}
+                </div>
+              </div>
+              <div class="print-doc-title">
+                <h3>FEE RECEIPT</h3>
+                <div class="copy-badge">${copyType}</div>
+              </div>
             </div>
-            <div style="text-align:right;">
-              <h3 style="margin:0;color:var(--p);">FEE RECEIPT</h3>
-              <div style="font-size:.75rem;color:#666;margin-top:4px;"><b>Copy:</b> ${copyType}</div>
+            
+            <div class="print-meta-grid">
+              <div class="print-meta-box">
+                <div class="print-meta-row"><span class="print-meta-lbl">Student Name</span><span class="print-meta-val">${s.name}</span></div>
+                <div class="print-meta-row"><span class="print-meta-lbl">Class</span><span class="print-meta-val">${cls?.name || '-'}</span></div>
+                <div class="print-meta-row"><span class="print-meta-lbl">Roll No</span><span class="print-meta-val">${s.roll || '-'}</span></div>
+              </div>
+              <div class="print-meta-box">
+                <div class="print-meta-row"><span class="print-meta-lbl">Receipt Date</span><span class="print-meta-val">${fmtDate(paidObj.date)}</span></div>
+                <div class="print-meta-row"><span class="print-meta-lbl">Status</span><span class="print-meta-val" style="color:#16a34a;">PAID</span></div>
+                <div class="print-meta-row"><span class="print-meta-lbl">Payment Mode</span><span class="print-meta-val">Cash / Bank</span></div>
+              </div>
             </div>
-          </div>
-          
-          <div style="display:flex;justify-content:space-between;margin-bottom:15px;font-size:.85rem;">
-            <div>
-              <div><b>Student:</b> ${s.name}</div>
-              <div style="margin-top:3px;color:#555;"><b>Class:</b> ${cls?.name || '-'} | <b>Roll:</b> ${s.roll || '-'}</div>
-            </div>
-            <div style="text-align:right;">
-              <div><b>Date:</b> ${fmtDate(paidObj.date)}</div>
-              <div style="margin-top:3px;color:var(--g);font-weight:700;">PAID</div>
-            </div>
-          </div>
 
-          <table class="print-table">
-            <thead><tr><th>Fee Description</th><th style="text-align:right;">Amount Paid</th></tr></thead>
-            <tbody>
-              <tr><td>${fee.name}</td><td style="text-align:right;">${cur} ${amount.toLocaleString()}</td></tr>
-              ${s.feeType === 'scholarship' && fid === 'f1' ? `<tr><td style="font-size:.75rem;color:var(--g);">Full Scholarship Applied</td><td></td></tr>` : ''}
-              ${s.feeType === 'discount' && fid === 'f1' ? `<tr><td style="font-size:.75rem;color:#7c3aed;">Discount Applied: ${s.feeDiscount}%</td><td></td></tr>` : ''}
-              <tr class="print-row-total"><td>Total Received</td><td style="text-align:right;color:var(--p);">${cur} ${amount.toLocaleString()}</td></tr>
-            </tbody>
-          </table>
-          
-          <div class="print-footer">
-            <div>Printed on ${fmtDate(today())} at ${nowHHMM()}</div>
-            <div style="display:flex;gap:40px;">
-              <div class="print-sign">Cashier / Admin</div>
-              <div class="print-sign">Parent Signature</div>
+            <table class="print-table">
+              <thead><tr><th>Fee Description</th><th class="amt-col">Amount</th></tr></thead>
+              <tbody>
+                <tr><td>${fee.name}</td><td class="amt-col">${cur} ${amount.toLocaleString()}</td></tr>
+                ${s.feeType === 'scholarship' && fid === 'f1' ? `<tr><td style="color:#16a34a;font-weight:600;">Full Scholarship Applied</td><td class="amt-col"></td></tr>` : ''}
+                ${s.feeType === 'discount' && fid === 'f1' ? `<tr><td style="color:#8b5cf6;font-weight:600;">Discount Applied: ${s.feeDiscount}%</td><td class="amt-col"></td></tr>` : ''}
+                <tr class="print-row-total"><td>Total Received</td><td class="amt-col">${cur} ${amount.toLocaleString()}</td></tr>
+              </tbody>
+            </table>
+            
+            <div class="print-footer">
+              <div style="font-size:0.75rem;color:#94a3b8;">Printed on ${fmtDate(today())} at ${nowHHMM()}</div>
+              <div style="display:flex;gap:50px;">
+                <div class="print-sign-box">
+                  <div class="print-sign-line"></div>
+                  <div class="print-sign-txt">Cashier / Admin</div>
+                </div>
+                <div class="print-sign-box">
+                  <div class="print-sign-line"></div>
+                  <div class="print-sign-txt">Parent Signature</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -5180,48 +5213,58 @@ ${teachers.length===0?`<div class="empty"><div class="empty-ic"></div><div class
       
       const slipHtml = (copyType) => `
         <div class="print-half">
-          <div class="print-header">
-            ${school.logo ? `<img src="${school.logo}" class="print-logo"/>` : `<div class="print-logo" style="background:var(--p);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:1.5rem;">${school.name.charAt(0)}</div>`}
-            <div class="print-title">
-              <h2>${school.name}</h2>
-              <p>${school.address} ${school.phone ? ' | Ph: ' + school.phone : ''}</p>
+          <div class="print-watermark" style="color:rgba(241,245,249,0.5);">SALARY</div>
+          <div class="print-content-wrap">
+            <div class="print-header">
+              <div class="print-logo-box">
+                ${school.logo ? `<img src="${school.logo}" class="print-logo"/>` : `<div class="print-logo" style="background:#1d4ed8;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:2rem;border-radius:12px;width:70px;height:70px;">${school.name.charAt(0)}</div>`}
+                <div class="print-school-info">
+                  <h2>${school.name}</h2>
+                  <p>${school.address}</p>
+                  ${school.phone ? `<p>Ph: ${school.phone}</p>` : ''}
+                </div>
+              </div>
+              <div class="print-doc-title">
+                <h3>PAYSLIP</h3>
+                <div class="copy-badge">${copyType}</div>
+              </div>
             </div>
-            <div style="text-align:right;">
-              <h3 style="margin:0;color:var(--p);">PAYSLIP</h3>
-              <div style="font-size:.75rem;color:#666;margin-top:4px;"><b>Copy:</b> ${copyType}</div>
+            
+            <div class="print-meta-grid">
+              <div class="print-meta-box">
+                <div class="print-meta-row"><span class="print-meta-lbl">Teacher Name</span><span class="print-meta-val">${t.name}</span></div>
+                <div class="print-meta-row"><span class="print-meta-lbl">Designation/Subject</span><span class="print-meta-val">${t.subject || 'N/A'}</span></div>
+                <div class="print-meta-row"><span class="print-meta-lbl">Contact</span><span class="print-meta-val">${t.phone || t.email || '-'}</span></div>
+              </div>
+              <div class="print-meta-box">
+                <div class="print-meta-row"><span class="print-meta-lbl">Payroll Month</span><span class="print-meta-val">${mName}</span></div>
+                <div class="print-meta-row"><span class="print-meta-lbl">Status</span><span class="print-meta-val" style="color:${t.payrollStatus === 'paid' ? '#16a34a' : '#ea580c'};">${t.payrollStatus === 'paid' ? 'PAID' : 'PENDING'}</span></div>
+                <div class="print-meta-row"><span class="print-meta-lbl">Attendance</span><span class="print-meta-val" style="font-weight:600;font-size:0.75rem;">P:${stats.present} / L:${stats.late} / A:${stats.absent}</span></div>
+              </div>
             </div>
-          </div>
-          
-          <div style="display:flex;justify-content:space-between;margin-bottom:15px;font-size:.85rem;">
-            <div>
-              <div><b>Teacher:</b> ${t.name}</div>
-              <div style="margin-top:3px;color:#555;"><b>Subject:</b> ${t.subject || 'N/A'}</div>
-            </div>
-            <div style="text-align:right;">
-              <div><b>Month:</b> ${mName}</div>
-              <div style="margin-top:3px;color:#555;"><b>Status:</b> ${t.payrollStatus === 'paid' ? 'Paid' : 'Pending'}</div>
-            </div>
-          </div>
 
-          <table class="print-table">
-            <thead><tr><th>Earnings & Deductions</th><th style="text-align:right;">Amount</th></tr></thead>
-            <tbody>
-              <tr><td>Basic Salary</td><td style="text-align:right;">${cur} ${num(t.salary).toLocaleString()}</td></tr>
-              ${num(t.bonus) > 0 ? `<tr><td>Bonus / Allowances</td><td style="text-align:right;color:var(--g);">${cur} ${num(t.bonus).toLocaleString()}</td></tr>` : ''}
-              ${num(t.deductions) > 0 ? `<tr><td>Deductions (Leaves/Absences)</td><td style="text-align:right;color:var(--r);">- ${cur} ${num(t.deductions).toLocaleString()}</td></tr>` : ''}
-              <tr class="print-row-total"><td>Net Salary</td><td style="text-align:right;color:var(--p);">${cur} ${net.toLocaleString()}</td></tr>
-            </tbody>
-          </table>
-          
-          <div style="font-size:.75rem;margin-top:15px;color:#555;">
-            <b>Attendance Summary:</b> Present: ${stats.present} | Late: ${stats.late} | Absent: ${stats.absent}
-          </div>
-          
-          <div class="print-footer">
-            <div>Printed on ${fmtDate(today())} at ${nowHHMM()}</div>
-            <div style="display:flex;gap:40px;">
-              <div class="print-sign">Teacher Signature</div>
-              <div class="print-sign">Admin Signature</div>
+            <table class="print-table">
+              <thead><tr><th>Earnings & Deductions</th><th class="amt-col">Amount</th></tr></thead>
+              <tbody>
+                <tr><td>Basic Salary</td><td class="amt-col">${cur} ${num(t.salary).toLocaleString()}</td></tr>
+                ${num(t.bonus) > 0 ? `<tr><td>Bonus / Allowances</td><td class="amt-col" style="color:#16a34a;">+ ${cur} ${num(t.bonus).toLocaleString()}</td></tr>` : ''}
+                ${num(t.deductions) > 0 ? `<tr><td>Deductions (Leaves/Absences)</td><td class="amt-col" style="color:#ef4444;">- ${cur} ${num(t.deductions).toLocaleString()}</td></tr>` : ''}
+                <tr class="print-row-total"><td>Net Salary</td><td class="amt-col">${cur} ${net.toLocaleString()}</td></tr>
+              </tbody>
+            </table>
+            
+            <div class="print-footer">
+              <div style="font-size:0.75rem;color:#94a3b8;">Generated on ${fmtDate(today())} at ${nowHHMM()}</div>
+              <div style="display:flex;gap:50px;">
+                <div class="print-sign-box">
+                  <div class="print-sign-line"></div>
+                  <div class="print-sign-txt">Admin / Principal</div>
+                </div>
+                <div class="print-sign-box">
+                  <div class="print-sign-line"></div>
+                  <div class="print-sign-txt">Teacher Signature</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
