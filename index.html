@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -2444,6 +2444,25 @@
       body.printing-idcards .pw > :not(.id-print-area) {
         display: none !important;
       }
+      
+      /* Print formatting for Payslips and Receipts */
+      body.printing-doc > :not(#print-container) { display: none !important; }
+      body.printing-doc { background: #fff !important; margin: 0; padding: 0; }
+      #print-container { display: none; width: 100%; max-width: 800px; margin: 0 auto; background: #fff; }
+      body.printing-doc #print-container { display: block !important; }
+      .print-half { height: 49vh; padding: 25px; box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden; page-break-inside: avoid; }
+      .print-divider { border-top: 2px dashed #999; margin: 0; padding: 0; height: 0; width: 100%; }
+      .print-header { display: flex; align-items: center; gap: 20px; border-bottom: 2px solid #000; padding-bottom: 12px; margin-bottom: 15px; }
+      .print-logo { width: 70px; height: 70px; border-radius: 10px; object-fit: contain; }
+      .print-title { flex: 1; }
+      .print-title h2 { margin: 0; font-size: 1.6rem; font-weight: 900; color: #000; letter-spacing: -0.5px; }
+      .print-title p { margin: 3px 0 0; font-size: .85rem; color: #444; }
+      .print-table { width: 100%; border-collapse: collapse; margin-top: 15px; border: 1px solid #000; }
+      .print-table th, .print-table td { border: 1px solid #000; padding: 10px 14px; text-align: left; font-size: .9rem; color: #000; }
+      .print-table th { background: #f1f5f9; font-weight: 800; text-transform: uppercase; font-size: .8rem; color: #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .print-row-total th, .print-row-total td { font-weight: 900; font-size: 1.05rem; border-top: 2px solid #000; background: #f8fafc; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .print-footer { margin-top: auto; display: flex; justify-content: space-between; font-size: .8rem; color: #333; padding-top: 25px; }
+      .print-sign { border-top: 1px solid #000; padding-top: 6px; width: 180px; text-align: center; font-weight: 600; }
 
       body.printing-idcards .pw {
         padding: 0 !important;
