@@ -4879,11 +4879,79 @@ ${teachers.length===0?`<div class="empty"><div class="empty-ic"></div><div class
       openModal(`
   <h3> ${escHtml(s.name)} Fees</h3>
   <div class="ibox" style="margin-bottom:12px;">${escHtml(cls?.name || '')} - Roll ${escHtml(s.roll || '-')} - Balance <b style="color:${sum.dueAmount ? 'var(--r)' : 'var(--g)'};">${fmtMoney(sum.dueAmount)}</b></div>
-  <div style="display:grid;gap:8px;">${DB.fees.items.map(f => { const paid = sum.payments[f.id]?.paid; return `<div style="display:flex;align-items:center;gap:10px;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px;"><div style="font-size:1.1rem;">${paid ? '?' : '?'}</div><div style="flex:1;"><div style="font-weight:800;font-size:.82rem;">${escHtml(f.name)}</div><div style="font-size:.68rem;color:var(--ink4);">Due ${escHtml(f.due || '-')} - ${f.mandatory ? 'Mandatory' : 'Optional'}${paid ? ' - Paid ' + fmtDate(sum.payments[f.id]?.date) : ''}</div></div><div style="text-align:right;"><div style="font-weight:900;color:${paid ? 'var(--g)' : 'var(--r)'};">${fmtMoney(f.id === 'f1' ? (monthlyFeeDue(sid) || monthlyFeeAmount(s)) : f.amount)}</div><button class="btn btn-xs ${paid ? 'btn-gh' : 'btn-g'}" onclick="toggleFee('${sid}','${f.id}',true)">${paid ? 'Unmark' : 'Mark Paid'}</button></div></div>`; }).join('')}</div>
+  <div style="display:grid;gap:8px;">${DB.fees.items.map(f => { const paid = sum.payments[f.id]?.paid; return `<div style="display:flex;align-items:center;gap:10px;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px;"><div style="font-size:1.1rem;">${paid ? '✅' : '⏳'}</div><div style="flex:1;"><div style="font-weight:800;font-size:.82rem;">${escHtml(f.name)}</div><div style="font-size:.68rem;color:var(--ink4);">Due ${escHtml(f.due || '-')} - ${f.mandatory ? 'Mandatory' : 'Optional'}${paid ? ' - Paid ' + fmtDate(sum.payments[f.id]?.date) : ''}</div></div><div style="text-align:right;"><div style="font-weight:900;color:${paid ? 'var(--g)' : 'var(--r)'};">${fmtMoney(f.id === 'f1' ? (monthlyFeeDue(sid) || monthlyFeeAmount(s)) : f.amount)}</div><div style="display:inline-flex;gap:4px;margin-top:4px;">${paid ? `<button class="btn btn-xs btn-gh" style="background:var(--p);color:#fff;" onclick="printFeeReceipt('${sid}', '${f.id}')">🖨️ Receipt</button>` : ''}<button class="btn btn-xs ${paid ? 'btn-gh' : 'btn-g'}" onclick="toggleFee('${sid}','${f.id}',true)">${paid ? 'Unmark' : 'Mark Paid'}</button></div></div></div>`; }).join('')}</div>
   <div class="m-btns" style="flex-wrap:wrap;">
       ${s.whatsapp ? `<button class="btn btn-wa btn-sm" onclick="sendFeeWA('${sid}','${(DB.fees.items.find(f => !sum.payments[f.id]?.paid) || DB.fees.items[0] || {}).id || 'f1'}')"> WhatsApp Reminder</button>` : ''}
     <button class="btn btn-gh btn-sm" onclick="closeModal();goPage('fees')">Close</button>
   </div>`);
+    }
+
+    function printFeeReceipt(sid, fid) {
+      const s = allStus().find(x => x.id === sid); if (!s) return;
+      const fee = DB.fees.items.find(f => f.id === fid) || DB.fees.items[0]; if(!fee) return;
+      const sum = studentFeeSummary(sid);
+      const paidObj = sum.payments[fid]; if (!paidObj?.paid) return showToast('Fee is not marked paid yet.', 'te');
+      const cls = DB.classes.find(c => c.id === s.classId);
+      const school = DB.school || { name: 'My School', address: '', phone: '' };
+      const cur = DB.settings?.currency || 'PKR';
+      const amount = (fid === 'f1' ? (monthlyFeeDue(sid) || monthlyFeeAmount(s)) : num(fee.amount));
+
+      const receiptHtml = (copyType) => `
+        <div class="print-half">
+          <div class="print-header">
+            ${school.logo ? `<img src="${school.logo}" class="print-logo"/>` : `<div class="print-logo" style="background:var(--p);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:1.5rem;">${school.name.charAt(0)}</div>`}
+            <div class="print-title">
+              <h2>${school.name}</h2>
+              <p>${school.address} ${school.phone ? ' | Ph: ' + school.phone : ''}</p>
+            </div>
+            <div style="text-align:right;">
+              <h3 style="margin:0;color:var(--p);">FEE RECEIPT</h3>
+              <div style="font-size:.75rem;color:#666;margin-top:4px;"><b>Copy:</b> ${copyType}</div>
+            </div>
+          </div>
+          
+          <div style="display:flex;justify-content:space-between;margin-bottom:15px;font-size:.85rem;">
+            <div>
+              <div><b>Student:</b> ${s.name}</div>
+              <div style="margin-top:3px;color:#555;"><b>Class:</b> ${cls?.name || '-'} | <b>Roll:</b> ${s.roll || '-'}</div>
+            </div>
+            <div style="text-align:right;">
+              <div><b>Date:</b> ${fmtDate(paidObj.date)}</div>
+              <div style="margin-top:3px;color:var(--g);font-weight:700;">PAID</div>
+            </div>
+          </div>
+
+          <table class="print-table">
+            <thead><tr><th>Fee Description</th><th style="text-align:right;">Amount Paid</th></tr></thead>
+            <tbody>
+              <tr><td>${fee.name}</td><td style="text-align:right;">${cur} ${amount.toLocaleString()}</td></tr>
+              ${s.feeType === 'scholarship' && fid === 'f1' ? `<tr><td style="font-size:.75rem;color:var(--g);">Full Scholarship Applied</td><td></td></tr>` : ''}
+              ${s.feeType === 'discount' && fid === 'f1' ? `<tr><td style="font-size:.75rem;color:#7c3aed;">Discount Applied: ${s.feeDiscount}%</td><td></td></tr>` : ''}
+              <tr class="print-row-total"><td>Total Received</td><td style="text-align:right;color:var(--p);">${cur} ${amount.toLocaleString()}</td></tr>
+            </tbody>
+          </table>
+          
+          <div class="print-footer">
+            <div>Printed on ${fmtDate(today())} at ${nowHHMM()}</div>
+            <div style="display:flex;gap:40px;">
+              <div class="print-sign">Cashier / Admin</div>
+              <div class="print-sign">Parent Signature</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const fullHtml = receiptHtml('School Copy') + '<div class="print-divider"></div>' + receiptHtml('Parent Copy');
+      document.getElementById('print-container').innerHTML = fullHtml;
+      
+      document.body.classList.add('printing-doc');
+      setTimeout(() => {
+        window.print();
+        setTimeout(() => {
+          document.body.classList.remove('printing-doc');
+          document.getElementById('print-container').innerHTML = '';
+        }, 500);
+      }, 150);
     }
 
     function feeReminderText(sid, fid, dueDate, note = '') {
@@ -5080,8 +5148,78 @@ ${teachers.length===0?`<div class="empty"><div class="empty-ic"></div><div class
   <div class="sc sv"><div class="sc-ic"></div><div class="sc-val" style="color:var(--v);">${teachers.length}</div><div class="sc-lbl">Total Staff</div></div>
 </div>
   ${teachers.length === 0 ? `<div class="card"><div class="empty"><div class="empty-ic"></div><div class="empty-t">No teacher payroll records yet</div><button class="btn btn-p btn-sm" style="margin-top:10px;" onclick="openTeachModal()">Add Teacher</button></div></div>` :
-          `<div class="g2">${teachers.map(t => { const stats = teacherMonthlyStats(t.id); return `<div class="card fu"><div class="ch"><div class="ct"> ${t.name}</div><span class="badge ${t.payrollStatus === 'paid' ? 'bg2' : 'bo2'}">${t.payrollStatus === 'paid' ? 'Paid' : 'Pending'}</span></div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px;"><div style="background:var(--card2);padding:10px;border-radius:12px;"><div style="font-size:.66rem;color:var(--ink4);">Base Salary</div><div style="font-weight:900;color:var(--ink);">${fmtMoney(t.salary)}</div></div><div style="background:var(--card2);padding:10px;border-radius:12px;"><div style="font-size:.66rem;color:var(--ink4);">Net Salary</div><div style="font-weight:900;color:var(--p);">${fmtMoney(teacherNetSalary(t))}</div></div><div style="background:var(--card2);padding:10px;border-radius:12px;"><div style="font-size:.66rem;color:var(--ink4);">Bonus</div><div style="font-weight:900;color:var(--g);">${fmtMoney(t.bonus)}</div></div><div style="background:var(--card2);padding:10px;border-radius:12px;"><div style="font-size:.66rem;color:var(--ink4);">Deductions</div><div style="font-weight:900;color:var(--r);">${fmtMoney(t.deductions)}</div></div></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;"><span class="badge bp2">Present ${stats.present}</span><span class="badge by2">Late ${stats.late}</span><span class="badge br2">Absent ${stats.absent}</span>${t.lastPaid ? `<span class="badge bg2">Last Paid ${fmtDate(t.lastPaid)}</span>` : ''}${t.payrollMonth ? `<span class="badge bp2">Month ${t.payrollMonth}</span>` : ''}</div><div style="font-size:.74rem;color:var(--ink3);line-height:1.6;">${t.notes || 'No payroll notes added yet.'}</div>${(t.payrollHistory || []).length ? `<div style="margin-top:9px;font-size:.7rem;color:var(--ink4);"><b>Recent payments:</b> ${(t.payrollHistory || []).slice(-3).reverse().map(h => `${h.month}: ${fmtMoney(h.amount)} on ${fmtDate(h.paidOn)}`).join(' - ')}</div>` : ''}<div class="m-btns" style="margin-top:12px;"><button class="btn btn-p btn-sm" onclick="payTeacherSalary('${t.id}')">Mark Salary Paid</button><button class="btn btn-gh btn-sm" onclick="openTeachModal('${t.id}')">Edit Payroll</button></div></div>`; }).join('')}</div>`}`;
+          `<div class="g2">${teachers.map(t => { const stats = teacherMonthlyStats(t.id); return `<div class="card fu"><div class="ch"><div class="ct"> ${t.name}</div><span class="badge ${t.payrollStatus === 'paid' ? 'bg2' : 'bo2'}">${t.payrollStatus === 'paid' ? 'Paid' : 'Pending'}</span></div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px;"><div style="background:var(--card2);padding:10px;border-radius:12px;"><div style="font-size:.66rem;color:var(--ink4);">Base Salary</div><div style="font-weight:900;color:var(--ink);">${fmtMoney(t.salary)}</div></div><div style="background:var(--card2);padding:10px;border-radius:12px;"><div style="font-size:.66rem;color:var(--ink4);">Net Salary</div><div style="font-weight:900;color:var(--p);">${fmtMoney(teacherNetSalary(t))}</div></div><div style="background:var(--card2);padding:10px;border-radius:12px;"><div style="font-size:.66rem;color:var(--ink4);">Bonus</div><div style="font-weight:900;color:var(--g);">${fmtMoney(t.bonus)}</div></div><div style="background:var(--card2);padding:10px;border-radius:12px;"><div style="font-size:.66rem;color:var(--ink4);">Deductions</div><div style="font-weight:900;color:var(--r);">${fmtMoney(t.deductions)}</div></div></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;"><span class="badge bp2">Present ${stats.present}</span><span class="badge by2">Late ${stats.late}</span><span class="badge br2">Absent ${stats.absent}</span>${t.lastPaid ? `<span class="badge bg2">Last Paid ${fmtDate(t.lastPaid)}</span>` : ''}${t.payrollMonth ? `<span class="badge bp2">Month ${t.payrollMonth}</span>` : ''}</div><div style="font-size:.74rem;color:var(--ink3);line-height:1.6;">${t.notes || 'No payroll notes added yet.'}</div>${(t.payrollHistory || []).length ? `<div style="margin-top:9px;font-size:.7rem;color:var(--ink4);"><b>Recent payments:</b> ${(t.payrollHistory || []).slice(-3).reverse().map(h => `${h.month}: ${fmtMoney(h.amount)} on ${fmtDate(h.paidOn)}`).join(' - ')}</div>` : ''}<div class="m-btns" style="margin-top:12px;"><button class="btn btn-gh btn-sm" style="background:var(--p);color:#fff;" onclick="printPayslip('${t.id}')">🖨️ Payslip</button><button class="btn btn-p btn-sm" onclick="payTeacherSalary('${t.id}')">Mark Salary Paid</button><button class="btn btn-gh btn-sm" onclick="openTeachModal('${t.id}')">Edit Payroll</button></div></div>`; }).join('')}</div>`}`;
     }
+    function printPayslip(id) {
+      const t = DB.users.find(u => u.id === id && u.role === 'teacher'); if (!t) return;
+      const stats = teacherMonthlyStats(id);
+      const mName = t.payrollMonth || monthKey();
+      const school = DB.school || { name: 'My School', address: '', phone: '' };
+      const net = teacherNetSalary(t);
+      const cur = DB.settings?.currency || 'PKR';
+      
+      const slipHtml = (copyType) => `
+        <div class="print-half">
+          <div class="print-header">
+            ${school.logo ? `<img src="${school.logo}" class="print-logo"/>` : `<div class="print-logo" style="background:var(--p);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:1.5rem;">${school.name.charAt(0)}</div>`}
+            <div class="print-title">
+              <h2>${school.name}</h2>
+              <p>${school.address} ${school.phone ? ' | Ph: ' + school.phone : ''}</p>
+            </div>
+            <div style="text-align:right;">
+              <h3 style="margin:0;color:var(--p);">PAYSLIP</h3>
+              <div style="font-size:.75rem;color:#666;margin-top:4px;"><b>Copy:</b> ${copyType}</div>
+            </div>
+          </div>
+          
+          <div style="display:flex;justify-content:space-between;margin-bottom:15px;font-size:.85rem;">
+            <div>
+              <div><b>Teacher:</b> ${t.name}</div>
+              <div style="margin-top:3px;color:#555;"><b>Subject:</b> ${t.subject || 'N/A'}</div>
+            </div>
+            <div style="text-align:right;">
+              <div><b>Month:</b> ${mName}</div>
+              <div style="margin-top:3px;color:#555;"><b>Status:</b> ${t.payrollStatus === 'paid' ? 'Paid' : 'Pending'}</div>
+            </div>
+          </div>
+
+          <table class="print-table">
+            <thead><tr><th>Earnings & Deductions</th><th style="text-align:right;">Amount</th></tr></thead>
+            <tbody>
+              <tr><td>Basic Salary</td><td style="text-align:right;">${cur} ${num(t.salary).toLocaleString()}</td></tr>
+              ${num(t.bonus) > 0 ? `<tr><td>Bonus / Allowances</td><td style="text-align:right;color:var(--g);">${cur} ${num(t.bonus).toLocaleString()}</td></tr>` : ''}
+              ${num(t.deductions) > 0 ? `<tr><td>Deductions (Leaves/Absences)</td><td style="text-align:right;color:var(--r);">- ${cur} ${num(t.deductions).toLocaleString()}</td></tr>` : ''}
+              <tr class="print-row-total"><td>Net Salary</td><td style="text-align:right;color:var(--p);">${cur} ${net.toLocaleString()}</td></tr>
+            </tbody>
+          </table>
+          
+          <div style="font-size:.75rem;margin-top:15px;color:#555;">
+            <b>Attendance Summary:</b> Present: ${stats.present} | Late: ${stats.late} | Absent: ${stats.absent}
+          </div>
+          
+          <div class="print-footer">
+            <div>Printed on ${fmtDate(today())} at ${nowHHMM()}</div>
+            <div style="display:flex;gap:40px;">
+              <div class="print-sign">Teacher Signature</div>
+              <div class="print-sign">Admin Signature</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const fullHtml = slipHtml('Office Copy') + '<div class="print-divider"></div>' + slipHtml('Teacher Copy');
+      document.getElementById('print-container').innerHTML = fullHtml;
+      
+      document.body.classList.add('printing-doc');
+      setTimeout(() => {
+        window.print();
+        setTimeout(() => {
+          document.body.classList.remove('printing-doc');
+          document.getElementById('print-container').innerHTML = '';
+        }, 500);
+      }, 150);
+    }
+
     function payTeacherSalary(id) {
       const t = DB.users.find(u => u.id === id && u.role === 'teacher'); if (!t) return;
       const amount = teacherNetSalary(t);
@@ -5383,7 +5521,8 @@ ${teachers.length===0?`<div class="empty"><div class="empty-ic"></div><div class
 <div class="ph ph-row fu no-print"><div><div class="ph-tag">ID Cards</div><h1>Class ID Cards</h1><div class="ph-sub">Print ${students.length} attendance QR cards for ${cls?.name || 'selected class'} on A4 sheets.</div></div>
   <div class="ph-acts"><select class="fi" style="width:auto;min-width:180px;" onchange="switchIdCardClass(this.value)">${DB.classes.map(c => `<option value="${c.id}" ${c.id === curCls ? 'selected' : ''}>${c.name}${c.section ? ' ' + c.section : ''}</option>`).join('')}</select><button class="btn btn-p btn-sm" onclick="printClassIdCards()">Print A4 Cards</button></div></div>
 <div class="id-print-toolbar no-print"><div class="ibox" style="margin:0;flex:1;">Each card is 3.375in x 2.125in and includes the attendance QR used by the scanner.</div></div>
-<div class="id-print-area">
+      <div id="print-container"></div>
+      <div class="id-print-area">
   ${sheets.length ? sheets.map(group => `<section class="id-a4-sheet">${group.map(classIdCardHtml).join('')}</section>`).join('') : '<div class="empty">No students found in this class.</div>'}
 </div>`;
     }
