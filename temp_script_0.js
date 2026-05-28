@@ -188,7 +188,7 @@
 
     function brokenIcon(value) {
       const s = String(value || '').trim();
-      return !s || /^[?]+$/.test(s) || s.includes('�');
+      return !s || /^[?]+$/.test(s) || s.includes('ï¿½');
     }
     function cleanIcon(value, fallback = '') {
       return brokenIcon(value) ? fallback : String(value).trim();
@@ -392,9 +392,9 @@
         function feeBadgeHtml(stu) {
       const base = num((DB.fees.items || []).find(f => f.id === 'f1')?.amount || 0);
       const cur = DB.settings?.currency || 'PKR';
-      if (stu.feeType === 'scholarship') return `<span style="display:inline-flex;align-items:center;gap:3px;background:#d1fae5;color:#059669;border-radius:6px;padding:2px 8px;font-size:.63rem;font-weight:800;">🎓 Scholarship</span>`;
-      if (stu.feeType === 'discount' && num(stu.feeDiscount) > 0) return `<span style="display:inline-flex;align-items:center;gap:3px;background:#f5f3ff;color:#7c3aed;border-radius:6px;padding:2px 8px;font-size:.63rem;font-weight:800;">↓${num(stu.feeDiscount)}% ${cur} ${monthlyFeeAmount(stu).toLocaleString()}</span>`;
-      if (num(stu.customFee) && num(stu.customFee) !== base) return `<span style="display:inline-flex;align-items:center;gap:3px;background:#fff2df;color:#ff8a00;border-radius:6px;padding:2px 8px;font-size:.63rem;font-weight:800;">★ ${cur} ${num(stu.customFee).toLocaleString()}</span>`;
+      if (stu.feeType === 'scholarship') return `<span style="display:inline-flex;align-items:center;gap:3px;background:#d1fae5;color:#059669;border-radius:6px;padding:2px 8px;font-size:.63rem;font-weight:800;">ðŸŽ“ Scholarship</span>`;
+      if (stu.feeType === 'discount' && num(stu.feeDiscount) > 0) return `<span style="display:inline-flex;align-items:center;gap:3px;background:#f5f3ff;color:#7c3aed;border-radius:6px;padding:2px 8px;font-size:.63rem;font-weight:800;">â†“${num(stu.feeDiscount)}% ${cur} ${monthlyFeeAmount(stu).toLocaleString()}</span>`;
+      if (num(stu.customFee) && num(stu.customFee) !== base) return `<span style="display:inline-flex;align-items:center;gap:3px;background:#fff2df;color:#ff8a00;border-radius:6px;padding:2px 8px;font-size:.63rem;font-weight:800;">â˜… ${cur} ${num(stu.customFee).toLocaleString()}</span>`;
       return `<span style="display:inline-flex;align-items:center;gap:3px;background:#f1f5f9;color:#64748b;border-radius:6px;padding:2px 8px;font-size:.63rem;font-weight:800;">${cur} ${base.toLocaleString()}</span>`;
     }
     function ensureMonthlyFeeLedger() {
@@ -741,11 +741,11 @@
     function cleanBrokenUI(root = document) {
       root.querySelectorAll('.sc-ic,.ph-tag,.ct,.hs-tag,.hs-deco,.id-card-logo,.rc-hl,.sl-ok,.scan-fb').forEach(el => {
         const t = (el.textContent || '').trim();
-        if (/^[?]+$/.test(t) || t.includes('�')) el.textContent = '';
+        if (/^[?]+$/.test(t) || t.includes('ï¿½')) el.textContent = '';
       });
       root.querySelectorAll('button').forEach(btn => {
         const t = (btn.textContent || '').trim();
-        if (/^[?]+$/.test(t) || t.includes('�')) btn.textContent = 'Delete';
+        if (/^[?]+$/.test(t) || t.includes('ï¿½')) btn.textContent = 'Delete';
       });
     }
     function navItems() {
@@ -1214,7 +1214,7 @@
     <div class="fg"><label class="fl">Parent WhatsApp</label><input class="fi" id="m-wa" value="${s?.whatsapp || ''}" placeholder="923XXXXXXXXX (with code)"/></div>
   </div>
   <div class="div"></div>
-  <div style="font-weight:700;font-size:.78rem;color:var(--p);margin-bottom:8px;">💰 Fee Configuration</div>
+  <div style="font-weight:700;font-size:.78rem;color:var(--p);margin-bottom:8px;">ðŸ’° Fee Configuration</div>
   <div class="fg2">
     <div class="fg"><label class="fl">Fee Type</label>
       <select class="fi" id="m-feetype" onchange="updateFeePreview()">
@@ -1229,9 +1229,9 @@
       <input class="fi" type="number" id="m-customfee" min="0" max="100" value="${s?.feeType==='discount'?num(s?.feeDiscount||0):num(s?.customFee||0)||''}" placeholder="${s?.feeType==='discount'?'e.g. 50 for 50% off':'Leave blank for default'}" oninput="updateFeePreview()"/>
     </div>
   </div>
-  <div class="fg"><label class="fl">Fee Note (internal only)</label><input class="fi" id="m-feenote" value="${s?.feeNote||''}" placeholder="e.g. Staff child — 50% waiver"/></div>
+  <div class="fg"><label class="fl">Fee Note (internal only)</label><input class="fi" id="m-feenote" value="${s?.feeNote||''}" placeholder="e.g. Staff child â€” 50% waiver"/></div>
   <div id="m-fee-preview" style="background:var(--pl);border:1px solid var(--pl2);border-radius:8px;padding:8px 12px;font-size:.75rem;font-weight:700;color:var(--p);margin-bottom:4px;">
-    ${(()=>{const base=num((DB.fees.items||[]).find(f=>f.id==='f1')?.amount||0);const cur=DB.settings?.currency||'PKR';if(s?.feeType==='scholarship')return '🎓 Full Scholarship — Fee: '+cur+' 0';if(s?.feeType==='discount'&&num(s?.feeDiscount)>0){const d=Math.min(100,num(s.feeDiscount));return '↓ '+num(s.feeDiscount)+'% Discount — Fee: '+cur+' '+Math.round(base*(1-d/100)).toLocaleString();}if(num(s?.customFee))return '★ Custom — Fee: '+cur+' '+num(s.customFee).toLocaleString();return 'Default — Fee: '+cur+' '+base.toLocaleString();})()}
+    ${(()=>{const base=num((DB.fees.items||[]).find(f=>f.id==='f1')?.amount||0);const cur=DB.settings?.currency||'PKR';if(s?.feeType==='scholarship')return 'ðŸŽ“ Full Scholarship â€” Fee: '+cur+' 0';if(s?.feeType==='discount'&&num(s?.feeDiscount)>0){const d=Math.min(100,num(s.feeDiscount));return 'â†“ '+num(s.feeDiscount)+'% Discount â€” Fee: '+cur+' '+Math.round(base*(1-d/100)).toLocaleString();}if(num(s?.customFee))return 'â˜… Custom â€” Fee: '+cur+' '+num(s.customFee).toLocaleString();return 'Default â€” Fee: '+cur+' '+base.toLocaleString();})()}
   </div>
   <div class="fg2" style="display:none">
   </div>
@@ -1283,10 +1283,10 @@
       if (inp) { inp.placeholder = type==='discount'?'e.g. 50 for 50% off':'Leave blank for default'; }
       if (prev) {
         var v = num((inp||{}).value||0);
-        if (type==='scholarship') prev.innerHTML = '🎓 Full Scholarship — Fee: '+cur+' 0';
-        else if (type==='discount'&&v>0) prev.innerHTML = '↓ '+v+'% Discount — Pays: '+cur+' '+Math.round(base*(1-v/100)).toLocaleString()+'/mo';
-        else if (type==='custom'&&v>0) prev.innerHTML = '★ Custom — Fee: '+cur+' '+v.toLocaleString()+'/mo';
-        else prev.innerHTML = 'Default — Fee: '+cur+' '+base.toLocaleString()+'/mo';
+        if (type==='scholarship') prev.innerHTML = 'ðŸŽ“ Full Scholarship â€” Fee: '+cur+' 0';
+        else if (type==='discount'&&v>0) prev.innerHTML = 'â†“ '+v+'% Discount â€” Pays: '+cur+' '+Math.round(base*(1-v/100)).toLocaleString()+'/mo';
+        else if (type==='custom'&&v>0) prev.innerHTML = 'â˜… Custom â€” Fee: '+cur+' '+v.toLocaleString()+'/mo';
+        else prev.innerHTML = 'Default â€” Fee: '+cur+' '+base.toLocaleString()+'/mo';
       }
     }
     function saveStu(editId) {
@@ -1542,27 +1542,27 @@
         const A = entries.filter(([, v]) => v.status === 'Absent').length;
         const Lv = entries.filter(([, v]) => v.status === 'Leave').length;
         return `
-  <div class="ph ph-row fu"><div><div class="ph-tag"> My Attendance</div><h1>Teacher Attendance</h1><div class="ph-sub">Late after ${DB.lateAfter||'08:00'} AM</div></div><button class="btn btn-gh btn-sm" onclick="markTeacherAtt('Leave')">📋 Apply Leave</button></div>
+  <div class="ph ph-row fu"><div><div class="ph-tag"> My Attendance</div><h1>Teacher Attendance</h1><div class="ph-sub">Late after ${DB.lateAfter||'08:00'} AM</div></div><button class="btn btn-gh btn-sm" onclick="markTeacherAtt('Leave')">ðŸ“‹ Apply Leave</button></div>
   <div class="sg fu d1"><div class="sc sg2"><div class="sc-ic"></div><div class="sc-val" style="color:var(--g);">${P}</div><div class="sc-lbl">Present</div></div><div class="sc sv"><div class="sc-ic"></div><div class="sc-val" style="color:var(--y);">${La}</div><div class="sc-lbl">Late</div></div><div class="sc sr"><div class="sc-ic"></div><div class="sc-val" style="color:var(--r);">${A}</div><div class="sc-lbl">Absent</div></div><div class="sc sp"><div class="sc-ic"></div><div class="sc-val" style="color:#2563eb;">${Lv}</div><div class="sc-lbl">Leave</div></div></div>
   <div class="card fu d2"><div class="ch"><div class="ct"> Attendance History</div></div>
-    ${entries.length===0?`<div class="empty"><div class="empty-ic"></div><div class="empty-t">No records yet</div></div>`:entries.map(([date,rec])=>`<div class="ta-row"><div class="ta-time" style="font-size:.75rem;color:var(--ink3);font-weight:600;">${fmtDate(date)}</div><div class="ta-name">${rec.checkIn?`Check-in: ${rec.checkIn}`:rec.status==='Leave'?'📋 Leave':'-'}${rec.note?`<div style="font-size:.65rem;color:var(--ink4);">${rec.note}</div>`:''}</div><span class="badge ${rec.status==='Present'?'bg2':rec.status==='Late'?'by2':rec.status==='Leave'?'bb2':'br2'}">${rec.status==='Late'?'⏰ Late':rec.status}</span></div>`).join('')}
+    ${entries.length===0?`<div class="empty"><div class="empty-ic"></div><div class="empty-t">No records yet</div></div>`:entries.map(([date,rec])=>`<div class="ta-row"><div class="ta-time" style="font-size:.75rem;color:var(--ink3);font-weight:600;">${fmtDate(date)}</div><div class="ta-name">${rec.checkIn?`Check-in: ${rec.checkIn}`:rec.status==='Leave'?'ðŸ“‹ Leave':'-'}${rec.note?`<div style="font-size:.65rem;color:var(--ink4);">${rec.note}</div>`:''}</div><span class="badge ${rec.status==='Present'?'bg2':rec.status==='Late'?'by2':rec.status==='Leave'?'bb2':'br2'}">${rec.status==='Late'?'â° Late':rec.status}</span></div>`).join('')}
   </div>`;
       }
       return `
-<div class="ph ph-row fu"><div><div class="ph-tag"> Teacher Attendance</div><h1>Staff Attendance</h1><div class="ph-sub">Late after ${DB.lateAfter||'08:00'} - Today: ${fmtDate(d)}</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;"><button class="btn btn-p btn-sm" onclick="startScanner()">📷 Scan QR</button><button class="btn btn-gh btn-sm" onclick="openMarkTeacherModal()">✏️ Manual Mark</button><button class="btn btn-gh btn-sm" onclick="openLateThreshModal()">⚙ Set Late Time</button></div></div>
+<div class="ph ph-row fu"><div><div class="ph-tag"> Teacher Attendance</div><h1>Staff Attendance</h1><div class="ph-sub">Late after ${DB.lateAfter||'08:00'} - Today: ${fmtDate(d)}</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;"><button class="btn btn-p btn-sm" onclick="startScanner()">ðŸ“· Scan QR</button><button class="btn btn-gh btn-sm" onclick="openMarkTeacherModal()">âœï¸ Manual Mark</button><button class="btn btn-gh btn-sm" onclick="openLateThreshModal()">âš™ Set Late Time</button></div></div>
 <div class="card fu d1"><div class="ch"><div class="ct">Today Status - ${fmtDate(d)}</div></div>
-${teachers.length===0?`<div class="empty"><div class="empty-ic"></div><div class="empty-t">No teachers added</div></div>`:`<div style="display:flex;flex-direction:column;gap:2px;">${teachers.map(t=>{const rec=(DB.teacherAttendance[t.id]||{})[d];return `<div class="ta-row"><div class="ava" style="width:32px;height:32px;border-radius:8px;background:${gc(t.name)};font-size:.58rem;flex-shrink:0;">${t.photo?`<img src="${t.photo}"/>`  :ini(t.name)}</div><div class="ta-name">${t.name}<div style="font-size:.66rem;color:var(--ink4);">${t.subject||'-'}</div></div><div class="ta-time">${rec?.checkIn?`In: ${rec.checkIn}`:rec?.status==='Leave'?'📋 Leave':'-'}</div><span class="badge ${rec?rec.status==='Present'?'bg2':rec.status==='Late'?'by2':rec.status==='Leave'?'bb2':'br2':'bo2'}">${rec?rec.status==='Late'?'⏰ Late':rec.status:'Not Marked'}</span><div style="display:flex;gap:3px;margin-left:auto;flex-wrap:wrap;"><button class="btn btn-xs btn-g" onclick="adminMarkTeacher('${t.id}','Present')">P</button><button class="btn btn-xs" style="background:var(--yl);color:var(--y);font-size:.64rem;font-weight:700;padding:3px 7px;border-radius:6px;cursor:pointer;" onclick="adminMarkTeacher('${t.id}','Late')">L</button><button class="btn btn-xs btn-r" onclick="adminMarkTeacher('${t.id}','Absent')">A</button><button class="btn btn-xs" style="background:#dbeafe;color:#2563eb;font-size:.64rem;font-weight:700;padding:3px 7px;border-radius:6px;cursor:pointer;" onclick="adminMarkTeacherLeave('${t.id}')">Leave</button></div></div>`;}).join('')}  </div>`}
+${teachers.length===0?`<div class="empty"><div class="empty-ic"></div><div class="empty-t">No teachers added</div></div>`:`<div style="display:flex;flex-direction:column;gap:2px;">${teachers.map(t=>{const rec=(DB.teacherAttendance[t.id]||{})[d];return `<div class="ta-row"><div class="ava" style="width:32px;height:32px;border-radius:8px;background:${gc(t.name)};font-size:.58rem;flex-shrink:0;">${t.photo?`<img src="${t.photo}"/>`  :ini(t.name)}</div><div class="ta-name">${t.name}<div style="font-size:.66rem;color:var(--ink4);">${t.subject||'-'}</div></div><div class="ta-time">${rec?.checkIn?`In: ${rec.checkIn}`:rec?.status==='Leave'?'ðŸ“‹ Leave':'-'}</div><span class="badge ${rec?rec.status==='Present'?'bg2':rec.status==='Late'?'by2':rec.status==='Leave'?'bb2':'br2':'bo2'}">${rec?rec.status==='Late'?'â° Late':rec.status:'Not Marked'}</span><div style="display:flex;gap:3px;margin-left:auto;flex-wrap:wrap;"><button class="btn btn-xs btn-g" onclick="adminMarkTeacher('${t.id}','Present')">P</button><button class="btn btn-xs" style="background:var(--yl);color:var(--y);font-size:.64rem;font-weight:700;padding:3px 7px;border-radius:6px;cursor:pointer;" onclick="adminMarkTeacher('${t.id}','Late')">L</button><button class="btn btn-xs btn-r" onclick="adminMarkTeacher('${t.id}','Absent')">A</button><button class="btn btn-xs" style="background:#dbeafe;color:#2563eb;font-size:.64rem;font-weight:700;padding:3px 7px;border-radius:6px;cursor:pointer;" onclick="adminMarkTeacherLeave('${t.id}')">Leave</button></div></div>`;}).join('')}  </div>`}
 </div>
 <div class="card fu d2"><div class="ch"><div class="ct"> Monthly Summary</div></div><div class="tw" style="border:none;"><table><thead><tr><th>Teacher</th><th>Present</th><th>Late</th><th>Absent</th><th>Leave</th><th>Att%</th></tr></thead><tbody>${teachers.map(t=>{const rec=DB.teacherAttendance[t.id]||{};const P=Object.values(rec).filter(v=>v.status==='Present').length;const La=Object.values(rec).filter(v=>v.status==='Late').length;const A=Object.values(rec).filter(v=>v.status==='Absent').length;const Lv=Object.values(rec).filter(v=>v.status==='Leave').length;const tot=Object.values(rec).length;const pct=tot?Math.round((P+La)/tot*100):0;return `<tr><td><b>${t.name}</b><div style="font-size:.65rem;color:var(--ink4);">${t.subject||'-'}</div></td><td><b style="color:var(--g);">${P}</b></td><td><b style="color:var(--y);">${La}</b></td><td><b style="color:var(--r);">${A}</b></td><td><b style="color:#2563eb;">${Lv}</b></td><td><b style="color:${pct>=90?'var(--g)':pct>=75?'var(--o)':'var(--r)'};"> ${pct}%</b></td></tr>`;}).join('')}
 </tbody></table></div></div>`;
     }
-    function adminMarkTeacher(uid2,status){const d=today();const t=nowHHMM();if(!DB.teacherAttendance[uid2])DB.teacherAttendance[uid2]={};DB.teacherAttendance[uid2][d]={checkIn:t,status};saveDB();showToast('✅ '+status+' marked','ts');goPage('teacheratt');}
-    function adminMarkTeacherLeave(uid2){const tname=(DB.users.find(u=>u.id===uid2)||{}).name||'';openModal(`<h3>📋 Mark Leave</h3><div class="fg"><label class="fl">Teacher</label><input class="fi" value="${tname}" readonly/></div><div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="tl-date" value="${today()}"/></div><div class="fg"><label class="fl">Reason</label><input class="fi" id="tl-reason" placeholder="Sick, Emergency..."/></div><div class="m-btns"><button class="btn btn-p" onclick="saveTeacherLeave('${uid2}')"> Save</button><button class="btn btn-gh" onclick="closeModal()">Cancel</button></div>`);}
-    function saveTeacherLeave(uid2){const d=document.getElementById('tl-date')?.value||today();const note=(document.getElementById('tl-reason')?.value||'').trim();if(!DB.teacherAttendance[uid2])DB.teacherAttendance[uid2]={};DB.teacherAttendance[uid2][d]={checkIn:'',status:'Leave',note,source:'admin'};saveDB();closeModal();showToast('📋 Leave marked','ts');goPage('teacheratt');}
-    function openMarkTeacherModal(){const teachers=DB.users.filter(u=>u.role==='teacher');if(!teachers.length){showToast('No teachers','te');return;}openModal(`<h3>✏️ Manual Mark</h3><div class="fg"><label class="fl">Teacher</label><select class="fi" id="mt-teacher">${teachers.map(t=>`<option value="${t.id}">${t.name} — ${t.subject||'No Subject'}</option>`).join('')}</select></div><div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="mt-date" value="${today()}"/></div><div class="fg"><label class="fl">Status</label><select class="fi" id="mt-status"><option value="Present">✅ Present</option><option value="Late">⏰ Late</option><option value="Absent">❌ Absent</option><option value="Leave">📋 Leave</option></select></div><div class="fg"><label class="fl">Time</label><input class="fi" type="time" id="mt-time" value="${nowHHMM()}"/></div><div class="fg"><label class="fl">Note</label><input class="fi" id="mt-note" placeholder="note..."/></div><div class="m-btns"><button class="btn btn-p" onclick="saveManualTeacherAtt()"> Save</button><button class="btn btn-gh" onclick="closeModal()">Cancel</button></div>`);}
-    function saveManualTeacherAtt(){const uid2=document.getElementById('mt-teacher')?.value;const d=document.getElementById('mt-date')?.value||today();const status=document.getElementById('mt-status')?.value||'Present';const t=document.getElementById('mt-time')?.value||nowHHMM();const note=(document.getElementById('mt-note')?.value||'').trim();if(!uid2){showToast('Select a teacher','te');return;}if(!DB.teacherAttendance[uid2])DB.teacherAttendance[uid2]={};DB.teacherAttendance[uid2][d]={checkIn:t,status,note,source:'manual'};saveDB();closeModal();showToast('✅ '+status+' marked','ts');goPage('teacheratt');}
-    function openLateThreshModal(){openModal(`<h3>⚙ Late Threshold</h3><div class="ibox">Teachers checking in after this time are marked <b>Late</b>.</div><div class="fg"><label class="fl">Late After</label><input class="fi" type="time" id="lt-time" value="${DB.lateAfter||'08:00'}"/></div><div class="m-btns"><button class="btn btn-p" onclick="saveLateThresh()"> Save</button><button class="btn btn-gh" onclick="closeModal()">Cancel</button></div>`);}
-    function saveLateThresh(){DB.lateAfter=document.getElementById('lt-time')?.value||'08:00';saveDB();closeModal();showToast('⚙ Late threshold: '+DB.lateAfter,'ts');goPage('teacheratt');}
+    function adminMarkTeacher(uid2,status){const d=today();const t=nowHHMM();if(!DB.teacherAttendance[uid2])DB.teacherAttendance[uid2]={};DB.teacherAttendance[uid2][d]={checkIn:t,status};saveDB();showToast('âœ… '+status+' marked','ts');goPage('teacheratt');}
+    function adminMarkTeacherLeave(uid2){const tname=(DB.users.find(u=>u.id===uid2)||{}).name||'';openModal(`<h3>ðŸ“‹ Mark Leave</h3><div class="fg"><label class="fl">Teacher</label><input class="fi" value="${tname}" readonly/></div><div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="tl-date" value="${today()}"/></div><div class="fg"><label class="fl">Reason</label><input class="fi" id="tl-reason" placeholder="Sick, Emergency..."/></div><div class="m-btns"><button class="btn btn-p" onclick="saveTeacherLeave('${uid2}')"> Save</button><button class="btn btn-gh" onclick="closeModal()">Cancel</button></div>`);}
+    function saveTeacherLeave(uid2){const d=document.getElementById('tl-date')?.value||today();const note=(document.getElementById('tl-reason')?.value||'').trim();if(!DB.teacherAttendance[uid2])DB.teacherAttendance[uid2]={};DB.teacherAttendance[uid2][d]={checkIn:'',status:'Leave',note,source:'admin'};saveDB();closeModal();showToast('ðŸ“‹ Leave marked','ts');goPage('teacheratt');}
+    function openMarkTeacherModal(){const teachers=DB.users.filter(u=>u.role==='teacher');if(!teachers.length){showToast('No teachers','te');return;}openModal(`<h3>âœï¸ Manual Mark</h3><div class="fg"><label class="fl">Teacher</label><select class="fi" id="mt-teacher">${teachers.map(t=>`<option value="${t.id}">${t.name} â€” ${t.subject||'No Subject'}</option>`).join('')}</select></div><div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="mt-date" value="${today()}"/></div><div class="fg"><label class="fl">Status</label><select class="fi" id="mt-status"><option value="Present">âœ… Present</option><option value="Late">â° Late</option><option value="Absent">âŒ Absent</option><option value="Leave">ðŸ“‹ Leave</option></select></div><div class="fg"><label class="fl">Time</label><input class="fi" type="time" id="mt-time" value="${nowHHMM()}"/></div><div class="fg"><label class="fl">Note</label><input class="fi" id="mt-note" placeholder="note..."/></div><div class="m-btns"><button class="btn btn-p" onclick="saveManualTeacherAtt()"> Save</button><button class="btn btn-gh" onclick="closeModal()">Cancel</button></div>`);}
+    function saveManualTeacherAtt(){const uid2=document.getElementById('mt-teacher')?.value;const d=document.getElementById('mt-date')?.value||today();const status=document.getElementById('mt-status')?.value||'Present';const t=document.getElementById('mt-time')?.value||nowHHMM();const note=(document.getElementById('mt-note')?.value||'').trim();if(!uid2){showToast('Select a teacher','te');return;}if(!DB.teacherAttendance[uid2])DB.teacherAttendance[uid2]={};DB.teacherAttendance[uid2][d]={checkIn:t,status,note,source:'manual'};saveDB();closeModal();showToast('âœ… '+status+' marked','ts');goPage('teacheratt');}
+    function openLateThreshModal(){openModal(`<h3>âš™ Late Threshold</h3><div class="ibox">Teachers checking in after this time are marked <b>Late</b>.</div><div class="fg"><label class="fl">Late After</label><input class="fi" type="time" id="lt-time" value="${DB.lateAfter||'08:00'}"/></div><div class="m-btns"><button class="btn btn-p" onclick="saveLateThresh()"> Save</button><button class="btn btn-gh" onclick="closeModal()">Cancel</button></div>`);}
+    function saveLateThresh(){DB.lateAfter=document.getElementById('lt-time')?.value||'08:00';saveDB();closeModal();showToast('âš™ Late threshold: '+DB.lateAfter,'ts');goPage('teacheratt');}
 
     /* ------------------------------- GRADES ------------------------------- */
     function pgGrades() {
@@ -1696,7 +1696,7 @@ ${teachers.length===0?`<div class="empty"><div class="empty-ic"></div><div class
       openModal(`
   <h3> ${escHtml(s.name)} Fees</h3>
   <div class="ibox" style="margin-bottom:12px;">${escHtml(cls?.name || '')} - Roll ${escHtml(s.roll || '-')} - Balance <b style="color:${sum.dueAmount ? 'var(--r)' : 'var(--g)'};">${fmtMoney(sum.dueAmount)}</b></div>
-  <div style="display:grid;gap:8px;">${DB.fees.items.map(f => { const paid = sum.payments[f.id]?.paid; return `<div style="display:flex;align-items:center;gap:10px;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px;"><div style="font-size:1.1rem;">${paid ? '✅' : '⏳'}</div><div style="flex:1;"><div style="font-weight:800;font-size:.82rem;">${escHtml(f.name)}</div><div style="font-size:.68rem;color:var(--ink4);">Due ${escHtml(f.due || '-')} - ${f.mandatory ? 'Mandatory' : 'Optional'}${paid ? ' - Paid ' + fmtDate(sum.payments[f.id]?.date) : ''}</div></div><div style="text-align:right;"><div style="font-weight:900;color:${paid ? 'var(--g)' : 'var(--r)'};">${fmtMoney(f.id === 'f1' ? (monthlyFeeDue(sid) || monthlyFeeAmount(s)) : f.amount)}</div><div style="display:inline-flex;gap:4px;margin-top:4px;">${paid ? `<button class="btn btn-xs btn-gh" style="background:var(--p);color:#fff;" onclick="printFeeReceipt('${sid}', '${f.id}')">🖨️ Receipt</button>` : ''}<button class="btn btn-xs ${paid ? 'btn-gh' : 'btn-g'}" onclick="toggleFee('${sid}','${f.id}',true)">${paid ? 'Unmark' : 'Mark Paid'}</button></div></div></div>`; }).join('')}</div>
+  <div style="display:grid;gap:8px;">${DB.fees.items.map(f => { const paid = sum.payments[f.id]?.paid; return `<div style="display:flex;align-items:center;gap:10px;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px;"><div style="font-size:1.1rem;">${paid ? 'âœ…' : 'â³'}</div><div style="flex:1;"><div style="font-weight:800;font-size:.82rem;">${escHtml(f.name)}</div><div style="font-size:.68rem;color:var(--ink4);">Due ${escHtml(f.due || '-')} - ${f.mandatory ? 'Mandatory' : 'Optional'}${paid ? ' - Paid ' + fmtDate(sum.payments[f.id]?.date) : ''}</div></div><div style="text-align:right;"><div style="font-weight:900;color:${paid ? 'var(--g)' : 'var(--r)'};">${fmtMoney(f.id === 'f1' ? (monthlyFeeDue(sid) || monthlyFeeAmount(s)) : f.amount)}</div><div style="display:inline-flex;gap:4px;margin-top:4px;">${paid ? `<button class="btn btn-xs btn-gh" style="background:var(--p);color:#fff;" onclick="printFeeReceipt('${sid}', '${f.id}')">ðŸ–¨ï¸ Receipt</button>` : ''}<button class="btn btn-xs ${paid ? 'btn-gh' : 'btn-g'}" onclick="toggleFee('${sid}','${f.id}',true)">${paid ? 'Unmark' : 'Mark Paid'}</button></div></div></div>`; }).join('')}</div>
   <div class="m-btns" style="flex-wrap:wrap;">
       ${s.whatsapp ? `<button class="btn btn-wa btn-sm" onclick="sendFeeWA('${sid}','${(DB.fees.items.find(f => !sum.payments[f.id]?.paid) || DB.fees.items[0] || {}).id || 'f1'}')"> WhatsApp Reminder</button>` : ''}
     <button class="btn btn-gh btn-sm" onclick="closeModal();goPage('fees')">Close</button>
@@ -1715,44 +1715,58 @@ ${teachers.length===0?`<div class="empty"><div class="empty-ic"></div><div class
 
       const receiptHtml = (copyType) => `
         <div class="print-half">
-          <div class="print-header">
-            ${school.logo ? `<img src="${school.logo}" class="print-logo"/>` : `<div class="print-logo" style="background:var(--p);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:1.5rem;">${school.name.charAt(0)}</div>`}
-            <div class="print-title">
-              <h2>${school.name}</h2>
-              <p>${school.address} ${school.phone ? ' | Ph: ' + school.phone : ''}</p>
+          <div class="print-watermark">PAID</div>
+          <div class="print-content-wrap">
+            <div class="print-header">
+              <div class="print-logo-box">
+                ${school.logo ? `<img src="${school.logo}" class="print-logo"/>` : `<div class="print-logo" style="background:#1d4ed8;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:2rem;border-radius:12px;width:70px;height:70px;">${school.name.charAt(0)}</div>`}
+                <div class="print-school-info">
+                  <h2>${school.name}</h2>
+                  <p>${school.address}</p>
+                  ${school.phone ? `<p>Ph: ${school.phone}</p>` : ''}
+                </div>
+              </div>
+              <div class="print-doc-title">
+                <h3>FEE RECEIPT</h3>
+                <div class="copy-badge">${copyType}</div>
+              </div>
             </div>
-            <div style="text-align:right;">
-              <h3 style="margin:0;color:var(--p);">FEE RECEIPT</h3>
-              <div style="font-size:.75rem;color:#666;margin-top:4px;"><b>Copy:</b> ${copyType}</div>
+            
+            <div class="print-meta-grid">
+              <div class="print-meta-box">
+                <div class="print-meta-row"><span class="print-meta-lbl">Student Name</span><span class="print-meta-val">${s.name}</span></div>
+                <div class="print-meta-row"><span class="print-meta-lbl">Class</span><span class="print-meta-val">${cls?.name || '-'}</span></div>
+                <div class="print-meta-row"><span class="print-meta-lbl">Roll No</span><span class="print-meta-val">${s.roll || '-'}</span></div>
+              </div>
+              <div class="print-meta-box">
+                <div class="print-meta-row"><span class="print-meta-lbl">Receipt Date</span><span class="print-meta-val">${fmtDate(paidObj.date)}</span></div>
+                <div class="print-meta-row"><span class="print-meta-lbl">Status</span><span class="print-meta-val" style="color:#16a34a;">PAID</span></div>
+                <div class="print-meta-row"><span class="print-meta-lbl">Payment Mode</span><span class="print-meta-val">Cash / Bank</span></div>
+              </div>
             </div>
-          </div>
-          
-          <div style="display:flex;justify-content:space-between;margin-bottom:15px;font-size:.85rem;">
-            <div>
-              <div><b>Student:</b> ${s.name}</div>
-              <div style="margin-top:3px;color:#555;"><b>Class:</b> ${cls?.name || '-'} | <b>Roll:</b> ${s.roll || '-'}</div>
-            </div>
-            <div style="text-align:right;">
-              <div><b>Date:</b> ${fmtDate(paidObj.date)}</div>
-              <div style="margin-top:3px;color:var(--g);font-weight:700;">PAID</div>
-            </div>
-          </div>
 
-          <table class="print-table">
-            <thead><tr><th>Fee Description</th><th style="text-align:right;">Amount Paid</th></tr></thead>
-            <tbody>
-              <tr><td>${fee.name}</td><td style="text-align:right;">${cur} ${amount.toLocaleString()}</td></tr>
-              ${s.feeType === 'scholarship' && fid === 'f1' ? `<tr><td style="font-size:.75rem;color:var(--g);">Full Scholarship Applied</td><td></td></tr>` : ''}
-              ${s.feeType === 'discount' && fid === 'f1' ? `<tr><td style="font-size:.75rem;color:#7c3aed;">Discount Applied: ${s.feeDiscount}%</td><td></td></tr>` : ''}
-              <tr class="print-row-total"><td>Total Received</td><td style="text-align:right;color:var(--p);">${cur} ${amount.toLocaleString()}</td></tr>
-            </tbody>
-          </table>
-          
-          <div class="print-footer">
-            <div>Printed on ${fmtDate(today())} at ${nowHHMM()}</div>
-            <div style="display:flex;gap:40px;">
-              <div class="print-sign">Cashier / Admin</div>
-              <div class="print-sign">Parent Signature</div>
+            <table class="print-table">
+              <thead><tr><th>Fee Description</th><th class="amt-col">Amount</th></tr></thead>
+              <tbody>
+                <tr><td>${fee.name}</td><td class="amt-col">${cur} ${amount.toLocaleString()}</td></tr>
+                ${s.feeType === 'scholarship' && fid === 'f1' ? `<tr><td style="color:#16a34a;font-weight:600;">Full Scholarship Applied</td><td class="amt-col"></td></tr>` : ''}
+                ${s.feeType === 'discount' && fid === 'f1' ? `<tr><td style="color:#8b5cf6;font-weight:600;">Discount Applied: ${s.feeDiscount}%</td><td class="amt-col"></td></tr>` : ''}
+                <tr class="print-row-total"><td>Total Received</td><td class="amt-col">${cur} ${amount.toLocaleString()}</td></tr>
+              </tbody>
+            </table>
+            
+            <div class="print-footer">
+              <div style="font-size:0.75rem;color:#94a3b8;">Printed on ${fmtDate(today())} at ${nowHHMM()}</div>
+              <div style="display:flex;gap:50px;">
+                <div class="print-sign-box">
+                  <div class="print-sign-line"></div>
+                  <div class="print-sign-txt">Cashier / Admin</div>
+                </div>
+                <div class="print-sign-box">
+                  <div class="print-sign-line"></div>
+                  <div class="print-sign-txt">Parent Signature</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1965,7 +1979,7 @@ ${teachers.length===0?`<div class="empty"><div class="empty-ic"></div><div class
   <div class="sc sv"><div class="sc-ic"></div><div class="sc-val" style="color:var(--v);">${teachers.length}</div><div class="sc-lbl">Total Staff</div></div>
 </div>
   ${teachers.length === 0 ? `<div class="card"><div class="empty"><div class="empty-ic"></div><div class="empty-t">No teacher payroll records yet</div><button class="btn btn-p btn-sm" style="margin-top:10px;" onclick="openTeachModal()">Add Teacher</button></div></div>` :
-          `<div class="g2">${teachers.map(t => { const stats = teacherMonthlyStats(t.id); return `<div class="card fu"><div class="ch"><div class="ct"> ${t.name}</div><span class="badge ${t.payrollStatus === 'paid' ? 'bg2' : 'bo2'}">${t.payrollStatus === 'paid' ? 'Paid' : 'Pending'}</span></div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px;"><div style="background:var(--card2);padding:10px;border-radius:12px;"><div style="font-size:.66rem;color:var(--ink4);">Base Salary</div><div style="font-weight:900;color:var(--ink);">${fmtMoney(t.salary)}</div></div><div style="background:var(--card2);padding:10px;border-radius:12px;"><div style="font-size:.66rem;color:var(--ink4);">Net Salary</div><div style="font-weight:900;color:var(--p);">${fmtMoney(teacherNetSalary(t))}</div></div><div style="background:var(--card2);padding:10px;border-radius:12px;"><div style="font-size:.66rem;color:var(--ink4);">Bonus</div><div style="font-weight:900;color:var(--g);">${fmtMoney(t.bonus)}</div></div><div style="background:var(--card2);padding:10px;border-radius:12px;"><div style="font-size:.66rem;color:var(--ink4);">Deductions</div><div style="font-weight:900;color:var(--r);">${fmtMoney(t.deductions)}</div></div></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;"><span class="badge bp2">Present ${stats.present}</span><span class="badge by2">Late ${stats.late}</span><span class="badge br2">Absent ${stats.absent}</span>${t.lastPaid ? `<span class="badge bg2">Last Paid ${fmtDate(t.lastPaid)}</span>` : ''}${t.payrollMonth ? `<span class="badge bp2">Month ${t.payrollMonth}</span>` : ''}</div><div style="font-size:.74rem;color:var(--ink3);line-height:1.6;">${t.notes || 'No payroll notes added yet.'}</div>${(t.payrollHistory || []).length ? `<div style="margin-top:9px;font-size:.7rem;color:var(--ink4);"><b>Recent payments:</b> ${(t.payrollHistory || []).slice(-3).reverse().map(h => `${h.month}: ${fmtMoney(h.amount)} on ${fmtDate(h.paidOn)}`).join(' - ')}</div>` : ''}<div class="m-btns" style="margin-top:12px;"><button class="btn btn-gh btn-sm" style="background:var(--p);color:#fff;" onclick="printPayslip('${t.id}')">🖨️ Payslip</button><button class="btn btn-p btn-sm" onclick="payTeacherSalary('${t.id}')">Mark Salary Paid</button><button class="btn btn-gh btn-sm" onclick="openTeachModal('${t.id}')">Edit Payroll</button></div></div>`; }).join('')}</div>`}`;
+          `<div class="g2">${teachers.map(t => { const stats = teacherMonthlyStats(t.id); return `<div class="card fu"><div class="ch"><div class="ct"> ${t.name}</div><span class="badge ${t.payrollStatus === 'paid' ? 'bg2' : 'bo2'}">${t.payrollStatus === 'paid' ? 'Paid' : 'Pending'}</span></div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px;"><div style="background:var(--card2);padding:10px;border-radius:12px;"><div style="font-size:.66rem;color:var(--ink4);">Base Salary</div><div style="font-weight:900;color:var(--ink);">${fmtMoney(t.salary)}</div></div><div style="background:var(--card2);padding:10px;border-radius:12px;"><div style="font-size:.66rem;color:var(--ink4);">Net Salary</div><div style="font-weight:900;color:var(--p);">${fmtMoney(teacherNetSalary(t))}</div></div><div style="background:var(--card2);padding:10px;border-radius:12px;"><div style="font-size:.66rem;color:var(--ink4);">Bonus</div><div style="font-weight:900;color:var(--g);">${fmtMoney(t.bonus)}</div></div><div style="background:var(--card2);padding:10px;border-radius:12px;"><div style="font-size:.66rem;color:var(--ink4);">Deductions</div><div style="font-weight:900;color:var(--r);">${fmtMoney(t.deductions)}</div></div></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;"><span class="badge bp2">Present ${stats.present}</span><span class="badge by2">Late ${stats.late}</span><span class="badge br2">Absent ${stats.absent}</span>${t.lastPaid ? `<span class="badge bg2">Last Paid ${fmtDate(t.lastPaid)}</span>` : ''}${t.payrollMonth ? `<span class="badge bp2">Month ${t.payrollMonth}</span>` : ''}</div><div style="font-size:.74rem;color:var(--ink3);line-height:1.6;">${t.notes || 'No payroll notes added yet.'}</div>${(t.payrollHistory || []).length ? `<div style="margin-top:9px;font-size:.7rem;color:var(--ink4);"><b>Recent payments:</b> ${(t.payrollHistory || []).slice(-3).reverse().map(h => `${h.month}: ${fmtMoney(h.amount)} on ${fmtDate(h.paidOn)}`).join(' - ')}</div>` : ''}<div class="m-btns" style="margin-top:12px;"><button class="btn btn-gh btn-sm" style="background:var(--p);color:#fff;" onclick="printPayslip('${t.id}')">ðŸ–¨ï¸ Payslip</button><button class="btn btn-p btn-sm" onclick="payTeacherSalary('${t.id}')">Mark Salary Paid</button><button class="btn btn-gh btn-sm" onclick="openTeachModal('${t.id}')">Edit Payroll</button></div></div>`; }).join('')}</div>`}`;
     }
     function printPayslip(id) {
       const t = DB.users.find(u => u.id === id && u.role === 'teacher'); if (!t) return;
@@ -1977,48 +1991,58 @@ ${teachers.length===0?`<div class="empty"><div class="empty-ic"></div><div class
       
       const slipHtml = (copyType) => `
         <div class="print-half">
-          <div class="print-header">
-            ${school.logo ? `<img src="${school.logo}" class="print-logo"/>` : `<div class="print-logo" style="background:var(--p);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:1.5rem;">${school.name.charAt(0)}</div>`}
-            <div class="print-title">
-              <h2>${school.name}</h2>
-              <p>${school.address} ${school.phone ? ' | Ph: ' + school.phone : ''}</p>
+          <div class="print-watermark">SALARY</div>
+          <div class="print-content-wrap">
+            <div class="print-header">
+              <div class="print-logo-box">
+                ${school.logo ? `<img src="${school.logo}" class="print-logo"/>` : `<div class="print-logo" style="background:#1d4ed8;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:2rem;border-radius:12px;width:70px;height:70px;">${school.name.charAt(0)}</div>`}
+                <div class="print-school-info">
+                  <h2>${school.name}</h2>
+                  <p>${school.address}</p>
+                  ${school.phone ? `<p>Ph: ${school.phone}</p>` : ''}
+                </div>
+              </div>
+              <div class="print-doc-title">
+                <h3>PAYSLIP</h3>
+                <div class="copy-badge">${copyType}</div>
+              </div>
             </div>
-            <div style="text-align:right;">
-              <h3 style="margin:0;color:var(--p);">PAYSLIP</h3>
-              <div style="font-size:.75rem;color:#666;margin-top:4px;"><b>Copy:</b> ${copyType}</div>
+            
+            <div class="print-meta-grid">
+              <div class="print-meta-box">
+                <div class="print-meta-row"><span class="print-meta-lbl">Teacher Name</span><span class="print-meta-val">${t.name}</span></div>
+                <div class="print-meta-row"><span class="print-meta-lbl">Designation/Subject</span><span class="print-meta-val">${t.subject || 'N/A'}</span></div>
+                <div class="print-meta-row"><span class="print-meta-lbl">Contact</span><span class="print-meta-val">${t.phone || t.email || '-'}</span></div>
+              </div>
+              <div class="print-meta-box">
+                <div class="print-meta-row"><span class="print-meta-lbl">Payroll Month</span><span class="print-meta-val">${mName}</span></div>
+                <div class="print-meta-row"><span class="print-meta-lbl">Status</span><span class="print-meta-val" style="color:${t.payrollStatus === 'paid' ? '#16a34a' : '#ea580c'};">${t.payrollStatus === 'paid' ? 'PAID' : 'PENDING'}</span></div>
+                <div class="print-meta-row"><span class="print-meta-lbl">Attendance</span><span class="print-meta-val" style="font-weight:600;font-size:0.75rem;">P:${stats.present} / L:${stats.late} / A:${stats.absent}</span></div>
+              </div>
             </div>
-          </div>
-          
-          <div style="display:flex;justify-content:space-between;margin-bottom:15px;font-size:.85rem;">
-            <div>
-              <div><b>Teacher:</b> ${t.name}</div>
-              <div style="margin-top:3px;color:#555;"><b>Subject:</b> ${t.subject || 'N/A'}</div>
-            </div>
-            <div style="text-align:right;">
-              <div><b>Month:</b> ${mName}</div>
-              <div style="margin-top:3px;color:#555;"><b>Status:</b> ${t.payrollStatus === 'paid' ? 'Paid' : 'Pending'}</div>
-            </div>
-          </div>
 
-          <table class="print-table">
-            <thead><tr><th>Earnings & Deductions</th><th style="text-align:right;">Amount</th></tr></thead>
-            <tbody>
-              <tr><td>Basic Salary</td><td style="text-align:right;">${cur} ${num(t.salary).toLocaleString()}</td></tr>
-              ${num(t.bonus) > 0 ? `<tr><td>Bonus / Allowances</td><td style="text-align:right;color:var(--g);">${cur} ${num(t.bonus).toLocaleString()}</td></tr>` : ''}
-              ${num(t.deductions) > 0 ? `<tr><td>Deductions (Leaves/Absences)</td><td style="text-align:right;color:var(--r);">- ${cur} ${num(t.deductions).toLocaleString()}</td></tr>` : ''}
-              <tr class="print-row-total"><td>Net Salary</td><td style="text-align:right;color:var(--p);">${cur} ${net.toLocaleString()}</td></tr>
-            </tbody>
-          </table>
-          
-          <div style="font-size:.75rem;margin-top:15px;color:#555;">
-            <b>Attendance Summary:</b> Present: ${stats.present} | Late: ${stats.late} | Absent: ${stats.absent}
-          </div>
-          
-          <div class="print-footer">
-            <div>Printed on ${fmtDate(today())} at ${nowHHMM()}</div>
-            <div style="display:flex;gap:40px;">
-              <div class="print-sign">Teacher Signature</div>
-              <div class="print-sign">Admin Signature</div>
+            <table class="print-table">
+              <thead><tr><th>Earnings & Deductions</th><th class="amt-col">Amount</th></tr></thead>
+              <tbody>
+                <tr><td>Basic Salary</td><td class="amt-col">${cur} ${num(t.salary).toLocaleString()}</td></tr>
+                ${num(t.bonus) > 0 ? `<tr><td>Bonus / Allowances</td><td class="amt-col" style="color:#16a34a;">+ ${cur} ${num(t.bonus).toLocaleString()}</td></tr>` : ''}
+                ${num(t.deductions) > 0 ? `<tr><td>Deductions (Leaves/Absences)</td><td class="amt-col" style="color:#ef4444;">- ${cur} ${num(t.deductions).toLocaleString()}</td></tr>` : ''}
+                <tr class="print-row-total"><td>Net Salary</td><td class="amt-col">${cur} ${net.toLocaleString()}</td></tr>
+              </tbody>
+            </table>
+            
+            <div class="print-footer">
+              <div style="font-size:0.75rem;color:#94a3b8;">Generated on ${fmtDate(today())} at ${nowHHMM()}</div>
+              <div style="display:flex;gap:50px;">
+                <div class="print-sign-box">
+                  <div class="print-sign-line"></div>
+                  <div class="print-sign-txt">Admin / Principal</div>
+                </div>
+                <div class="print-sign-box">
+                  <div class="print-sign-line"></div>
+                  <div class="print-sign-txt">Teacher Signature</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
