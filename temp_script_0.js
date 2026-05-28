@@ -474,7 +474,7 @@
     }
 
     /* ------------------------------- AUTH ------------------------------- */
-    let curRole = 'admin', curUser = null, curCls = null, curPage = 'dashboard';
+    let curRole = 'admin', curUser = null, curCls = null, curPage = 'dashboard', curReportMonth = null;
     let loginRole = 'admin', _qrS = null, _toastT = null;
 
     function togglePassword(id, btn) {
@@ -769,6 +769,7 @@
         { p: 'reportcards', i: '', l: 'Report Cards', s: 'Report' },
         { p: 'idcards', i: '', l: 'ID Cards', s: 'ID' },
         { p: 'families', i: '', l: 'Families', s: 'Family' },
+        { p: 'reports', i: '', l: 'Reports', s: 'History' },
         { p: 'settings', i: 'settings', l: 'Settings', s: 'Setup' },
       ];
       if (curRole === 'teacher') return [
@@ -833,7 +834,7 @@
         students: pgStudents, admissions: pgAdmissions, classes: pgClasses, attendance: pgAttendance, grades: pgGrades,
         fees: pgFees, exams: pgExams, notices: pgNotices, timetable: pgTimetable,
         teachers: pgTeachers, payroll: pgPayroll, teacheratt: pgTeacherAtt, subjects: pgSubjects,
-        reportcards: pgReportCards, idcards: pgClassIdCards, families: pgFamilies, settings: pgSettings,
+        reportcards: pgReportCards, idcards: pgClassIdCards, families: pgFamilies, settings: pgSettings, reports: pgReports,
         mygrades: pgMyGrades, myattend: pgMyAttend, qrcard: pgQRCard, myfees: pgMyFees, profile: pgProfile,
       };
       return (map[p] || pgAdminDash)();
@@ -2177,6 +2178,124 @@ ${teachers.length===0?`<div class="empty"><div class="empty-ic"></div><div class
       saveDB(); closeModal(); showToast('? Family saved', 'ts'); goPage('families');
     }
     function delFam(id) { if (!confirm('Delete this family?')) return; allStus().forEach(s => { if (s.familyId === id) s.familyId = null; }); delete DB.families[id]; DB.users = DB.users.filter(u => !(u.role === 'parent' && u.familyId === id)); saveDB(); showToast('Deleted'); goPage('families'); }
+
+    /* ------------------------------- REPORTS & HISTORY ------------------------------- */
+    function pgReports() {
+      const m = curReportMonth || monthKey();
+      const stus = allStus();
+      const teachers = (DB.users || []).filter(u => u.role === 'teacher');
+      
+      const feeRows = stus.map(s => ({ s, row: DB.fees.monthlyLedger?.[s.id]?.[m] }));
+      const feesPaid = feeRows.filter(x => x.row?.paid).reduce((sum, x) => sum + num(x.row.amount), 0);
+      const feesPending = feeRows.filter(x => !x.row?.paid && x.row).reduce((sum, x) => sum + num(x.row.amount), 0);
+      
+      const payRows = teachers.map(t => ({ t, h: (t.payrollHistory || []).find(x => x.month === m) }));
+      const payrollTotal = payRows.filter(x => x.h).reduce((sum, x) => sum + num(x.h.amount), 0);
+
+      return `
+    <div class="ph ph-row fu">
+      <div><div class="ph-tag"> History</div><h1>Reports & History</h1><div class="ph-sub">View past fee collections, payroll, and attendance</div></div>
+      <div class="ph-acts" style="display:flex;align-items:center;gap:10px;">
+        <label style="font-size:.75rem;font-weight:700;color:var(--ink3);">Select Month:</label>
+        <input type="month" class="fi" value="${m}" onchange="curReportMonth=this.value;goPage('reports')" style="width:160px;margin:0;"/>
+      </div>
+    </div>
+    <div class="g2">
+      <div class="card fu">
+        <div class="ch"><div class="ct"> Fee Collection - ${m}</div></div>
+        <div style="display:flex;gap:20px;margin-bottom:15px;">
+          <div><div style="font-size:.65rem;color:var(--ink4);">Collected</div><div style="font-weight:900;color:var(--g);font-size:1.2rem;">${fmtMoney(feesPaid)}</div></div>
+          <div><div style="font-size:.65rem;color:var(--ink4);">Pending</div><div style="font-weight:900;color:var(--r);font-size:1.2rem;">${fmtMoney(feesPending)}</div></div>
+        </div>
+        <div class="tw"><table><thead><tr><th>Student</th><th>Class</th><th>Amount</th><th>Status</th></tr></thead><tbody>
+        ${feeRows.filter(x => x.row).map(x => `<tr><td><div style="font-weight:700;font-size:.8rem;">${x.s.name}</div></td><td style="font-size:.75rem;">${DB.classes.find(c=>c.id===x.s.classId)?.name||'-'}</td><td><b style="color:var(--ink);">${fmtMoney(x.row.amount)}</b></td><td>${x.row.paid ? `<span class="badge bg2">Paid ${fmtDate(x.row.date)}</span>` : '<span class="badge br2">Pending</span>'}</td></tr>`).join('') || `<tr><td colspan="4" style="text-align:center;color:var(--ink4);padding:20px;">No fee records found for ${m}</td></tr>`}
+        </tbody></table></div>
+      </div>
+      
+      <div class="card fu">
+        <div class="ch"><div class="ct"> Payroll History - ${m}</div></div>
+        <div style="margin-bottom:15px;">
+          <div style="font-size:.65rem;color:var(--ink4);">Total Paid Out</div><div style="font-weight:900;color:var(--p);font-size:1.2rem;">${fmtMoney(payrollTotal)}</div>
+        </div>
+        <div class="tw"><table><thead><tr><th>Teacher</th><th>Base</th><th>Net Paid</th><th>Status</th><th>Action</th></tr></thead><tbody>
+        ${payRows.map(x => `<tr><td><div style="font-weight:700;font-size:.8rem;">${x.t.name}</div></td><td style="font-size:.75rem;color:var(--ink3);">${fmtMoney(x.t.salary)}</td><td>${x.h ? `<b style="color:var(--g);">${fmtMoney(x.h.amount)}</b>` : '-'}</td><td>${x.h ? `<span class="badge bg2">Paid ${fmtDate(x.h.paidOn)}</span>` : '<span class="badge bo2">Unpaid</span>'}</td><td>${x.h ? `<button class="btn btn-xs btn-gh" onclick="printHistoricalPayslip('${x.t.id}', '${m}')">Print Slip</button>` : '-'}</td></tr>`).join('')}
+        </tbody></table></div>
+      </div>
+    </div>`;
+    }
+
+    function printHistoricalPayslip(id, m) {
+      const t = DB.users.find(u => u.id === id);
+      const h = (t.payrollHistory || []).find(x => x.month === m);
+      if (!h) return;
+      const school = DB.school || { name: 'My School', address: '', phone: '' };
+      
+      const slipHtml = (copyType) => `
+        <div class="print-half">
+          <div class="print-watermark">SALARY</div>
+          <div class="print-content-wrap">
+            <div class="print-header">
+              <div class="print-logo-box">
+                ${school.logo ? `<img src="${school.logo}" class="print-logo"/>` : `<div class="print-logo" style="background:#1d4ed8;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:2rem;border-radius:12px;width:70px;height:70px;">${school.name.charAt(0)}</div>`}
+                <div class="print-school-info">
+                  <h2>${school.name}</h2>
+                  <p>${school.address}</p>
+                  ${school.phone ? `<p>Ph: ${school.phone}</p>` : ''}
+                </div>
+              </div>
+              <div class="print-doc-title">
+                <h3>PAYSLIP</h3>
+                <div class="copy-badge">${copyType}</div>
+              </div>
+            </div>
+            
+            <div class="print-meta-grid">
+              <div class="print-meta-box">
+                <div class="print-meta-row"><span class="print-meta-lbl">Teacher Name</span><span class="print-meta-val">${t.name}</span></div>
+                <div class="print-meta-row"><span class="print-meta-lbl">Designation/Subject</span><span class="print-meta-val">${t.subject || 'N/A'}</span></div>
+                <div class="print-meta-row"><span class="print-meta-lbl">Contact</span><span class="print-meta-val">${t.phone || 'N/A'}</span></div>
+              </div>
+              <div class="print-meta-box">
+                <div class="print-meta-row"><span class="print-meta-lbl">Payroll Month</span><span class="print-meta-val">${m}</span></div>
+                <div class="print-meta-row"><span class="print-meta-lbl">Status</span><span class="print-meta-val" style="color:#059669;">PAID</span></div>
+                <div class="print-meta-row"><span class="print-meta-lbl">Paid On</span><span class="print-meta-val">${fmtDate(h.paidOn)}</span></div>
+              </div>
+            </div>
+
+            <table class="print-table">
+              <thead>
+                <tr><th>Earnings & Deductions</th><th class="amt-col">Amount</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Basic Salary</td><td class="amt-col">PKR ${num(h.base).toLocaleString()}</td></tr>
+                ${num(h.bonus) ? `<tr><td>Bonus / Allowances</td><td class="amt-col">PKR ${num(h.bonus).toLocaleString()}</td></tr>` : ''}
+                ${num(h.deductions) ? `<tr><td>Deductions (Leaves/Advance)</td><td class="amt-col" style="color:#dc2626;">- PKR ${num(h.deductions).toLocaleString()}</td></tr>` : ''}
+                <tr class="print-row-total">
+                  <td>Net Salary</td>
+                  <td class="amt-col">PKR ${num(h.amount).toLocaleString()}</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="print-footer">
+              <div class="print-sign-box">
+                <div class="print-sign-line"></div>
+                <div class="print-sign-txt">Teacher Signature</div>
+              </div>
+              <div class="print-sign-box">
+                <div class="print-sign-line"></div>
+                <div class="print-sign-txt">Principal / Admin</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('print-container').innerHTML = slipHtml('SCHOOL COPY') + '<div class="print-divider"></div>' + slipHtml('TEACHER COPY');
+      document.body.classList.add('printing-doc');
+      window.print();
+      document.body.classList.remove('printing-doc');
+    }
 
     /* ------------------------------- SETTINGS ------------------------------- */
     function pgSettings() {
