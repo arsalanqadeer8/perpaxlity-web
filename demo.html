@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>The Progressive Children Academy — Portal Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --blue:#2C2CE8;--blue2:#4f46e5;--green:#10b981;--orange:#f59e0b;
+  --red:#ef4444;--purple:#8b5cf6;--pink:#ec4899;--teal:#14b8a6;
+  --dark:#07080c;--card:#13151f;--border:rgba(255,255,255,0.08);
+  --text:#f0f2ff;--muted:#7b82a0;
+}
+body{font-family:'Inter',sans-serif;background:#07080c;color:#fff;overflow:hidden;height:100vh;width:100vw;}
+
+/* ── SCENE WRAPPER ── */
+#demo{position:relative;width:100vw;height:100vh;overflow:hidden;}
+
+/* ── SCENES ── */
+.scene{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;
+  transition:opacity 0.7s cubic-bezier(0.23,1,0.32,1);
+}
+.scene.active{opacity:1;pointer-events:all;}
+
+/* ── PROGRESS BAR ── */
+#prog-wrap{
+  position:fixed;bottom:0;left:0;right:0;z-index:200;
+  background:rgba(0,0,0,0.7);backdrop-filter:blur(10px);
+  border-top:1px solid rgba(255,255,255,0.07);
+  padding:14px 40px 20px;
+  display:flex;align-items:center;gap:20px;
+}
+#prog-bar-track{flex:1;height:4px;background:rgba(255,255,255,0.1);border-radius:99px;overflow:hidden;cursor:pointer;}
+#prog-bar-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));border-radius:99px;transition:width 0.1s linear;}
+.ctrl-btn{
+  background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);
+  color:#fff;width:36px;height:36px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:0.9rem;transition:all 0.2s;flex-shrink:0;
+}
+.ctrl-btn:hover{background:rgba(255,255,255,0.15);}
+#scene-label{font-size:0.75rem;color:var(--muted);min-width:160px;text-align:right;}
+
+/* ── SLIDE DOTS ── */
+#dots{
+  position:fixed;right:24px;top:50%;transform:translateY(-50%);
+  display:flex;flex-direction:column;gap:10px;z-index:200;
+}
+.dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.2);cursor:pointer;transition:all 0.3s;}
+.dot.active{background:#fff;height:24px;border-radius:4px;}
+
+/* ── COMMON MOCKUP ── */
+.portal-mockup{
+  width:min(1000px,88vw);
+  background:#0e1018;
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:20px;
+  overflow:hidden;
+  box-shadow:0 40px 120px rgba(0,0,0,0.8),0 0 0 1px rgba(255,255,255,0.04) inset;
+}
+.mockup-bar{
+  background:rgba(255,255,255,0.03);
+  border-bottom:1px solid rgba(255,255,255,0.06);
+  padding:12px 20px;
+  display:flex;align-items:center;gap:8px;
+}
+.mac-dot{width:11px;height:11px;border-radius:50%;}
+.mac-r{background:#ff5f57;}.mac-y{background:#febc2e;}.mac-g{background:#28c840;}
+.mock-url{
+  flex:1;background:rgba(255,255,255,0.04);border-radius:6px;
+  padding:4px 12px;font-size:0.7rem;color:var(--muted);text-align:center;margin:0 16px;
+}
+.mockup-body{display:grid;grid-template-columns:190px 1fr;min-height:420px;}
+
+/* sidebar */
+.mock-sb{background:rgba(255,255,255,0.02);border-right:1px solid var(--border);padding:16px 10px;display:flex;flex-direction:column;gap:4px;}
+.mock-sb-who{padding:10px 8px 16px;border-bottom:1px solid var(--border);margin-bottom:8px;}
+.mock-sb-role{font-size:0.6rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:1px;}
+.mock-sb-name{font-size:0.8rem;font-weight:800;margin-top:2px;}
+.sb-item{padding:8px 10px;border-radius:8px;font-size:0.72rem;color:var(--muted);display:flex;align-items:center;gap:8px;cursor:pointer;transition:all 0.2s;}
+.sb-item.on{background:rgba(108,99,255,0.15);color:#a78bfa;}
+.sb-item .sb-ic{width:16px;text-align:center;font-size:0.8rem;}
+
+/* content area */
+.mock-pg{padding:24px;overflow:hidden;}
+.pg-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.pg-title{font-size:1.1rem;font-weight:900;letter-spacing:-0.3px;}
+.pg-sub{font-size:0.7rem;color:var(--muted);margin-top:2px;}
+.pg-btn{background:var(--blue);color:#fff;border:none;padding:7px 16px;border-radius:8px;font-size:0.72rem;font-weight:700;cursor:pointer;}
+
+/* stat cards */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
+.stat-card{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:14px;}
+.stat-card-lbl{font-size:0.62rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;}
+.stat-card-val{font-size:1.1rem;font-weight:900;}
+.stat-card-val.blue{color:#818cf8;}.stat-card-val.green{color:#34d399;}.stat-card-val.orange{color:#fbbf24;}.stat-card-val.red{color:#f87171;}
+
+/* table */
+.mock-table{width:100%;border-collapse:collapse;font-size:0.72rem;}
+.mock-table th{background:rgba(255,255,255,0.03);color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;padding:9px 12px;text-align:left;font-size:0.62rem;border-bottom:1px solid var(--border);}
+.mock-table td{padding:9px 12px;border-bottom:1px solid rgba(255,255,255,0.04);color:#c8cde0;}
+.mock-table tr:last-child td{border-bottom:none;}
+.badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:0.62rem;font-weight:700;}
+.b-green{background:rgba(52,211,153,0.12);color:#34d399;}
+.b-orange{background:rgba(251,191,36,0.12);color:#fbbf24;}
+.b-red{background:rgba(248,113,113,0.12);color:#f87171;}
+.b-blue{background:rgba(129,140,248,0.12);color:#818cf8;}
+.b-purple{background:rgba(167,139,250,0.12);color:#a78bfa;}
+.avatar{width:26px;height:26px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;font-size:0.6rem;font-weight:800;color:#fff;}
+
+/* chart bars */
+.chart-wrap{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:12px;padding:16px;}
+.chart-title{font-size:0.68rem;font-weight:700;color:var(--muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px;}
+.bars{display:flex;align-items:flex-end;gap:6px;height:70px;}
+.bar{flex:1;border-radius:4px 4px 0 0;background:linear-gradient(to top,var(--blue),var(--purple));opacity:0.7;}
+
+/* ── SCENE 0 — INTRO ── */
+#s0{
+  background:radial-gradient(ellipse at 30% 50%,rgba(44,44,232,0.25) 0%,transparent 60%),
+             radial-gradient(ellipse at 70% 50%,rgba(139,92,246,0.15) 0%,transparent 60%),
+             #07080c;
+  flex-direction:column;text-align:center;
+}
+.intro-logo{
+  width:80px;height:80px;border-radius:22px;
+  background:linear-gradient(135deg,var(--blue),var(--purple));
+  display:flex;align-items:center;justify-content:center;
+  font-size:2.5rem;margin:0 auto 28px;
+  box-shadow:0 0 60px rgba(44,44,232,0.5);
+  animation:pulse 2s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{box-shadow:0 0 40px rgba(44,44,232,0.4);}50%{box-shadow:0 0 80px rgba(44,44,232,0.7);}}
+.intro-title{font-size:clamp(2rem,4vw,3.5rem);font-weight:900;letter-spacing:-1.5px;margin-bottom:12px;line-height:1.1;}
+.intro-grad{background:linear-gradient(135deg,#fff 0%,#a78bfa 50%,#34d399 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.intro-sub{font-size:1rem;color:var(--muted);max-width:500px;line-height:1.6;margin:0 auto 32px;}
+.intro-pills{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+.pill{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);padding:6px 16px;border-radius:99px;font-size:0.75rem;font-weight:600;color:#c8cde0;}
+
+/* ── SCENE — left text + right mockup ── */
+.split-scene{display:grid;grid-template-columns:1fr 1.6fr;gap:48px;align-items:center;padding:0 60px;width:100%;max-width:1200px;}
+.split-text{}
+.scene-num{font-size:0.7rem;color:var(--muted);font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;}
+.scene-title{font-size:clamp(1.8rem,3vw,2.8rem);font-weight:900;letter-spacing:-1px;line-height:1.15;margin-bottom:14px;}
+.scene-desc{font-size:0.9rem;color:var(--muted);line-height:1.7;margin-bottom:20px;}
+.scene-bullets{display:flex;flex-direction:column;gap:8px;}
+.scene-bullet{display:flex;align-items:center;gap:10px;font-size:0.82rem;color:#c8cde0;}
+.scene-bullet .bic{width:20px;height:20px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;flex-shrink:0;}
+
+/* text animations */
+.anim-word{display:inline-block;opacity:0;transform:translateY(20px);animation:wordIn 0.5s cubic-bezier(0.23,1,0.32,1) forwards;}
+@keyframes wordIn{to{opacity:1;transform:none;}}
+.scene.active .anim-word:nth-child(1){animation-delay:0.05s;}
+.scene.active .anim-word:nth-child(2){animation-delay:0.12s;}
+.scene.active .anim-word:nth-child(3){animation-delay:0.19s;}
+.scene.active .anim-word:nth-child(4){animation-delay:0.26s;}
+.scene.active .anim-word:nth-child(5){animation-delay:0.33s;}
+.scene.active .anim-word:nth-child(6){animation-delay:0.40s;}
+.scene.active .split-text .scene-desc{animation:fadeUp 0.6s 0.4s cubic-bezier(0.23,1,0.32,1) both;}
+.scene.active .split-text .scene-bullets{animation:fadeUp 0.6s 0.55s cubic-bezier(0.23,1,0.32,1) both;}
+.scene.active .portal-mockup{animation:mockIn 0.8s 0.1s cubic-bezier(0.23,1,0.32,1) both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:none;}}
+@keyframes mockIn{from{opacity:0;transform:translateX(40px) perspective(800px) rotateY(-6deg);}to{opacity:1;transform:translateX(0) perspective(800px) rotateY(-1deg);}}
+.scene.active#s0 .intro-logo{animation:pulse 2s ease-in-out infinite,scaleIn 0.7s cubic-bezier(0.23,1,0.32,1);}
+@keyframes scaleIn{from{opacity:0;transform:scale(0.5);}to{opacity:1;transform:scale(1);}}
+.scene.active#s0 .intro-title{animation:fadeUp 0.7s 0.2s both;}
+.scene.active#s0 .intro-sub{animation:fadeUp 0.7s 0.4s both;}
+.scene.active#s0 .intro-pills{animation:fadeUp 0.7s 0.55s both;}
+
+/* ── OUTRO ── */
+#s8{
+  background:radial-gradient(ellipse at 50% 50%,rgba(16,185,129,0.2) 0%,rgba(44,44,232,0.1) 40%,transparent 70%),#07080c;
+  flex-direction:column;text-align:center;
+}
+.outro-title{font-size:clamp(2rem,5vw,4rem);font-weight:900;letter-spacing:-2px;margin-bottom:16px;line-height:1.1;}
+.outro-sub{font-size:1rem;color:var(--muted);max-width:480px;margin:0 auto 36px;line-height:1.6;}
+.outro-btns{display:flex;gap:14px;justify-content:center;}
+.obtn-p{background:var(--blue);color:#fff;border:none;padding:14px 32px;border-radius:10px;font-size:0.95rem;font-weight:700;cursor:pointer;box-shadow:0 8px 30px rgba(44,44,232,0.4);transition:all 0.2s;}
+.obtn-p:hover{transform:translateY(-2px);}
+.obtn-g{background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.15);padding:14px 32px;border-radius:10px;font-size:0.95rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.obtn-g:hover{border-color:rgba(255,255,255,0.35);}
+.scene.active#s8 .outro-title{animation:fadeUp 0.7s 0.1s both;}
+.scene.active#s8 .outro-sub{animation:fadeUp 0.7s 0.3s both;}
+.scene.active#s8 .outro-btns{animation:fadeUp 0.7s 0.45s both;}
+
+/* watermark */
+.wm{position:fixed;top:20px;left:40px;font-size:0.78rem;font-weight:700;color:rgba(255,255,255,0.25);z-index:200;letter-spacing:1px;}
+
+/* ── RECEIPT PREVIEW ── */
+.receipt-prev{background:#fff;color:#111;border-radius:12px;padding:20px;font-size:0.7rem;width:280px;}
+.rp-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #e5e7eb;}
+.rp-logo{width:36px;height:36px;background:#1d4ed8;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:0.9rem;}
+.rp-school{font-weight:900;font-size:0.75rem;color:#111;}
+.rp-addr{font-size:0.62rem;color:#6b7280;}
+.rp-title{text-align:right;font-weight:900;font-size:0.85rem;color:#1d4ed8;}
+.rp-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f3f4f6;}
+.rp-row:last-child{border-bottom:none;font-weight:800;font-size:0.78rem;color:#1d4ed8;}
+.rp-lbl{color:#6b7280;}
+.rp-val{font-weight:600;}
+
+/* ── ID CARD ── */
+.id-card{background:linear-gradient(135deg,#1e3a8a,#3b82f6);border-radius:14px;padding:20px 16px;width:200px;color:#fff;text-align:center;}
+.id-av{width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,0.2);margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:900;border:3px solid rgba(255,255,255,0.4);}
+.id-name{font-size:0.85rem;font-weight:800;margin-bottom:2px;}
+.id-roll{font-size:0.65rem;opacity:0.7;margin-bottom:10px;}
+.id-school{font-size:0.62rem;opacity:0.65;margin-bottom:10px;}
+.id-qr{width:60px;height:60px;background:rgba(255,255,255,0.9);border-radius:6px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:2px;padding:6px;}
+.qr-cell{border-radius:1px;}
+
+/* attendance row */
+.att-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+.att-row:last-child{border-bottom:none;}
+.att-name{font-size:0.75rem;font-weight:700;}
+.att-time{font-size:0.65rem;color:var(--muted);}
+.att-btns{display:flex;gap:4px;}
+.att-btn{padding:3px 8px;border-radius:5px;font-size:0.6rem;font-weight:700;border:none;cursor:pointer;}
+.att-p{background:rgba(52,211,153,0.15);color:#34d399;}
+.att-l{background:rgba(251,191,36,0.15);color:#fbbf24;}
+.att-a{background:rgba(248,113,113,0.15);color:#f87171;}
+
+</style>
+</head>
+<body>
+
+<div class="wm">The Progressive Children Academy — Portal Demo</div>
+
+<!-- DOTS -->
+<div id="dots">
+  <div class="dot active" onclick="goScene(0)"></div>
+  <div class="dot" onclick="goScene(1)"></div>
+  <div class="dot" onclick="goScene(2)"></div>
+  <div class="dot" onclick="goScene(3)"></div>
+  <div class="dot" onclick="goScene(4)"></div>
+  <div class="dot" onclick="goScene(5)"></div>
+  <div class="dot" onclick="goScene(6)"></div>
+  <div class="dot" onclick="goScene(7)"></div>
+  <div class="dot" onclick="goScene(8)"></div>
+</div>
+
+<!-- PROGRESS BAR -->
+<div id="prog-wrap">
+  <div class="ctrl-btn" onclick="prev()">&#9664;</div>
+  <div class="ctrl-btn" id="playbtn" onclick="togglePlay()">&#9646;&#9646;</div>
+  <div class="ctrl-btn" onclick="next()">&#9654;</div>
+  <div id="prog-bar-track" onclick="seekClick(event)">
+    <div id="prog-bar-fill" style="width:0%"></div>
+  </div>
+  <div id="scene-label">Intro — 1 / 9</div>
+</div>
+
+<!-- DEMO -->
+<div id="demo">
+
+  <!-- S0: INTRO -->
+  <div class="scene active" id="s0">
+    <div>
+      <div class="intro-logo">&#9998;</div>
+      <h1 class="intro-title"><span class="intro-grad">The Progressive<br/>Children Academy</span></h1>
+      <p class="intro-sub">A complete digital school management system built for modern Pakistani schools — watch how it works.</p>
+      <div class="intro-pills">
+        <div class="pill">&#128198; Fee Management</div>
+        <div class="pill">&#9989; Attendance</div>
+        <div class="pill">&#128176; Payroll</div>
+        <div class="pill">&#128203; Report Cards</div>
+        <div class="pill">&#128247; ID Cards</div>
+        <div class="pill">&#128202; Reports</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S1: DASHBOARD -->
+  <div class="scene" id="s1">
+    <div class="split-scene">
+      <div class="split-text">
+        <div class="scene-num">Feature 01</div>
+        <h2 class="scene-title">
+          <span class="anim-word">Smart</span>&nbsp;
+          <span class="anim-word">Admin</span><br/>
+          <span class="anim-word">Dashboard</span>
+        </h2>
+        <p class="scene-desc">See everything at a glance — total students, fees collected, attendance today, and teachers paid. The dashboard updates in real time.</p>
+        <div class="scene-bullets">
+          <div class="scene-bullet"><div class="bic" style="background:rgba(129,140,248,0.2);">&#128200;</div>Live statistics & charts</div>
+          <div class="scene-bullet"><div class="bic" style="background:rgba(52,211,153,0.2);">&#128179;</div>Monthly fee collection overview</div>
+          <div class="scene-bullet"><div class="bic" style="background:rgba(251,191,36,0.2);">&#128276;</div>Instant notifications & alerts</div>
+        </div>
+      </div>
+      <div class="portal-mockup">
+        <div class="mockup-bar"><div class="mac-dot mac-r"></div><div class="mac-dot mac-y"></div><div class="mac-dot mac-g"></div><div class="mock-url">&#128274; progressive-academy.edu.pk/portal</div></div>
+        <div class="mockup-body">
+          <div class="mock-sb">
+            <div class="mock-sb-who"><div class="mock-sb-role">Admin</div><div class="mock-sb-name">Adeeba Ansari</div></div>
+            <div class="sb-item on"><div class="sb-ic">&#127968;</div>Dashboard</div>
+            <div class="sb-item"><div class="sb-ic">&#128100;</div>Students</div>
+            <div class="sb-item"><div class="sb-ic">&#9989;</div>Attendance</div>
+            <div class="sb-item"><div class="sb-ic">&#128198;</div>Fees</div>
+            <div class="sb-item"><div class="sb-ic">&#128176;</div>Payroll</div>
+            <div class="sb-item"><div class="sb-ic">&#128202;</div>Reports</div>
+          </div>
+          <div class="mock-pg">
+            <div class="pg-head"><div><div class="pg-title">Dashboard</div><div class="pg-sub">May 2026 — The Progressive Children Academy</div></div></div>
+            <div class="stat-row">
+              <div class="stat-card"><div class="stat-card-lbl">Total Students</div><div class="stat-card-val blue">524</div></div>
+              <div class="stat-card"><div class="stat-card-lbl">Fee Collected</div><div class="stat-card-val green">PKR 1.2M</div></div>
+              <div class="stat-card"><div class="stat-card-lbl">Attendance</div><div class="stat-card-val orange">96%</div></div>
+              <div class="stat-card"><div class="stat-card-lbl">Teachers Paid</div><div class="stat-card-val" style="color:#f472b6;">28/30</div></div>
+            </div>
+            <div class="chart-wrap">
+              <div class="chart-title">Monthly Fee Collection — 2026</div>
+              <div class="bars">
+                <div class="bar" style="height:50%"></div><div class="bar" style="height:65%"></div>
+                <div class="bar" style="height:55%"></div><div class="bar" style="height:80%"></div>
+                <div class="bar" style="height:72%"></div><div class="bar" style="height:90%"></div>
+                <div class="bar" style="height:68%"></div><div class="bar" style="height:100%;opacity:1;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S2: STUDENTS -->
+  <div class="scene" id="s2">
+    <div class="split-scene">
+      <div class="split-text">
+        <div class="scene-num">Feature 02</div>
+        <h2 class="scene-title">
+          <span class="anim-word">Student</span><br/>
+          <span class="anim-word">Management</span>
+        </h2>
+        <p class="scene-desc">Add, edit, and manage every student's profile — photo, class, roll number, parent contact, WhatsApp number, and fee details all in one place.</p>
+        <div class="scene-bullets">
+          <div class="scene-bullet"><div class="bic" style="background:rgba(129,140,248,0.2);">&#128247;</div>Student photo & profile</div>
+          <div class="scene-bullet"><div class="bic" style="background:rgba(52,211,153,0.2);">&#128241;</div>WhatsApp contact linked</div>
+          <div class="scene-bullet"><div class="bic" style="background:rgba(251,191,36,0.2);">&#128100;</div>Class & roll management</div>
+        </div>
+      </div>
+      <div class="portal-mockup">
+        <div class="mockup-bar"><div class="mac-dot mac-r"></div><div class="mac-dot mac-y"></div><div class="mac-dot mac-g"></div><div class="mock-url">&#128274; progressive-academy.edu.pk/students</div></div>
+        <div class="mockup-body">
+          <div class="mock-sb">
+            <div class="mock-sb-who"><div class="mock-sb-role">Admin</div><div class="mock-sb-name">Adeeba Ansari</div></div>
+            <div class="sb-item"><div class="sb-ic">&#127968;</div>Dashboard</div>
+            <div class="sb-item on"><div class="sb-ic">&#128100;</div>Students</div>
+            <div class="sb-item"><div class="sb-ic">&#9989;</div>Attendance</div>
+            <div class="sb-item"><div class="sb-ic">&#128198;</div>Fees</div>
+            <div class="sb-item"><div class="sb-ic">&#128176;</div>Payroll</div>
+            <div class="sb-item"><div class="sb-ic">&#128202;</div>Reports</div>
+          </div>
+          <div class="mock-pg">
+            <div class="pg-head"><div><div class="pg-title">Students</div><div class="pg-sub">524 students across all classes</div></div><button class="pg-btn">+ Add Student</button></div>
+            <table class="mock-table">
+              <thead><tr><th>Name</th><th>Class</th><th>Roll</th><th>Fee Status</th><th></th></tr></thead>
+              <tbody>
+                <tr><td><div style="display:flex;align-items:center;gap:6px;"><div class="avatar" style="background:#6366f1;">AN</div>Ali Nawaz</div></td><td>Class 5A</td><td>01</td><td><span class="badge b-green">Paid</span></td><td><span class="badge b-blue" style="cursor:pointer;">Manage</span></td></tr>
+                <tr><td><div style="display:flex;align-items:center;gap:6px;"><div class="avatar" style="background:#ec4899;">SA</div>Sara Ahmed</div></td><td>Class 6B</td><td>07</td><td><span class="badge b-orange">Pending</span></td><td><span class="badge b-blue" style="cursor:pointer;">Manage</span></td></tr>
+                <tr><td><div style="display:flex;align-items:center;gap:6px;"><div class="avatar" style="background:#10b981;">HR</div>Hamza Raza</div></td><td>Class 4A</td><td>12</td><td><span class="badge b-green">Paid</span></td><td><span class="badge b-blue" style="cursor:pointer;">Manage</span></td></tr>
+                <tr><td><div style="display:flex;align-items:center;gap:6px;"><div class="avatar" style="background:#f59e0b;">ZK</div>Zara Khan</div></td><td>Class 7C</td><td>03</td><td><span class="badge b-red">Overdue</span></td><td><span class="badge b-blue" style="cursor:pointer;">Manage</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S3: ATTENDANCE -->
+  <div class="scene" id="s3">
+    <div class="split-scene">
+      <div class="split-text">
+        <div class="scene-num">Feature 03</div>
+        <h2 class="scene-title">
+          <span class="anim-word">QR &amp;</span><br/>
+          <span class="anim-word">Digital</span><br/>
+          <span class="anim-word">Attendance</span>
+        </h2>
+        <p class="scene-desc">Mark student and teacher attendance instantly. Scan QR codes from ID cards or mark manually. Automatic monthly summaries generated.</p>
+        <div class="scene-bullets">
+          <div class="scene-bullet"><div class="bic" style="background:rgba(52,211,153,0.2);">&#128247;</div>QR code scanning from ID cards</div>
+          <div class="scene-bullet"><div class="bic" style="background:rgba(251,191,36,0.2);">&#9998;</div>Manual mark with one tap</div>
+          <div class="scene-bullet"><div class="bic" style="background:rgba(248,113,113,0.2);">&#128202;</div>Monthly attendance reports</div>
+        </div>
+      </div>
+      <div class="portal-mockup">
+        <div class="mockup-bar"><div class="mac-dot mac-r"></div><div class="mac-dot mac-y"></div><div class="mac-dot mac-g"></div><div class="mock-url">&#128274; progressive-academy.edu.pk/attendance</div></div>
+        <div class="mockup-body">
+          <div class="mock-sb">
+            <div class="mock-sb-who"><div class="mock-sb-role">Admin</div><div class="mock-sb-name">Adeeba Ansari</div></div>
+            <div class="sb-item"><div class="sb-ic">&#127968;</div>Dashboard</div>
+            <div class="sb-item"><div class="sb-ic">&#128100;</div>Students</div>
+            <div class="sb-item on"><div class="sb-ic">&#9989;</div>Attendance</div>
+            <div class="sb-item"><div class="sb-ic">&#128198;</div>Fees</div>
+            <div class="sb-item"><div class="sb-ic">&#128176;</div>Payroll</div>
+            <div class="sb-item"><div class="sb-ic">&#128202;</div>Reports</div>
+          </div>
+          <div class="mock-pg">
+            <div class="pg-head"><div><div class="pg-title">Attendance</div><div class="pg-sub">Tuesday, 28 May 2026</div></div><button class="pg-btn">&#128247; Scan QR</button></div>
+            <div style="display:flex;flex-direction:column;">
+              <div class="att-row"><div><div class="att-name">Ali Nawaz</div><div class="att-time">Check-in: 07:52 AM</div></div><span class="badge b-green">Present</span><div class="att-btns"><button class="att-btn att-p">P</button><button class="att-btn att-l">L</button><button class="att-btn att-a">A</button></div></div>
+              <div class="att-row"><div><div class="att-name">Sara Ahmed</div><div class="att-time">Check-in: 08:14 AM</div></div><span class="badge b-orange">Late</span><div class="att-btns"><button class="att-btn att-p">P</button><button class="att-btn att-l">L</button><button class="att-btn att-a">A</button></div></div>
+              <div class="att-row"><div><div class="att-name">Hamza Raza</div><div class="att-time">Not marked yet</div></div><span class="badge b-red">Absent</span><div class="att-btns"><button class="att-btn att-p">P</button><button class="att-btn att-l">L</button><button class="att-btn att-a">A</button></div></div>
+              <div class="att-row"><div><div class="att-name">Zara Khan</div><div class="att-time">Check-in: 07:45 AM</div></div><span class="badge b-green">Present</span><div class="att-btns"><button class="att-btn att-p">P</button><button class="att-btn att-l">L</button><button class="att-btn att-a">A</button></div></div>
+              <div class="att-row"><div><div class="att-name">Usman Malik</div><div class="att-time">Check-in: 07:58 AM</div></div><span class="badge b-green">Present</span><div class="att-btns"><button class="att-btn att-p">P</button><button class="att-btn att-l">L</button><button class="att-btn att-a">A</button></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S4: FEES -->
+  <div class="scene" id="s4">
+    <div class="split-scene">
+      <div class="split-text">
+        <div class="scene-num">Feature 04</div>
+        <h2 class="scene-title">
+          <span class="anim-word">Fee</span><br/>
+          <span class="anim-word">Management</span><br/>
+          <span class="anim-word">&amp; Receipts</span>
+        </h2>
+        <p class="scene-desc">Track monthly fees for every student. Mark as paid with one click and instantly print a beautiful professional receipt with your school logo.</p>
+        <div class="scene-bullets">
+          <div class="scene-bullet"><div class="bic" style="background:rgba(52,211,153,0.2);">&#128179;</div>One-click payment marking</div>
+          <div class="scene-bullet"><div class="bic" style="background:rgba(129,140,248,0.2);">&#128203;</div>Print receipt with school logo</div>
+          <div class="scene-bullet"><div class="bic" style="background:rgba(251,191,36,0.2);">&#128241;</div>WhatsApp reminder to parents</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:20px;align-items:center;">
+        <div class="portal-mockup" style="width:480px;">
+          <div class="mockup-bar"><div class="mac-dot mac-r"></div><div class="mac-dot mac-y"></div><div class="mac-dot mac-g"></div><div class="mock-url">Fees</div></div>
+          <div style="padding:18px;">
+            <div class="stat-row" style="grid-template-columns:1fr 1fr;margin-bottom:14px;">
+              <div class="stat-card"><div class="stat-card-lbl">Collected May</div><div class="stat-card-val green">PKR 420,000</div></div>
+              <div class="stat-card"><div class="stat-card-lbl">Pending</div><div class="stat-card-val red">PKR 78,000</div></div>
+            </div>
+            <table class="mock-table">
+              <thead><tr><th>Student</th><th>Amount</th><th>Status</th><th></th></tr></thead>
+              <tbody>
+                <tr><td>Ali Nawaz</td><td>PKR 3,500</td><td><span class="badge b-green">Paid</span></td><td><span style="font-size:0.6rem;color:#818cf8;cursor:pointer;">Receipt</span></td></tr>
+                <tr><td>Sara Ahmed</td><td>PKR 3,500</td><td><span class="badge b-orange">Pending</span></td><td><span style="font-size:0.6rem;color:#34d399;cursor:pointer;">Mark Paid</span></td></tr>
+                <tr><td>Hamza Raza</td><td>PKR 4,000</td><td><span class="badge b-green">Paid</span></td><td><span style="font-size:0.6rem;color:#818cf8;cursor:pointer;">Receipt</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="receipt-prev">
+          <div class="rp-head">
+            <div class="rp-logo">P</div>
+            <div style="flex:1;"><div class="rp-school">The Progressive Children Academy</div><div class="rp-addr">Karachi, Pakistan | Ph: 03112641027</div></div>
+            <div class="rp-title">FEE<br/>RECEIPT</div>
+          </div>
+          <div class="rp-row"><span class="rp-lbl">Student</span><span class="rp-val">Ali Nawaz</span></div>
+          <div class="rp-row"><span class="rp-lbl">Class</span><span class="rp-val">Class 5-A</span></div>
+          <div class="rp-row"><span class="rp-lbl">Month</span><span class="rp-val">May 2026</span></div>
+          <div class="rp-row"><span class="rp-lbl">Date Paid</span><span class="rp-val">28 May 2026</span></div>
+          <div class="rp-row"><span class="rp-lbl">Monthly Fee</span><span class="rp-val">PKR 3,500</span></div>
+          <div class="rp-row"><span>NET TOTAL</span><span>PKR 3,500</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S5: PAYROLL -->
+  <div class="scene" id="s5">
+    <div class="split-scene">
+      <div class="split-text">
+        <div class="scene-num">Feature 05</div>
+        <h2 class="scene-title">
+          <span class="anim-word">Teacher</span><br/>
+          <span class="anim-word">Payroll</span><br/>
+          <span class="anim-word">&amp; Payslips</span>
+        </h2>
+        <p class="scene-desc">Process salaries for all teachers with bonuses and deductions. Print two-copy payslips (school copy + teacher copy) on A4 paper instantly.</p>
+        <div class="scene-bullets">
+          <div class="scene-bullet"><div class="bic" style="background:rgba(52,211,153,0.2);">&#128176;</div>One-click salary processing</div>
+          <div class="scene-bullet"><div class="bic" style="background:rgba(129,140,248,0.2);">&#128203;</div>Print 2 payslips on 1 A4 sheet</div>
+          <div class="scene-bullet"><div class="bic" style="background:rgba(251,191,36,0.2);">&#128202;</div>Full payroll history stored</div>
+        </div>
+      </div>
+      <div class="portal-mockup">
+        <div class="mockup-bar"><div class="mac-dot mac-r"></div><div class="mac-dot mac-y"></div><div class="mac-dot mac-g"></div><div class="mock-url">&#128274; progressive-academy.edu.pk/payroll</div></div>
+        <div class="mockup-body">
+          <div class="mock-sb">
+            <div class="mock-sb-who"><div class="mock-sb-role">Admin</div><div class="mock-sb-name">Adeeba Ansari</div></div>
+            <div class="sb-item"><div class="sb-ic">&#127968;</div>Dashboard</div>
+            <div class="sb-item"><div class="sb-ic">&#128100;</div>Teachers</div>
+            <div class="sb-item"><div class="sb-ic">&#9989;</div>Attendance</div>
+            <div class="sb-item on"><div class="sb-ic">&#128176;</div>Payroll</div>
+            <div class="sb-item"><div class="sb-ic">&#128202;</div>Reports</div>
+          </div>
+          <div class="mock-pg">
+            <div class="pg-head"><div><div class="pg-title">Payroll — May 2026</div><div class="pg-sub">28 teachers • PKR 1,240,000 total</div></div></div>
+            <table class="mock-table">
+              <thead><tr><th>Teacher</th><th>Base</th><th>Net Salary</th><th>Status</th><th></th></tr></thead>
+              <tbody>
+                <tr><td><div style="display:flex;align-items:center;gap:6px;"><div class="avatar" style="background:#8b5cf6;">AR</div>Ahmed Raza</div></td><td style="color:var(--muted);">40,000</td><td style="color:#34d399;font-weight:800;">PKR 43,000</td><td><span class="badge b-green">Paid</span></td><td><span style="font-size:0.6rem;color:#818cf8;cursor:pointer;">Payslip</span></td></tr>
+                <tr><td><div style="display:flex;align-items:center;gap:6px;"><div class="avatar" style="background:#ec4899;">FA</div>Fatima Ali</div></td><td style="color:var(--muted);">35,000</td><td style="color:#34d399;font-weight:800;">PKR 35,000</td><td><span class="badge b-green">Paid</span></td><td><span style="font-size:0.6rem;color:#818cf8;cursor:pointer;">Payslip</span></td></tr>
+                <tr><td><div style="display:flex;align-items:center;gap:6px;"><div class="avatar" style="background:#14b8a6;">SM</div>Sana Malik</div></td><td style="color:var(--muted);">38,000</td><td style="color:#fbbf24;font-weight:800;">PKR 38,000</td><td><span class="badge b-orange">Pending</span></td><td><span style="font-size:0.6rem;color:#34d399;cursor:pointer;">Pay Now</span></td></tr>
+                <tr><td><div style="display:flex;align-items:center;gap:6px;"><div class="avatar" style="background:#f59e0b;">UK</div>Usman Khan</div></td><td style="color:var(--muted);">42,000</td><td style="color:#fbbf24;font-weight:800;">PKR 40,000</td><td><span class="badge b-orange">Pending</span></td><td><span style="font-size:0.6rem;color:#34d399;cursor:pointer;">Pay Now</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S6: ID CARDS -->
+  <div class="scene" id="s6">
+    <div class="split-scene">
+      <div class="split-text">
+        <div class="scene-num">Feature 06</div>
+        <h2 class="scene-title">
+          <span class="anim-word">Student</span><br/>
+          <span class="anim-word">ID Cards</span><br/>
+          <span class="anim-word">with QR</span>
+        </h2>
+        <p class="scene-desc">Generate beautiful ID cards for every student and teacher — complete with a unique QR code. Print them instantly for physical use.</p>
+        <div class="scene-bullets">
+          <div class="scene-bullet"><div class="bic" style="background:rgba(52,211,153,0.2);">&#128247;</div>QR code for instant scanning</div>
+          <div class="scene-bullet"><div class="bic" style="background:rgba(129,140,248,0.2);">&#128203;</div>Ready to print immediately</div>
+          <div class="scene-bullet"><div class="bic" style="background:rgba(251,191,36,0.2);">&#127891;</div>Student & teacher cards</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:24px;align-items:center;">
+        <div class="id-card">
+          <div style="font-size:0.55rem;font-weight:700;opacity:0.6;letter-spacing:1px;margin-bottom:8px;">THE PROGRESSIVE CHILDREN ACADEMY</div>
+          <div class="id-av">AN</div>
+          <div class="id-name">Ali Nawaz</div>
+          <div class="id-roll">Roll No. 01 — Class 5A</div>
+          <div class="id-school">Karachi, Pakistan</div>
+          <div class="id-qr">
+            <div class="qr-cell" style="background:#111;grid-column:span 3;grid-row:span 3;border-radius:3px;"></div>
+            <div class="qr-cell" style="background:#111;"></div><div class="qr-cell" style="background:transparent;"></div>
+            <div class="qr-cell" style="background:#111;"></div><div class="qr-cell" style="background:#111;"></div>
+            <div class="qr-cell" style="background:transparent;"></div><div class="qr-cell" style="background:#111;"></div>
+            <div class="qr-cell" style="background:#111;grid-column:span 3;grid-row:span 3;border-radius:3px;"></div>
+          </div>
+        </div>
+        <div class="id-card" style="background:linear-gradient(135deg,#065f46,#10b981);">
+          <div style="font-size:0.55rem;font-weight:700;opacity:0.6;letter-spacing:1px;margin-bottom:8px;">THE PROGRESSIVE CHILDREN ACADEMY</div>
+          <div class="id-av">FA</div>
+          <div class="id-name">Fatima Ali</div>
+          <div class="id-roll">Mathematics Teacher</div>
+          <div class="id-school">Staff ID — Karachi</div>
+          <div class="id-qr">
+            <div class="qr-cell" style="background:#111;grid-column:span 3;grid-row:span 3;border-radius:3px;"></div>
+            <div class="qr-cell" style="background:transparent;"></div><div class="qr-cell" style="background:#111;"></div>
+            <div class="qr-cell" style="background:#111;"></div><div class="qr-cell" style="background:transparent;"></div>
+            <div class="qr-cell" style="background:#111;"></div><div class="qr-cell" style="background:transparent;"></div>
+            <div class="qr-cell" style="background:#111;grid-column:span 3;grid-row:span 3;border-radius:3px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S7: REPORTS -->
+  <div class="scene" id="s7">
+    <div class="split-scene">
+      <div class="split-text">
+        <div class="scene-num">Feature 07</div>
+        <h2 class="scene-title">
+          <span class="anim-word">Historical</span><br/>
+          <span class="anim-word">Reports</span><br/>
+          <span class="anim-word">&amp; Records</span>
+        </h2>
+        <p class="scene-desc">Go back to any past month and view exact fee collections and payroll data. Re-print any historical payslip or receipt instantly.</p>
+        <div class="scene-bullets">
+          <div class="scene-bullet"><div class="bic" style="background:rgba(52,211,153,0.2);">&#128197;</div>Browse any past month</div>
+          <div class="scene-bullet"><div class="bic" style="background:rgba(129,140,248,0.2);">&#128203;</div>Re-print old payslips & receipts</div>
+          <div class="scene-bullet"><div class="bic" style="background:rgba(251,191,36,0.2);">&#128200;</div>Full audit trail stored securely</div>
+        </div>
+      </div>
+      <div class="portal-mockup">
+        <div class="mockup-bar"><div class="mac-dot mac-r"></div><div class="mac-dot mac-y"></div><div class="mac-dot mac-g"></div><div class="mock-url">&#128274; progressive-academy.edu.pk/reports</div></div>
+        <div class="mockup-body">
+          <div class="mock-sb">
+            <div class="mock-sb-who"><div class="mock-sb-role">Admin</div><div class="mock-sb-name">Adeeba Ansari</div></div>
+            <div class="sb-item"><div class="sb-ic">&#127968;</div>Dashboard</div>
+            <div class="sb-item"><div class="sb-ic">&#128198;</div>Fees</div>
+            <div class="sb-item"><div class="sb-ic">&#128176;</div>Payroll</div>
+            <div class="sb-item on"><div class="sb-ic">&#128202;</div>Reports</div>
+          </div>
+          <div class="mock-pg">
+            <div class="pg-head"><div><div class="pg-title">Reports &amp; History</div><div class="pg-sub">Select month to view historical data</div></div><div style="background:rgba(255,255,255,0.05);border:1px solid var(--border);padding:5px 10px;border-radius:8px;font-size:0.7rem;">&#128197; April 2026</div></div>
+            <div class="stat-row" style="grid-template-columns:1fr 1fr;margin-bottom:14px;">
+              <div class="stat-card"><div class="stat-card-lbl">Fees Collected</div><div class="stat-card-val green">PKR 398,000</div></div>
+              <div class="stat-card"><div class="stat-card-lbl">Payroll Paid</div><div class="stat-card-val blue">PKR 1,180,000</div></div>
+            </div>
+            <table class="mock-table">
+              <thead><tr><th>Teacher</th><th>Month</th><th>Net Paid</th><th></th></tr></thead>
+              <tbody>
+                <tr><td>Ahmed Raza</td><td>Apr 2026</td><td style="color:#34d399;font-weight:700;">PKR 43,000</td><td><span class="badge b-purple" style="cursor:pointer;">Print Slip</span></td></tr>
+                <tr><td>Fatima Ali</td><td>Apr 2026</td><td style="color:#34d399;font-weight:700;">PKR 35,000</td><td><span class="badge b-purple" style="cursor:pointer;">Print Slip</span></td></tr>
+                <tr><td>Sana Malik</td><td>Apr 2026</td><td style="color:#34d399;font-weight:700;">PKR 36,500</td><td><span class="badge b-purple" style="cursor:pointer;">Print Slip</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S8: OUTRO -->
+  <div class="scene" id="s8">
+    <div>
+      <div style="font-size:3rem;margin-bottom:24px;animation:bounce 1s ease-in-out infinite;">&#127891;</div>
+      <h2 class="outro-title">
+        <span style="background:linear-gradient(135deg,#fff,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
+          All-in-one.<br/>Built for Pakistan.
+        </span>
+      </h2>
+      <p class="outro-sub">The Progressive Children Academy portal — managing students, fees, payroll, attendance, and reports from one beautiful dashboard.</p>
+      <div class="outro-btns">
+        <button class="obtn-p" onclick="window.open('https://perpaxlity-web-git-main-arsalanqadeer8-4238s-projects.vercel.app/')">Open Live Portal &#8594;</button>
+        <button class="obtn-g" onclick="goScene(0)">&#9654; Watch Again</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+@keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-12px);}}
+</style>
+<script>
+const SCENES = document.querySelectorAll('.scene');
+const DOTS = document.querySelectorAll('.dot');
+const LABELS = [
+  'Intro — 1 / 9','Dashboard — 2 / 9','Students — 3 / 9',
+  'Attendance — 4 / 9','Fees — 5 / 9','Payroll — 6 / 9',
+  'ID Cards — 7 / 9','Reports — 8 / 9','Summary — 9 / 9'
+];
+const DURATION = 7000; // ms per scene
+let cur = 0, playing = true, elapsed = 0, last = null, raf = null;
+
+function goScene(n) {
+  SCENES[cur].classList.remove('active');
+  DOTS[cur].classList.remove('active');
+  cur = ((n % SCENES.length) + SCENES.length) % SCENES.length;
+  SCENES[cur].classList.add('active');
+  DOTS[cur].classList.add('active');
+  document.getElementById('scene-label').textContent = LABELS[cur];
+  elapsed = 0;
+  last = null;
+}
+function next() { goScene(cur + 1); }
+function prev() { goScene(cur - 1); }
+
+function togglePlay() {
+  playing = !playing;
+  document.getElementById('playbtn').innerHTML = playing ? '&#9646;&#9646;' : '&#9654;';
+  if (playing) { last = null; tick(); }
+}
+
+function seekClick(e) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const pct = (e.clientX - rect.left) / rect.width;
+  elapsed = pct * DURATION;
+}
+
+function tick(ts) {
+  if (!playing) return;
+  if (last !== null) {
+    elapsed += ts - last;
+    const pct = Math.min(elapsed / DURATION * 100, 100);
+    document.getElementById('prog-bar-fill').style.width = pct + '%';
+    if (elapsed >= DURATION) { next(); }
+  }
+  last = ts;
+  raf = requestAnimationFrame(tick);
+}
+
+// start
+requestAnimationFrame(tick);
+
+// keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
+  if (e.key === 'ArrowLeft') prev();
+  if (e.key === 'p' || e.key === 'P') togglePlay();
+});
+</script>
+</body>
+</html>
