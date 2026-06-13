@@ -1,9 +1,9 @@
-﻿﻿﻿<!DOCTYPE html>
+﻿﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>The School - Where Learning Meets Fun!</title>
+<title>ArsalTech - School Management System</title>
 <meta name="description" content="A complete school website and portal for students, parents, teachers, fees, attendance, results, notices, and reports." />
 <meta name="theme-color" content="#ff8a00" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -3008,7 +3008,7 @@
 <!-- LOADING SPINNER -->
 <div class="app-loader" id="app-loader">
   <div class="loader-spin"></div>
-  <div class="loader-text">Loading School Portal...</div>
+  <div class="loader-text">Loading ArsalTech Portal...</div>
 </div>
 
 <!-- OFFLINE BANNER -->
@@ -3020,8 +3020,8 @@
     <div class="land-brand">
       <div class="land-mark" id="land-mark" style="background:transparent;"></div>
       <div>
-        <div class="land-name" id="land-name">My School</div>
-        <div class="land-copy" id="land-copy">School & admissions</div>
+        <div class="land-name" id="land-name">ArsalTech</div>
+        <div class="land-copy" id="land-copy">School Management System</div>
       </div>
     </div>
     <nav class="land-links">
@@ -3129,7 +3129,7 @@
         <button class="btn btn-p" onclick="openLogin()">School Portal</button>
       </div>
     </section>
-    <div class="land-footer">- 2025 School Management System - Powered by EduNova</div>
+    <div class="land-footer">© 2025 ArsalTech - School Management System</div>
   </main>
 </div>
 
@@ -3142,7 +3142,7 @@
     <div class="lp-brand">
       <div class="lp-logo" id="lp-logo" onclick="document.getElementById('logo-file').click()"></div>
       <input type="file" id="logo-file" accept="image/*" style="display:none;" onchange="uploadLogo(this)" />
-      <div class="lp-title" id="lp-title">EduNova</div>
+      <div class="lp-title" id="lp-title">ArsalTech</div>
       <div class="lp-sub" id="lp-sub">School Management System</div>
     </div>
     <div class="lp-box">
@@ -3159,7 +3159,7 @@
       <button class="login-btn" onclick="doLogin()">Sign In</button>
       <button type="button" class="forgot-link" onclick="forgotPassword()">Forgot Password?</button>
     </div>
-    <div class="lp-footer">Secure school portal powered by Supabase Auth</div>
+    <div class="lp-footer">ArsalTech Demo &bull; admin@arsaltech.edu / demo1234</div>
   </div>
 </div>
 
@@ -3168,7 +3168,7 @@
   <div class="tb">
     <div class="tb-brand">
       <div class="tb-ico" id="tb-ico"></div>
-      <div class="tb-sname" id="tb-sname">EduNova</div>
+      <div class="tb-sname" id="tb-sname">ArsalTech</div>
     </div>
     <div class="tb-r">
       <div class="tb-pill" id="tb-pill"></div>
@@ -3225,10 +3225,8 @@
     'use strict';
     /* ------------------------------- SUPABASE CONFIG ------------------------------- */
     const SUPABASE_URL  = 'https://owojgzrzstigmumsehdw.supabase.co';
-    const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93b2pnenJ6c3RpZ211bXNlaGR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwNDUwOTAsImV4cCI6MjA5MjYyMTA5MH0.5PLeyDfDBjO5pYaTc1RhfYSsXn3hbMh2tbSjBcfKLT0';
-    const _sb = (typeof supabase !== 'undefined' && SUPABASE_KEY !== 'PASTE_YOUR_ANON_KEY_HERE')
-      ? supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
-      : null;
+    const SUPABASE_KEY  = 'PASTE_YOUR_ANON_KEY_HERE'; // demo mode - no cloud needed
+    const _sb = null; // demo mode offline
 
     /* ------------------------------- DATA ------------------------------- */
     const SK = 'edunova_v5';
@@ -3493,16 +3491,19 @@
 
     function defaultDB() {
       return {
-        school: { name: 'EduNova School', tagline: 'Playful learning, powerful management', logo: '', address: '', city: 'Karachi', phone: '', whatsapp: '', email: '', principal: '', primaryColor: '#ff8a00', founded: '', motto: '', website: '', heroText: 'A friendlier school website with complete management tools for staff and parents.' },
-        admissions: [],
+        school: { name: 'ArsalTech School', tagline: 'Smart learning, powerful management', logo: '', address: 'Main Campus, Model Town', city: 'Lahore', phone: '042-35761234', whatsapp: '923211234567', email: 'info@arsaltech.edu', principal: 'Mr. Arsalan Ahmed', primaryColor: '#ff8a00', founded: '2018', motto: 'Knowledge is Power', website: 'www.arsaltech.edu', heroText: 'ArsalTech provides a complete school management system for students, teachers, and parents.' },
+        admissions: [
+          { id: 'adm1', createdAt: '2025-06-01T09:00:00Z', status: 'new', studentName: 'Bilal Yousaf', classId: 'c6', className: 'Class 6 A', dob: '2013-03-15', gender: 'Male', father: 'Yousaf Tariq', mother: 'Amna Yousaf', phone: '0321-1234567', whatsapp: '923211234567', email: 'yousaf@gmail.com', address: 'House 12, Block B, Lahore', previousSchool: 'Punjab Public School', notes: 'Very interested in science.' },
+          { id: 'adm2', createdAt: '2025-06-05T11:30:00Z', status: 'new', studentName: 'Hina Iqbal', classId: 'c7', className: 'Class 7 A', dob: '2012-07-20', gender: 'Female', father: 'Iqbal Hussain', mother: 'Reshma Iqbal', phone: '0300-9876543', whatsapp: '923009876543', email: 'iqbal.h@email.com', address: 'Flat 4, Garden Town, Lahore', previousSchool: '', notes: '' },
+        ],
         classes: [
-          { id: 'c1', name: 'Class 1', section: 'A', level: 'primary', capacity: 35, teacher: '' },
+          { id: 'c1', name: 'Class 1', section: 'A', level: 'primary', capacity: 35, teacher: 'u2' },
           { id: 'c2', name: 'Class 2', section: 'A', level: 'primary', capacity: 35, teacher: '' },
           { id: 'c3', name: 'Class 3', section: 'A', level: 'primary', capacity: 35, teacher: '' },
           { id: 'c4', name: 'Class 4', section: 'A', level: 'primary', capacity: 35, teacher: '' },
           { id: 'c5', name: 'Class 5', section: 'A', level: 'primary', capacity: 35, teacher: '' },
-          { id: 'c6', name: 'Class 6', section: 'A', level: 'secondary', capacity: 40, teacher: '' },
-          { id: 'c7', name: 'Class 7', section: 'A', level: 'secondary', capacity: 40, teacher: '' },
+          { id: 'c6', name: 'Class 6', section: 'A', level: 'secondary', capacity: 40, teacher: 'u2' },
+          { id: 'c7', name: 'Class 7', section: 'A', level: 'secondary', capacity: 40, teacher: 'u5' },
           { id: 'c8', name: 'Class 8', section: 'A', level: 'secondary', capacity: 40, teacher: '' },
           { id: 'c9', name: 'Class 9', section: 'A', level: 'secondary', capacity: 40, teacher: '' },
           { id: 'c10', name: 'Class 10', section: 'A', level: 'secondary', capacity: 40, teacher: '' },
@@ -3517,11 +3518,35 @@
           { id: 's7', name: 'Computer', code: 'CS', icon: '', color: '#db2777' },
           { id: 's8', name: 'Pak. Studies', code: 'PS', icon: 'PS', color: '#166534' },
         ],
-        students: {},
-        grades: {},
-        attendance: {},
-        teacherAttendance: {}, // {userId:{date:{checkIn:'HH:MM',status:'Present/Late/Absent'}}}
-        lateAfter: '08:00', // configurable late time
+        students: {
+          c6: [
+            { id: 'stu1', name: 'Ahmed Ali Khan', roll: '001', classId: 'c6', gender: 'Male', dob: '2012-04-10', father: 'Ali Khan', phone: '0321-5551001', address: 'House 5, Gulberg, Lahore', loginEmail: 'ahmed@arsaltech.edu', loginPass: 'demo1234', photo: '', attendance: 92, feeType: 'standard', customFee: 0, feeDiscount: 0 },
+            { id: 'stu2', name: 'Fatima Zahra', roll: '002', classId: 'c6', gender: 'Female', dob: '2012-09-22', father: 'Zahra Malik', phone: '0300-5552002', address: 'House 10, DHA Phase 2, Lahore', loginEmail: 'fatima@arsaltech.edu', loginPass: 'demo1234', photo: '', attendance: 88, feeType: 'standard', customFee: 0, feeDiscount: 0 },
+          ],
+          c7: [
+            { id: 'stu3', name: 'Usman Tariq', roll: '001', classId: 'c7', gender: 'Male', dob: '2011-06-15', father: 'Tariq Mahmood', phone: '0333-5553003', address: 'Flat 2A, Model Town, Lahore', loginEmail: '', loginPass: '', photo: '', attendance: 79, feeType: 'discount', customFee: 0, feeDiscount: 20 },
+          ]
+        },
+        grades: {
+          c6: {
+            stu1: { s1: 88, s2: 92, s3: 76, s4: 85, s5: 90, s6: 78, s7: 95, s8: 82 },
+            stu2: { s1: 72, s2: 68, s3: 91, s4: 88, s5: 84, s6: 77, s7: 70, s8: 80 },
+          },
+          c7: {
+            stu3: { s1: 60, s2: 55, s3: 70, s4: 65, s5: 72, s6: 58, s7: 80, s8: 62 },
+          }
+        },
+        attendance: {
+          c6: {
+            stu1: { '2025-06-09': 'P', '2025-06-10': 'P', '2025-06-11': 'A', '2025-06-12': 'P', '2025-06-13': 'P' },
+            stu2: { '2025-06-09': 'P', '2025-06-10': 'L', '2025-06-11': 'P', '2025-06-12': 'P', '2025-06-13': 'P' },
+          },
+          c7: {
+            stu3: { '2025-06-09': 'A', '2025-06-10': 'P', '2025-06-11': 'P', '2025-06-12': 'A', '2025-06-13': 'P' },
+          }
+        },
+        teacherAttendance: {},
+        lateAfter: '08:00',
         fees: {
           items: [
             { id: 'f1', name: 'Monthly Tuition', amount: 5000, due: '5th of month', mandatory: true, type: 'monthly' },
@@ -3529,18 +3554,43 @@
             { id: 'f3', name: 'Exam Fee', amount: 2000, due: 'Nov 15', mandatory: true, type: 'exam' },
             { id: 'f4', name: 'Transport', amount: 2500, due: '5th of month', mandatory: false, type: 'monthly' },
             { id: 'f5', name: 'Books & Stationery', amount: 3000, due: 'Jan', mandatory: false, type: 'annual' },
-          ], payments: {}
+          ],
+          payments: {
+            stu1: { f1: { paid: true, date: '2025-06-03', amount: 5000, month: '2025-06' }, f2: { paid: true, date: '2025-01-08', amount: 10000 } },
+            stu2: { f1: { paid: false } },
+            stu3: { f1: { paid: true, date: '2025-06-04', amount: 4000, month: '2025-06' } }
+          }
         },
-        exams: [],
-        notices: [],
-        timetable: {},
-        users: [
-          { id: 'u1', name: 'School Admin', email: 'admin@school.edu', role: 'admin', photo: '', phone: '', createdAt: '' },
-          { id: 'u2', name: 'Ms. Sana Malik', email: 'teacher@school.edu', role: 'teacher', photo: '', phone: '03001230000', subject: 'Mathematics', classIds: ['c6', 'c7'], salary: 45000, bonus: 3000, deductions: 0, payrollStatus: 'pending', lastPaid: '', joinDate: '2025-01-10', notes: 'Senior mathematics teacher' },
-          { id: 'u3', name: 'Ahmed Raza', email: 'student@school.edu', role: 'student', photo: '', studentId: '', classId: 'c9' },
-          { id: 'u4', name: 'Mr. Raza Sr.', email: 'parent@school.edu', role: 'parent', photo: '', phone: '', familyId: 'fam1' },
+        exams: [
+          { id: 'ex1', name: 'Mid-Term Exam', date: '2025-06-20', classes: ['c6', 'c7'], subjects: ['s1','s2','s3','s4'], totalMarks: 100, notes: 'Covers chapters 1-5' },
+          { id: 'ex2', name: 'Final Term Exam', date: '2025-07-25', classes: ['c6','c7','c8','c9','c10'], subjects: ['s1','s2','s3','s4','s5','s6','s7','s8'], totalMarks: 100, notes: 'Full syllabus' },
         ],
-        families: { fam1: { id: 'fam1', parentName: 'Raza Family', phone: '03001234567', email: 'parent@school.edu', address: '', studentIds: [], whatsapp: '923001234567' } },
+        notices: [
+          { id: 'n1', title: 'School closed on Eid holidays', body: 'School will remain closed from June 28 to July 5 on account of Eid ul Adha. Classes resume July 7.', date: '2025-06-13', targetRole: 'all' },
+          { id: 'n2', title: 'Fee submission last date', body: 'Kindly submit monthly fee before June 15 to avoid late charges.', date: '2025-06-10', targetRole: 'parent' },
+          { id: 'n3', title: 'Mid-term exams schedule released', body: 'Mid-term examinations will be held from June 20. Timetable shared in the portal.', date: '2025-06-08', targetRole: 'all' },
+        ],
+        timetable: {
+          c6: {
+            Monday:    ['Mathematics','English','Science','Urdu','Computer','Islamiyat'],
+            Tuesday:   ['English','Mathematics','Urdu','Science','Social Studies','Computer'],
+            Wednesday: ['Science','Islamiyat','Mathematics','English','Urdu','Pak. Studies'],
+            Thursday:  ['Urdu','Social Studies','English','Mathematics','Science','Computer'],
+            Friday:    ['Islamiyat','Pak. Studies','Computer','Science','English','Mathematics'],
+          }
+        },
+        users: [
+          { id: 'u1', name: 'Admin ArsalTech', email: 'admin@arsaltech.edu', role: 'admin', photo: '', phone: '0321-0000001', createdAt: '2025-01-01' },
+          { id: 'u2', name: 'Ms. Sana Malik', email: 'teacher@arsaltech.edu', role: 'teacher', photo: '', phone: '0301-1112222', subject: 'Mathematics', classIds: ['c6','c1'], salary: 45000, bonus: 3000, deductions: 0, payrollStatus: 'pending', lastPaid: '', joinDate: '2023-04-01', notes: 'Senior Mathematics teacher. Class 6 & 1 incharge.' },
+          { id: 'u5', name: 'Mr. Kamran Baig', email: 'kamran@arsaltech.edu', role: 'teacher', photo: '', phone: '0333-9998877', subject: 'Science', classIds: ['c7'], salary: 40000, bonus: 2000, deductions: 0, payrollStatus: 'paid', lastPaid: '2025-06-03', joinDate: '2022-08-15', notes: 'Science teacher, Class 7 incharge.' },
+          { id: 'u3', name: 'Ahmed Ali Khan', email: 'ahmed@arsaltech.edu', role: 'student', photo: '', studentId: 'stu1', classId: 'c6' },
+          { id: 'u4', name: 'Ali Khan (Parent)', email: 'parent@arsaltech.edu', role: 'parent', photo: '', phone: '0321-5551001', familyId: 'fam1' },
+          { id: 'u6', name: 'Zahra Malik (Parent)', email: 'parent2@arsaltech.edu', role: 'parent', photo: '', phone: '0300-5552002', familyId: 'fam2' },
+        ],
+        families: {
+          fam1: { id: 'fam1', parentName: 'Ali Khan', phone: '0321-5551001', email: 'parent@arsaltech.edu', address: 'House 5, Gulberg, Lahore', studentIds: ['stu1'], whatsapp: '923215551001' },
+          fam2: { id: 'fam2', parentName: 'Zahra Malik', phone: '0300-5552002', email: 'parent2@arsaltech.edu', address: 'House 10, DHA Phase 2, Lahore', studentIds: ['stu2'], whatsapp: '923005552002' },
+        },
         settings: { currency: 'PKR', schoolYear: '2025-26', theme: 'light', defaultFeeDueDay: '5th of month' },
       };
     }
@@ -3723,13 +3773,40 @@
       return emailKey(u?.email) || raw;
     }
 
+    // ---- DEMO CREDENTIALS (no Supabase needed) ----
+    const DEMO_USERS = {
+      'admin@arsaltech.edu':   { password: 'demo1234', role: 'admin' },
+      'teacher@arsaltech.edu': { password: 'demo1234', role: 'teacher' },
+      'kamran@arsaltech.edu':  { password: 'demo1234', role: 'teacher' },
+      'ahmed@arsaltech.edu':   { password: 'demo1234', role: 'student' },
+      'parent@arsaltech.edu':  { password: 'demo1234', role: 'parent' },
+      'parent2@arsaltech.edu': { password: 'demo1234', role: 'parent' },
+    };
+
     async function doLogin() {
       const loginValue = (document.getElementById('l-email').value || '').trim().toLowerCase();
       const em = resolvePortalLoginEmail(loginValue);
       const pw = (document.getElementById('l-pass').value || '').trim();
       if (!em || !pw) { showToast('Enter email and password', 'tw2'); return; }
-      if (!em.includes('@')) { showToast('Supabase Auth login must use the Login Email saved in the portal.', 'te', 5200); return; }
-      if (!_sb) { showToast('Supabase Auth is not configured', 'te'); return; }
+
+      // ---- DEMO MODE: check demo credentials first ----
+      const demoMatch = DEMO_USERS[em];
+      if (demoMatch && pw === demoMatch.password) {
+        const u = findUserProfile(em, demoMatch.role) || findUserProfile(em);
+        if (u) {
+          setCurrentUser(u);
+          document.getElementById('landing-page').style.display = 'none';
+          document.getElementById('login-page').style.display = 'none';
+          const app = document.getElementById('app');
+          app.style.display = 'flex'; app.style.flexDirection = 'column';
+          buildShell(); goPage('dashboard'); applyBranding();
+          showToast('Welcome to ArsalTech Demo!', 'ts', 2800);
+          return;
+        }
+      }
+
+      // ---- Normal Supabase login (if configured) ----
+      if (!_sb) { showToast('Use demo credentials: admin@arsaltech.edu / demo1234', 'tw2', 5200); return; }
       if (Date.now() < _loginLockUntil) { showToast('Too many attempts. Wait ' + Math.ceil((_loginLockUntil-Date.now())/1000) + 's', 'te', 3000); return; }
       _loginAttempts++;
       const btn = document.querySelector('.login-btn');
@@ -3743,7 +3820,7 @@
         stripStoredPasswords();
         ensureEnhancements();
         const u = findUserProfile(em, loginRole);
-        if (!u) { await _sb.auth.signOut(); showToast('Signed in, but this email is not linked to a teacher, student, parent, or admin profile.', 'te', 5200); return; }
+        if (!u) { await _sb.auth.signOut(); showToast('Email not linked to any portal profile.', 'te', 5200); return; }
         if (u.role !== loginRole) showToast('Role detected: ' + u.role, 'tw2', 2400);
         saveDB();
         setCurrentUser(u);
