@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -3349,7 +3349,7 @@
 
     function brokenIcon(value) {
       const s = String(value || '').trim();
-      return !s || /^[?]+$/.test(s) || s.includes('�');
+      return !s || /^[?]+$/.test(s) || s.includes('?');
     }
     function cleanIcon(value, fallback = '') {
       return brokenIcon(value) ? fallback : String(value).trim();
@@ -3884,11 +3884,11 @@
     function cleanBrokenUI(root = document) {
       root.querySelectorAll('.sc-ic,.ph-tag,.ct,.hs-tag,.hs-deco,.id-card-logo,.rc-hl,.sl-ok,.scan-fb').forEach(el => {
         const t = (el.textContent || '').trim();
-        if (/^[?]+$/.test(t) || t.includes('�')) el.textContent = '';
+        if (/^[?]+$/.test(t) || t.includes('?')) el.textContent = '';
       });
       root.querySelectorAll('button').forEach(btn => {
         const t = (btn.textContent || '').trim();
-        if (/^[?]+$/.test(t) || t.includes('�')) btn.textContent = 'Delete';
+        if (/^[?]+$/.test(t) || t.includes('?')) btn.textContent = 'Delete';
       });
     }
     function navItems() {
@@ -5596,6 +5596,7 @@
 </body>
 
 </html>
+
 
 
 
