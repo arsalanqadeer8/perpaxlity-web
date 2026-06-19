@@ -15,10 +15,31 @@ CREATE TABLE IF NOT EXISTS db_snapshot (
 ALTER TABLE db_snapshot ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Anon all db_snapshot" ON db_snapshot;
 DROP POLICY IF EXISTS "Authenticated db_snapshot" ON db_snapshot;
-CREATE POLICY "Authenticated db_snapshot" ON db_snapshot
+DROP POLICY IF EXISTS "Authenticated read db_snapshot" ON db_snapshot;
+DROP POLICY IF EXISTS "Authenticated write db_snapshot" ON db_snapshot;
+
+-- Allow all authenticated users to read the snapshot to load the dashboard
+CREATE POLICY "Authenticated read db_snapshot" ON db_snapshot
+  FOR SELECT TO authenticated
+  USING (true);
+
+-- Restrict updating/inserting the db_snapshot to admins and teachers ONLY
+CREATE POLICY "Authenticated write db_snapshot" ON db_snapshot
   FOR ALL TO authenticated
-  USING (true)
-  WITH CHECK (true);
+  USING (
+    EXISTS (
+      SELECT 1 FROM users 
+      WHERE users.auth_user_id = auth.uid() 
+      AND users.role IN ('admin', 'teacher')
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM users 
+      WHERE users.auth_user_id = auth.uid() 
+      AND users.role IN ('admin', 'teacher')
+    )
+  );
 
 
 -- ── PUBLIC WEBSITE BRANDING (safe public landing data only) ─────

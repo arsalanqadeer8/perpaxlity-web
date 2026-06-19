@@ -3232,6 +3232,10 @@
       if (!_sb || !DB) return;
       const { data: authData } = await _sb.auth.getSession();
       if (!authData?.session) { showSyncBadge('Sign in to sync cloud data', '#f59e0b'); return; }
+      if (curRole === 'student' || curRole === 'parent') {
+        showSyncBadge('Local save only (No permission)', '#f59e0b');
+        return;
+      }
       try {
         await _sb.from('db_snapshot').upsert({ id: 1, data: DB, updated_at: new Date().toISOString() });
         await pushPublicSite(true);
