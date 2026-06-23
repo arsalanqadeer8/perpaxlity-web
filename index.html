@@ -2953,129 +2953,827 @@
 @media(max-width:620px){ .land-links{display:none}.clean-hero .hs-title{font-size:2.7rem}.welcome-photo,.welcome-photo img{min-height:300px}.program-strip,.admission-grid,.clean-stats{grid-template-columns:1fr}.clean-stats div{border-right:0;border-bottom:1px solid #edf0e5}.clean-stats div:last-child{border-bottom:0} }
 
 </style>
+
+
+
+
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&amp;family=Poppins:wght@300;400;500;600;700&amp;family=Bricolage+Grotesque:opsz,wght@12..96,400..800&amp;family=Inter:wght@400..700&amp;family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    corePlugins: { preflight: false },
+    theme: {
+      extend: {
+        "colors": {
+                "background": "#faf8ff",
+                "surface-container": "#eaedff",
+                "on-primary": "#ffffff",
+                "on-tertiary-fixed-variant": "#404754",
+                "on-surface-variant": "#444651",
+                "on-tertiary-fixed": "#151c27",
+                "on-tertiary-container": "#a5acbb",
+                "error": "#ba1a1a",
+                "secondary": "#795900",
+                "outline": "#757682",
+                "on-secondary-fixed": "#261a00",
+                "secondary-container": "#ffc329",
+                "on-secondary": "#ffffff",
+                "tertiary-fixed-dim": "#c0c7d6",
+                "surface-bright": "#faf8ff",
+                "on-secondary-fixed-variant": "#5c4300",
+                "primary-fixed": "#dce1ff",
+                "surface": "#faf8ff",
+                "on-surface": "#131b2e",
+                "surface-variant": "#dae2fd",
+                "tertiary-fixed": "#dce2f3",
+                "secondary-fixed": "#ffdf9f",
+                "inverse-on-surface": "#eef0ff",
+                "on-tertiary": "#ffffff",
+                "on-secondary-container": "#6f5100",
+                "surface-dim": "#d2d9f4",
+                "on-background": "#131b2e",
+                "primary": "#00236f",
+                "outline-variant": "#c5c5d3",
+                "on-primary-container": "#90a8ff",
+                "on-primary-fixed": "#00164e",
+                "on-primary-fixed-variant": "#264191",
+                "inverse-surface": "#283044",
+                "primary-fixed-dim": "#b6c4ff",
+                "surface-container-highest": "#dae2fd",
+                "error-container": "#ffdad6",
+                "surface-tint": "#4059aa",
+                "secondary-fixed-dim": "#f9bd22",
+                "tertiary-container": "#39404d",
+                "inverse-primary": "#b6c4ff",
+                "surface-container-low": "#f2f3ff",
+                "surface-container-high": "#e2e7ff",
+                "primary-container": "#1e3a8a",
+                "tertiary": "#232a36",
+                "on-error-container": "#93000a",
+                "on-error": "#ffffff",
+                "surface-container-lowest": "#ffffff"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.125rem",
+                "lg": "0.25rem",
+                "xl": "0.5rem",
+                "full": "0.75rem"
+        },
+        "spacing": {
+                "stack-md": "1.5rem",
+                "gutter": "1.5rem",
+                "notebook-padding": "2.5rem",
+                "stack-sm": "0.5rem",
+                "margin-page": "2rem",
+                "stack-lg": "4rem"
+        },
+        "fontFamily": {
+                "headline-md": [
+                        "Bricolage Grotesque"
+                ],
+                "display-lg": [
+                        "Bricolage Grotesque"
+                ],
+                "annotation": [
+                        "Caveat"
+                ],
+                "body-lg": [
+                        "Inter"
+                ],
+                "label-caps": [
+                        "Space Mono"
+                ],
+                "display-lg-mobile": [
+                        "Bricolage Grotesque"
+                ],
+                "body-md": [
+                        "Inter"
+                ]
+        },
+        "fontSize": {
+                "headline-md": [
+                        "32px",
+                        {
+                                "lineHeight": "1.2",
+                                "fontWeight": "700"
+                        }
+                ],
+                "display-lg": [
+                        "56px",
+                        {
+                                "lineHeight": "1.1",
+                                "letterSpacing": "-0.02em",
+                                "fontWeight": "800"
+                        }
+                ],
+                "annotation": [
+                        "20px",
+                        {
+                                "lineHeight": "1.2",
+                                "fontWeight": "400"
+                        }
+                ],
+                "body-lg": [
+                        "18px",
+                        {
+                                "lineHeight": "1.6",
+                                "fontWeight": "400"
+                        }
+                ],
+                "label-caps": [
+                        "12px",
+                        {
+                                "lineHeight": "1.0",
+                                "letterSpacing": "0.1em",
+                                "fontWeight": "500"
+                        }
+                ],
+                "display-lg-mobile": [
+                        "36px",
+                        {
+                                "lineHeight": "1.2",
+                                "fontWeight": "800"
+                        }
+                ],
+                "body-md": [
+                        "16px",
+                        {
+                                "lineHeight": "1.5",
+                                "fontWeight": "400"
+                        }
+                ]
+        }
+},
+    },
+  }
+</script>
+<style>
+        #landing-page {
+            background-color: #f0f0f0;
+            background-image: radial-gradient(#d5d5d5 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .notebook-texture {
+            background-color: #FFFDF7;
+            background-image: 
+                linear-gradient(#e5e5e5 1px, transparent 1px);
+            background-size: 100% 2rem;
+            background-position: 0 2rem;
+            position: relative;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03), inset 20px 0 30px -20px rgba(0,0,0,0.1);
+        }
+
+        .notebook-texture::before {
+            content: '';
+            position: absolute;
+            left: 2rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: #ffdad6;
+            z-index: 0;
+        }
+        
+        .content-layer {
+            position: relative;
+            z-index: 1;
+            perspective: 2500px;
+        }
+
+        .page-turn {
+            transform-origin: left center;
+            transition: all 1s cubic-bezier(0.25, 1, 0.5, 1);
+            will-change: transform, opacity, box-shadow;
+            position: relative;
+            z-index: 10;
+            background-color: transparent; /* Inherit notebook texture essentially */
+            border-bottom: 2px dashed rgba(0,0,0,0.05);
+            padding-bottom: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .page-turn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 1px;
+            background: linear-gradient(to right, rgba(0,0,0,0.05), transparent);
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 1s;
+        }
+        
+        .page-turn.flipped-up {
+            transform: rotateY(-15deg) translateZ(30px) scale(0.98);
+            opacity: 0.4;
+            box-shadow: 15px 0 30px -10px rgba(0,0,0,0.1);
+            z-index: 5;
+        }
+
+        .page-turn.flipped-down {
+            transform: rotateY(10deg) translateZ(-20px) scale(0.95);
+            opacity: 0.6;
+            box-shadow: -10px 0 20px -10px rgba(0,0,0,0.05);
+            z-index: 5;
+        }
+        
+        .page-turn.flipped-up::before, .page-turn.flipped-down::before {
+            opacity: 1;
+        }
+
+        .tape {
+            background-color: rgba(255, 255, 255, 0.6);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            backdrop-filter: blur(2px);
+            transform: rotate(-2deg);
+        }
+
+        .sticky-note {
+            box-shadow: 4px 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .sticky-note:hover {
+            transform: translateY(-5px) rotate(1deg);
+            box-shadow: 6px 8px 12px rgba(0,0,0,0.15);
+        }
+
+        .polaroid {
+            background: white;
+            padding: 10px 10px 40px 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transform: rotate(2deg);
+            transition: transform 0.3s ease;
+        }
+
+        .polaroid:nth-child(even) {
+            transform: rotate(-2deg);
+        }
+
+        .polaroid:hover {
+            transform: scale(1.05) rotate(0deg);
+            z-index: 10;
+        }
+
+        .pencil-underline {
+            position: relative;
+            display: inline-block;
+        }
+
+        .pencil-underline::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: currentColor;
+            border-radius: 2px;
+            transform: rotate(-1deg);
+            opacity: 0.7;
+        }
+
+        .handwritten {
+            font-family: 'Caveat', cursive;
+        }
+
+        /* Nav Drawer Animation */
+        #nav-drawer {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        #nav-drawer.open {
+            transform: translateX(0);
+        }
+        
+        /* Open Book Styles */
+        .open-book-container {
+            perspective: 2000px;
+            transform-style: preserve-3d;
+        }
+        .book-page {
+            background-color: #fdfbf7;
+            background-image: 
+                radial-gradient(#e0dcd3 1px, transparent 1px);
+            background-size: 20px 20px;
+            box-shadow: 
+                0 0 10px rgba(0,0,0,0.1),
+                inset 5px 0 20px rgba(0,0,0,0.05),
+                inset -5px 0 20px rgba(0,0,0,0.05);
+            position: relative;
+        }
+        /* Paper stack effect */
+        .book-page::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            bottom: -2px;
+            background: #fdfbf7;
+            border: 1px solid rgba(0,0,0,0.1);
+            z-index: -1;
+            box-shadow: 
+                0 2px 0 #fdfbf7, 0 2px 2px rgba(0,0,0,0.1),
+                0 4px 0 #f0eee9, 0 4px 2px rgba(0,0,0,0.1),
+                0 6px 0 #e6e4df, 0 6px 4px rgba(0,0,0,0.1);
+        }
+        .left-page::before {
+            left: -6px;
+            right: 0;
+            border-radius: 8px 0 0 8px;
+        }
+        .right-page::before {
+            left: 0;
+            right: -6px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .book-spine {
+            background: linear-gradient(to right, 
+                rgba(0,0,0,0.1) 0%, 
+                rgba(0,0,0,0.2) 20%, 
+                rgba(0,0,0,0.05) 50%, 
+                rgba(0,0,0,0.2) 80%, 
+                rgba(0,0,0,0.1) 100%);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+        }
+        
+        .gold-foil {
+            background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        /* Dog ear hover effect */
+        .dog-ear {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.05) 50%);
+            z-index: 30;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .dog-ear-tr {
+            top: 0;
+            right: 0;
+            box-shadow: -2px 2px 4px rgba(0,0,0,0.1);
+        }
+        .dog-ear-bl {
+            bottom: 0;
+            left: 0;
+            background: linear-gradient(45deg, transparent 50%, rgba(0,0,0,0.05) 50%);
+            box-shadow: 2px -2px 4px rgba(0,0,0,0.1);
+        }
+        .book-page:hover .dog-ear-tr {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, transparent 50%, #fff 50%);
+            box-shadow: -4px 4px 8px rgba(0,0,0,0.2);
+        }
+        .book-page:hover .dog-ear-bl {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(45deg, transparent 50%, #fff 50%);
+            box-shadow: 4px -4px 8px rgba(0,0,0,0.2);
+        }
+
+        /* 3D Flip Animation for right page content */
+        .flip-container {
+            perspective: 1000px;
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .flip-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+            transform-origin: left center;
+        }
+        .flip-inner.is-flipped {
+            transform: rotateY(-180deg);
+        }
+        .flip-front, .flip-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+        }
+        .flip-back {
+            transform: rotateY(180deg);
+        }
+    </style>
+
 </head>
 
 <body>
 
 <!-- LANDING -->
-<div id="landing-page" class="clean-landing">
-  <header class="clean-nav reveal in-view">
-    <div class="land-brand">
-      <div class="land-mark" id="land-mark"></div>
-      <div>
-        <div class="land-name" id="land-name">EduNova</div>
-        <div class="land-copy" id="land-copy">School & admissions</div>
-      </div>
-    </div>
-    <nav class="land-links">
-      <a href="#land-welcome">About</a>
-      <a href="#land-programs">Programs</a>
-      <a href="#land-admission">Admission</a>
-      <a href="#land-contact">Contact</a>
-      <button class="btn btn-p btn-sm" onclick="openLogin()">Portal</button>
-    </nav>
-  </header>
-
-  <section class="clean-hero hero-slideshow">
-    <div class="hs-slides" id="hs-slides">
-      <div class="hs-slide active" style="background-image:linear-gradient(rgba(17,24,39,.36),rgba(17,24,39,.42)),url('https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1800&q=80');">
-        <div class="hs-overlay">
-          <div class="hs-tag">The Best Start</div>
-          <h2 class="hs-title">Learning That Feels Personal</h2>
-          <p class="hs-sub">Admissions, academics, attendance, and parent updates in one calm school experience.</p>
-          <div class="hs-btns">
-            <button class="btn btn-p" onclick="document.getElementById('land-admission').scrollIntoView({behavior:'smooth'})">Apply Online</button>
-            <button class="btn btn-gh" onclick="openLogin()">School Portal</button>
-          </div>
+<div id="landing-page" class="text-on-surface font-body-lg overflow-x-hidden">
+<div aria-hidden="true" class="fixed inset-0 z-[100] pointer-events-none opacity-[0.04] mix-blend-multiply"><svg class="w-full h-full" viewbox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="paper-noise"><feturbulence basefrequency="0.65" numoctaves="3" stitchtiles="stitch" type="fractalNoise"></feturbulence><fecolormatrix type="saturate" values="0"></fecolormatrix></filter><rect filter="url(#paper-noise)" height="100%" width="100%"></rect></svg></div>
+<!-- Navigation Header (Desktop) -->
+<header class="w-full top-0 px-notebook-padding pt-stack-sm bg-transparent flat no shadows hidden md:flex justify-between items-center max-w-7xl mx-auto z-50 px-8 relative sticky top-0 backdrop-blur-sm bg-surface-bright/80">
+<div class="font-headline-md text-headline-md text-primary dark:text-primary-fixed italic tracking-tight cursor-pointer hover:opacity-80 transition-opacity duration-300">
+            The Student's Notebook
         </div>
-      </div>
-    </div>
-    <div class="hs-dots" id="hs-dots"><span class="hs-dot active" onclick="goSlide(0)"></span></div>
-  </section>
-
-  <main class="clean-shell">
-    <section class="welcome-block reveal" id="land-welcome">
-      <div class="welcome-copy">
-        <div class="script-label">Welcome to our school</div>
-        <h1>Where confidence, care, and strong learning grow together.</h1>
-        <p id="land-hero-text">A professional school website with admissions, attendance, fees, results, and parent communication connected to the portal.</p>
-        <div class="clean-actions">
-          <button class="btn btn-p" onclick="document.getElementById('land-admission').scrollIntoView({behavior:'smooth'})">Admission Form</button>
-          <button class="btn btn-gh" onclick="openLogin()">Login to Portal</button>
-        </div>
-      </div>
-      <div class="welcome-photo">
-        <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1200&q=80" alt="Students learning in classroom">
-      </div>
-    </section>
-
-    <section class="program-strip reveal" id="land-programs">
-      <article>
-        <img src="https://images.unsplash.com/photo-1540479859555-17af45c78602?auto=format&fit=crop&w=700&q=80" alt="Sports activity">
-        <span>Sports</span>
-      </article>
-      <article>
-        <img src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=700&q=80" alt="Art class">
-        <span>Creative Arts</span>
-      </article>
-      <article>
-        <img src="https://images.unsplash.com/photo-1588072432836-e10032774350?auto=format&fit=crop&w=700&q=80" alt="Classroom study">
-        <span>Academics</span>
-      </article>
-      <article>
-        <img src="https://images.unsplash.com/photo-1596464716127-f2a82984de30?auto=format&fit=crop&w=700&q=80" alt="School activity">
-        <span>Activities</span>
-      </article>
-    </section>
-
-    <section class="clean-stats reveal">
-      <div><strong id="land-stat-students">0+</strong><span>Students</span></div>
-      <div><strong id="land-stat-teachers">0+</strong><span>Teachers</span></div>
-      <div><strong id="land-stat-classes">0+</strong><span>Classes</span></div>
-    </section>
-
-    <section class="admission-wrap reveal" id="land-admission">
-      <div class="admission-copy">
-        <div class="script-label">Online admission</div>
-        <h2>Apply for admission</h2>
-        <p>Send the basic details. The office will review and contact the parent.</p>
-      </div>
-      <div class="admission-card">
-        <div class="admission-grid">
-          <div class="fg"><label class="fl">Student Full Name <span class="req">*</span></label><input class="fi" id="adm-student" placeholder="Student name" autocomplete="name"/></div>
-          <div class="fg"><label class="fl">Applying For Class <span class="req">*</span></label><select class="fi" id="adm-class"><option value="">Select class</option></select></div>
-          <div class="fg"><label class="fl">Date of Birth</label><input class="fi" type="date" id="adm-dob"/></div>
-          <div class="fg"><label class="fl">Gender</label><select class="fi" id="adm-gender"><option value="">Select</option><option>Male</option><option>Female</option></select></div>
-          <div class="fg"><label class="fl">Father / Guardian <span class="req">*</span></label><input class="fi" id="adm-father" placeholder="Parent or guardian"/></div>
-          <div class="fg"><label class="fl">Phone <span class="req">*</span></label><input class="fi" id="adm-phone" placeholder="03XX-XXXXXXX" inputmode="tel"/></div>
-          <div class="fg"><label class="fl">WhatsApp</label><input class="fi" id="adm-whatsapp" placeholder="923XXXXXXXXX" inputmode="tel"/></div>
-          <div class="fg"><label class="fl">Email</label><input class="fi" type="email" id="adm-email" placeholder="parent@email.com" autocomplete="email"/></div>
-        </div>
-        <div class="fg"><label class="fl">Mother Name</label><input class="fi" id="adm-mother" placeholder="Mother name"/></div>
-        <div class="fg"><label class="fl">Previous School</label><input class="fi" id="adm-prev" placeholder="Optional"/></div>
-        <div class="fg"><label class="fl">Home Address</label><textarea class="fi" id="adm-address" placeholder="House / street / area"></textarea></div>
-        <div class="fg"><label class="fl">Message</label><textarea class="fi" id="adm-notes" placeholder="Any question or special note"></textarea></div>
-        <div class="admission-actions">
-          <div id="adm-status">We will contact you after review.</div>
-          <button class="btn btn-p" id="adm-submit" onclick="submitOnlineAdmission()">Submit Application</button>
-        </div>
-      </div>
-    </section>
-
-    <section class="contact-strip reveal" id="land-contact">
-      <div>
-        <h3>Contact the school office</h3>
-        <p>For admissions, fees, and parent support, reach out to the office team.</p>
-      </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;">
-        <button class="btn btn-wa" onclick="openManualParentWhatsApp()">WhatsApp Us</button>
-        <button class="btn btn-p" onclick="openLogin()">School Portal</button>
-      </div>
-    </section>
-    <div class="land-footer">- 2025 School Management System - Powered by EduNova</div>
-  </main>
+<nav class="flex gap-gutter items-center font-annotation">
+<a class="text-primary dark:text-primary-fixed border-b-2 border-primary dark:border-primary-fixed pb-1 hover:opacity-80 transition-opacity duration-300 translate-y-0.5 transition-transform text-2xl" href="javascript:void(0)">Our Vision</a>
+<a class="text-on-surface-variant dark:text-on-tertiary-container hover:text-primary transition-colors hover:opacity-80 transition-opacity duration-300 text-2xl" href="javascript:void(0)">Curriculum</a>
+<a class="text-on-surface-variant dark:text-on-tertiary-container hover:text-primary transition-colors hover:opacity-80 transition-opacity duration-300 text-2xl" href="javascript:void(0)">Admissions</a>
+<a class="text-on-surface-variant dark:text-on-tertiary-container hover:text-primary transition-colors hover:opacity-80 transition-opacity duration-300 text-2xl" href="javascript:void(0)">The Faculty</a>
+<button class="bg-primary text-on-primary px-6 py-2 rounded-full font-label-caps text-label-caps hover:bg-primary-container transition-colors shadow-md hover:shadow-lg active:translate-y-0.5 active:shadow-sm font-sans" onclick="openLogin()">Enroll Now</button>
+</nav>
+</header>
+<!-- Mobile Header -->
+<header class="md:hidden flex justify-between items-center p-4 sticky top-0 z-50 bg-surface-bright/90 backdrop-blur-sm shadow-sm">
+<div class="font-headline-md text-xl text-primary italic tracking-tight">The Student's Notebook</div>
+<button class="p-2 text-on-surface-variant" id="menu-btn">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</header>
+<!-- Mobile Navigation Drawer -->
+<div class="fixed left-0 top-0 h-full w-80 rounded-r-xl shadow-2xl border-r border-outline-variant bg-surface-container-lowest dark:bg-tertiary-container z-[60] overflow-y-auto flex flex-col" id="nav-drawer">
+<div class="p-notebook-padding border-b border-outline-variant flex justify-between items-start">
+<div>
+<img alt="Academy Crest" class="w-16 h-16 object-contain mb-4" data-alt="Academy Crest logo, high quality, elegant design, academic aesthetic, dark blue and gold colors, on light background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAl5x_Ig8rBg_WJig0frhVhE8Ar8MyFLZnsYYWJTsWvxfVj6_BR9BDXIwUds2gakGef-7oR7I-CHkjm5Y2TdyXVoMEdnDEgNexvrkSLV2tvh2p-zFF_MXB_CM_T50Bqs-pptGSpn3w6mbIEKwNLdl3KTfXU4FfSK6i6IAoZKM8emVnsOm3jTKvMkPUg32SOs1g9sPs7dwfeLUukfOe2_E6YYO19nJL8JEWyJnVERM6c4X9ix_FR1fg8U-1PogkpwU7hw7qjvObI54U9"/>
+<h2 class="font-display-lg-mobile text-display-lg-mobile text-primary dark:text-primary-fixed leading-tight">The Progressive Academy</h2>
+<p class="font-annotation text-annotation text-on-surface-variant mt-2">Established 1924</p>
 </div>
+<button class="p-2 text-on-surface-variant" id="close-menu-btn">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<nav class="flex-1 py-4 flex flex-col gap-2">
+<a class="flex items-center gap-3 bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary rounded-full mx-2 my-1 px-4 py-3 scale-95 transition-all" href="javascript:void(0)">
+<span class="material-symbols-outlined">book</span>
+<span class="font-body-lg text-body-lg">Home</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant dark:text-on-tertiary-fixed-variant hover:bg-surface-container-high mx-2 my-1 rounded-full px-4 py-3 hover:bg-surface-dim dark:hover:bg-tertiary" href="javascript:void(0)">
+<span class="material-symbols-outlined">edit</span>
+<span class="font-body-lg text-body-lg">Assignments</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant dark:text-on-tertiary-fixed-variant hover:bg-surface-container-high mx-2 my-1 rounded-full px-4 py-3 hover:bg-surface-dim dark:hover:bg-tertiary" href="javascript:void(0)">
+<span class="material-symbols-outlined">history</span>
+<span class="font-body-lg text-body-lg">Archives</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant dark:text-on-tertiary-fixed-variant hover:bg-surface-container-high mx-2 my-1 rounded-full px-4 py-3 hover:bg-surface-dim dark:hover:bg-tertiary" href="javascript:void(0)">
+<span class="material-symbols-outlined">map</span>
+<span class="font-body-lg text-body-lg">Campus Map</span>
+</a>
+</nav>
+<div class="p-4 border-t border-outline-variant">
+<button class="w-full bg-primary text-on-primary py-3 rounded-full font-label-caps text-label-caps mb-4" onclick="openLogin()">Request Prospectus</button>
+<div class="flex justify-around text-on-surface-variant">
+<a class="flex flex-col items-center gap-1 hover:text-primary" href="javascript:void(0)"><span class="material-symbols-outlined">settings</span><span class="text-sm">Settings</span></a>
+<a class="flex flex-col items-center gap-1 hover:text-primary" href="javascript:void(0)"><span class="material-symbols-outlined">help</span><span class="text-sm">Support</span></a>
+</div>
+</div>
+</div>
+<!-- Main Content Wrapper (The Desk) -->
+<main class="max-w-7xl mx-auto py-stack-lg px-4 md:px-8 relative">
+<!-- Notebook Cover (Hero) - Now an Open Book -->
+<section class="min-h-[819px] flex items-center justify-center relative mb-stack-lg overflow-visible pt-12 pb-24 bg-[#1a2332] rounded-xl shadow-[inset_0_20px_50px_rgba(0,0,0,0.5)]">
+<!-- Desk Texture -->
+<div class="absolute inset-0 z-0 pointer-events-none opacity-40 mix-blend-multiply bg-[url('https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&amp;fit=crop&amp;q=80&amp;w=2000')] bg-cover"></div>
+<div class="absolute inset-0 z-0 bg-gradient-to-b from-transparent to-black/30 pointer-events-none rounded-xl"></div>
+<!-- Open Book Container -->
+<div class="open-book-container relative z-10 w-full lg:w-[90%] max-w-6xl aspect-[2/1.2] mx-auto flex drop-shadow-[0_30px_40px_rgba(0,0,0,0.6)]">
+<!-- Left Page -->
+<div class="book-page left-page w-1/2 h-full rounded-l-lg border-y border-l border-black/10 flex flex-col justify-center items-center p-8 md:p-16 relative origin-right z-20">
+<div class="dog-ear dog-ear-bl"></div>
+<div class="w-full max-w-sm text-center relative z-10">
+<h1 class="font-display-lg text-4xl md:text-6xl mb-8 gold-foil">
+                The Student's Notebook
+            </h1>
+<div class="w-24 h-1 bg-gradient-to-r from-transparent via-secondary to-transparent mx-auto mb-8 opacity-50"></div>
+<p class="handwritten text-3xl md:text-4xl text-on-surface-variant leading-relaxed">
+                Welcome to our story...<br/>
+                Every page a new adventure,<br/>
+                every lesson a step forward.
+            </p>
+</div>
+<!-- Decorative subtle lines mimicking lined paper -->
+<div class="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(transparent_95%,_#000_100%)] bg-[length:100%_2rem] z-0"></div>
+</div>
+<!-- Central Spine -->
+<div class="w-8 h-full book-spine z-10 flex justify-center shadow-[0_0_10px_rgba(0,0,0,0.3)]">
+<div class="w-[1px] h-full bg-black/10 mx-auto"></div>
+<div class="w-[1px] h-full bg-white/20 mx-auto"></div>
+</div>
+<!-- Right Page (Interactive Album) -->
+<div class="book-page right-page w-1/2 h-full rounded-r-lg border-y border-r border-black/10 relative origin-left z-20 p-6 md:p-12 flex flex-col">
+<div class="dog-ear dog-ear-tr"></div>
+<!-- Interactive Controls -->
+<div class="flex justify-between items-center mb-6 z-30">
+<h2 class="handwritten text-3xl text-primary">Campus Gallery</h2>
+<div class="flex gap-2">
+<button class="w-10 h-10 rounded-full bg-surface-container-high hover:bg-surface-variant flex items-center justify-center text-primary shadow-sm transition-colors" id="prev-btn">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="w-10 h-10 rounded-full bg-surface-container-high hover:bg-surface-variant flex items-center justify-center text-primary shadow-sm transition-colors" id="next-btn">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- 3D Flipping Photo Container -->
+<div class="flex-1 relative flip-container cursor-pointer group" id="photo-flip-container">
+<div class="tape absolute -top-4 left-1/2 -ml-8 w-16 h-6 z-40"></div>
+<div class="flip-inner" id="flip-inner">
+<!-- Front Side -->
+<div class="flip-front bg-white p-4 pb-16 shadow-xl border border-black/5 flex flex-col h-full transform transition-transform group-hover:scale-[1.01]">
+<div class="flex-1 bg-surface-container overflow-hidden relative">
+<img alt="Library" class="w-full h-full object-cover" id="front-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDscdfhXJ4oiAYdCPC2us_DAT1u285lssl77RbDzQm3-GXfDxKmAX8E_3geVviQhUnT5oEmoefGtiKgrsKaHsft9j3venaD4skr1W4uJ_dfp-suWUdOHwWDCKDh4a7b2hKpqL2MIDaF1u9Ym_oaSMBo3OH3L_IteS1jewJwS_kw9vykMGzxXodtwbq2ISv2OXc-QyDET_Nw7rI5c1yqgCHLBqAk56Mhff6HL_VGo-5C9BbWt32XXBoUhWvGqT5ezmMxM5ZVVcsVD2o9"/>
+</div>
+<p class="handwritten text-2xl absolute bottom-4 w-full text-center text-on-surface-variant left-0" id="front-caption">Campus Courtyard</p>
+</div>
+<!-- Back Side -->
+<div class="flip-back bg-white p-4 pb-16 shadow-xl border border-black/5 flex flex-col h-full">
+<div class="flex-1 bg-surface-container overflow-hidden relative">
+<img alt="Tech Hub" class="w-full h-full object-cover" id="back-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzBsKK9GUcThBwiy1b4lmuJqUuBZhpRdFHnxLas1kpnbSphuVjTjQ7hF6EUfW_cZzgoClHWIjfXd-1DtHgBHZcAmBZ1kJRMV5W7pwlxku-eUBstkRzv0a7WnswRYEkRKVsetNp48dCGy14KtjZDoEIaHr5kUboT6Yl54oEcI8nLwBEQWQXF0Cs0pbPr4tKAMemoqxNEaaiFi6rVFFttwGed7Dg8QYMa0Gi-JuVgmZmKLVZ8NAaHbPJgAxwrIWhxFX8GMeI4-Jdz9QT"/>
+</div>
+<p class="handwritten text-2xl absolute bottom-4 w-full text-center text-on-surface-variant left-0" id="back-caption">The Tech Hub</p>
+</div>
+</div>
+</div>
+<!-- Decorative lines -->
+<div class="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(transparent_95%,_#000_100%)] bg-[length:100%_2rem] z-0"></div>
+</div>
+</div>
+</section>
+<!-- Open Notebook Spread Wrapper -->
+<div class="notebook-texture rounded-lg md:rounded-xl min-h-screen p-4 md:p-notebook-padding shadow-2xl relative">
+<div class="content-layer">
+<!-- Welcome Page -->
+<div class="page-turn flipped-down">
+<section class="grid grid-cols-1 md:grid-cols-2 gap-gutter min-h-[614px]">
+<div class="pl-8 md:pl-16 pt-8">
+<h2 class="handwritten text-4xl text-primary mb-6">Our Philosophy...</h2>
+<p class="handwritten text-2xl leading-relaxed text-on-surface-variant max-w-prose">
+                            Dear students and parents,<br/><br/>
+                            Education is not just about filling a bucket, but lighting a fire. At The Progressive Academy, we believe every page you turn here is a new opportunity to discover, create, and lead.<br/><br/>
+                            Let's write your future together.<br/><br/>
+<span class="text-primary-container">- The Principal</span>
+</p>
+</div>
+<div class="relative p-8 flex items-center justify-center">
+<div class="polaroid transform rotate-3">
+<img alt="School Building" class="w-full h-auto aspect-video object-cover" data-alt="A beautiful watercolor illustration of a classic, ivy-covered brick school building with tall windows and a clock tower, set on a sunny day with green lawns, bright and optimistic mood, light mode aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0Cp_BuUqmYy0NX8RSfybCk-vURgWvn9dJe6YlmWMksgLwJU5gSQMc5wOLpvZ80qXLNwmTtp3tmRCMfyMPu5NCWpulrqPIH4mzJfSAcTjMOli-CyvXi4hdqvZcye5_3gl-5zYV5Abwgaa8x-Y02wKH8-8mbvXZ5ChNbnrlLgQ0AFD9S5l6SsphVl1PdCDEfCowNKSQ_qkjO9eY0eyRDv8JgHwp2brBHy8Qf5VK7Avqa-6XJjye-7pr_1JE6cyu_wAPgWW3Lh5ElhWT"/>
+<p class="handwritten text-xl text-center mt-4 text-on-surface-variant">Our Campus, Est. 1924</p>
+</div>
+<div class="tape absolute top-4 left-1/2 -ml-8 w-16 h-6"></div>
+</div>
+</section>
+</div>
+<!-- Why Choose Us (Sticky Notes) -->
+<div class="page-turn flipped-down">
+<section class="py-8">
+<h2 class="font-headline-md text-headline-md text-center mb-12 text-primary">The Progressive Difference</h2>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 px-4 md:px-12">
+<!-- Note 1 -->
+<div class="sticky-note bg-secondary-container p-6 aspect-square flex flex-col justify-center relative rotate-1">
+<div class="tape absolute -top-3 left-1/2 -ml-6 w-12 h-5"></div>
+<span class="material-symbols-outlined text-4xl mb-4 text-on-secondary-container">school</span>
+<h3 class="font-body-lg font-bold mb-2 text-on-secondary-container">Qualified Teachers</h3>
+<p class="font-body-md text-on-secondary-container/80">Experts who <span class="pencil-underline">inspire</span> and guide.</p>
+</div>
+<!-- Note 2 -->
+<div class="sticky-note bg-surface-container-high p-6 aspect-square flex flex-col justify-center relative -rotate-2 mt-4 md:mt-0">
+<div class="tape absolute -top-3 left-1/2 -ml-6 w-12 h-5"></div>
+<span class="material-symbols-outlined text-4xl mb-4 text-primary">desktop_mac</span>
+<h3 class="font-body-lg font-bold mb-2 text-primary">Smart Classrooms</h3>
+<p class="font-body-md text-on-surface-variant">Technology meeting <span class="pencil-underline">tradition</span>.</p>
+</div>
+<!-- Note 3 -->
+<div class="sticky-note bg-surface-dim p-6 aspect-square flex flex-col justify-center relative rotate-2 mt-4 lg:mt-0">
+<div class="tape absolute -top-3 left-1/2 -ml-6 w-12 h-5"></div>
+<span class="material-symbols-outlined text-4xl mb-4 text-on-surface-variant">favorite</span>
+<h3 class="font-body-lg font-bold mb-2 text-on-surface-variant">Character Building</h3>
+<p class="font-body-md text-on-surface-variant/80">Focus on <span class="pencil-underline">values</span> and ethics.</p>
+</div>
+<!-- Note 4 -->
+<div class="sticky-note bg-secondary-fixed p-6 aspect-square flex flex-col justify-center relative -rotate-1 mt-4 lg:mt-0">
+<div class="tape absolute -top-3 left-1/2 -ml-6 w-12 h-5"></div>
+<span class="material-symbols-outlined text-4xl mb-4 text-on-secondary-fixed">sports_basketball</span>
+<h3 class="font-body-lg font-bold mb-2 text-on-secondary-fixed">Co-Curriculars</h3>
+<p class="font-body-md text-on-secondary-fixed/80">Developing <span class="pencil-underline">all-round</span> talents.</p>
+</div>
+</div>
+</section>
+</div>
+<!-- Journey Timeline -->
+<div class="page-turn flipped-down">
+<section class="py-12 border-t-2 border-dashed border-outline-variant/50 relative">
+<div class="absolute -top-4 right-12 text-outline-variant rotate-12">
+<span class="material-symbols-outlined text-4xl">edit</span>
+</div>
+<h2 class="font-headline-md text-headline-md pl-8 md:pl-16 mb-8 text-primary">The Learning Journey</h2>
+<div class="relative px-8 md:px-16 pb-8">
+<!-- Horizontal Line -->
+<div class="absolute top-1/2 left-16 right-16 h-1 bg-outline-variant/50 hidden md:block rounded-full"></div>
+<div class="flex flex-col md:flex-row justify-between gap-8 relative z-10">
+<!-- Stage 1 -->
+<div class="flex flex-col items-center text-center">
+<div class="w-16 h-16 rounded-full bg-surface-bright border-4 border-primary flex items-center justify-center mb-4 shadow-md">
+<span class="material-symbols-outlined text-primary">child_care</span>
+</div>
+<h4 class="font-bold font-body-lg text-primary">Nursery</h4>
+<p class="font-annotation text-xl text-on-surface-variant mt-2">Curiosity begins</p>
+</div>
+<!-- Stage 2 -->
+<div class="flex flex-col items-center text-center">
+<div class="w-16 h-16 rounded-full bg-surface-bright border-4 border-primary flex items-center justify-center mb-4 shadow-md">
+<span class="material-symbols-outlined text-primary">backpack</span>
+</div>
+<h4 class="font-bold font-body-lg text-primary">Primary</h4>
+<p class="font-annotation text-xl text-on-surface-variant mt-2">Foundations built</p>
+</div>
+<!-- Stage 3 -->
+<div class="flex flex-col items-center text-center">
+<div class="w-16 h-16 rounded-full bg-surface-bright border-4 border-primary flex items-center justify-center mb-4 shadow-md">
+<span class="material-symbols-outlined text-primary">science</span>
+</div>
+<h4 class="font-bold font-body-lg text-primary">Middle</h4>
+<p class="font-annotation text-xl text-on-surface-variant mt-2">Exploring depth</p>
+</div>
+<!-- Stage 4 -->
+<div class="flex flex-col items-center text-center">
+<div class="w-16 h-16 rounded-full bg-surface-bright border-4 border-secondary-fixed-dim flex items-center justify-center mb-4 shadow-md">
+<span class="material-symbols-outlined text-secondary-fixed-dim">emoji_events</span>
+</div>
+<h4 class="font-bold font-body-lg text-primary">Matric</h4>
+<p class="font-annotation text-xl text-on-surface-variant mt-2">Ready to lead</p>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Facilities (Scrapbook) -->
+<div class="page-turn flipped-down">
+<section class="pl-8 md:pl-16 pr-4 pb-8">
+<h2 class="handwritten text-4xl mb-8 text-primary">Our Campus Scrapbook</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+<div class="relative">
+<div class="tape absolute -top-4 -left-4 w-20 h-6 z-20"></div>
+<div class="tape absolute -bottom-4 -right-4 w-20 h-6 z-20"></div>
+<img alt="Computer Lab" class="w-full h-64 object-cover rounded shadow-md transform -rotate-1 hover:rotate-0 transition-transform" data-alt="A bright, modern computer lab with rows of sleek silver monitors on light wooden desks. Students are engaged. Soft natural light streaming from large windows. Minimalist, organized, educational aesthetic, light mode." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzBsKK9GUcThBwiy1b4lmuJqUuBZhpRdFHnxLas1kpnbSphuVjTjQ7hF6EUfW_cZzgoClHWIjfXd-1DtHgBHZcAmBZ1kJRMV5W7pwlxku-eUBstkRzv0a7WnswRYEkRKVsetNp48dCGy14KtjZDoEIaHr5kUboT6Yl54oEcI8nLwBEQWQXF0Cs0pbPr4tKAMemoqxNEaaiFi6rVFFttwGed7Dg8QYMa0Gi-JuVgmZmKLVZ8NAaHbPJgAxwrIWhxFX8GMeI4-Jdz9QT"/>
+<p class="handwritten text-2xl mt-4 text-center text-on-surface-variant">The Tech Hub</p>
+</div>
+<div class="relative mt-8 md:mt-0">
+<div class="tape absolute -top-4 right-4 w-16 h-6 z-20"></div>
+<img alt="Library" class="w-full h-64 object-cover rounded shadow-md transform rotate-2 hover:rotate-0 transition-transform" data-alt="A cozy, sunlit library filled with tall wooden bookshelves. Warm reading nooks with comfortable seating. Dust motes visible in the sunbeams. Academic, serene, inspiring mood, light mode aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFsDmwWlJPdru7lex5CAh62aGpLHDfqkiWQ5fMTCmWSfXvPDEo-DY54_3hFAnV02K7ougOFGCpcPye7oukEmByE3-P3Y2ppaKigD7OoMGj4va3CxQB0enzi9ShMvPOQVeJwFM4MIufjihfKrWxD2LxklUfrbmctTWeDACw-tPs0IGapB15qAeOZV7yNw7MtekZeAoiPQDgqq7lln_SvoiDUYG5yDzhqfR1g9sZbZH8UVwlNfdkOT6pMsR7U224Jfl0KSFYGZxuH6ZJ"/>
+<p class="handwritten text-2xl mt-4 text-center text-on-surface-variant">Library Moments</p>
+</div>
+</div>
+</section>
+</div>
+<!-- Admission Checklist & Final Call -->
+<div class="page-turn border-b-0 mb-0 pb-0 flipped-down">
+<section class="grid grid-cols-1 md:grid-cols-2 gap-12 pl-8 md:pl-16 pr-4 pt-12">
+<div>
+<h2 class="font-headline-md text-headline-md mb-6 text-primary">Admission Checklist</h2>
+<ul class="space-y-4 handwritten text-2xl text-on-surface-variant">
+<li class="flex items-center gap-3">
+<span class="w-8 h-8 rounded-full border-2 border-primary text-primary flex items-center justify-center text-xl">1</span>
+                                Visit School Campus
+                            </li>
+<li class="flex items-center gap-3">
+<span class="w-8 h-8 rounded-full border-2 border-primary text-primary flex items-center justify-center text-xl">2</span>
+                                Submit Application Form
+                            </li>
+<li class="flex items-center gap-3">
+<span class="w-8 h-8 rounded-full border-2 border-primary text-primary flex items-center justify-center text-xl">3</span>
+                                Student Assessment
+                            </li>
+<li class="flex items-center gap-3">
+<span class="w-8 h-8 rounded-full border-2 border-secondary-fixed-dim text-secondary-fixed-dim flex items-center justify-center text-xl">4</span>
+                                Enrollment Confirmation
+                            </li>
+</ul>
+</div>
+<div class="flex flex-col items-center justify-center text-center bg-surface-container-low p-8 rounded-xl border border-outline-variant/30 relative">
+<div class="absolute top-2 right-2 text-secondary-fixed-dim">
+<span class="material-symbols-outlined text-3xl">star</span>
+</div>
+<h2 class="handwritten text-5xl text-primary mb-4 transform -rotate-2">Admissions Open 2026</h2>
+<p class="font-body-lg text-on-surface-variant mb-8">Your Child's Future Starts Here.</p>
+<button class="bg-primary text-on-primary px-8 py-4 rounded-full font-label-caps text-label-caps text-lg hover:bg-primary-container transition-colors shadow-lg hover:shadow-xl active:translate-y-1 flex items-center gap-2">
+                            Apply Now
+                            <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</section>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full mt-stack-lg rounded-t-xl bg-inverse-surface dark:bg-surface-container-highest shadow-inner w-full py-stack-md px-notebook-padding flex flex-col items-center gap-stack-sm text-center">
+<div class="font-label-caps text-label-caps text-secondary-fixed mb-2">The Progressive Academy</div>
+<div class="flex gap-4 mb-4">
+<a class="font-annotation text-annotation text-surface-variant dark:text-on-surface-variant hover:text-secondary-fixed-dim transition-colors opacity-90" href="javascript:void(0)">Privacy Policy</a>
+<span class="text-surface-variant">•</span>
+<a class="font-annotation text-annotation text-surface-variant dark:text-on-surface-variant hover:text-secondary-fixed-dim transition-colors opacity-90" href="javascript:void(0)">Terms of Service</a>
+<span class="text-surface-variant">•</span>
+<a class="font-annotation text-annotation text-surface-variant dark:text-on-surface-variant hover:text-secondary-fixed-dim transition-colors opacity-90" href="javascript:void(0)">Library Access</a>
+</div>
+<p class="font-annotation text-annotation text-inverse-on-surface dark:text-on-surface">© 2024 The Progressive Academy. All Rights Reserved.</p>
+</footer>
+<script>
+        // Simple Navigation Drawer Toggle
+        const menuBtn = document.getElementById('menu-btn');
+        const closeMenuBtn = document.getElementById('close-menu-btn');
+        const navDrawer = document.getElementById('nav-drawer');
 
+        menuBtn.addEventListener('click', () => {
+            navDrawer.classList.add('open');
+        });
+
+        closeMenuBtn.addEventListener('click', () => {
+            navDrawer.classList.remove('open');
+        });
+
+        // Page Flip Animation (Scroll)
+        const pages = document.querySelectorAll('.page-turn');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.remove('flipped-up', 'flipped-down');
+                } else {
+                    if (entry.boundingClientRect.top < 0) {
+                        entry.target.classList.add('flipped-up');
+                        entry.target.classList.remove('flipped-down');
+                    } else {
+                        entry.target.classList.add('flipped-down');
+                        entry.target.classList.remove('flipped-up');
+                    }
+                }
+            });
+        }, {
+            threshold: 0.1,
+            rootMargin: "-20% 0px -20% 0px"
+        });
+
+        pages.forEach(page => {
+            observer.observe(page);
+        });
+        
+        // 3D Flip Album Logic
+        const albumData = [
+            { src: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDFsDmwWlJPdru7lex5CAh62aGpLHDfqkiWQ5fMTCmWSfXvPDEo-DY54_3hFAnV02K7ougOFGCpcPye7oukEmByE3-P3Y2ppaKigD7OoMGj4va3CxQB0enzi9ShMvPOQVeJwFM4MIufjihfKrWxD2LxklUfrbmctTWeDACw-tPs0IGapB15qAeOZV7yNw7MtekZeAoiPQDgqq7lln_SvoiDUYG5yDzhqfR1g9sZbZH8UVwlNfdkOT6pMsR7U224Jfl0KSFYGZxuH6ZJ', caption: 'Extensive Library' },
+            { src: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCzBsKK9GUcThBwiy1b4lmuJqUuBZhpRdFHnxLas1kpnbSphuVjTjQ7hF6EUfW_cZzgoClHWIjfXd-1DtHgBHZcAmBZ1kJRMV5W7pwlxku-eUBstkRzv0a7WnswRYEkRKVsetNp48dCGy14KtjZDoEIaHr5kUboT6Yl54oEcI8nLwBEQWQXF0Cs0pbPr4tKAMemoqxNEaaiFi6rVFFttwGed7Dg8QYMa0Gi-JuVgmZmKLVZ8NAaHbPJgAxwrIWhxFX8GMeI4-Jdz9QT', caption: 'The Tech Hub' },
+            { src: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC0Cp_BuUqmYy0NX8RSfybCk-vURgWvn9dJe6YlmWMksgLwJU5gSQMc5wOLpvZ80qXLNwmTtp3tmRCMfyMPu5NCWpulrqPIH4mzJfSAcTjMOli-CyvXi4hdqvZcye5_3gl-5zYV5Abwgaa8x-Y02wKH8-8mbvXZ5ChNbnrlLgQ0AFD9S5l6SsphVl1PdCDEfCowNKSQ_qkjO9eY0eyRDv8JgHwp2brBHy8Qf5VK7Avqa-6XJjye-7pr_1JE6cyu_wAPgWW3Lh5ElhWT', caption: 'Campus Grounds' }
+        ];
+
+        let currentIndex = 0;
+        let isFlipped = false;
+        
+        const flipInner = document.getElementById('flip-inner');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const flipContainer = document.getElementById('photo-flip-container');
+        
+        const frontImg = document.getElementById('front-img');
+        const frontCaption = document.getElementById('front-caption');
+        const backImg = document.getElementById('back-img');
+        const backCaption = document.getElementById('back-caption');
+
+        function updateAlbum(direction) {
+            if (direction === 'next') {
+                currentIndex = (currentIndex + 1) % albumData.length;
+            } else {
+                currentIndex = (currentIndex - 1 + albumData.length) % albumData.length;
+            }
+            
+            isFlipped = !isFlipped;
+            
+            // Pre-load the next image on the hidden side before flipping
+            if (isFlipped) {
+                backImg.src = albumData[currentIndex].src;
+                backCaption.textContent = albumData[currentIndex].caption;
+                flipInner.classList.add('is-flipped');
+            } else {
+                frontImg.src = albumData[currentIndex].src;
+                frontCaption.textContent = albumData[currentIndex].caption;
+                flipInner.classList.remove('is-flipped');
+            }
+        }
+
+        prevBtn.addEventListener('click', () => updateAlbum('prev'));
+        nextBtn.addEventListener('click', () => updateAlbum('next'));
+        flipContainer.addEventListener('click', () => updateAlbum('next'));
+
+    </script>
+
+</div>
 
 <!-- LOGIN -->
 <div id="login-page" style="display:none;">
