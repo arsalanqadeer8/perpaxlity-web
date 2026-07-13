@@ -5118,6 +5118,7 @@
   <div style="font-weight:700;font-size:.78rem;color:var(--p);margin-bottom:5px;"> Student Login - <span style="font-weight:500;color:var(--ink4);">Leave blank for no login</span></div>
   <div class="ibox" style="margin-bottom:10px;padding:8px 12px;">Create or invite this email in Supabase Auth. Passwords are no longer stored in portal data.</div>
   <div class="fg"><label class="fl">Login Email</label><input class="fi" id="m-lemail" value="${s?.loginEmail || ''}" placeholder="student@email.com"/></div>
+  <div class="fg"><label class="fl">Login Password</label><input class="fi" type="password" id="m-lpass" placeholder="Enter password (for new logins)"/></div>
   <div class="div"></div>
   <div style="font-weight:700;font-size:.78rem;color:var(--v);margin-bottom:9px;"> Family / Siblings - one parent login for all children</div>
   <div class="fg2">
@@ -5148,7 +5149,7 @@
     }
     function clearStuPhoto() { document.getElementById('m-pd').value = ''; const p = document.getElementById('m-pup'); if (p) p.innerHTML = '<div class="pup-ic"></div><div class="pup-tx">Add Photo</div>'; }
 
-    function saveStu(editId) {
+    async function saveStu(editId) {
       const name = (document.getElementById('m-name')?.value || '').trim();
       if (!name) { showToast(' Name is required', 'te'); return; }
       const classId = document.getElementById('m-class')?.value;
@@ -5161,6 +5162,7 @@
 
       const autoEmail = `${roll.toLowerCase()}.${(DB.classes.find(c => c.id === classId)?.name || 'class').toLowerCase().replace(/\s/g, '')}@school.edu`;
       const loginEmail = ((document.getElementById('m-lemail')?.value || '').trim().toLowerCase()) || autoEmail;
+      const loginPass = document.getElementById('m-lpass')?.value || '';
 
       let familyId = famSel || null;
       if (!familyId && famName) {
@@ -5187,7 +5189,24 @@
         DB.students[classId].push({ id: newId, ...data });
         if (familyId) { if (!DB.families[familyId]) DB.families[familyId] = { id: familyId, parentName: famName, studentIds: [] }; (DB.families[familyId].studentIds = DB.families[familyId].studentIds || []).push(newId); }
         syncStudentLoginProfile({ ...data, name, photo, classId, loginEmail }, newId);
-        showToast(`Student added. Create/invite ${loginEmail} in Supabase Auth.`, 'ts');
+        
+        if (_sb && loginPass) {
+          try {
+            showToast('Creating secure Auth login...', 'ti');
+            const { data, error } = await _sb.functions.invoke('create-student-auth', {
+              body: { email: loginEmail, password: loginPass }
+            });
+            if (error) throw error;
+            if (data?.error) throw new Error(data.error);
+            showToast(`Student added & Auth Login created for ${loginEmail}!`, 'ts');
+          } catch(e) {
+            console.error('Edge function error:', e);
+            showToast(`Student added locally. Auth creation failed: ${e.message}`, 'te', 8000);
+          }
+        } else {
+          showToast(`Student added. No password provided for Auth.`, 'ts');
+        }
+    
       }
       saveDB(); pushCloudDB(); closeModal(); goPage('students');
     }
