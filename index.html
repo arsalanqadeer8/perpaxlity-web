@@ -1425,16 +1425,23 @@
       width: 100%;
       max-width: 540px;
       max-height: 94vh;
-      overflow-y: auto;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
       box-shadow: var(--sh3);
       animation: fadeUp .28s cubic-bezier(.22, 1, .36, 1);
       border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    }
+    #modal-body {
       padding: 20px 16px;
+      overflow-y: auto;
     }
 
     @media(min-width:560px) {
       .modal {
         border-radius: var(--radius-xl);
+      }
+      #modal-body {
         padding: 24px 20px;
       }
     }
@@ -1444,7 +1451,8 @@
       height: 3px;
       background: var(--border2);
       border-radius: 99px;
-      margin: 0 auto 14px;
+      margin: 14px auto 14px;
+      flex-shrink: 0;
     }
 
     @media(min-width:560px) {
