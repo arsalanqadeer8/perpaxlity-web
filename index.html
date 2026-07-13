@@ -4592,8 +4592,8 @@
       setText('land-copy', s.tagline || 'Learn • Grow • Excel');
       ['tb-ico', 'lp-logo'].forEach(id => {
         const el = document.getElementById(id); if (!el) return;
-        el.innerHTML = s.logo ? `<img src="${s.logo}" alt="logo"/>` : '';
-        el.style.background = s.logo ? 'transparent' : 'linear-gradient(135deg,' + (s.primaryColor || '#ff8a00') + ',var(--p2))';
+        el.innerHTML = s.logo ? `<img src="${s.logo}" alt="logo" style="width:100%;height:100%;object-fit:contain;"/>` : `<img src="logo.png" alt="logo" style="width:100%;height:100%;object-fit:contain;"/>`;
+        el.style.background = 'transparent';
       });
       document.documentElement.style.setProperty('--p', s.primaryColor || '#ff8a00');
       renderLandingSlides();
