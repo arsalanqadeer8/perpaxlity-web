@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>The School - Where Learning Meets Fun!</title>
-<meta name="description" content="A complete school website and portal for students, parents, teachers, fees, attendance, results, notices, and reports." />
-<meta name="theme-color" content="#ff8a00" />
+<title>Oxford Excellence Academy - Learn • Grow • Excel</title>
+<meta name="description" content="Oxford Excellence Academy portal for students, parents, teachers, fees, attendance, results, notices, and reports." />
+<meta name="theme-color" content="#0a192f" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link
@@ -23,18 +23,18 @@
     }
 
     :root {
-      --p: #ff8a00;
-      --p2: #ff6b6b;
-      --pl: #fff2df;
-      --pl2: #ffd8b0;
-      --g: #4caf50;
+      --p: #0a192f;
+      --p2: #172a45;
+      --pl: #e6f1ff;
+      --pl2: #ccd6f6;
+      --g: #10b981;
       --gl: #effcf1;
       --g2: #d9f5de;
       --r: #ef4444;
       --rl: #fff1f2;
       --r2: #fecdd3;
-      --o: #f59e0b;
-      --ol: #fff8e8;
+      --o: #d4af37;
+      --ol: #fdfaf0;
       --v: #8b5cf6;
       --vl: #f5f3ff;
       --c: #4da8da;
@@ -43,17 +43,17 @@
       --pkl: #fff0f6;
       --y: #eab308;
       --yl: #fffbe6;
-      --ink: #27364a;
-      --ink2: #42546b;
+      --ink: #0f172a;
+      --ink2: #1e293b;
       --ink3: #64748b;
       --ink4: #94a3b8;
       --ink5: #cbd5e1;
-      --bg: #fff9f0;
+      --bg: #f8fafc;
       --card: #ffffff;
-      --card2: #fffdfa;
-      --card3: #fff3e3;
-      --border: #f1e2ce;
-      --border2: #e6cfb0;
+      --card2: #f1f5f9;
+      --card3: #e2e8f0;
+      --border: #e2e8f0;
+      --border2: #cbd5e1;
       --radius: 16px;
       --radius-lg: 24px;
       --radius-xl: 32px;
@@ -2952,7 +2952,51 @@
 @media(max-width:920px){ .welcome-block,.admission-wrap{grid-template-columns:1fr}.program-strip{grid-template-columns:repeat(2,1fr)}.clean-hero.hero-slideshow{height:520px}.clean-nav{padding:12px 16px}.clean-shell{padding:32px 18px 24px} }
 @media(max-width:620px){ .land-links{display:none}.clean-hero .hs-title{font-size:2.7rem}.welcome-photo,.welcome-photo img{min-height:300px}.program-strip,.admission-grid,.clean-stats{grid-template-columns:1fr}.clean-stats div{border-right:0;border-bottom:1px solid #edf0e5}.clean-stats div:last-child{border-bottom:0} }
 
-</style>
+
+    /* PREMIUM LANDING CSS */
+    .ox-landing { font-family: 'Inter', system-ui, sans-serif; background: #f8fafc; color: #1e293b; margin: 0; padding: 0; overflow-x: hidden; min-height: 100vh; }
+    .ox-nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 5%; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 1000; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .ox-brand { font-size: 1.5rem; font-weight: 800; color: #0a192f; letter-spacing: -0.5px; }
+    .ox-nav-links { display: flex; gap: 32px; }
+    .ox-nav-links a { text-decoration: none; color: #475569; font-weight: 500; transition: color 0.3s; font-size: 0.95rem; }
+    .ox-nav-links a:hover { color: #0a192f; }
+    .ox-btn { background: #0a192f; color: white; padding: 10px 24px; border-radius: 50px; font-weight: 600; text-decoration: none; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border: none; font-size: 0.95rem; }
+    .ox-btn:hover { background: #112a4f; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(10, 25, 47, 0.2); }
+    .ox-hero { padding: 80px 5% 120px; display: flex; align-items: center; justify-content: space-between; gap: 40px; min-height: calc(100vh - 80px); background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); position: relative; overflow: hidden;}
+    .ox-hero::before { content: ''; position: absolute; top: -20%; right: -10%; width: 60vw; height: 60vw; background: radial-gradient(circle, rgba(212,175,55,0.12) 0%, rgba(255,255,255,0) 70%); border-radius: 50%; z-index: 0; }
+    .ox-hero-content { flex: 1; max-width: 600px; z-index: 1; }
+    .ox-badge { display: inline-block; background: rgba(10, 25, 47, 0.05); color: #0a192f; padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; margin-bottom: 24px; letter-spacing: 0.5px; text-transform: uppercase; border: 1px solid rgba(10,25,47,0.1);}
+    .ox-hero h1 { font-size: 4.5rem; line-height: 1.05; color: #0a192f; margin-bottom: 24px; font-weight: 800; letter-spacing: -1.5px;}
+    .ox-hero h1 span { color: #d4af37; }
+    .ox-hero p { font-size: 1.25rem; color: #475569; margin-bottom: 40px; line-height: 1.6; max-width: 500px; }
+    .ox-hero-img { flex: 1; z-index: 1; display: flex; justify-content: center; position: relative; }
+    .ox-hero-img img { max-width: 100%; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); animation: float 6s ease-in-out infinite; object-fit: cover; aspect-ratio: 4/3; }
+    
+    .ox-features { padding: 120px 5%; background: white; position: relative; z-index: 2; border-top: 1px solid #f1f5f9; }
+    .ox-sec-head { text-align: center; margin-bottom: 60px; }
+    .ox-sec-head h2 { font-size: 2.75rem; color: #0a192f; margin-bottom: 16px; font-weight: 800; letter-spacing: -0.5px; }
+    .ox-sec-head p { color: #64748b; font-size: 1.15rem; max-width: 600px; margin: 0 auto; line-height: 1.6; }
+    .ox-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 32px; max-width: 1200px; margin: 0 auto; }
+    .ox-card { padding: 40px; border-radius: 24px; background: #ffffff; border: 1px solid #e2e8f0; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); cursor: default; }
+    .ox-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px -15px rgba(10,25,47,0.15); border-color: #d4af37; }
+    .ox-card-icon { width: 56px; height: 56px; border-radius: 16px; background: rgba(10,25,47,0.05); color: #0a192f; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; margin-bottom: 24px; transition: all 0.3s; }
+    .ox-card:hover .ox-card-icon { background: #0a192f; color: white; transform: scale(1.05) rotate(-5deg); }
+    .ox-card h3 { font-size: 1.4rem; color: #0a192f; margin-bottom: 12px; font-weight: 700; }
+    .ox-card p { color: #475569; line-height: 1.65; font-size: 1.05rem; margin: 0; }
+    
+    @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-15px); } 100% { transform: translateY(0px); } }
+    
+    @media (max-width: 992px) {
+        .ox-hero { flex-direction: column; text-align: center; padding: 60px 5% 80px; }
+        .ox-hero-content { margin-bottom: 40px; max-width: 100%; }
+        .ox-hero h1 { font-size: 3.5rem; }
+        .ox-hero p { margin: 0 auto 30px auto; }
+        .ox-nav-links { display: none; }
+    }
+    @media (max-width: 480px) {
+        .ox-hero h1 { font-size: 2.75rem; }
+    }
+\n</style>
 
 
 
@@ -3378,403 +3422,53 @@
 <body>
 
 <!-- LANDING -->
-<div id="landing-page" class="text-on-surface font-body-lg overflow-x-hidden">
-<div aria-hidden="true" class="fixed inset-0 z-[100] pointer-events-none opacity-[0.04] mix-blend-multiply"><svg class="w-full h-full" viewbox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="paper-noise"><feturbulence basefrequency="0.65" numoctaves="3" stitchtiles="stitch" type="fractalNoise"></feturbulence><fecolormatrix type="saturate" values="0"></fecolormatrix></filter><rect filter="url(#paper-noise)" height="100%" width="100%"></rect></svg></div>
-<!-- Navigation Header (Desktop) -->
-<header class="w-full top-0 px-notebook-padding pt-stack-sm bg-transparent flat no shadows hidden md:flex justify-between items-center max-w-7xl mx-auto z-50 px-8 relative sticky top-0 backdrop-blur-sm bg-surface-bright/80">
-<div class="font-headline-md text-headline-md text-primary dark:text-primary-fixed italic tracking-tight cursor-pointer hover:opacity-80 transition-opacity duration-300">
-            The Student's Notebook
+<div id="landing-page" class="ox-landing">
+    <nav class="ox-nav">
+        <div class="ox-brand" id="land-name">Oxford Excellence Academy</div>
+        <div class="ox-nav-links">
+            <a href="#about">About</a>
+            <a href="#curriculum">Curriculum</a>
+            <a href="#admissions">Admissions</a>
         </div>
-<nav class="flex gap-gutter items-center font-annotation">
-<a class="text-primary dark:text-primary-fixed border-b-2 border-primary dark:border-primary-fixed pb-1 hover:opacity-80 transition-opacity duration-300 translate-y-0.5 transition-transform text-2xl" href="javascript:void(0)">Our Vision</a>
-<a class="text-on-surface-variant dark:text-on-tertiary-container hover:text-primary transition-colors hover:opacity-80 transition-opacity duration-300 text-2xl" href="javascript:void(0)">Curriculum</a>
-<a class="text-on-surface-variant dark:text-on-tertiary-container hover:text-primary transition-colors hover:opacity-80 transition-opacity duration-300 text-2xl" href="javascript:void(0)">Admissions</a>
-<a class="text-on-surface-variant dark:text-on-tertiary-container hover:text-primary transition-colors hover:opacity-80 transition-opacity duration-300 text-2xl" href="javascript:void(0)">The Faculty</a>
-<button class="bg-primary text-on-primary px-6 py-2 rounded-full font-label-caps text-label-caps hover:bg-primary-container transition-colors shadow-md hover:shadow-lg active:translate-y-0.5 active:shadow-sm font-sans" onclick="openLogin()">Enroll Now</button>
-</nav>
-</header>
-<!-- Mobile Header -->
-<header class="md:hidden flex justify-between items-center p-4 sticky top-0 z-50 bg-surface-bright/90 backdrop-blur-sm shadow-sm">
-<div class="font-headline-md text-xl text-primary italic tracking-tight">The Student's Notebook</div>
-<button class="p-2 text-on-surface-variant" id="menu-btn">
-<span class="material-symbols-outlined">menu</span>
-</button>
-</header>
-<!-- Mobile Navigation Drawer -->
-<div class="fixed left-0 top-0 h-full w-80 rounded-r-xl shadow-2xl border-r border-outline-variant bg-surface-container-lowest dark:bg-tertiary-container z-[60] overflow-y-auto flex flex-col" id="nav-drawer">
-<div class="p-notebook-padding border-b border-outline-variant flex justify-between items-start">
-<div>
-<img alt="Academy Crest" class="w-16 h-16 object-contain mb-4" data-alt="Academy Crest logo, high quality, elegant design, academic aesthetic, dark blue and gold colors, on light background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAl5x_Ig8rBg_WJig0frhVhE8Ar8MyFLZnsYYWJTsWvxfVj6_BR9BDXIwUds2gakGef-7oR7I-CHkjm5Y2TdyXVoMEdnDEgNexvrkSLV2tvh2p-zFF_MXB_CM_T50Bqs-pptGSpn3w6mbIEKwNLdl3KTfXU4FfSK6i6IAoZKM8emVnsOm3jTKvMkPUg32SOs1g9sPs7dwfeLUukfOe2_E6YYO19nJL8JEWyJnVERM6c4X9ix_FR1fg8U-1PogkpwU7hw7qjvObI54U9"/>
-<h2 class="font-display-lg-mobile text-display-lg-mobile text-primary dark:text-primary-fixed leading-tight">The Progressive Academy</h2>
-<p class="font-annotation text-annotation text-on-surface-variant mt-2">Established 1924</p>
-</div>
-<button class="p-2 text-on-surface-variant" id="close-menu-btn">
-<span class="material-symbols-outlined">close</span>
-</button>
-</div>
-<nav class="flex-1 py-4 flex flex-col gap-2">
-<a class="flex items-center gap-3 bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary rounded-full mx-2 my-1 px-4 py-3 scale-95 transition-all" href="javascript:void(0)">
-<span class="material-symbols-outlined">book</span>
-<span class="font-body-lg text-body-lg">Home</span>
-</a>
-<a class="flex items-center gap-3 text-on-surface-variant dark:text-on-tertiary-fixed-variant hover:bg-surface-container-high mx-2 my-1 rounded-full px-4 py-3 hover:bg-surface-dim dark:hover:bg-tertiary" href="javascript:void(0)">
-<span class="material-symbols-outlined">edit</span>
-<span class="font-body-lg text-body-lg">Assignments</span>
-</a>
-<a class="flex items-center gap-3 text-on-surface-variant dark:text-on-tertiary-fixed-variant hover:bg-surface-container-high mx-2 my-1 rounded-full px-4 py-3 hover:bg-surface-dim dark:hover:bg-tertiary" href="javascript:void(0)">
-<span class="material-symbols-outlined">history</span>
-<span class="font-body-lg text-body-lg">Archives</span>
-</a>
-<a class="flex items-center gap-3 text-on-surface-variant dark:text-on-tertiary-fixed-variant hover:bg-surface-container-high mx-2 my-1 rounded-full px-4 py-3 hover:bg-surface-dim dark:hover:bg-tertiary" href="javascript:void(0)">
-<span class="material-symbols-outlined">map</span>
-<span class="font-body-lg text-body-lg">Campus Map</span>
-</a>
-</nav>
-<div class="p-4 border-t border-outline-variant">
-<button class="w-full bg-primary text-on-primary py-3 rounded-full font-label-caps text-label-caps mb-4" onclick="openLogin()">Request Prospectus</button>
-<div class="flex justify-around text-on-surface-variant">
-<a class="flex flex-col items-center gap-1 hover:text-primary" href="javascript:void(0)"><span class="material-symbols-outlined">settings</span><span class="text-sm">Settings</span></a>
-<a class="flex flex-col items-center gap-1 hover:text-primary" href="javascript:void(0)"><span class="material-symbols-outlined">help</span><span class="text-sm">Support</span></a>
-</div>
-</div>
-</div>
-<!-- Main Content Wrapper (The Desk) -->
-<main class="max-w-7xl mx-auto py-stack-lg px-4 md:px-8 relative">
-<!-- Notebook Cover (Hero) - Now an Open Book -->
-<section class="min-h-[819px] flex items-center justify-center relative mb-stack-lg overflow-visible pt-12 pb-24 bg-[#1a2332] rounded-xl shadow-[inset_0_20px_50px_rgba(0,0,0,0.5)]">
-<!-- Desk Texture -->
-<div class="absolute inset-0 z-0 pointer-events-none opacity-40 mix-blend-multiply bg-[url('https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&amp;fit=crop&amp;q=80&amp;w=2000')] bg-cover"></div>
-<div class="absolute inset-0 z-0 bg-gradient-to-b from-transparent to-black/30 pointer-events-none rounded-xl"></div>
-<!-- Open Book Container -->
-<div class="open-book-container relative z-10 w-full lg:w-[90%] max-w-6xl aspect-[2/1.2] mx-auto flex drop-shadow-[0_30px_40px_rgba(0,0,0,0.6)]">
-<!-- Left Page -->
-<div class="book-page left-page w-1/2 h-full rounded-l-lg border-y border-l border-black/10 flex flex-col justify-center items-center p-8 md:p-16 relative origin-right z-20">
-<div class="dog-ear dog-ear-bl"></div>
-<div class="w-full max-w-sm text-center relative z-10">
-<h1 class="font-display-lg text-4xl md:text-6xl mb-8 gold-foil">
-                The Student's Notebook
-            </h1>
-<div class="w-24 h-1 bg-gradient-to-r from-transparent via-secondary to-transparent mx-auto mb-8 opacity-50"></div>
-<p class="handwritten text-3xl md:text-4xl text-on-surface-variant leading-relaxed">
-                Welcome to our story...<br/>
-                Every page a new adventure,<br/>
-                every lesson a step forward.
-            </p>
-</div>
-<!-- Decorative subtle lines mimicking lined paper -->
-<div class="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(transparent_95%,_#000_100%)] bg-[length:100%_2rem] z-0"></div>
-</div>
-<!-- Central Spine -->
-<div class="w-8 h-full book-spine z-10 flex justify-center shadow-[0_0_10px_rgba(0,0,0,0.3)]">
-<div class="w-[1px] h-full bg-black/10 mx-auto"></div>
-<div class="w-[1px] h-full bg-white/20 mx-auto"></div>
-</div>
-<!-- Right Page (Interactive Album) -->
-<div class="book-page right-page w-1/2 h-full rounded-r-lg border-y border-r border-black/10 relative origin-left z-20 p-6 md:p-12 flex flex-col">
-<div class="dog-ear dog-ear-tr"></div>
-<!-- Interactive Controls -->
-<div class="flex justify-between items-center mb-6 z-30">
-<h2 class="handwritten text-3xl text-primary">Campus Gallery</h2>
-<div class="flex gap-2">
-<button class="w-10 h-10 rounded-full bg-surface-container-high hover:bg-surface-variant flex items-center justify-center text-primary shadow-sm transition-colors" id="prev-btn">
-<span class="material-symbols-outlined">chevron_left</span>
-</button>
-<button class="w-10 h-10 rounded-full bg-surface-container-high hover:bg-surface-variant flex items-center justify-center text-primary shadow-sm transition-colors" id="next-btn">
-<span class="material-symbols-outlined">chevron_right</span>
-</button>
-</div>
-</div>
-<!-- 3D Flipping Photo Container -->
-<div class="flex-1 relative flip-container cursor-pointer group" id="photo-flip-container">
-<div class="tape absolute -top-4 left-1/2 -ml-8 w-16 h-6 z-40"></div>
-<div class="flip-inner" id="flip-inner">
-<!-- Front Side -->
-<div class="flip-front bg-white p-4 pb-16 shadow-xl border border-black/5 flex flex-col h-full transform transition-transform group-hover:scale-[1.01]">
-<div class="flex-1 bg-surface-container overflow-hidden relative">
-<img alt="Library" class="w-full h-full object-cover" id="front-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDscdfhXJ4oiAYdCPC2us_DAT1u285lssl77RbDzQm3-GXfDxKmAX8E_3geVviQhUnT5oEmoefGtiKgrsKaHsft9j3venaD4skr1W4uJ_dfp-suWUdOHwWDCKDh4a7b2hKpqL2MIDaF1u9Ym_oaSMBo3OH3L_IteS1jewJwS_kw9vykMGzxXodtwbq2ISv2OXc-QyDET_Nw7rI5c1yqgCHLBqAk56Mhff6HL_VGo-5C9BbWt32XXBoUhWvGqT5ezmMxM5ZVVcsVD2o9"/>
-</div>
-<p class="handwritten text-2xl absolute bottom-4 w-full text-center text-on-surface-variant left-0" id="front-caption">Campus Courtyard</p>
-</div>
-<!-- Back Side -->
-<div class="flip-back bg-white p-4 pb-16 shadow-xl border border-black/5 flex flex-col h-full">
-<div class="flex-1 bg-surface-container overflow-hidden relative">
-<img alt="Tech Hub" class="w-full h-full object-cover" id="back-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzBsKK9GUcThBwiy1b4lmuJqUuBZhpRdFHnxLas1kpnbSphuVjTjQ7hF6EUfW_cZzgoClHWIjfXd-1DtHgBHZcAmBZ1kJRMV5W7pwlxku-eUBstkRzv0a7WnswRYEkRKVsetNp48dCGy14KtjZDoEIaHr5kUboT6Yl54oEcI8nLwBEQWQXF0Cs0pbPr4tKAMemoqxNEaaiFi6rVFFttwGed7Dg8QYMa0Gi-JuVgmZmKLVZ8NAaHbPJgAxwrIWhxFX8GMeI4-Jdz9QT"/>
-</div>
-<p class="handwritten text-2xl absolute bottom-4 w-full text-center text-on-surface-variant left-0" id="back-caption">The Tech Hub</p>
-</div>
-</div>
-</div>
-<!-- Decorative lines -->
-<div class="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(transparent_95%,_#000_100%)] bg-[length:100%_2rem] z-0"></div>
-</div>
-</div>
-</section>
-<!-- Open Notebook Spread Wrapper -->
-<div class="notebook-texture rounded-lg md:rounded-xl min-h-screen p-4 md:p-notebook-padding shadow-2xl relative">
-<div class="content-layer">
-<!-- Welcome Page -->
-<div class="page-turn flipped-down">
-<section class="grid grid-cols-1 md:grid-cols-2 gap-gutter min-h-[614px]">
-<div class="pl-8 md:pl-16 pt-8">
-<h2 class="handwritten text-4xl text-primary mb-6">Our Philosophy...</h2>
-<p class="handwritten text-2xl leading-relaxed text-on-surface-variant max-w-prose">
-                            Dear students and parents,<br/><br/>
-                            Education is not just about filling a bucket, but lighting a fire. At The Progressive Academy, we believe every page you turn here is a new opportunity to discover, create, and lead.<br/><br/>
-                            Let's write your future together.<br/><br/>
-<span class="text-primary-container">- The Principal</span>
-</p>
-</div>
-<div class="relative p-8 flex items-center justify-center">
-<div class="polaroid transform rotate-3">
-<img alt="School Building" class="w-full h-auto aspect-video object-cover" data-alt="A beautiful watercolor illustration of a classic, ivy-covered brick school building with tall windows and a clock tower, set on a sunny day with green lawns, bright and optimistic mood, light mode aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0Cp_BuUqmYy0NX8RSfybCk-vURgWvn9dJe6YlmWMksgLwJU5gSQMc5wOLpvZ80qXLNwmTtp3tmRCMfyMPu5NCWpulrqPIH4mzJfSAcTjMOli-CyvXi4hdqvZcye5_3gl-5zYV5Abwgaa8x-Y02wKH8-8mbvXZ5ChNbnrlLgQ0AFD9S5l6SsphVl1PdCDEfCowNKSQ_qkjO9eY0eyRDv8JgHwp2brBHy8Qf5VK7Avqa-6XJjye-7pr_1JE6cyu_wAPgWW3Lh5ElhWT"/>
-<p class="handwritten text-xl text-center mt-4 text-on-surface-variant">Our Campus, Est. 1924</p>
-</div>
-<div class="tape absolute top-4 left-1/2 -ml-8 w-16 h-6"></div>
-</div>
-</section>
-</div>
-<!-- Why Choose Us (Sticky Notes) -->
-<div class="page-turn flipped-down">
-<section class="py-8">
-<h2 class="font-headline-md text-headline-md text-center mb-12 text-primary">The Progressive Difference</h2>
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 px-4 md:px-12">
-<!-- Note 1 -->
-<div class="sticky-note bg-secondary-container p-6 aspect-square flex flex-col justify-center relative rotate-1">
-<div class="tape absolute -top-3 left-1/2 -ml-6 w-12 h-5"></div>
-<span class="material-symbols-outlined text-4xl mb-4 text-on-secondary-container">school</span>
-<h3 class="font-body-lg font-bold mb-2 text-on-secondary-container">Qualified Teachers</h3>
-<p class="font-body-md text-on-secondary-container/80">Experts who <span class="pencil-underline">inspire</span> and guide.</p>
-</div>
-<!-- Note 2 -->
-<div class="sticky-note bg-surface-container-high p-6 aspect-square flex flex-col justify-center relative -rotate-2 mt-4 md:mt-0">
-<div class="tape absolute -top-3 left-1/2 -ml-6 w-12 h-5"></div>
-<span class="material-symbols-outlined text-4xl mb-4 text-primary">desktop_mac</span>
-<h3 class="font-body-lg font-bold mb-2 text-primary">Smart Classrooms</h3>
-<p class="font-body-md text-on-surface-variant">Technology meeting <span class="pencil-underline">tradition</span>.</p>
-</div>
-<!-- Note 3 -->
-<div class="sticky-note bg-surface-dim p-6 aspect-square flex flex-col justify-center relative rotate-2 mt-4 lg:mt-0">
-<div class="tape absolute -top-3 left-1/2 -ml-6 w-12 h-5"></div>
-<span class="material-symbols-outlined text-4xl mb-4 text-on-surface-variant">favorite</span>
-<h3 class="font-body-lg font-bold mb-2 text-on-surface-variant">Character Building</h3>
-<p class="font-body-md text-on-surface-variant/80">Focus on <span class="pencil-underline">values</span> and ethics.</p>
-</div>
-<!-- Note 4 -->
-<div class="sticky-note bg-secondary-fixed p-6 aspect-square flex flex-col justify-center relative -rotate-1 mt-4 lg:mt-0">
-<div class="tape absolute -top-3 left-1/2 -ml-6 w-12 h-5"></div>
-<span class="material-symbols-outlined text-4xl mb-4 text-on-secondary-fixed">sports_basketball</span>
-<h3 class="font-body-lg font-bold mb-2 text-on-secondary-fixed">Co-Curriculars</h3>
-<p class="font-body-md text-on-secondary-fixed/80">Developing <span class="pencil-underline">all-round</span> talents.</p>
-</div>
-</div>
-</section>
-</div>
-<!-- Journey Timeline -->
-<div class="page-turn flipped-down">
-<section class="py-12 border-t-2 border-dashed border-outline-variant/50 relative">
-<div class="absolute -top-4 right-12 text-outline-variant rotate-12">
-<span class="material-symbols-outlined text-4xl">edit</span>
-</div>
-<h2 class="font-headline-md text-headline-md pl-8 md:pl-16 mb-8 text-primary">The Learning Journey</h2>
-<div class="relative px-8 md:px-16 pb-8">
-<!-- Horizontal Line -->
-<div class="absolute top-1/2 left-16 right-16 h-1 bg-outline-variant/50 hidden md:block rounded-full"></div>
-<div class="flex flex-col md:flex-row justify-between gap-8 relative z-10">
-<!-- Stage 1 -->
-<div class="flex flex-col items-center text-center">
-<div class="w-16 h-16 rounded-full bg-surface-bright border-4 border-primary flex items-center justify-center mb-4 shadow-md">
-<span class="material-symbols-outlined text-primary">child_care</span>
-</div>
-<h4 class="font-bold font-body-lg text-primary">Nursery</h4>
-<p class="font-annotation text-xl text-on-surface-variant mt-2">Curiosity begins</p>
-</div>
-<!-- Stage 2 -->
-<div class="flex flex-col items-center text-center">
-<div class="w-16 h-16 rounded-full bg-surface-bright border-4 border-primary flex items-center justify-center mb-4 shadow-md">
-<span class="material-symbols-outlined text-primary">backpack</span>
-</div>
-<h4 class="font-bold font-body-lg text-primary">Primary</h4>
-<p class="font-annotation text-xl text-on-surface-variant mt-2">Foundations built</p>
-</div>
-<!-- Stage 3 -->
-<div class="flex flex-col items-center text-center">
-<div class="w-16 h-16 rounded-full bg-surface-bright border-4 border-primary flex items-center justify-center mb-4 shadow-md">
-<span class="material-symbols-outlined text-primary">science</span>
-</div>
-<h4 class="font-bold font-body-lg text-primary">Middle</h4>
-<p class="font-annotation text-xl text-on-surface-variant mt-2">Exploring depth</p>
-</div>
-<!-- Stage 4 -->
-<div class="flex flex-col items-center text-center">
-<div class="w-16 h-16 rounded-full bg-surface-bright border-4 border-secondary-fixed-dim flex items-center justify-center mb-4 shadow-md">
-<span class="material-symbols-outlined text-secondary-fixed-dim">emoji_events</span>
-</div>
-<h4 class="font-bold font-body-lg text-primary">Matric</h4>
-<p class="font-annotation text-xl text-on-surface-variant mt-2">Ready to lead</p>
-</div>
-</div>
-</div>
-</section>
-</div>
-<!-- Facilities (Scrapbook) -->
-<div class="page-turn flipped-down">
-<section class="pl-8 md:pl-16 pr-4 pb-8">
-<h2 class="handwritten text-4xl mb-8 text-primary">Our Campus Scrapbook</h2>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-<div class="relative">
-<div class="tape absolute -top-4 -left-4 w-20 h-6 z-20"></div>
-<div class="tape absolute -bottom-4 -right-4 w-20 h-6 z-20"></div>
-<img alt="Computer Lab" class="w-full h-64 object-cover rounded shadow-md transform -rotate-1 hover:rotate-0 transition-transform" data-alt="A bright, modern computer lab with rows of sleek silver monitors on light wooden desks. Students are engaged. Soft natural light streaming from large windows. Minimalist, organized, educational aesthetic, light mode." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzBsKK9GUcThBwiy1b4lmuJqUuBZhpRdFHnxLas1kpnbSphuVjTjQ7hF6EUfW_cZzgoClHWIjfXd-1DtHgBHZcAmBZ1kJRMV5W7pwlxku-eUBstkRzv0a7WnswRYEkRKVsetNp48dCGy14KtjZDoEIaHr5kUboT6Yl54oEcI8nLwBEQWQXF0Cs0pbPr4tKAMemoqxNEaaiFi6rVFFttwGed7Dg8QYMa0Gi-JuVgmZmKLVZ8NAaHbPJgAxwrIWhxFX8GMeI4-Jdz9QT"/>
-<p class="handwritten text-2xl mt-4 text-center text-on-surface-variant">The Tech Hub</p>
-</div>
-<div class="relative mt-8 md:mt-0">
-<div class="tape absolute -top-4 right-4 w-16 h-6 z-20"></div>
-<img alt="Library" class="w-full h-64 object-cover rounded shadow-md transform rotate-2 hover:rotate-0 transition-transform" data-alt="A cozy, sunlit library filled with tall wooden bookshelves. Warm reading nooks with comfortable seating. Dust motes visible in the sunbeams. Academic, serene, inspiring mood, light mode aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFsDmwWlJPdru7lex5CAh62aGpLHDfqkiWQ5fMTCmWSfXvPDEo-DY54_3hFAnV02K7ougOFGCpcPye7oukEmByE3-P3Y2ppaKigD7OoMGj4va3CxQB0enzi9ShMvPOQVeJwFM4MIufjihfKrWxD2LxklUfrbmctTWeDACw-tPs0IGapB15qAeOZV7yNw7MtekZeAoiPQDgqq7lln_SvoiDUYG5yDzhqfR1g9sZbZH8UVwlNfdkOT6pMsR7U224Jfl0KSFYGZxuH6ZJ"/>
-<p class="handwritten text-2xl mt-4 text-center text-on-surface-variant">Library Moments</p>
-</div>
-</div>
-</section>
-</div>
-<!-- Admission Checklist & Final Call -->
-<div class="page-turn border-b-0 mb-0 pb-0 flipped-down">
-<section class="grid grid-cols-1 md:grid-cols-2 gap-12 pl-8 md:pl-16 pr-4 pt-12">
-<div>
-<h2 class="font-headline-md text-headline-md mb-6 text-primary">Admission Checklist</h2>
-<ul class="space-y-4 handwritten text-2xl text-on-surface-variant">
-<li class="flex items-center gap-3">
-<span class="w-8 h-8 rounded-full border-2 border-primary text-primary flex items-center justify-center text-xl">1</span>
-                                Visit School Campus
-                            </li>
-<li class="flex items-center gap-3">
-<span class="w-8 h-8 rounded-full border-2 border-primary text-primary flex items-center justify-center text-xl">2</span>
-                                Submit Application Form
-                            </li>
-<li class="flex items-center gap-3">
-<span class="w-8 h-8 rounded-full border-2 border-primary text-primary flex items-center justify-center text-xl">3</span>
-                                Student Assessment
-                            </li>
-<li class="flex items-center gap-3">
-<span class="w-8 h-8 rounded-full border-2 border-secondary-fixed-dim text-secondary-fixed-dim flex items-center justify-center text-xl">4</span>
-                                Enrollment Confirmation
-                            </li>
-</ul>
-</div>
-<div class="flex flex-col items-center justify-center text-center bg-surface-container-low p-8 rounded-xl border border-outline-variant/30 relative">
-<div class="absolute top-2 right-2 text-secondary-fixed-dim">
-<span class="material-symbols-outlined text-3xl">star</span>
-</div>
-<h2 class="handwritten text-5xl text-primary mb-4 transform -rotate-2">Admissions Open 2026</h2>
-<p class="font-body-lg text-on-surface-variant mb-8">Your Child's Future Starts Here.</p>
-<button class="bg-primary text-on-primary px-8 py-4 rounded-full font-label-caps text-label-caps text-lg hover:bg-primary-container transition-colors shadow-lg hover:shadow-xl active:translate-y-1 flex items-center gap-2">
-                            Apply Now
-                            <span class="material-symbols-outlined">arrow_forward</span>
-</button>
-</div>
-</section>
-</div>
-</div>
-</div>
-</main>
-<!-- Footer -->
-<footer class="w-full mt-stack-lg rounded-t-xl bg-inverse-surface dark:bg-surface-container-highest shadow-inner w-full py-stack-md px-notebook-padding flex flex-col items-center gap-stack-sm text-center">
-<div class="font-label-caps text-label-caps text-secondary-fixed mb-2">The Progressive Academy</div>
-<div class="flex gap-4 mb-4">
-<a class="font-annotation text-annotation text-surface-variant dark:text-on-surface-variant hover:text-secondary-fixed-dim transition-colors opacity-90" href="javascript:void(0)">Privacy Policy</a>
-<span class="text-surface-variant">•</span>
-<a class="font-annotation text-annotation text-surface-variant dark:text-on-surface-variant hover:text-secondary-fixed-dim transition-colors opacity-90" href="javascript:void(0)">Terms of Service</a>
-<span class="text-surface-variant">•</span>
-<a class="font-annotation text-annotation text-surface-variant dark:text-on-surface-variant hover:text-secondary-fixed-dim transition-colors opacity-90" href="javascript:void(0)">Library Access</a>
-</div>
-<p class="font-annotation text-annotation text-inverse-on-surface dark:text-on-surface">© 2024 The Progressive Academy. All Rights Reserved.</p>
-</footer>
-<script>
-        // Simple Navigation Drawer Toggle
-        const menuBtn = document.getElementById('menu-btn');
-        const closeMenuBtn = document.getElementById('close-menu-btn');
-        const navDrawer = document.getElementById('nav-drawer');
+        <button class="ox-btn" onclick="openLogin()">Access Portal</button>
+    </nav>
 
-        menuBtn.addEventListener('click', () => {
-            navDrawer.classList.add('open');
-        });
+    <header class="ox-hero">
+        <div class="ox-hero-content">
+            <div class="ox-badge">World-Class Education</div>
+            <h1>Empowering the <span>Leaders</span> of Tomorrow</h1>
+            <p id="land-copy">Learn • Grow • Excel</p>
+            <button class="ox-btn" onclick="openLogin()" style="padding: 16px 36px; font-size: 1.15rem;">Student & Parent Login</button>
+        </div>
+        <div class="ox-hero-img">
+            <img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" alt="Oxford Excellence Students" />
+        </div>
+    </header>
 
-        closeMenuBtn.addEventListener('click', () => {
-            navDrawer.classList.remove('open');
-        });
-
-        // Page Flip Animation (Scroll)
-        const pages = document.querySelectorAll('.page-turn');
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.remove('flipped-up', 'flipped-down');
-                } else {
-                    if (entry.boundingClientRect.top < 0) {
-                        entry.target.classList.add('flipped-up');
-                        entry.target.classList.remove('flipped-down');
-                    } else {
-                        entry.target.classList.add('flipped-down');
-                        entry.target.classList.remove('flipped-up');
-                    }
-                }
-            });
-        }, {
-            threshold: 0.1,
-            rootMargin: "-20% 0px -20% 0px"
-        });
-
-        pages.forEach(page => {
-            observer.observe(page);
-        });
-        
-        // 3D Flip Album Logic
-        const albumData = [
-            { src: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDFsDmwWlJPdru7lex5CAh62aGpLHDfqkiWQ5fMTCmWSfXvPDEo-DY54_3hFAnV02K7ougOFGCpcPye7oukEmByE3-P3Y2ppaKigD7OoMGj4va3CxQB0enzi9ShMvPOQVeJwFM4MIufjihfKrWxD2LxklUfrbmctTWeDACw-tPs0IGapB15qAeOZV7yNw7MtekZeAoiPQDgqq7lln_SvoiDUYG5yDzhqfR1g9sZbZH8UVwlNfdkOT6pMsR7U224Jfl0KSFYGZxuH6ZJ', caption: 'Extensive Library' },
-            { src: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCzBsKK9GUcThBwiy1b4lmuJqUuBZhpRdFHnxLas1kpnbSphuVjTjQ7hF6EUfW_cZzgoClHWIjfXd-1DtHgBHZcAmBZ1kJRMV5W7pwlxku-eUBstkRzv0a7WnswRYEkRKVsetNp48dCGy14KtjZDoEIaHr5kUboT6Yl54oEcI8nLwBEQWQXF0Cs0pbPr4tKAMemoqxNEaaiFi6rVFFttwGed7Dg8QYMa0Gi-JuVgmZmKLVZ8NAaHbPJgAxwrIWhxFX8GMeI4-Jdz9QT', caption: 'The Tech Hub' },
-            { src: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC0Cp_BuUqmYy0NX8RSfybCk-vURgWvn9dJe6YlmWMksgLwJU5gSQMc5wOLpvZ80qXLNwmTtp3tmRCMfyMPu5NCWpulrqPIH4mzJfSAcTjMOli-CyvXi4hdqvZcye5_3gl-5zYV5Abwgaa8x-Y02wKH8-8mbvXZ5ChNbnrlLgQ0AFD9S5l6SsphVl1PdCDEfCowNKSQ_qkjO9eY0eyRDv8JgHwp2brBHy8Qf5VK7Avqa-6XJjye-7pr_1JE6cyu_wAPgWW3Lh5ElhWT', caption: 'Campus Grounds' }
-        ];
-
-        let currentIndex = 0;
-        let isFlipped = false;
-        
-        const flipInner = document.getElementById('flip-inner');
-        const prevBtn = document.getElementById('prev-btn');
-        const nextBtn = document.getElementById('next-btn');
-        const flipContainer = document.getElementById('photo-flip-container');
-        
-        const frontImg = document.getElementById('front-img');
-        const frontCaption = document.getElementById('front-caption');
-        const backImg = document.getElementById('back-img');
-        const backCaption = document.getElementById('back-caption');
-
-        function updateAlbum(direction) {
-            if (direction === 'next') {
-                currentIndex = (currentIndex + 1) % albumData.length;
-            } else {
-                currentIndex = (currentIndex - 1 + albumData.length) % albumData.length;
-            }
-            
-            isFlipped = !isFlipped;
-            
-            // Pre-load the next image on the hidden side before flipping
-            if (isFlipped) {
-                backImg.src = albumData[currentIndex].src;
-                backCaption.textContent = albumData[currentIndex].caption;
-                flipInner.classList.add('is-flipped');
-            } else {
-                frontImg.src = albumData[currentIndex].src;
-                frontCaption.textContent = albumData[currentIndex].caption;
-                flipInner.classList.remove('is-flipped');
-            }
-        }
-
-        prevBtn.addEventListener('click', () => updateAlbum('prev'));
-        nextBtn.addEventListener('click', () => updateAlbum('next'));
-        flipContainer.addEventListener('click', () => updateAlbum('next'));
-
-    </script>
-
+    <section class="ox-features" id="about">
+        <div class="ox-sec-head">
+            <h2>Our Educational Pillars</h2>
+            <p>We provide a comprehensive framework designed to nurture academic brilliance, personal growth, and unparalleled success.</p>
+        </div>
+        <div class="ox-grid">
+            <div class="ox-card">
+                <div class="ox-card-icon">📚</div>
+                <h3>Rigorous Curriculum</h3>
+                <p>Our globally recognized syllabus challenges students to think critically and master complex concepts across all disciplines.</p>
+            </div>
+            <div class="ox-card">
+                <div class="ox-card-icon">🌱</div>
+                <h3>Holistic Growth</h3>
+                <p>Beyond academics, we focus on character building, leadership skills, and emotional intelligence for well-rounded development.</p>
+            </div>
+            <div class="ox-card">
+                <div class="ox-card-icon">🏆</div>
+                <h3>Proven Excellence</h3>
+                <p>Join a legacy of top-tier achievers. Our students consistently excel in standardized testing and university placements.</p>
+            </div>
+        </div>
+    </section>
 </div>
-
 <!-- LOGIN -->
 <div id="login-page" style="display:none;">
   <div class="lp-mesh"></div>
@@ -3783,8 +3477,8 @@
     <div class="lp-brand">
       <div class="lp-logo" id="lp-logo" onclick="document.getElementById('logo-file').click()"></div>
       <input type="file" id="logo-file" accept="image/*" style="display:none;" onchange="uploadLogo(this)" />
-      <div class="lp-title" id="lp-title">EduNova</div>
-      <div class="lp-sub" id="lp-sub">School Management System</div>
+      <div class="lp-title" id="lp-title">Oxford Excellence Academy</div>
+      <div class="lp-sub" id="lp-sub">Learn • Grow • Excel</div>
     </div>
     <div class="lp-box">
       <div class="rtabs">
@@ -3799,7 +3493,7 @@
             onkeydown="if(event.key==='Enter')doLogin()" /><button type="button" class="pw-toggle" onclick="togglePassword('l-pass',this)">Show</button></div>
       <button class="login-btn" onclick="doLogin()">Sign In</button>
     </div>
-    <div class="lp-footer">TCPA OS - Data stored securely in your browser</div>
+    <div class="lp-footer">Oxford Excellence Academy Portal - Data stored securely in your browser</div>
   </div>
 </div>
 
@@ -3808,7 +3502,7 @@
   <div class="tb">
     <div class="tb-brand">
       <div class="tb-ico" id="tb-ico"></div>
-      <div class="tb-sname" id="tb-sname">EduNova</div>
+      <div class="tb-sname" id="tb-sname">Oxford Excellence Academy</div>
     </div>
     <div class="tb-r">
       <div class="tb-pill" id="tb-pill"></div>
@@ -3871,7 +3565,7 @@
       : null;
 
     /* ------------------------------- DATA ------------------------------- */
-    const SK = 'edunova_v5';
+    const SK = 'oxford_v1';
     let DB = null;
     let _sbPending = false;
     let _sbTimer   = null;
@@ -3977,6 +3671,10 @@
       const landBtn = document.getElementById('land-login-btn');
       if (landBtn) { landBtn.disabled = false; landBtn.textContent = 'Login to School Portal'; }
       DB = loadDB() || defaultDB();
+      DB.school.name = 'Oxford Excellence Academy';
+      DB.school.tagline = 'Learn • Grow • Excel';
+      DB.school.logo = 'logo.png';
+      DB.school.primaryColor = '#0a192f';
       const publicData = await loadPublicSite();
       if (publicData) mergePublicSite(publicData);
       stripStoredPasswords();
@@ -4143,7 +3841,7 @@
 
     function defaultDB() {
       return {
-        school: { name: 'TCPA', tagline: 'Playful learning, powerful management', logo: '', address: '', city: 'Karachi', phone: '', whatsapp: '', email: '', principal: '', primaryColor: '#ff8a00', founded: '', motto: '', website: '', heroText: 'A friendlier school website with complete management tools for staff and parents.' },
+        school: { name: 'Oxford Excellence Academy', tagline: 'Learn • Grow • Excel', logo: 'logo.png', address: '', city: 'Karachi', phone: '', whatsapp: '', email: '', principal: '', primaryColor: '#0a192f', founded: '', motto: 'Learn • Grow • Excel', website: '', heroText: 'Oxford Excellence Academy portal with complete management tools for staff and parents.' },
         admissions: [],
         classes: [
           { id: 'c1', name: 'Class 1', section: 'A', level: 'primary', capacity: 35, teacher: '' },
@@ -4518,31 +4216,19 @@
       return 'background:linear-gradient(135deg, ' + accent + ' 0%, #0f766e 100%);';
     }
 
-    function renderLandingSlides() {
-      const wrap = document.getElementById('hs-slides');
-      const dots = document.getElementById('hs-dots');
-      if (!wrap || !dots || !DB?.school) return;
-      const slides = (DB.school.slides && DB.school.slides.length ? DB.school.slides : defaultSlides()).slice(0, 4);
-      wrap.innerHTML = slides.map((slide, i) => '<div class="hs-slide ' + (i === 0 ? 'active' : '') + '" style="' + slideStyle(slide, i) + '"><div class="hs-overlay"><div class="hs-tag">' + (slide.icon || '') + ' ' + (slide.tag || '') + '</div><h2 class="hs-title">' + (slide.title || DB.school.name || 'Our School') + '</h2><p class="hs-sub">' + (slide.text || DB.school.tagline || '') + '</p><div class="hs-btns"><button class="btn btn-p" onclick="openLogin()">School Portal</button><button class="btn btn-gh" onclick="document.getElementById(\'land-contact\').scrollIntoView({behavior:\'smooth\'})">Contact Us</button></div></div><div class="hs-deco">' + (slide.icon || '') + '</div></div>').join('');
-      dots.innerHTML = slides.map((_, i) => '<span class="hs-dot ' + (i === 0 ? 'active' : '') + '" onclick="goSlide(' + i + ')"></span>').join('');
-      if (typeof _hsIdx !== 'undefined') _hsIdx = 0;
-    }
+    function renderLandingSlides() {}
 
     function applyBranding() {
       if (!DB || !DB.school) return;
       const s = DB.school;
       const setText = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
-      setText('doc-title', s.name || 'EduNova');
-      setText('tb-sname', s.name || 'EduNova');
-      setText('lp-title', s.name || 'EduNova');
-      setText('lp-sub', s.tagline || 'School Management System');
-      setText('land-name', s.name || 'EduNova');
-      setText('land-copy', s.tagline || 'School Management System');
-      const landHero = document.getElementById('land-hero-text'); if (landHero) landHero.textContent = s.heroText || 'A friendlier school website with complete management tools for staff and parents.';
-      const studentStat = document.getElementById('land-stat-students'); if (studentStat) studentStat.textContent = `${allStus().length}+`;
-      const teacherStat = document.getElementById('land-stat-teachers'); if (teacherStat) teacherStat.textContent = `${DB.users.filter(u => u.role === 'teacher').length}+`;
-      const classStat = document.getElementById('land-stat-classes'); if (classStat) classStat.textContent = `${DB.classes.length}+`;
-      ['tb-ico', 'lp-logo', 'land-mark'].forEach(id => {
+      setText('doc-title', s.name || 'Oxford Excellence Academy');
+      setText('tb-sname', s.name || 'Oxford Excellence Academy');
+      setText('lp-title', s.name || 'Oxford Excellence Academy');
+      setText('lp-sub', s.tagline || 'Learn • Grow • Excel');
+      setText('land-name', s.name || 'Oxford Excellence Academy');
+      setText('land-copy', s.tagline || 'Learn • Grow • Excel');
+      ['tb-ico', 'lp-logo'].forEach(id => {
         const el = document.getElementById(id); if (!el) return;
         el.innerHTML = s.logo ? `<img src="${s.logo}" alt="logo"/>` : '';
         el.style.background = s.logo ? 'transparent' : 'linear-gradient(135deg,' + (s.primaryColor || '#ff8a00') + ',var(--p2))';
@@ -5959,7 +5645,7 @@
 </div>`;
     }
     function saveAllSettings() { saveDB(); pushPublicSite(); applyBranding(); showToast('Settings saved and published', 'ts'); }
-    function exportData() { const blob = new Blob([JSON.stringify(DB, null, 2)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `edunova-backup-${today()}.json`; a.click(); showToast('? Exported', 'ts'); }
+    function exportData() { const blob = new Blob([JSON.stringify(DB, null, 2)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `oxford-backup-${today()}.json`; a.click(); showToast('? Exported', 'ts'); }
     function importData(inp) { const f = inp.files[0]; if (!f) return; const r = new FileReader(); r.onload = e => { try { DB = JSON.parse(e.target.result); saveDB(); applyBranding(); buildShell(); goPage('dashboard'); showToast('? Data imported', 'ts'); } catch { showToast('? Invalid file', 'te'); } }; r.readAsText(f); }
     async function resetAll() { if (!confirm(' Delete ALL data permanently?')) return; const v = prompt('Type RESET to confirm:'); if (v !== 'RESET') { showToast('Cancelled'); return; } localStorage.removeItem(SK); if (_sb) { try { await _sb.from('db_snapshot').delete().eq('id', 1); } catch(e) {} } location.reload(); }
 
