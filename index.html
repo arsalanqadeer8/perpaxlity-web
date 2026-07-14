@@ -5790,10 +5790,62 @@
     <div style="font-family:var(--head);font-size:1.5rem;font-weight:800;">${feeReminderQueue.length}</div>
       ${current ? `<div style="font-size:.82rem;font-weight:700;margin-top:6px;">Next: ${escHtml(current.student.name)}</div><div style="font-size:.72rem;color:var(--ink3);">${escHtml(current.firstFee.name)} - ${fmtMoney(current.firstFee.amount)} - ${normalizePhone(current.student.whatsapp)}</div>` : '<div class="muted">All reminders opened.</div>'}
   </div>
-  <div class="m-btns">
-      ${current ? '<button class="btn btn-wa" onclick="openNextBulkFeeReminder()">Open Next WhatsApp</button>' : ''}
+  <div class="m-btns" style="flex-wrap:wrap;">
+      ${current ? `<button class="btn btn-wa" onclick="openNextBulkFeeReminder()">Manual WA Send</button>
+      <button class="btn btn-p" style="background:#0ea5e9;color:#fff;" onclick="automateBulkFeeReminders()" id="btn-auto-wa">? Automate All via API</button>` : ''}
     <button class="btn btn-gh" onclick="closeModal()">Close</button>
   </div>`);
+    }
+    async function automateBulkFeeReminders() {
+      if (!feeReminderQueue.length) { showToast('Queue is empty'); return; }
+      if (!_sb) { showToast('Database connection missing for API.', 'te'); return; }
+      if (!confirm('This will send a WhatsApp message to all ' + feeReminderQueue.length + ' parents automatically via the Meta API. Make sure your Meta credentials and "fee_reminder" template are approved. Proceed?')) return;
+      
+      const btn = document.getElementById('btn-auto-wa');
+      if (btn) { btn.innerHTML = 'Sending...'; btn.disabled = true; }
+      
+      showToast(`Automating ${feeReminderQueue.length} messages via API...`, 'ts');
+      
+      let sent = 0;
+      let failed = 0;
+
+      for (let i = 0; i < feeReminderQueue.length; i++) {
+        const row = feeReminderQueue[i];
+        const phone = normalizePhone(row.student.whatsapp);
+        const amount = fmtMoney(row.sum.dueAmount);
+        
+        try {
+          const { data, error } = await _sb.functions.invoke('send-whatsapp', {
+            body: {
+              phone: phone,
+              templateName: 'fee_reminder',
+              languageCode: 'en_US',
+              components: [
+                {
+                  type: 'body',
+                  parameters: [
+                    { type: 'text', text: String(row.student.name) },
+                    { type: 'text', text: String(amount) }
+                  ]
+                }
+              ]
+            }
+          });
+          if (error) throw error;
+          if (data && data.success) {
+            sent++;
+          } else {
+            failed++;
+          }
+        } catch(e) {
+          console.error('WhatsApp API Error:', e);
+          failed++;
+        }
+      }
+      
+      feeReminderQueue = [];
+      showToast(`Automated batch complete. Sent: ${sent}, Failed: ${failed}`, sent > 0 ? 'ts' : 'te', 5000);
+      openBulkFeeReminderQueue();
     }
     function openNextBulkFeeReminder() {
       const row = feeReminderQueue.shift();
