@@ -5201,8 +5201,8 @@
         if (_sb && loginPass) {
           try {
             showToast('Creating secure Auth login...', 'ti');
-            const { data, error } = await _sb.functions.invoke('create-student-auth', {
-              body: { email: loginEmail, password: loginPass }
+            const { data, error } = await _sb.functions.invoke('create-auth-user', {
+              body: { email: loginEmail, password: loginPass, role: 'student' }
             });
             if (error) throw error;
             if (data?.error) throw new Error(data.error);
@@ -5815,7 +5815,7 @@
       openModal(`
   <h3>${t ? ' Edit Teacher' : '? Add Teacher'}</h3>
   <div class="fg2"><div class="fg"><label class="fl">Full Name <span class="req">*</span></label><input class="fi" id="mt-name" value="${t?.name || ''}" placeholder="Ms. Fatima Khan"/></div><div class="fg"><label class="fl">Login Email <span class="req">*</span></label><input class="fi" type="email" id="mt-email" value="${t?.email || ''}" placeholder="teacher@school.edu"/></div></div>
-  <div class="ibox" style="margin-bottom:10px;">Create or invite this teacher email in Supabase Auth. Passwords are not stored here.</div><div class="fg"><label class="fl">Main Subject</label><select class="fi" id="mt-sub"><option value="">Select</option>${DB.subjects.map(s => `<option value="${s.name}" ${t?.subject === s.name ? 'selected' : ''}>${s.name}</option>`).join('')}</select></div></div>
+  <div class="fg pw-field"><label class="fl">Login Password</label><input class="fi" type="password" id="mt-pass" placeholder="Enter password (for new logins)" autocomplete="new-password"/><button type="button" class="pw-toggle" onclick="togglePassword(\'mt-pass\',this)">Show</button></div><div class="fg"><label class="fl">Main Subject</label><select class="fi" id="mt-sub"><option value="">Select</option>${DB.subjects.map(s => `<option value="${s.name}" ${t?.subject === s.name ? 'selected' : ''}>${s.name}</option>`).join('')}</select></div></div>
   <div class="fg2"><div class="fg"><label class="fl">Phone</label><input class="fi" id="mt-phone" value="${t?.phone || ''}" placeholder="03XXXXXXXXX"/></div><div class="fg"><label class="fl">Joining Date</label><input class="fi" type="date" id="mt-join" value="${t?.joinDate || ''}"/></div></div>
   <div class="fg2"><div class="fg"><label class="fl">Base Salary</label><input class="fi" type="number" id="mt-salary" value="${num(t?.salary || 40000)}" placeholder="45000"/></div><div class="fg"><label class="fl">Bonus</label><input class="fi" type="number" id="mt-bonus" value="${num(t?.bonus || 0)}" placeholder="0"/></div></div>
   <div class="fg2"><div class="fg"><label class="fl">Deductions</label><input class="fi" type="number" id="mt-deductions" value="${num(t?.deductions || 0)}" placeholder="0"/></div><div class="fg"><label class="fl">Payroll Status</label><select class="fi" id="mt-paystatus"><option value="pending" ${t?.payrollStatus !== 'paid' ? 'selected' : ''}>Pending</option><option value="paid" ${t?.payrollStatus === 'paid' ? 'selected' : ''}>Paid</option></select></div></div>
@@ -5823,7 +5823,23 @@
   <div class="fg"><label class="fl">Assigned Classes</label><div style="display:flex;flex-wrap:wrap;gap:7px;padding:10px;background:var(--card2);border:1.5px solid var(--border);border-radius:8px;">${DB.classes.map(c => `<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:.78px;font-weight:600;font-size:.76rem;"><input type="checkbox" value="${c.id}" ${(t?.classIds || []).includes(c.id) ? 'checked' : ''}/> ${c.name}${c.section ? ' ' + c.section : ''}</label>`).join('')}</div></div>
   <div class="m-btns"><button class="btn btn-p" onclick="saveTeach('${eid || ''}')"> ${t ? 'Update' : 'Add'} Teacher</button><button class="btn btn-gh" onclick="closeModal()">Cancel</button></div>`);
     }
-    function saveTeach(eid) { const name = (document.getElementById('mt-name')?.value || '').trim(); const email = (document.getElementById('mt-email')?.value || '').trim().toLowerCase(); if (!name || !email) { showToast('Name & email required', 'te'); return; } const classIds = [...document.querySelectorAll('#modal-body input[type=checkbox]:checked')].map(x => x.value); const obj = { name, email, subject: document.getElementById('mt-sub')?.value || '', classIds, role: 'teacher', phone: document.getElementById('mt-phone')?.value?.trim() || '', joinDate: document.getElementById('mt-join')?.value || '', salary: num(document.getElementById('mt-salary')?.value || 0), bonus: num(document.getElementById('mt-bonus')?.value || 0), deductions: num(document.getElementById('mt-deductions')?.value || 0), payrollStatus: document.getElementById('mt-paystatus')?.value || 'pending', notes: document.getElementById('mt-notes')?.value?.trim() || '' }; if (eid) { const t = DB.users.find(x => x.id === eid); if (t) Object.assign(t, obj); } else DB.users.push({ id: uid(), ...obj, photo: '', lastPaid: '', payrollHistory: [] }); saveDB(); pushCloudDB(); closeModal(); showToast('Teacher saved', 'ts'); goPage('teachers'); }
+    async function saveTeach(eid) { const name = (document.getElementById('mt-name')?.value || '').trim(); const email = (document.getElementById('mt-email')?.value || '').trim().toLowerCase(); if (!name || !email) { showToast('Name & email required', 'te'); return; } const classIds = [...document.querySelectorAll('#modal-body input[type=checkbox]:checked')].map(x => x.value); const loginPass = (document.getElementById('mt-pass')?.value || '').trim();
+    if (!eid && loginPass && _sb) {
+      document.getElementById('m-btn').textContent = 'Creating Login...';
+      try {
+        const { data, error } = await _sb.functions.invoke('create-auth-user', {
+          body: { email, password: loginPass, role: 'teacher' }
+        });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        showToast(`Teacher added & Auth Login created!`, 'ts');
+      } catch (err) {
+        showToast(err.message, 'te');
+        document.getElementById('m-btn').textContent = 'Save';
+        return;
+      }
+    }
+    const obj = { name, email, subject: document.getElementById('mt-sub')?.value || '', classIds, role: 'teacher', phone: document.getElementById('mt-phone')?.value?.trim() || '', joinDate: document.getElementById('mt-join')?.value || '', salary: num(document.getElementById('mt-salary')?.value || 0), bonus: num(document.getElementById('mt-bonus')?.value || 0), deductions: num(document.getElementById('mt-deductions')?.value || 0), payrollStatus: document.getElementById('mt-paystatus')?.value || 'pending', notes: document.getElementById('mt-notes')?.value?.trim() || '' }; if (eid) { const t = DB.users.find(x => x.id === eid); if (t) Object.assign(t, obj); } else DB.users.push({ id: uid(), ...obj, photo: '', lastPaid: '', payrollHistory: [] }); saveDB(); pushCloudDB(); closeModal(); showToast('Teacher saved', 'ts'); goPage('teachers'); }
 
     function pgPayroll() {
       const teachers = DB.users.filter(u => u.role === 'teacher');
@@ -5940,15 +5956,31 @@
   <h3>${f ? ' Edit Family' : '? Add Family'}</h3>
   <div class="fg2"><div class="fg"><label class="fl">Parent Name <span class="req">*</span></label><input class="fi" id="mf-name" value="${f?.parentName || ''}" placeholder="Mr. & Mrs. Khan"/></div><div class="fg"><label class="fl">Phone</label><input class="fi" id="mf-phone" value="${f?.phone || ''}" placeholder="03XX-XXXXXXX"/></div></div>
   <div class="fg2"><div class="fg"><label class="fl">WhatsApp (with country code)</label><input class="fi" id="mf-wa" value="${f?.whatsapp || ''}" placeholder="923001234567"/></div><div class="fg"><label class="fl">Parent Login Email</label><input class="fi" type="email" id="mf-email" value="${f?.email || ''}" placeholder="parent@email.com"/></div></div>
-  <div class="ibox" style="margin-bottom:10px;">Create or invite the parent email in Supabase Auth. Passwords are not stored here.</div>
+  <div class="fg pw-field"><label class="fl">Login Password</label><input class="fi" type="password" id="mf-pass" placeholder="Enter password (for new logins)" autocomplete="new-password"/><button type="button" class="pw-toggle" onclick="togglePassword(\'mf-pass\',this)">Show</button></div>
   <div class="fg"><label class="fl">Link Children</label><div style="display:flex;flex-wrap:wrap;gap:7px;padding:10px;background:var(--card2);border:1.5px solid var(--border);border-radius:8px;max-height:160px;overflow-y:auto;">${allStus().map(s => { const cls = DB.classes.find(c => c.id === s.classId); return `<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:.75rem;font-weight:600;"><input type="checkbox" value="${s.id}" ${(f?.studentIds || []).includes(s.id) ? 'checked' : ''}/> ${s.name} <span style="color:var(--ink4);">(${cls?.name || '?'})</span></label>`; }).join('')}${allStus().length === 0 ? '<span style="color:var(--ink4);font-size:.76rem;">Add students first</span>' : ''}</div></div>
   <div class="m-btns"><button class="btn btn-p" onclick="saveFam('${eid || ''}')"> ${f ? 'Update' : 'Create'}</button><button class="btn btn-gh" onclick="closeModal()">Cancel</button></div>`);
     }
-    function saveFam(eid) {
+    async function saveFam(eid) {
       const name = (document.getElementById('mf-name')?.value || '').trim(); if (!name) { showToast('Parent name required', 'te'); return; }
       const studentIds = [...document.querySelectorAll('#modal-body input[type=checkbox]:checked')].map(x => x.value);
       const email = (document.getElementById('mf-email')?.value || '').trim().toLowerCase();
       const fid = eid || uid();
+      const loginPass = (document.getElementById('mf-pass')?.value || '').trim();
+      if (!eid && email && loginPass && _sb) {
+        document.getElementById('m-btn').textContent = 'Creating Login...';
+        try {
+          const { data, error } = await _sb.functions.invoke('create-auth-user', {
+            body: { email, password: loginPass, role: 'parent' }
+          });
+          if (error) throw error;
+          if (data?.error) throw new Error(data.error);
+          showToast(`Family added & Auth Login created!`, 'ts');
+        } catch (err) {
+          showToast(err.message, 'te');
+          document.getElementById('m-btn').textContent = 'Save';
+          return;
+        }
+      }
       const obj = { id: fid, parentName: name, phone: document.getElementById('mf-phone')?.value || '', whatsapp: document.getElementById('mf-wa')?.value || '', email, studentIds };
       DB.families[fid] = eid ? { ...DB.families[fid], ...obj } : obj;
       if (email) { let pu = DB.users.find(x => x.role === 'parent' && x.familyId === fid); if (pu) { pu.email = email; pu.name = name; } else DB.users.push({ id: uid(), name, email, role: 'parent', photo: '', familyId: fid }); }
