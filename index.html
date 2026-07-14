@@ -3861,7 +3861,7 @@
             onkeydown="if(event.key==='Enter')doLogin()" /></div>
       <div class="lf pw-field"><label>Password</label><input id="l-pass" type="password" placeholder="--------"
             onkeydown="if(event.key==='Enter')doLogin()" /><button type="button" class="pw-toggle" onclick="togglePassword('l-pass',this)">Show</button></div>
-      <button class="login-btn" onclick="doLogin()">Sign In</button>
+      <button class="login-btn" onclick="doLogin()">Secure Sign In</button>
     </div>
     <div class="lp-footer">Oxford Excellence Academy Portal - Data stored securely in your browser</div>
   </div>
@@ -4472,8 +4472,10 @@
         if (!u) { if(!error) await _sb.auth.signOut(); showToast('Signed in, but this email is not linked to a teacher, student, parent, or admin profile.', 'te', 5200); return; }
         if (u.role !== loginRole) {
           if (!error) await _sb.auth.signOut();
-          showToast(`This email is registered as a ${u.role}, not ${loginRole}. Please select the correct tab.`, 'te', 5200);
-          btn.disabled = false; btn.textContent = 'Sign In';
+          const err = `This email is registered as a ${u.role}, not ${loginRole}. Please select the correct tab.`;
+          alert(err);
+          showToast(err, 'te', 5200);
+          if (btn) { btn.disabled = false; btn.textContent = 'Secure Sign In'; }
           return;
         }
         saveDB();
