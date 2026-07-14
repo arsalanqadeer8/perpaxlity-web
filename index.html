@@ -4349,7 +4349,7 @@
     }
     function monthlyFeeAmount(stu) {
       const fee = (DB.fees.items || []).find(f => f.id === 'f1') || { amount: 0 };
-      return num(stu?.customFee) || num(fee.amount);
+      return (stu && stu.customFee !== undefined && stu.customFee !== '') ? num(stu.customFee) : num(fee.amount);
     }
     function ensureMonthlyFeeLedger() {
       if (!DB?.fees) return;
@@ -5198,7 +5198,7 @@
   </div>
   <div class="fg2">
     <div class="fg"><label class="fl">Mother's Name</label><input class="fi" id="m-mother" value="${s?.mother || ''}" placeholder="Mrs. ..."/></div>
-    <div class="fg"><label class="fl">Parent WhatsApp</label><input class="fi" id="m-wa" value="${s?.whatsapp || ''}" placeholder="923XXXXXXXXX (with code)"/></div><div class="fg"><label class="fl">Monthly Fee</label><input class="fi" type="number" id="m-customfee" value="${num(s?.customFee || 0) || ''}" placeholder="Use default fee"/></div>
+    <div class="fg"><label class="fl">Parent WhatsApp</label><input class="fi" id="m-wa" value="${s?.whatsapp || ''}" placeholder="923XXXXXXXXX (with code)"/></div><div class="fg"><label class="fl">Monthly Fee</label><input class="fi" type="number" id="m-customfee" value="${(s && s.customFee !== undefined && s.customFee !== '') ? num(s.customFee) : ''}" placeholder="Use default fee"/></div>
   </div>
   <div class="fg"><label class="fl">Address</label><textarea class="fi" id="m-addr" style="min-height:50px;">${s?.address || ''}</textarea></div>
   <div class="div"></div>
@@ -5258,7 +5258,8 @@
         DB.families[familyId] = { id: familyId, parentName: famName, phone: document.getElementById('m-fphone')?.value || '', email: loginEmail, address: '', studentIds: [], whatsapp: wa };
       }
 
-      const data = { name, roll, classId, gender: document.getElementById('m-gender')?.value || '', dob: document.getElementById('m-dob')?.value || '', blood: document.getElementById('m-blood')?.value || '', fees: document.getElementById('m-fees')?.value || 'Pending', father: (document.getElementById('m-father')?.value || '').trim(), fphone: (document.getElementById('m-fphone')?.value || '').trim(), mother: (document.getElementById('m-mother')?.value || '').trim(), address: (document.getElementById('m-addr')?.value || '').trim(), whatsapp: wa, photo, familyId, loginEmail, customFee: num(document.getElementById('m-customfee')?.value || 0) };
+      const cfVal = document.getElementById('m-customfee')?.value;
+      const data = { name, roll, classId, gender: document.getElementById('m-gender')?.value || '', dob: document.getElementById('m-dob')?.value || '', blood: document.getElementById('m-blood')?.value || '', fees: document.getElementById('m-fees')?.value || 'Pending', father: (document.getElementById('m-father')?.value || '').trim(), fphone: (document.getElementById('m-fphone')?.value || '').trim(), mother: (document.getElementById('m-mother')?.value || '').trim(), address: (document.getElementById('m-addr')?.value || '').trim(), whatsapp: wa, photo, familyId, loginEmail, customFee: cfVal === '' ? '' : num(cfVal) };
 
       if (editId) {
         const old = allStus().find(x => x.id === editId); if (!old) { showToast('Not found', 'te'); return; }
@@ -5637,7 +5638,7 @@
     function studentFeeSummary(sid) {
       const payments = DB.fees.payments[sid] || {};
       const stu = allStus().find(x => x.id === sid);
-      const itemAmount = f => (f.id === 'f1' && num(stu?.customFee)) ? num(stu.customFee) : num(f.amount);
+      const itemAmount = f => (f.id === 'f1' && (stu && stu.customFee !== undefined && stu.customFee !== '')) ? num(stu.customFee) : num(f.amount);
       const mandatory = DB.fees.items.filter(f => f.mandatory);
       const allItems = DB.fees.items || [];
       const paidAmount = allItems.reduce((sum, f) => sum + (f.id === 'f1' ? monthlyFeePaidTotal(sid) : (payments[f.id]?.paid ? num(payments[f.id].amount || itemAmount(f)) : 0)), 0);
@@ -5735,7 +5736,7 @@
       const s = allStus().find(x => x.id === sid); if (!s) return '';
       const fee = DB.fees.items.find(f => f.id === fid) || DB.fees.items[0] || { name: 'School Fee', amount: 0, due: DB.settings?.defaultFeeDueDay || '5th of month' };
       const cls = DB.classes.find(c => c.id === s.classId);
-      const amount = (fid === 'f1' && num(s.customFee)) ? num(s.customFee) : num(fee.amount);
+      const amount = (fid === 'f1' && (s && s.customFee !== undefined && s.customFee !== '')) ? num(s.customFee) : num(fee.amount);
       const balance = (DB.fees.payments[s.id] || {})[fid]?.paid ? 0 : amount;
       return `Dear Parent of ${s.name},\n\nThis is a friendly fee reminder from ${DB.school.name}.\nStudent: ${s.name}\nClass: ${cls?.name || ''}\nRoll No: ${s.roll || ''}\nFee Item: ${fee.name}\nAmount Due: ${fmtMoney(balance || amount)}\nDue Date: ${dueDate || fee.due || DB.settings?.defaultFeeDueDay || '5th of month'}\n${note ? `\nNote: ${note}\n` : ''}\nPlease share payment once deposited.\n\nThank you.\n${DB.school.name}`;
     }
