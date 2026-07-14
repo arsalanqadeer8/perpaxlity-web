@@ -4514,6 +4514,28 @@
       document.getElementById('l-email').value = '';
       document.getElementById('l-pass').value = '';
     }
+
+    async function adminResetPassword(email, newPass, btnEl) {
+      if (!email || !newPass) { showToast('Email and new password required', 'te'); return; }
+      if (newPass.length < 6) { showToast('Password must be at least 6 characters', 'te'); return; }
+      if (!_sb) { showToast('Supabase not configured', 'te'); return; }
+      if (curRole !== 'admin') { showToast('Admin only', 'te'); return; }
+      const origText = btnEl.textContent;
+      btnEl.disabled = true; btnEl.textContent = 'Resetting...';
+      try {
+        const { data: sessionData } = await _sb.auth.getSession();
+        const { data, error } = await _sb.functions.invoke('admin-reset-password', {
+          body: { email, password: newPass },
+          headers: { Authorization: `Bearer ${sessionData?.session?.access_token}` }
+        });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        showToast('Password reset successfully!', 'ts');
+      } catch (e) {
+        showToast(e.message || 'Error resetting password', 'te', 5000);
+      }
+      btnEl.disabled = false; btnEl.textContent = origText;
+    }
     function openLogin(prefillRole = 'admin') {
       document.getElementById('landing-page').style.display = 'none';
       document.getElementById('login-page').style.display = 'flex';
@@ -5172,7 +5194,8 @@
   <div style="font-weight:700;font-size:.78rem;color:var(--p);margin-bottom:5px;"> Student Login - <span style="font-weight:500;color:var(--ink4);">Leave blank for no login</span></div>
   <div class="ibox" style="margin-bottom:10px;padding:8px 12px;">Create or invite this email in Supabase Auth. Passwords are no longer stored in portal data.</div>
   <div class="fg"><label class="fl">Login Email</label><input class="fi" id="m-lemail" value="${s?.loginEmail || ''}" placeholder="student@email.com" autocomplete="new-password"/></div>
-  <div class="fg pw-field"><label class="fl">Login Password</label><input class="fi" type="password" id="m-lpass" placeholder="Enter password (for new logins)" autocomplete="new-password"/><button type="button" class="pw-toggle" onclick="togglePassword('m-lpass',this)">Show</button></div>
+  <div class="fg pw-field"><label class="fl">Login Password</label><input class="fi" type="password" id="m-lpass" placeholder="Enter password (for new logins or resets)" autocomplete="new-password"/><button type="button" class="pw-toggle" onclick="togglePassword('m-lpass',this)">Show</button></div>
+  ${s?.loginEmail ? `<div style="margin-top:-8px;margin-bottom:10px;text-align:right;"><button type="button" class="btn btn-gh btn-xs" style="color:var(--r);border-color:var(--rl);" onclick="adminResetPassword(document.getElementById('m-lemail').value, document.getElementById('m-lpass').value, this)">Force Reset Password</button></div>` : ''}
   <div class="div"></div>
   <div style="font-weight:700;font-size:.78rem;color:var(--v);margin-bottom:9px;"> Family / Siblings - one parent login for all children</div>
   <div class="fg2">
@@ -5861,7 +5884,9 @@
       openModal(`
   <h3>${t ? ' Edit Teacher' : '? Add Teacher'}</h3>
   <div class="fg2"><div class="fg"><label class="fl">Full Name <span class="req">*</span></label><input class="fi" id="mt-name" value="${t?.name || ''}" placeholder="Ms. Fatima Khan"/></div><div class="fg"><label class="fl">Login Email <span class="req">*</span></label><input class="fi" type="email" id="mt-email" value="${t?.email || ''}" placeholder="teacher@school.edu"/></div></div>
-  <div class="fg pw-field"><label class="fl">Login Password</label><input class="fi" type="password" id="mt-pass" placeholder="Enter password (for new logins)" autocomplete="new-password"/><button type="button" class="pw-toggle" onclick="togglePassword(\'mt-pass\',this)">Show</button></div><div class="fg"><label class="fl">Main Subject</label><select class="fi" id="mt-sub"><option value="">Select</option>${DB.subjects.map(s => `<option value="${s.name}" ${t?.subject === s.name ? 'selected' : ''}>${s.name}</option>`).join('')}</select></div></div>
+  <div class="fg pw-field"><label class="fl">Login Password</label><input class="fi" type="password" id="mt-pass" placeholder="Enter password (for new logins or resets)" autocomplete="new-password"/><button type="button" class="pw-toggle" onclick="togglePassword(\'mt-pass\',this)">Show</button></div>
+  ${t?.email ? `<div style="margin-top:-8px;margin-bottom:10px;text-align:right;"><button type="button" class="btn btn-gh btn-xs" style="color:var(--r);border-color:var(--rl);" onclick="adminResetPassword(document.getElementById('mt-email').value, document.getElementById('mt-pass').value, this)">Force Reset Password</button></div>` : ''}
+  <div class="fg"><label class="fl">Main Subject</label><select class="fi" id="mt-sub"><option value="">Select</option>${DB.subjects.map(s => `<option value="${s.name}" ${t?.subject === s.name ? 'selected' : ''}>${s.name}</option>`).join('')}</select></div></div>
   <div class="fg2"><div class="fg"><label class="fl">Phone</label><input class="fi" id="mt-phone" value="${t?.phone || ''}" placeholder="03XXXXXXXXX"/></div><div class="fg"><label class="fl">Joining Date</label><input class="fi" type="date" id="mt-join" value="${t?.joinDate || ''}"/></div></div>
   <div class="fg2"><div class="fg"><label class="fl">Base Salary</label><input class="fi" type="number" id="mt-salary" value="${num(t?.salary || 40000)}" placeholder="45000"/></div><div class="fg"><label class="fl">Bonus</label><input class="fi" type="number" id="mt-bonus" value="${num(t?.bonus || 0)}" placeholder="0"/></div></div>
   <div class="fg2"><div class="fg"><label class="fl">Deductions</label><input class="fi" type="number" id="mt-deductions" value="${num(t?.deductions || 0)}" placeholder="0"/></div><div class="fg"><label class="fl">Payroll Status</label><select class="fi" id="mt-paystatus"><option value="pending" ${t?.payrollStatus !== 'paid' ? 'selected' : ''}>Pending</option><option value="paid" ${t?.payrollStatus === 'paid' ? 'selected' : ''}>Paid</option></select></div></div>
@@ -6002,7 +6027,8 @@
   <h3>${f ? ' Edit Family' : '? Add Family'}</h3>
   <div class="fg2"><div class="fg"><label class="fl">Parent Name <span class="req">*</span></label><input class="fi" id="mf-name" value="${f?.parentName || ''}" placeholder="Mr. & Mrs. Khan"/></div><div class="fg"><label class="fl">Phone</label><input class="fi" id="mf-phone" value="${f?.phone || ''}" placeholder="03XX-XXXXXXX"/></div></div>
   <div class="fg2"><div class="fg"><label class="fl">WhatsApp (with country code)</label><input class="fi" id="mf-wa" value="${f?.whatsapp || ''}" placeholder="923001234567"/></div><div class="fg"><label class="fl">Parent Login Email</label><input class="fi" type="email" id="mf-email" value="${f?.email || ''}" placeholder="parent@email.com"/></div></div>
-  <div class="fg pw-field"><label class="fl">Login Password</label><input class="fi" type="password" id="mf-pass" placeholder="Enter password (for new logins)" autocomplete="new-password"/><button type="button" class="pw-toggle" onclick="togglePassword(\'mf-pass\',this)">Show</button></div>
+  <div class="fg pw-field"><label class="fl">Login Password</label><input class="fi" type="password" id="mf-pass" placeholder="Enter password (for new logins or resets)" autocomplete="new-password"/><button type="button" class="pw-toggle" onclick="togglePassword(\'mf-pass\',this)">Show</button></div>
+  ${f?.email ? `<div style="margin-top:-8px;margin-bottom:10px;text-align:right;"><button type="button" class="btn btn-gh btn-xs" style="color:var(--r);border-color:var(--rl);" onclick="adminResetPassword(document.getElementById('mf-email').value, document.getElementById('mf-pass').value, this)">Force Reset Password</button></div>` : ''}
   <div class="fg"><label class="fl">Link Children</label><div style="display:flex;flex-wrap:wrap;gap:7px;padding:10px;background:var(--card2);border:1.5px solid var(--border);border-radius:8px;max-height:160px;overflow-y:auto;">${allStus().map(s => { const cls = DB.classes.find(c => c.id === s.classId); return `<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:.75rem;font-weight:600;"><input type="checkbox" value="${s.id}" ${(f?.studentIds || []).includes(s.id) ? 'checked' : ''}/> ${s.name} <span style="color:var(--ink4);">(${cls?.name || '?'})</span></label>`; }).join('')}${allStus().length === 0 ? '<span style="color:var(--ink4);font-size:.76rem;">Add students first</span>' : ''}</div></div>
   <div class="m-btns"><button class="btn btn-p" onclick="saveFam('${eid || ''}')"> ${f ? 'Update' : 'Create'}</button><button class="btn btn-gh" onclick="closeModal()">Cancel</button></div>`);
     }
