@@ -3845,8 +3845,8 @@
   <div class="lp-dots"></div>
   <div class="lp-card">
     <div class="lp-brand">
-      <div class="lp-logo" id="lp-logo" onclick="document.getElementById('logo-file').click()"></div>
-      <input type="file" id="logo-file" accept="image/*" style="display:none;" onchange="uploadLogo(this)" />
+      <div class="lp-logo" id="lp-logo"></div>
+
       <div class="lp-title" id="lp-title">Oxford Excellence Academy</div>
       <div class="lp-sub" id="lp-sub">Learn • Grow • Excel</div>
     </div>
@@ -4470,7 +4470,12 @@
         ensureEnhancements();
         const u = findUserProfile(em, loginRole);
         if (!u) { if(!error) await _sb.auth.signOut(); showToast('Signed in, but this email is not linked to a teacher, student, parent, or admin profile.', 'te', 5200); return; }
-        if (u.role !== loginRole) showToast('Role detected: ' + u.role, 'tw2', 2400);
+        if (u.role !== loginRole) {
+          if (!error) await _sb.auth.signOut();
+          showToast(`This email is registered as a ${u.role}, not ${loginRole}. Please select the correct tab.`, 'te', 5200);
+          btn.disabled = false; btn.textContent = 'Sign In';
+          return;
+        }
         saveDB();
         setCurrentUser(u);
         document.getElementById('landing-page').style.display = 'none';
