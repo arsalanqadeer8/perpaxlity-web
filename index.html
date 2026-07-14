@@ -4233,6 +4233,7 @@
       else if (u.role === 'student') curCls = u.classId || DB.classes[0]?.id;
       else if (u.role === 'parent') { const fam = DB.families[u.familyId]; const sid = (fam?.studentIds || [])[0]; curCls = allStus().find(s => s.id === sid)?.classId || DB.classes[0]?.id; }
       else curCls = DB.classes[0]?.id;
+      curTerm = DB?.settings?.activeTerm || 't1';
     }
 
     function defaultDB() {
@@ -4308,7 +4309,7 @@
     function fmtDate(d) { if (!d) return '-'; try { return new Date(d).toLocaleDateString('en-GB'); } catch { return d; } }
     function allStus() { return Object.values(DB.students).flat(); }
     function clsStus(cid) { return DB.students[cid] || []; }
-    function avgStu(cid, sid) { const g = (DB.grades[cid] || {})[sid] || {}; const v = Object.values(g).filter(x => x > 0); return v.length ? Math.round(v.reduce((a, b) => a + b, 0) / v.length) : 0; }
+    function avgStu(cid, sid, tid = curTerm) { const g = (DB.grades[cid + '_' + tid] || {})[sid] || {}; const v = Object.values(g).filter(x => x > 0); return v.length ? Math.round(v.reduce((a, b) => a + b, 0) / v.length) : 0; }
     function attPct(cid, sid) { const a = (DB.attendance[cid] || {})[sid] || {}; const arr = Object.values(a); if (!arr.length) return clsStus(cid).find(s => s.id === sid)?.attendance || 0; return Math.round(arr.filter(x => x === 'P').length / arr.length * 100); }
     function nextRoll(cid) { const s = clsStus(cid); return String(s.length + 1).padStart(3, '0'); }
     function nowHHMM() { const n = new Date(); return `${String(n.getHours()).padStart(2, '0')}:${String(n.getMinutes()).padStart(2, '0')}`; }
@@ -4409,6 +4410,15 @@
       DB.settings.currency = DB.settings.currency || 'PKR';
       DB.settings.schoolYear = DB.settings.schoolYear || '2025-26';
       DB.settings.defaultFeeDueDay = DB.settings.defaultFeeDueDay || '5th of month';
+      DB.settings.terms = DB.settings.terms || [{id:'t1', name:'Midterm'}, {id:'t2', name:'Final Term'}];
+      DB.settings.activeTerm = DB.settings.activeTerm || 't1';
+      DB.grades = DB.grades || {};
+      Object.keys(DB.grades).forEach(k => {
+        if (!k.includes('_')) {
+          DB.grades[k + '_t1'] = DB.grades[k];
+          delete DB.grades[k];
+        }
+      });
       ensureMonthlyFeeLedger();
       stripStoredPasswords();
       DB.users = (DB.users || []).map(u => {
@@ -4426,7 +4436,7 @@
     }
 
     /* ------------------------------- AUTH ------------------------------- */
-    let curRole = 'admin', curUser = null, curCls = null, curPage = 'dashboard';
+    let curRole = 'admin', curUser = null, curCls = null, curTerm = 't1', curPage = 'dashboard';
     let loginRole = 'admin', _qrS = null, _toastT = null;
 
     function togglePassword(id, btn) {
@@ -4973,8 +4983,8 @@
 </div>
 <div class="g2">
   <div class="card fu d2">
-    <div class="ch"><div class="ct"> Subject Scores</div><button class="btn btn-gh btn-sm" onclick="goPage('mygrades')">Full</button></div>
-    <div class="score-mini">${DB.subjects.map(sub => { const v = (DB.grades[cid]?.[stu.id] || {})[sub.id] || 0; return `<div class="sm-row"><div class="sm-lbl">${sub.icon} ${sub.name}</div><div class="sm-bar"><div class="sm-fill" style="width:${v}%;background:${sub.color};"></div></div><div class="sm-val" style="color:${sub.color};">${v || '-'}</div></div>`; }).join('')}</div>
+    <div class="ch"><div class="ct"> Subject Scores</div><div style="display:flex;gap:5px;"><select class="fi" style="padding:2px 5px;font-size:.7rem;height:auto;" onchange="curTerm=this.value;goPage('dashboard')">${DB.settings.terms.map(t => `<option value="${t.id}" ${curTerm===t.id?'selected':''}>${t.name}</option>`).join('')}</select><button class="btn btn-gh btn-sm" onclick="goPage('mygrades')">Full</button></div></div>
+    <div class="score-mini">${DB.subjects.map(sub => { const v = (DB.grades[cid + '_' + curTerm]?.[stu.id] || {})[sub.id] || 0; return `<div class="sm-row"><div class="sm-lbl">${sub.icon} ${sub.name}</div><div class="sm-bar"><div class="sm-fill" style="width:${v}%;background:${sub.color};"></div></div><div class="sm-val" style="color:${sub.color};">${v || '-'}</div></div>`; }).join('')}</div>
   </div>
   <div>
     <div class="card fu d3" style="cursor:pointer;background:linear-gradient(135deg,var(--pl),#fff);border-color:var(--pl2);" onclick="goPage('qrcard')">
@@ -5291,7 +5301,7 @@
     function delStu(sid, cid) {
       if (!confirm('Delete this student and all their data?')) return;
       DB.students[cid] = (DB.students[cid] || []).filter(x => x.id !== sid);
-      delete (DB.grades[cid] || {})[sid]; delete (DB.attendance[cid] || {})[sid]; delete DB.fees.payments[sid];
+      DB.settings.terms.forEach(t => { delete (DB.grades[cid + '_' + t.id] || {})[sid]; }); delete (DB.attendance[cid] || {})[sid]; delete DB.fees.payments[sid];
       DB.users = DB.users.filter(x => x.studentId !== sid);
       Object.values(DB.families).forEach(f => { if (f.studentIds) f.studentIds = f.studentIds.filter(x => x !== sid); });
       saveDB(); showToast('Deleted'); goPage('students');
@@ -5312,8 +5322,8 @@
   </div>
     ${sibs.length ? `<div style="background:var(--vl);border:1px solid rgba(124,58,237,.15);border-radius:8px;padding:8px 11px;margin-bottom:11px;font-size:.75rem;"><b style="color:var(--v);">Siblings:</b> ${sibs.map(sb => `${sb.name} (${(DB.classes.find(c => c.id === sb.classId) || {}).name || '?'})`).join(' - ')}</div>` : ''}
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px;">${[['Father', s.father], ['Phone', s.fphone], ['Mother', s.mother], ['WhatsApp', s.whatsapp], ['DOB', fmtDate(s.dob)], ['Login', s.loginEmail]].map(([l, v]) => `<div style="background:var(--card2);border-radius:8px;padding:8px;"><div style="font-size:.62rem;color:var(--ink4);margin-bottom:1px;">${l}</div><div style="font-size:.78rem;font-weight:600;">${v || '-'}</div></div>`).join('')}</div>
-  <div style="font-size:.76rem;font-weight:700;color:var(--ink2);margin-bottom:8px;">Subject Scores</div>
-  <div class="score-mini">${DB.subjects.map(sub => { const v = (DB.grades[cid]?.[sid] || {})[sub.id] || 0; return `<div class="sm-row"><div class="sm-lbl">${sub.icon} ${sub.name}</div><div class="sm-bar"><div class="sm-fill" style="width:${v}%;background:${sub.color};"></div></div><div class="sm-val" style="color:${sub.color};">${v || '-'}</div></div>`; }).join('')}</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><div style="font-size:.76rem;font-weight:700;color:var(--ink2);">Subject Scores</div><select class="fi" style="width:100px;padding:2px 5px;font-size:.7rem;height:auto;" onchange="curTerm=this.value;closeModal();openStuDetail('${sid}','${cid}')">${DB.settings.terms.map(t => `<option value="${t.id}" ${curTerm===t.id?'selected':''}>${t.name}</option>`).join('')}</select></div>
+  <div class="score-mini">${DB.subjects.map(sub => { const v = (DB.grades[cid + '_' + curTerm]?.[sid] || {})[sub.id] || 0; return `<div class="sm-row"><div class="sm-lbl">${sub.icon} ${sub.name}</div><div class="sm-bar"><div class="sm-fill" style="width:${v}%;background:${sub.color};"></div></div><div class="sm-val" style="color:${sub.color};">${v || '-'}</div></div>`; }).join('')}</div>
   <div class="m-btns" style="margin-top:13px;flex-wrap:wrap;">
     <button class="btn btn-p btn-sm" onclick="closeModal();openAddStudentModal('${sid}')"> Edit</button>
       ${s.whatsapp ? `<button class="btn btn-wa btn-sm" onclick="waMsg('${s.whatsapp}','Dear parent of ${s.name}, greetings from ${DB.school.name}.')"> WhatsApp</button>` : ''}
@@ -5580,16 +5590,22 @@
       return `
 <div class="ph ph-row fu">
   <div><div class="ph-tag"> Grades</div><h1>Grade Book</h1><div class="ph-sub">${cls?.name || ''} - Enter marks out of 100</div></div>
-  <div class="ph-acts"><button class="btn btn-gh btn-sm" onclick="clearGrades()">Clear</button><button class="btn btn-g btn-sm" onclick="saveGrades()"> Save Grades</button></div>
+  <div class="ph-acts">
+    <select class="fi" style="width:140px;padding:5px;height:auto;font-weight:600;" onchange="curTerm=this.value;goPage('grades')">
+      ${DB.settings.terms.map(t => `<option value="${t.id}" ${curTerm===t.id?'selected':''}>${t.name}</option>`).join('')}
+    </select>
+    <button class="btn btn-gh btn-sm" onclick="clearGrades()">Clear</button><button class="btn btn-g btn-sm" onclick="saveGrades()"> Save Grades</button>
+  </div>
 </div>
   ${clsBar('switchGrdCls')}
   ${sts.length === 0 ? `<div class="card"><div class="empty"><div class="empty-ic"></div><div class="empty-t">No students</div></div></div>` : `
 <div class="card fu d2" style="padding:0;overflow:hidden;"><div class="tw"><table>
   <thead><tr><th>Roll</th><th>Student</th>${DB.subjects.map(s => `<th style="text-align:center;">${s.icon}<br/><span style="font-weight:400;">${s.code}</span></th>`).join('')}<th>Avg</th><th>Grade</th></tr></thead>
   <tbody>${sts.map(s => {
-        if (!DB.grades[curCls]) DB.grades[curCls] = {};
-        if (!DB.grades[curCls][s.id]) DB.grades[curCls][s.id] = {};
-        const g = DB.grades[curCls][s.id];
+        const tKey = curCls + '_' + curTerm;
+        if (!DB.grades[tKey]) DB.grades[tKey] = {};
+        if (!DB.grades[tKey][s.id]) DB.grades[tKey][s.id] = {};
+        const g = DB.grades[tKey][s.id];
         const filled = DB.subjects.map(sub => g[sub.id] || 0).filter(v => v > 0);
         const av = filled.length ? Math.round(filled.reduce((a, v) => a + v, 0) / filled.length) : 0;
         return `<tr><td style="font-weight:700;font-size:.72rem;">${s.roll || '-'}</td>
@@ -5601,18 +5617,19 @@
   </tbody></table></div></div>`}`;
     }
     function setGrade(sid, subId, val, inp) {
-      if (!DB.grades[curCls]) DB.grades[curCls] = {};
-      if (!DB.grades[curCls][sid]) DB.grades[curCls][sid] = {};
+      const tKey = curCls + '_' + curTerm;
+      if (!DB.grades[tKey]) DB.grades[tKey] = {};
+      if (!DB.grades[tKey][sid]) DB.grades[tKey][sid] = {};
       const v = Math.min(100, Math.max(0, parseInt(val) || 0));
-      DB.grades[curCls][sid][subId] = v;
-      const vals = Object.values(DB.grades[curCls][sid]).filter(x => x > 0);
+      DB.grades[tKey][sid][subId] = v;
+      const vals = Object.values(DB.grades[tKey][sid]).filter(x => x > 0);
       const av = vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : 0;
       const ae = document.getElementById(`av-${sid}`); const ge = document.getElementById(`gr-${sid}`);
       if (ae) { ae.textContent = av || '-'; ae.style.color = sCol(av); }
       if (ge) ge.innerHTML = `<span class="badge ${gCls(av)}">${lGrade(av)}</span>`;
     }
     function saveGrades() { saveDB(); showToast('? Grades saved', 'ts'); }
-    function clearGrades() { if (!confirm('Clear all grades for this class?')) return; delete DB.grades[curCls]; saveDB(); goPage('grades'); }
+    function clearGrades() { if (!confirm('Clear all grades for this class in this term?')) return; delete DB.grades[curCls + '_' + curTerm]; saveDB(); goPage('grades'); }
     function switchGrdCls(cid) { curCls = cid; updatePill(); goPage('grades'); }
 
     /* ------------------------------- FEES ------------------------------- */
@@ -5809,7 +5826,7 @@
   <div class="m-btns"><button class="btn btn-p" onclick="saveCls('${eid || ''}')"> ${c ? 'Update' : 'Add'}</button>${c ? `<button class="btn btn-xs" style="background:var(--rl);color:var(--r);" onclick="delCls('${c.id}')">Delete</button>` : ''}<button class="btn btn-gh" onclick="closeModal()">Cancel</button></div>`);
     }
     function saveCls(eid) { const name = (document.getElementById('mc-name')?.value || '').trim(); if (!name) { showToast('Name required', 'te'); return; } const obj = { name, section: document.getElementById('mc-sec').value.trim(), level: document.getElementById('mc-lev').value, capacity: document.getElementById('mc-cap').value, teacher: document.getElementById('mc-teach').value.trim() }; if (eid) { const c = DB.classes.find(x => x.id === eid); if (c) Object.assign(c, obj); } else DB.classes.push({ id: uid(), ...obj }); saveDB(); closeModal(); showToast('? Saved', 'ts'); goPage('classes'); }
-    function delCls(id) { if (!confirm('Delete class and all students?')) return; DB.classes = DB.classes.filter(c => c.id !== id); delete DB.students[id]; delete DB.grades[id]; delete DB.attendance[id]; saveDB(); closeModal(); showToast('Deleted'); goPage('classes'); }
+    function delCls(id) { if (!confirm('Delete class and all students?')) return; DB.classes = DB.classes.filter(c => c.id !== id); delete DB.students[id]; DB.settings.terms.forEach(t => delete DB.grades[id + '_' + t.id]); delete DB.attendance[id]; saveDB(); closeModal(); showToast('Deleted'); goPage('classes'); }
 
     /* ------------------------------- EXAMS ------------------------------- */
     function pgExams() {
@@ -5957,7 +5974,12 @@
       const sts = clsStus(curCls);
       return `
 <div class="ph ph-row fu"><div><div class="ph-tag"> Report Cards</div><h1>Print Report Cards</h1><div class="ph-sub">Select a student to generate & print</div></div>
-  <button class="btn btn-gh btn-sm no-print" onclick="window.print()"> Print</button></div>
+  <div style="display:flex;gap:10px;align-items:center;">
+    <select class="fi" style="width:140px;padding:5px;height:auto;font-weight:600;" onchange="curTerm=this.value;goPage('reportcards')">
+      ${DB.settings.terms.map(t => `<option value="${t.id}" ${curTerm===t.id?'selected':''}>${t.name}</option>`).join('')}
+    </select>
+    <button class="btn btn-gh btn-sm no-print" onclick="window.print()"> Print</button>
+  </div></div>
   ${clsBar('switchRCCls')}
   ${sts.length === 0 ? `<div class="card"><div class="empty"><div class="empty-ic"></div><div class="empty-t">No students in this class</div></div></div>` : `
 <div class="card fu d1"><div class="ch"><div class="ct">Select Student</div></div><div style="display:flex;flex-wrap:wrap;gap:7px;">${sts.map(s => `<button class="btn btn-gh btn-sm" onclick="openReportCard('${s.id}','${curCls}')" style="display:flex;align-items:center;gap:7px;"><div class="ava" style="width:22px;height:22px;border-radius:5px;background:${gc(s.name)};font-size:.46rem;flex-shrink:0;">${s.photo ? `<img src="${s.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:5px;"/>` : ini(s.name)}</div>${s.name}</button>`).join('')}</div></div>`}`;
@@ -5966,7 +5988,7 @@
     function openReportCard(sid, cid) {
       const s = clsStus(cid).find(x => x.id === sid); if (!s) return;
       const cls = DB.classes.find(c => c.id === cid);
-      const grades = DB.grades[cid]?.[sid] || {};
+      const grades = DB.grades[cid + '_' + curTerm]?.[sid] || {};
       const ap = attPct(cid, sid);
       const rows = DB.subjects.map(sub => { const v = grades[sub.id] || 0; return { sub, v }; });
       const filled = rows.filter(r => r.v > 0);
@@ -6097,6 +6119,24 @@
   </div>
 </div>
 
+<div class="card fu">
+  <div class="ch"><div class="ct"> Academic Terms</div></div>
+  <div class="ibox" style="margin-bottom:10px;">Configure grading terms. Selecting an active term sets the default for grade entry and report cards.</div>
+  <div style="display:flex;gap:10px;margin-bottom:10px;align-items:center;">
+    <div style="font-weight:600;font-size:.8rem;width:120px;">Active Term</div>
+    <select class="fi" style="flex:1;padding:5px;" onchange="DB.settings.activeTerm=this.value;saveDB();showToast('Active term updated','ts');">
+      ${DB.settings.terms.map(t => `<option value="${t.id}" ${DB.settings.activeTerm===t.id?'selected':''}>${t.name}</option>`).join('')}
+    </select>
+  </div>
+  <div style="font-size:.8rem;font-weight:600;margin-bottom:5px;">Manage Terms</div>
+  ${DB.settings.terms.map((t,i) => `
+    <div style="display:flex;gap:10px;margin-bottom:5px;">
+      <input class="fi" style="flex:1;" value="${t.name}" placeholder="Term Name" onchange="DB.settings.terms[${i}].name=this.value;saveDB();"/>
+      <button class="btn btn-gh btn-sm" onclick="if(confirm('Delete term? Grades for this term will be orphaned.')) { DB.settings.terms = DB.settings.terms.filter(x => x.id !== '${t.id}'); if(DB.settings.activeTerm==='${t.id}') DB.settings.activeTerm = DB.settings.terms[0]?.id; saveDB(); goPage('settings'); }">Delete</button>
+    </div>
+  `).join('')}
+  <button class="btn btn-gh btn-sm" style="margin-top:5px;" onclick="const tname=prompt('New Term Name:');if(tname){DB.settings.terms.push({id:'t'+Date.now(), name:tname});saveDB();goPage('settings');}">+ Add Term</button>
+</div>
 <div class="card fu d2">
   <div class="ch"><div class="ct"> Landing Page Slides</div></div>
   <div class="ibox" style="margin-bottom:10px;">Paste public image URLs or base64 image data. Leave image blank to use a clean color background.</div>
@@ -6147,9 +6187,12 @@
 
     function pgMyGrades() {
       const stu = getStu(); const cid = stu.classId || curCls;
-      const grades = DB.grades[cid]?.[stu.id] || {}; const av = avgStu(cid, stu.id);
+      const grades = DB.grades[cid + '_' + curTerm]?.[stu.id] || {}; const av = avgStu(cid, stu.id, curTerm);
       return `
-<div class="ph fu"><div class="ph-tag"> My Grades</div><h1>${stu.name || curUser?.name}</h1><div class="ph-sub">${(DB.classes.find(c => c.id === cid) || {}).name || ''} - Roll ${stu.roll || '-'}</div></div>
+<div class="ph ph-row fu"><div><div class="ph-tag"> My Grades</div><h1>${stu.name || curUser?.name}</h1><div class="ph-sub">${(DB.classes.find(c => c.id === cid) || {}).name || ''} - Roll ${stu.roll || '-'}</div></div>
+<select class="fi" style="width:140px;padding:5px;height:auto;font-weight:600;" onchange="curTerm=this.value;goPage('mygrades')">
+  ${DB.settings.terms.map(t => `<option value="${t.id}" ${curTerm===t.id?'selected':''}>${t.name}</option>`).join('')}
+</select></div>
 <div style="display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap;">
   <div class="card" style="flex:1;min-width:100px;text-align:center;padding:14px;"><div style="font-family:var(--head);font-size:1.9rem;font-weight:700;color:${sCol(av)};">${av}%</div><div style="font-size:.7rem;color:var(--ink3);">Overall Average</div></div>
   <div class="card" style="flex:1;min-width:100px;text-align:center;padding:14px;"><div style="font-family:var(--head);font-size:1.7rem;font-weight:700;color:${sCol(av)};">${lGrade(av)}</div><div style="font-size:.7rem;color:var(--ink3);">Grade</div></div>
