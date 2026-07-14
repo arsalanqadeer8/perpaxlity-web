@@ -4608,11 +4608,24 @@
       renderAdmissionClassOptions();
     }
 
-    function uploadLogo(inp) {
+    
+    async function uploadToStorage(file) {
+      if (!_sb) throw new Error("No Supabase connection");
+      const ext = file.name.split('.').pop();
+      const fileName = `${Date.now()}_${Math.random().toString(36).substring(2,9)}.${ext}`;
+      const { data, error } = await _sb.storage.from('portal_images').upload(fileName, file);
+      if (error) throw error;
+      const { data: publicUrlData } = _sb.storage.from('portal_images').getPublicUrl(fileName);
+      return publicUrlData.publicUrl;
+    }
+
+    async async function uploadLogo(inp) {
       const f = inp.files[0]; if (!f) return;
-      const r = new FileReader();
-      r.onload = e => { DB.school.logo = e.target.result; saveDB(); pushPublicSite(); applyBranding(); showToast('Logo updated and publishing', 'ts'); };
-      r.readAsDataURL(f);
+      try {
+        showToast('Uploading logo...', 'ts');
+        const url = await uploadToStorage(f);
+        DB.school.logo = url; saveDB(); pushPublicSite(); applyBranding(); showToast('Logo updated and published', 'ts');
+      } catch(e) { showToast(e.message, 'te'); }
     }
 
     /* ------------------------------- SHELL ------------------------------- */
@@ -6274,7 +6287,7 @@
   <button class="btn btn-gh" onclick="logout()" style="width:100%;justify-content:center;">Sign Out</button>
 </div>`;
     }
-    function updateProfilePhoto(inp) { const f = inp.files[0]; if (!f) return; const r = new FileReader(); r.onload = e => { curUser.photo = e.target.result; const u = DB.users.find(x => x.id === curUser.id); if (u) u.photo = e.target.result; saveDB(); buildShell(); showToast('? Photo updated', 'ts'); }; r.readAsDataURL(f); }
+    async function updateProfilePhoto(inp) { const f = inp.files[0]; if (!f) return; try { showToast('Uploading photo...', 'ts'); const url = await uploadToStorage(f); curUser.photo = url; const u = DB.users.find(x => x.id === curUser.id); if (u) u.photo = url; saveDB(); buildShell(); showToast('? Photo updated', 'ts'); } catch(e) { showToast(e.message, 'te'); } }
     async function changeMyPass() { const np = (document.getElementById('pp-n')?.value || '').trim(); const cp = (document.getElementById('pp-c')?.value || '').trim(); if (!np || np !== cp) { showToast('Passwords do not match', 'te'); return; } if (np.length < 8) { showToast('Min 8 chars', 'te'); return; } if (!_sb) { showToast('Supabase Auth is not configured', 'te'); return; } const { error } = await _sb.auth.updateUser({ password: np }); if (error) { showToast(error.message || 'Password update failed', 'te'); return; } showToast('Password updated in Supabase Auth', 'ts'); }
 
     /* ------------------------------- QR SCANNER ------------------------------- */
