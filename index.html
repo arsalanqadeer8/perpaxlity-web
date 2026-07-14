@@ -5864,7 +5864,7 @@
     }
     async function saveTeach(eid) { const name = (document.getElementById('mt-name')?.value || '').trim(); const email = (document.getElementById('mt-email')?.value || '').trim().toLowerCase(); if (!name || !email) { showToast('Name & email required', 'te'); return; } const classIds = [...document.querySelectorAll('#modal-body input[type=checkbox]:checked')].map(x => x.value); const loginPass = (document.getElementById('mt-pass')?.value || '').trim();
     if (!eid && loginPass && _sb) {
-      document.getElementById('m-btn').textContent = 'Creating Login...';
+      const btn = document.querySelector('.m-btns .btn-p'); if (btn) btn.textContent = 'Creating Login...';
       try {
         const { data, error } = await _sb.functions.invoke('create-auth-user', {
           body: { email, password: loginPass, role: 'teacher' }
@@ -5874,7 +5874,7 @@
         showToast(`Teacher added & Auth Login created!`, 'ts');
       } catch (err) {
         showToast(err.message, 'te');
-        document.getElementById('m-btn').textContent = 'Save';
+        const btn2 = document.querySelector('.m-btns .btn-p'); if (btn2) btn2.textContent = 'Save';
         return;
       }
     }
@@ -6006,7 +6006,7 @@
       const fid = eid || uid();
       const loginPass = (document.getElementById('mf-pass')?.value || '').trim();
       if (!eid && email && loginPass && _sb) {
-        document.getElementById('m-btn').textContent = 'Creating Login...';
+        const btn = document.querySelector('.m-btns .btn-p'); if (btn) btn.textContent = 'Creating Login...';
         try {
           const { data, error } = await _sb.functions.invoke('create-auth-user', {
             body: { email, password: loginPass, role: 'parent' }
@@ -6016,7 +6016,7 @@
           showToast(`Family added & Auth Login created!`, 'ts');
         } catch (err) {
           showToast(err.message, 'te');
-          document.getElementById('m-btn').textContent = 'Save';
+          const btn2 = document.querySelector('.m-btns .btn-p'); if (btn2) btn2.textContent = 'Save';
           return;
         }
       }
