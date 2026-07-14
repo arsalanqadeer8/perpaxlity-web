@@ -3999,7 +3999,8 @@
         return;
       }
       try {
-        await _sb.from('db_snapshot').upsert({ id: 1, data: DB, updated_at: new Date().toISOString() });
+        _lastPushTime = new Date().toISOString();
+        await _sb.from('db_snapshot').upsert({ id: 1, data: DB, updated_at: _lastPushTime });
         await pushPublicSite(true);
         _sbPending = false;
         showSyncBadge('Saved to cloud', '#4caf50');
@@ -4201,7 +4202,32 @@
       if (u) return u;
       return ensurePortalProfileForEmail(em, role);
     }
+    
+    let realtimeSub = null;
+    let _lastPushTime = 0;
+    function setupRealtime() {
+      if (!_sb || realtimeSub || curRole === 'student' || curRole === 'parent') return;
+      realtimeSub = _sb.channel('public:db_snapshot')
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'db_snapshot' }, payload => {
+          if (!payload.new || !payload.new.data) return;
+          const diff = Math.abs(new Date(payload.new.updated_at) - new Date(_lastPushTime));
+          if (diff < 5000) return; // Ignore echoes of our own pushes
+
+          DB = payload.new.data;
+          saveLocalDB();
+          
+          if (document.querySelector('.modal')) {
+             showToast('Data updated by another user! (Changes will appear after you close this modal)', 'tw2', 5000);
+          } else {
+             buildShell();
+             showToast('Live update synced', 'ts');
+          }
+        })
+        .subscribe();
+    }
+
     function setCurrentUser(u) {
+      setupRealtime();
       curUser = u; curRole = u.role;
       if (u.role === 'teacher') curCls = (u.classIds || [])[0] || DB.classes[0]?.id;
       else if (u.role === 'student') curCls = u.classId || DB.classes[0]?.id;
