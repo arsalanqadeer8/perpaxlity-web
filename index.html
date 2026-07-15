@@ -3764,10 +3764,7 @@
                 <div class="ox-faq-q">What are the school hours?</div>
                 <div class="ox-faq-a">Regular school hours are from 8:00 AM to 3:30 PM, Monday through Friday. Extracurricular activities run from 3:45 PM to 5:30 PM.</div>
             </div>
-            <div class="ox-faq-item" onclick="this.querySelector('.ox-faq-a').style.display = this.querySelector('.ox-faq-a').style.display === 'block' ? 'none' : 'block'">
-                <div class="ox-faq-q">Is financial aid available?</div>
-                <div class="ox-faq-a">Yes, we offer need-based financial aid and merit scholarships to ensure that exceptional students can attend regardless of financial background.</div>
-            </div>
+
             <div class="ox-faq-item" onclick="this.querySelector('.ox-faq-a').style.display = this.querySelector('.ox-faq-a').style.display === 'block' ? 'none' : 'block'">
                 <div class="ox-faq-q">What is the admissions process?</div>
                 <div class="ox-faq-a">The process involves submitting an online application via the portal, providing past academic transcripts, taking an entrance assessment, and attending a family interview.</div>
@@ -3776,12 +3773,43 @@
     </section>
 
     <!-- CTA & Footer -->
-    <section class="ox-cta" id="admissions">
-        <h2 class="gs-scroll-up">Ready to Join Our Legacy?</h2>
-        <p class="gs-scroll-up">Take the first step towards a brilliant future. Access the portal to start your application, manage documents, and connect with our admissions team.</p>
-        <div class="gs-scroll-up">
-            <button class="ox-btn" onclick="openLogin()">Access Secure Portal</button>
-        </div>
+    <section class="ox-cta" id="admissions" style="padding: 100px 5%; background: linear-gradient(135deg, #0a192f 0%, #112a4f 100%); color: white; text-align: center;">
+        <h2 class="gs-scroll-up" style="font-size: 3rem; font-weight: 800; margin-bottom: 15px;">Apply for Admission</h2>
+        <p class="gs-scroll-up" style="font-size: 1.15rem; color: #cbd5e1; max-width: 600px; margin: 0 auto 40px auto; line-height: 1.6;">Fill out the form below to start your application process. Our admissions team will contact you within 24 hours.</p>
+        
+        <form class="gs-scroll-up" style="max-width: 600px; margin: 0 auto; background: #ffffff; padding: 40px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); text-align: left;" onsubmit="event.preventDefault(); alert('Application submitted successfully!');">
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; color: #0a192f; font-weight: 600; margin-bottom: 8px;">Student's Full Name</label>
+                <input type="text" required style="width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 1rem; color: #0a192f; outline: none;" placeholder="John Doe" onfocus="this.style.borderColor='#d4af37'" onblur="this.style.borderColor='#cbd5e1'">
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; color: #0a192f; font-weight: 600; margin-bottom: 8px;">Parent/Guardian Email</label>
+                <input type="email" required style="width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 1rem; color: #0a192f; outline: none;" placeholder="john@example.com" onfocus="this.style.borderColor='#d4af37'" onblur="this.style.borderColor='#cbd5e1'">
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; color: #0a192f; font-weight: 600; margin-bottom: 8px;">Phone Number</label>
+                <input type="tel" required style="width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 1rem; color: #0a192f; outline: none;" placeholder="(123) 456-7890" onfocus="this.style.borderColor='#d4af37'" onblur="this.style.borderColor='#cbd5e1'">
+            </div>
+            <div style="margin-bottom: 30px;">
+                <label style="display: block; color: #0a192f; font-weight: 600; margin-bottom: 8px;">Grade Applying For</label>
+                <select required style="width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 1rem; color: #0a192f; background: #ffffff; outline: none;" onfocus="this.style.borderColor='#d4af37'" onblur="this.style.borderColor='#cbd5e1'">
+                    <option value="" disabled selected>Select a grade</option>
+                    <option value="pre-k">Pre-K</option>
+                    <option value="kindergarten">Kindergarten</option>
+                    <option value="grade-1">Grade 1</option>
+                    <option value="grade-2">Grade 2</option>
+                    <option value="grade-3">Grade 3</option>
+                    <option value="grade-4">Grade 4</option>
+                    <option value="grade-5">Grade 5</option>
+                    <option value="grade-6">Grade 6</option>
+                    <option value="grade-7">Grade 7</option>
+                    <option value="grade-8">Grade 8</option>
+                    <option value="grade-9">Grade 9</option>
+                    <option value="grade-10">Grade 10</option>
+                </select>
+            </div>
+            <button type="submit" class="ox-btn" style="width: 100%; padding: 16px; font-size: 1.15rem;">Submit Application</button>
+        </form>
     </section>
 
     <footer class="ox-footer">
