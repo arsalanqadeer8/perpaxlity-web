@@ -3777,39 +3777,68 @@
         <h2 class="gs-scroll-up" style="font-size: 3rem; font-weight: 800; margin-bottom: 15px;">Apply for Admission</h2>
         <p class="gs-scroll-up" style="font-size: 1.15rem; color: #cbd5e1; max-width: 600px; margin: 0 auto 40px auto; line-height: 1.6;">Fill out the form below to start your application process. Our admissions team will contact you within 24 hours.</p>
         
-        <form class="gs-scroll-up" style="max-width: 600px; margin: 0 auto; background: #ffffff; padding: 40px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); text-align: left;" onsubmit="event.preventDefault(); alert('Application submitted successfully!');">
+        <form id="landing-admission-form" class="gs-scroll-up" style="max-width: 600px; margin: 0 auto; background: #ffffff; padding: 40px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); text-align: left;" onsubmit="submitLandingForm(event)">
             <div style="margin-bottom: 20px;">
                 <label style="display: block; color: #0a192f; font-weight: 600; margin-bottom: 8px;">Student's Full Name</label>
-                <input type="text" required style="width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 1rem; color: #0a192f; outline: none;" placeholder="Name" onfocus="this.style.borderColor='#d4af37'" onblur="this.style.borderColor='#cbd5e1'">
+                <input type="text" id="lf-name" required style="width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 1rem; color: #0a192f; outline: none;" placeholder="Name" onfocus="this.style.borderColor='#d4af37'" onblur="this.style.borderColor='#cbd5e1'">
             </div>
             <div style="margin-bottom: 20px;">
                 <label style="display: block; color: #0a192f; font-weight: 600; margin-bottom: 8px;">Parent/Guardian Email</label>
-                <input type="email" required style="width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 1rem; color: #0a192f; outline: none;" placeholder="john@example.com" onfocus="this.style.borderColor='#d4af37'" onblur="this.style.borderColor='#cbd5e1'">
+                <input type="email" id="lf-email" required style="width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 1rem; color: #0a192f; outline: none;" placeholder="john@example.com" onfocus="this.style.borderColor='#d4af37'" onblur="this.style.borderColor='#cbd5e1'">
             </div>
             <div style="margin-bottom: 20px;">
                 <label style="display: block; color: #0a192f; font-weight: 600; margin-bottom: 8px;">Phone Number</label>
-                <input type="tel" required style="width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 1rem; color: #0a192f; outline: none;" placeholder="0300 1234567" onfocus="this.style.borderColor='#d4af37'" onblur="this.style.borderColor='#cbd5e1'">
+                <input type="tel" id="lf-phone" required style="width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 1rem; color: #0a192f; outline: none;" placeholder="0300 1234567" onfocus="this.style.borderColor='#d4af37'" onblur="this.style.borderColor='#cbd5e1'">
             </div>
             <div style="margin-bottom: 30px;">
                 <label style="display: block; color: #0a192f; font-weight: 600; margin-bottom: 8px;">Grade Applying For</label>
-                <select required style="width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 1rem; color: #0a192f; background: #ffffff; outline: none;" onfocus="this.style.borderColor='#d4af37'" onblur="this.style.borderColor='#cbd5e1'">
+                <select id="lf-grade" required style="width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 1rem; color: #0a192f; background: #ffffff; outline: none;" onfocus="this.style.borderColor='#d4af37'" onblur="this.style.borderColor='#cbd5e1'">
                     <option value="" disabled selected>Select a grade</option>
-                    <option value="pre-k">Pre-K</option>
-                    <option value="kindergarten">Kindergarten</option>
-                    <option value="grade-1">Grade 1</option>
-                    <option value="grade-2">Grade 2</option>
-                    <option value="grade-3">Grade 3</option>
-                    <option value="grade-4">Grade 4</option>
-                    <option value="grade-5">Grade 5</option>
-                    <option value="grade-6">Grade 6</option>
-                    <option value="grade-7">Grade 7</option>
-                    <option value="grade-8">Grade 8</option>
-                    <option value="grade-9">Grade 9</option>
-                    <option value="grade-10">Grade 10</option>
+                    <option value="Pre-K">Pre-K</option>
+                    <option value="Kindergarten">Kindergarten</option>
+                    <option value="Grade 1">Grade 1</option>
+                    <option value="Grade 2">Grade 2</option>
+                    <option value="Grade 3">Grade 3</option>
+                    <option value="Grade 4">Grade 4</option>
+                    <option value="Grade 5">Grade 5</option>
+                    <option value="Grade 6">Grade 6</option>
+                    <option value="Grade 7">Grade 7</option>
+                    <option value="Grade 8">Grade 8</option>
+                    <option value="Grade 9">Grade 9</option>
+                    <option value="Grade 10">Grade 10</option>
                 </select>
             </div>
             <button type="submit" class="ox-btn" style="width: 100%; padding: 16px; font-size: 1.15rem;">Submit Application</button>
         </form>
+        <script>
+            function submitLandingForm(e) {
+                e.preventDefault();
+                const name = document.getElementById('lf-name').value;
+                const email = document.getElementById('lf-email').value;
+                const phone = document.getElementById('lf-phone').value;
+                const grade = document.getElementById('lf-grade').value;
+                
+                if (!name || !phone || !grade) return;
+                
+                const app = {
+                    id: 'adm-' + Date.now(),
+                    createdAt: new Date().toISOString(),
+                    status: 'new',
+                    studentName: name,
+                    className: grade,
+                    father: 'Parent/Guardian (via Web)',
+                    phone: phone,
+                    email: email.toLowerCase(),
+                    notes: 'Submitted via landing page form.'
+                };
+                
+                DB.admissions = [app, ...(DB.admissions || [])].slice(0, 100);
+                saveLocalDB();
+                
+                alert('Application submitted successfully! Our admissions team will contact you soon.');
+                e.target.reset();
+            }
+        </script>
     </section>
 
     <footer class="ox-footer">
