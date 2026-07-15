@@ -3585,20 +3585,60 @@
         </div>
     </div>
 
-    <!-- Principal Message -->
-    <section class="ox-principal gs-scroll-up" id="about">
-        <div class="ox-principal-img">
-            <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Principal" />
+    <!-- Leadership Messages -->
+    <section class="ox-principal-carousel gs-scroll-up" id="about" style="padding: 120px 5%; background: #ffffff; text-align: center; position: relative;">
+        <span class="ox-sec-badge">Welcome to Excellence</span>
+        <h2 style="font-size: 2.5rem; color: #0a192f; margin-bottom: 40px; font-weight: 800; margin-top: 20px;">Messages from Leadership</h2>
+        
+        <div style="position: relative; max-width: 900px; margin: 0 auto;">
+            <div id="leadership-slider" style="display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; scrollbar-width: none; ms-overflow-style: none;">
+                <div style="scroll-snap-align: center; flex: 0 0 100%; padding: 0 20px; box-sizing: border-box;">
+                    <p style="font-size: 1.2rem; color: #475569; line-height: 1.8; margin-bottom: 30px; font-style: italic;">"At our school, we don't just teach curriculum; we cultivate character. For over a decade, we have been dedicated to providing a holistic environment where intellectual curiosity thrives, ethical values are instilled, and global perspectives are embraced."</p>
+                    <div class="ox-signature" style="font-family: 'Brush Script MT', cursive, serif; font-size: 2.5rem; color: #0a192f;">Adeeba Ansari</div>
+                    <div class="ox-principal-name" style="font-weight: 700; color: #0a192f; margin-top: 10px;">Miss Adeeba Ansari</div>
+                    <div class="ox-principal-title" style="color: #64748b; font-size: 0.95rem;">Principal</div>
+                </div>
+                <div style="scroll-snap-align: center; flex: 0 0 100%; padding: 0 20px; box-sizing: border-box;">
+                    <p style="font-size: 1.2rem; color: #475569; line-height: 1.8; margin-bottom: 30px; font-style: italic;">"We equip our students with resilience, critical thinking, and a profound sense of purpose. Our rigorous preparation ensures every student achieves top scores and is perfectly positioned for higher education and a bright future."</p>
+                    <div class="ox-signature" style="font-family: 'Brush Script MT', cursive, serif; font-size: 2.5rem; color: #0a192f;">Fazila Ansari</div>
+                    <div class="ox-principal-name" style="font-weight: 700; color: #0a192f; margin-top: 10px;">Miss Fazila Ansari</div>
+                    <div class="ox-principal-title" style="color: #64748b; font-size: 0.95rem;">Vice Principal</div>
+                </div>
+            </div>
+            
+            <style>
+                #leadership-slider::-webkit-scrollbar { display: none; }
+                .slider-btn { position: absolute; top: 50%; transform: translateY(-50%); width: 45px; height: 45px; border-radius: 50%; border: 2px solid #e2e8f0; background: #ffffff; color: #0a192f; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; z-index: 10; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+                .slider-btn:hover { border-color: #d4af37; color: #d4af37; box-shadow: 0 6px 15px rgba(212,175,55,0.2); }
+                .slider-btn-prev { left: -60px; }
+                .slider-btn-next { right: -60px; }
+                @media (max-width: 1024px) {
+                    .slider-btn-prev { left: -20px; }
+                    .slider-btn-next { right: -20px; }
+                }
+                @media (max-width: 768px) {
+                    .slider-btn { display: none; }
+                }
+            </style>
+            
+            <button class="slider-btn slider-btn-prev" onclick="document.getElementById('leadership-slider').scrollBy({left: -500, behavior: 'smooth'})">&#10094;</button>
+            <button class="slider-btn slider-btn-next" onclick="document.getElementById('leadership-slider').scrollBy({left: 500, behavior: 'smooth'})">&#10095;</button>
         </div>
-        <div class="ox-principal-text">
-            <span class="ox-sec-badge">Welcome to Excellence</span>
-            <h2>A Message From The Head of School</h2>
-            <p>At Oxford Excellence Academy, we don't just teach curriculum; we cultivate character. For over three decades, we have been dedicated to providing a holistic environment where intellectual curiosity thrives, ethical values are instilled, and global perspectives are embraced.</p>
-            <p>Our students go on to attend Ivy League institutions and become leaders in their respective fields because we equip them with resilience, critical thinking, and a profound sense of purpose.</p>
-            <div class="ox-signature">Alexander Wright</div>
-            <div class="ox-principal-name">Dr. Alexander Wright</div>
-            <div class="ox-principal-title">Founding Principal & Head of Education</div>
+        <div style="display: flex; justify-content: center; gap: 8px; margin-top: 30px;" id="leadership-dots">
+            <div class="dot active" style="width: 8px; height: 8px; border-radius: 50%; background: #d4af37; cursor: pointer;" onclick="document.getElementById('leadership-slider').scrollTo({left: 0, behavior: 'smooth'})"></div>
+            <div class="dot" style="width: 8px; height: 8px; border-radius: 50%; background: #e2e8f0; cursor: pointer;" onclick="document.getElementById('leadership-slider').scrollTo({left: 1000, behavior: 'smooth'})"></div>
         </div>
+        <script>
+            document.getElementById('leadership-slider').addEventListener('scroll', function(e) {
+                const scrollLeft = e.target.scrollLeft;
+                const width = e.target.clientWidth;
+                const index = Math.round(scrollLeft / width);
+                const dots = document.getElementById('leadership-dots').children;
+                for(let i=0; i<dots.length; i++) {
+                    dots[i].style.background = i === index ? '#d4af37' : '#e2e8f0';
+                }
+            });
+        </script>
     </section>
 
     <!-- Academic Programs -->
