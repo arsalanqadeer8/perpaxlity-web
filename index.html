@@ -2978,8 +2978,13 @@
         --ox-body: 'Inter', sans-serif;
     }
     
-    .ox-landing { font-family: var(--ox-body); background: var(--ox-bg); color: var(--ox-primary); margin: 0; padding: 0; overflow-x: hidden; position: relative; }
-    .ox-landing h1, .ox-landing h2, .ox-landing h3, .ox-landing h4, .ox-landing h5, .ox-landing h6 { font-family: var(--ox-heading); letter-spacing: -0.03em; }
+    /* CSS Reset */
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; width: 100%; overflow-x: hidden; }
+
+    .ox-landing { font-family: var(--ox-body); background: var(--ox-bg); color: var(--ox-primary); position: relative; width: 100%; overflow: hidden; }
+    .ox-landing h1, .ox-landing h2, .ox-landing h3, .ox-landing h4, .ox-landing h5, .ox-landing h6 { font-family: var(--ox-heading); letter-spacing: -0.03em; margin-top: 0; }
+    .ox-landing p { margin-top: 0; }
     
     /* Top Ticker */
     .ox-ticker { background: var(--ox-primary); color: var(--ox-gold); padding: 10px 5%; font-size: 0.85rem; font-weight: 600; text-align: center; text-transform: uppercase; letter-spacing: 1px; }
