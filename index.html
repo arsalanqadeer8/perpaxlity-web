@@ -3009,17 +3009,14 @@
     .ox-btn-outline:hover { background: var(--ox-bg); color: var(--ox-primary); border-color: var(--ox-primary); }
     
     /* Hero Section */
-    .ox-hero { padding: 80px 5% 120px; display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 60px; min-height: 90vh; position: relative; overflow: hidden; }
-    .ox-hero::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(212,175,55,0.05) 0%, transparent 60%); z-index: 0; pointer-events: none; }
-    .ox-hero-content { position: relative; z-index: 2; }
-    .ox-badge { display: inline-block; background: rgba(212, 175, 55, 0.1); color: var(--ox-gold); padding: 8px 24px; border-radius: 30px; font-size: 0.85rem; font-weight: 700; margin-bottom: 24px; letter-spacing: 1px; text-transform: uppercase; border: 1px solid rgba(212, 175, 55, 0.2); }
-    .ox-hero h1 { font-size: clamp(3rem, 5vw, 4.5rem); line-height: 1.05; color: var(--ox-primary); margin-bottom: 24px; font-weight: 800; letter-spacing: -2px; }
+    .ox-hero { padding: 120px 5%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; min-height: 90vh; position: relative; overflow: hidden; background: url('hero_image.jpg') center/cover no-repeat; }
+    .ox-hero::before { content: ''; position: absolute; inset: 0; background: rgba(10, 25, 47, 0.65); z-index: 0; }
+    .ox-hero-content { position: relative; z-index: 2; max-width: 800px; }
+    .ox-badge { display: inline-block; background: rgba(212, 175, 55, 0.2); color: var(--ox-gold); padding: 8px 24px; border-radius: 30px; font-size: 0.85rem; font-weight: 700; margin-bottom: 24px; letter-spacing: 1px; text-transform: uppercase; border: 1px solid rgba(212, 175, 55, 0.4); }
+    .ox-hero h1 { font-size: clamp(3rem, 6vw, 5.5rem); line-height: 1.1; color: #ffffff; margin-bottom: 24px; font-weight: 800; letter-spacing: -2px; }
     .ox-hero h1 span { color: var(--ox-gold); }
-    .ox-hero p { font-size: 1.15rem; color: var(--ox-text); margin-bottom: 40px; line-height: 1.7; max-width: 550px; }
-    .ox-hero-actions { display: flex; gap: 16px; flex-wrap: wrap; }
-    .ox-hero-img { position: relative; z-index: 1; border-radius: 30px; box-shadow: 0 40px 80px rgba(0,0,0,0.1); overflow: hidden; aspect-ratio: 4/3; width: 100%; transform: perspective(1000px) rotateY(-5deg); transition: transform 0.5s; }
-    .ox-hero-img:hover { transform: perspective(1000px) rotateY(0deg); }
-    .ox-hero-img img { width: 100%; height: 100%; object-fit: cover; }
+    .ox-hero p { font-size: 1.25rem; color: #e2e8f0; margin-bottom: 40px; line-height: 1.7; max-width: 650px; margin-left: auto; margin-right: auto; }
+    .ox-hero-actions { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
 
     /* Stats Bar */
     .ox-stats { background: var(--ox-primary); color: #ffffff; padding: 50px 5%; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; position: relative; z-index: 10; margin-top: -60px; border-radius: 24px; max-width: 1200px; margin-left: auto; margin-right: auto; box-shadow: 0 20px 40px rgba(10, 25, 47, 0.2); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
@@ -3138,9 +3135,7 @@
         .ox-nav-links a { font-size: 2rem; font-family: var(--ox-heading); font-weight: 800; color: var(--ox-primary); }
         .ox-nav-links a:hover { color: var(--ox-gold); }
         .ox-btn.mobile-hide { display: none; }
-        .ox-hero { grid-template-columns: 1fr; text-align: center; padding: 60px 5% 100px; gap: 40px; }
-        .ox-hero p { margin: 0 auto 40px auto; }
-        .ox-hero-actions { justify-content: center; }
+        .ox-hero { padding: 100px 5% 120px; }
         .ox-principal { grid-template-columns: 1fr; text-align: center; gap: 40px; }
         .ox-stats { margin-top: -30px; grid-template-columns: 1fr 1fr; gap: 30px; padding: 40px 5%; }
         .ox-stat-num { font-size: 2.5rem; }
@@ -3341,15 +3336,13 @@
 
     <header class="ox-hero">
         <div class="ox-hero-content gs-anim-up">
+            <div class="ox-badge">Admissions Open</div>
             <h1>Empowering the <br><span>Global Leaders</span> of Tomorrow</h1>
             <p id="land-copy">Discover an educational environment where tradition meets innovation, preparing students for success at the world's top universities.</p>
             <div class="ox-hero-actions">
                 <button class="ox-btn" onclick="openLogin()" style="padding: 16px 36px; font-size: 1.1rem;">Enroll Now</button>
-                <button class="ox-btn ox-btn-outline" onclick="document.getElementById('about').scrollIntoView({behavior: 'smooth'})" style="padding: 16px 36px; font-size: 1.1rem;">Explore Campus</button>
+                <button class="ox-btn ox-btn-outline" onclick="document.getElementById('about').scrollIntoView({behavior: 'smooth'})" style="padding: 16px 36px; font-size: 1.1rem; color: #fff; border-color: rgba(255,255,255,0.3);">Explore Campus</button>
             </div>
-        </div>
-        <div class="ox-hero-img gs-anim-in" style="position: relative; overflow: hidden; border-radius: 30px; box-shadow: 0 30px 60px rgba(0,0,0,0.15); aspect-ratio: 4/3; width: 100%; max-width: 600px;">
-            <img src="hero_image.jpg" style="width: 100%; height: 100%; object-fit: cover;" alt="Hero Image" />
         </div>
     </header>
 
