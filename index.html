@@ -3406,7 +3406,8 @@
             <div class="dot" style="width: 8px; height: 8px; border-radius: 50%; background: #e2e8f0; cursor: pointer;" onclick="document.getElementById('leadership-slider').scrollTo({left: 1000, behavior: 'smooth'})"></div>
         </div>
         <script>
-            document.getElementById('leadership-slider').addEventListener('scroll', function(e) {
+            const leadershipSlider = document.getElementById('leadership-slider');
+            leadershipSlider.addEventListener('scroll', function(e) {
                 const scrollLeft = e.target.scrollLeft;
                 const width = e.target.clientWidth;
                 const index = Math.round(scrollLeft / width);
@@ -3415,6 +3416,16 @@
                     dots[i].style.background = i === index ? '#d4af37' : '#e2e8f0';
                 }
             });
+
+            setInterval(() => {
+                const width = leadershipSlider.clientWidth;
+                const maxScroll = leadershipSlider.scrollWidth - width;
+                if (leadershipSlider.scrollLeft >= maxScroll - 10) {
+                    leadershipSlider.scrollTo({ left: 0, behavior: 'smooth' });
+                } else {
+                    leadershipSlider.scrollBy({ left: width, behavior: 'smooth' });
+                }
+            }, 5000);
         </script>
     </section>
 
