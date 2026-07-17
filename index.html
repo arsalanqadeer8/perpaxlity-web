@@ -3941,6 +3941,7 @@
       app.style.flexDirection = 'column';
       buildShell();
       goPage(curPage || 'dashboard');
+      if (curRole === 'admin') refreshAdmissionApplications(true);
       applyBranding();
     }
     function stripStoredPasswords() {
@@ -4368,6 +4369,7 @@
         const app = document.getElementById('app');
         app.style.display = 'flex'; app.style.flexDirection = 'column';
         buildShell(); goPage('dashboard'); applyBranding();
+        if (loginRole === 'admin') refreshAdmissionApplications(true);
         refreshCloudAfterLogin(em, u.role);
       } finally {
         if (btn) { btn.disabled = false; btn.textContent = 'Sign In'; }
@@ -4952,20 +4954,25 @@
 </div>`;
     }
 
-    async function refreshAdmissionApplications() {
-      if (!_sb) { showToast('Supabase is not configured', 'tw2'); return; }
+    async function refreshAdmissionApplications(silent = false) {
+      if (!_sb) { if (!silent) showToast('Supabase is not configured', 'tw2'); return; }
       const note = document.getElementById('admission-sync-note');
-      if (note) note.textContent = 'Refreshing online admission applications...';
+      if (note && !silent) note.textContent = 'Refreshing online admission applications...';
       const { data, error } = await _sb.from('admission_applications').select('*').order('created_at', { ascending: false }).limit(200);
       if (error) {
         if (note) note.textContent = 'Could not load online applications. Run school_database_setup.sql in Supabase first.';
-        showToast('Admission table not ready in Supabase', 'te');
+        if (!silent) showToast('Admission table not ready in Supabase', 'te');
         return;
       }
       DB.admissions = (data || []).map(supabaseToLocalAdmission);
       saveLocalDB();
-      goPage('admissions');
-      showToast('Online admissions refreshed', 'ts');
+      if (!silent) {
+        goPage('admissions');
+        showToast('Online admissions refreshed', 'ts');
+      } else {
+        const adminBtn = document.querySelector(`[onclick="goPage('admissions')"]`);
+        if (adminBtn) buildShell();
+      }
     }
 
     function findAdmission(id) { return (DB.admissions || []).find(a => String(a.id) === String(id)); }
