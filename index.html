@@ -3711,7 +3711,7 @@
   <div class="lp-mesh"></div>
   <div class="lp-dots"></div>
   <div class="lp-card">
-    <div class="lp-brand">
+    <div class="lp-brand" onclick="closeLogin()" style="cursor: pointer;">
       <div class="lp-logo" id="lp-logo"></div>
 
       <div class="lp-title" id="lp-title">Oxford Excellence Academy</div>
@@ -4424,6 +4424,10 @@
       document.getElementById('login-page').style.display = 'flex';
       const btn = [...document.querySelectorAll('.rtab')].find(b => b.textContent.toLowerCase().includes(prefillRole));
       if (btn) setRole(prefillRole, btn);
+    }
+    function closeLogin() {
+      document.getElementById('login-page').style.display = 'none';
+      document.getElementById('landing-page').style.display = '';
     }
     function openManualParentWhatsApp() {
       const phone = normalizePhone(DB.school?.whatsapp || DB.school?.phone || '');
