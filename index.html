@@ -11,6 +11,7 @@
 <link
     href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap"
     rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1753,14 +1754,42 @@
       background: #fff;
       padding: .25in;
       display: grid;
-      grid-template-columns: repeat(2, 3.375in);
-      grid-auto-rows: 2.125in;
-      gap: .12in .18in;
+      grid-template-columns: repeat(3, 2.125in);
+      grid-auto-rows: 3.375in;
+      gap: .25in .2in;
       align-content: start;
       justify-content: center;
       box-shadow: var(--sh2);
       border: 1px solid var(--border);
     }
+    .vid-card { width: 2.125in; height: 3.375in; background: #ffffff; border-radius: .15in; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; box-sizing: border-box; color: #0a192f; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .vid-top-deco { position: absolute; top: -.2in; left: -.2in; width: 1.2in; height: .8in; background: #0a192f; border-radius: 50%; box-shadow: 0 0 0 .06in #fff, 0 0 0 .12in #b48e4b; z-index: 1; }
+    .vid-header { text-align: center; padding-top: .15in; position: relative; z-index: 2; }
+    .vid-logo-circle { width: .6in; height: .6in; margin: 0 auto; border-radius: 50%; border: 2px solid #b48e4b; display: flex; align-items: center; justify-content: center; background: #fff; font-size: .3in; color: #0a192f; overflow: hidden; }
+    .vid-logo-circle img { width: 100%; height: 100%; object-fit: contain; }
+    .vid-school-name { font-weight: 800; font-size: .11in; letter-spacing: .02in; margin-top: .05in; color: #0a192f; }
+    .vid-tagline { font-size: .06in; font-weight: 700; color: #b48e4b; letter-spacing: .03in; margin-top: .02in; }
+    .vid-body { display: flex; margin-top: .1in; padding: 0 .1in; position: relative; z-index: 2; gap: .08in; }
+    .vid-photo-col { width: .75in; display: flex; flex-direction: column; align-items: center; gap: .12in; }
+    .vid-photo-wrap { width: .75in; height: .75in; border-radius: 50%; border: .03in solid #b48e4b; overflow: hidden; background: #eee; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size: .2in; }
+    .vid-photo-wrap img { width: 100%; height: 100%; object-fit: cover; }
+    .vid-qr { width: .6in; height: .6in; background: #fff; border-radius: .05in; }
+    .vid-qr canvas, .vid-qr img { width: 100% !important; height: 100% !important; border-radius: .05in; }
+    .vid-info-col { flex: 1; display:flex; flex-direction:column; }
+    .vid-name { font-size: .12in; font-weight: 800; color: #0a192f; line-height: 1.1; text-transform: uppercase; }
+    .vid-role { font-size: .08in; font-weight: 700; color: #b48e4b; margin-top: .02in; letter-spacing: .02in; text-transform: uppercase; }
+    .vid-role::after { content:''; display:block; width:.4in; height:1px; background:#b48e4b; margin-top:.04in; }
+    .vid-table { margin-top: .08in; display:flex; flex-direction:column; gap:.04in; flex:1; }
+    .vid-row { display: flex; align-items: center; gap: .04in; font-size: .06in; border-bottom: .5px solid rgba(10,25,47,0.1); padding-bottom:.02in; }
+    .vid-row i { color: #fff; background: #0a192f; border-radius: 50%; width: .12in; height: .12in; display: flex; align-items: center; justify-content: center; font-size: .07in; flex-shrink:0; }
+    .vid-row > div { display: flex; justify-content: space-between; flex: 1; align-items: center; }
+    .vid-row span { opacity: 0.8; }
+    .vid-row b { font-weight: 700; font-size: .065in; color: #0a192f; text-align:right;}
+    .vid-sign { text-align: center; margin-top: .02in; }
+    .vid-sign img { height: .22in; display: block; margin: 0 auto; opacity: 0.8; }
+    .vid-sign span { font-size: .05in; font-weight: 700; color: #0a192f; border-top: .5px solid #b48e4b; padding-top: .02in; display: inline-block; width: .6in; }
+    .vid-footer { position: absolute; bottom: 0; left: -5%; width: 110%; height: .4in; background: #0a192f; border-radius: 50% 50% 0 0 / 100% 100% 0 0; border-top: .02in solid #b48e4b; display: flex; justify-content: center; align-items: flex-end; padding-bottom: .08in; z-index: 1; }
+    .vid-foot-text { font-size: .06in; color: #fff; font-weight: 600; letter-spacing: .02in; display: flex; align-items: center; gap: .05in; }
 
     .school-id-card {
       width: 3.375in;
@@ -1849,6 +1878,11 @@
       background: var(--yl);
       color: var(--y);
       border-color: rgba(202, 138, 4, .25);
+    }
+    .acV {
+      background: var(--bl);
+      color: var(--b);
+      border-color: var(--b2);
     }
 
     .ac0 {
@@ -2471,7 +2505,7 @@
         break-after: page;
       }
 
-      body.printing-idcards .school-id-card {
+      body.printing-idcards .vid-card {
         box-shadow: none !important;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
@@ -3129,8 +3163,10 @@
     .ox-footer-bottom { text-align: center; font-size: 0.95rem; color: #64748b; }
     
     /* Mobile Overrides & Hamburger Menu */
+    .mobile-only { display: none !important; }
     @media (max-width: 992px) {
         .ox-btn.mobile-hide { display: none; }
+        .mobile-only { display: block !important; }
         .ox-hero { padding: 100px 5% 120px; }
         .ox-principal { grid-template-columns: 1fr; text-align: center; gap: 40px; }
         .ox-stats { margin-top: -30px; grid-template-columns: 1fr 1fr; gap: 30px; padding: 40px 5%; }
@@ -3149,158 +3185,17 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&amp;family=Poppins:wght@300;400;500;600;700&amp;family=Bricolage+Grotesque:opsz,wght@12..96,400..800&amp;family=Inter:wght@400..700&amp;family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&amp;display=swap" rel="stylesheet"/>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<script id="tailwind-config">
-  tailwind.config = {
-    darkMode: "class",
-    corePlugins: { preflight: false },
-    theme: {
-      extend: {
-        "colors": {
-                "background": "#faf8ff",
-                "surface-container": "#eaedff",
-                "on-primary": "#ffffff",
-                "on-tertiary-fixed-variant": "#404754",
-                "on-surface-variant": "#444651",
-                "on-tertiary-fixed": "#151c27",
-                "on-tertiary-container": "#a5acbb",
-                "error": "#ba1a1a",
-                "secondary": "#795900",
-                "outline": "#757682",
-                "on-secondary-fixed": "#261a00",
-                "secondary-container": "#ffc329",
-                "on-secondary": "#ffffff",
-                "tertiary-fixed-dim": "#c0c7d6",
-                "surface-bright": "#faf8ff",
-                "on-secondary-fixed-variant": "#5c4300",
-                "primary-fixed": "#dce1ff",
-                "surface": "#faf8ff",
-                "on-surface": "#131b2e",
-                "surface-variant": "#dae2fd",
-                "tertiary-fixed": "#dce2f3",
-                "secondary-fixed": "#ffdf9f",
-                "inverse-on-surface": "#eef0ff",
-                "on-tertiary": "#ffffff",
-                "on-secondary-container": "#6f5100",
-                "surface-dim": "#d2d9f4",
-                "on-background": "#131b2e",
-                "primary": "#00236f",
-                "outline-variant": "#c5c5d3",
-                "on-primary-container": "#90a8ff",
-                "on-primary-fixed": "#00164e",
-                "on-primary-fixed-variant": "#264191",
-                "inverse-surface": "#283044",
-                "primary-fixed-dim": "#b6c4ff",
-                "surface-container-highest": "#dae2fd",
-                "error-container": "#ffdad6",
-                "surface-tint": "#4059aa",
-                "secondary-fixed-dim": "#f9bd22",
-                "tertiary-container": "#39404d",
-                "inverse-primary": "#b6c4ff",
-                "surface-container-low": "#f2f3ff",
-                "surface-container-high": "#e2e7ff",
-                "primary-container": "#1e3a8a",
-                "tertiary": "#232a36",
-                "on-error-container": "#93000a",
-                "on-error": "#ffffff",
-                "surface-container-lowest": "#ffffff"
-        },
-        "borderRadius": {
-                "DEFAULT": "0.125rem",
-                "lg": "0.25rem",
-                "xl": "0.5rem",
-                "full": "0.75rem"
-        },
-        "spacing": {
-                "stack-md": "1.5rem",
-                "gutter": "1.5rem",
-                "notebook-padding": "2.5rem",
-                "stack-sm": "0.5rem",
-                "margin-page": "2rem",
-                "stack-lg": "4rem"
-        },
-        "fontFamily": {
-                "headline-md": [
-                        "Bricolage Grotesque"
-                ],
-                "display-lg": [
-                        "Bricolage Grotesque"
-                ],
-                "annotation": [
-                        "Caveat"
-                ],
-                "body-lg": [
-                        "Inter"
-                ],
-                "label-caps": [
-                        "Space Mono"
-                ],
-                "display-lg-mobile": [
-                        "Bricolage Grotesque"
-                ],
-                "body-md": [
-                        "Inter"
-                ]
-        },
-        "fontSize": {
-                "headline-md": [
-                        "32px",
-                        {
-                                "lineHeight": "1.2",
-                                "fontWeight": "700"
-                        }
-                ],
-                "display-lg": [
-                        "56px",
-                        {
-                                "lineHeight": "1.1",
-                                "letterSpacing": "-0.02em",
-                                "fontWeight": "800"
-                        }
-                ],
-                "annotation": [
-                        "20px",
-                        {
-                                "lineHeight": "1.2",
-                                "fontWeight": "400"
-                        }
-                ],
-                "body-lg": [
-                        "18px",
-                        {
-                                "lineHeight": "1.6",
-                                "fontWeight": "400"
-                        }
-                ],
-                "label-caps": [
-                        "12px",
-                        {
-                                "lineHeight": "1.0",
-                                "letterSpacing": "0.1em",
-                                "fontWeight": "500"
-                        }
-                ],
-                "display-lg-mobile": [
-                        "36px",
-                        {
-                                "lineHeight": "1.2",
-                                "fontWeight": "800"
-                        }
-                ],
-                "body-md": [
-                        "16px",
-                        {
-                                "lineHeight": "1.5",
-                                "fontWeight": "400"
-                        }
-                ]
-        }
-},
-    },
+
+
+
+<script>
+  for(let i=0; i<sessionStorage.length; i++){
+    if(sessionStorage.key(i).startsWith('sb-') && sessionStorage.key(i).endsWith('-auth-token')){
+      document.write('<style>#landing-page { display: none !important; }</style>');
+      break;
+    }
   }
 </script>
-
-
 </head>
 
 <body>
@@ -3322,6 +3217,7 @@
             <a href="#student-month" onclick="toggleMenu()">Student of the Month</a>
             <a href="#admissions" onclick="toggleMenu()">Admissions</a>
             <a href="#footer" onclick="toggleMenu()">Contact Us</a>
+            <a href="#" onclick="openLogin(); toggleMenu(); return false;" class="mobile-only" style="color: var(--ox-gold); font-weight: bold; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; margin-top: 10px;">Access Portal</a>
         </div>
         <div class="ox-nav-actions">
             <button class="ox-btn mobile-hide" onclick="openLogin()">Access Portal</button>
@@ -3565,14 +3461,16 @@
             <button type="submit" class="ox-btn" style="width: 100%; padding: 16px; font-size: 1.15rem;">Submit Application</button>
         </form>
         <script>
-            function submitLandingForm(e) {
+            async function submitLandingForm(e) {
                 e.preventDefault();
                 const name = document.getElementById('lf-name').value;
                 const email = document.getElementById('lf-email').value;
                 const phone = document.getElementById('lf-phone').value;
                 const grade = document.getElementById('lf-grade').value;
+                const btn = e.target.querySelector('button[type="submit"]');
                 
                 if (!name || !phone || !grade) return;
+                if (btn) { btn.disabled = true; btn.textContent = 'Submitting...'; }
                 
                 const app = {
                     id: 'adm-' + Date.now(),
@@ -3586,11 +3484,31 @@
                     notes: 'Submitted via landing page form.'
                 };
                 
-                DB.admissions = [app, ...(DB.admissions || [])].slice(0, 100);
-                saveLocalDB();
+                try {
+                    if (typeof _sb !== 'undefined' && _sb) {
+                        const { error } = await _sb.from('admission_applications').insert({
+                            student_name: app.studentName,
+                            applying_class_name: app.className,
+                            father_name: app.father,
+                            phone: app.phone,
+                            email: app.email,
+                            notes: app.notes,
+                            status: app.status
+                        });
+                        if (error) throw error;
+                    }
+                } catch(err) {
+                    console.error("Admission Sync Error:", err);
+                }
+                
+                if (typeof DB !== 'undefined' && DB && typeof saveLocalDB !== 'undefined') {
+                    DB.admissions = [app, ...(DB.admissions || [])].slice(0, 100);
+                    saveLocalDB();
+                }
                 
                 alert('Application submitted successfully! Our admissions team will contact you soon.');
                 e.target.reset();
+                if (btn) { btn.disabled = false; btn.textContent = 'Submit Application'; }
             }
 
             function toggleMenu() {
@@ -3797,8 +3715,8 @@
     /* ------------------------------- SUPABASE CONFIG ------------------------------- */
     const SUPABASE_URL  = 'https://iprqtkmtelgdhlenlsrc.supabase.co';
     const SUPABASE_KEY  = 'sb_publishable_DX0GG-V6vp9ey7_FxbvLdw_ql-E8nEt';
-    const _sb = (typeof supabase !== 'undefined' && SUPABASE_KEY !== 'PASTE_YOUR_ANON_KEY_HERE')
-      ? supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+    const _sb = (typeof supabase !== 'undefined' && SUPABASE_URL) 
+      ? supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { storage: window.sessionStorage } })
       : null;
 
     /* ------------------------------- DATA ------------------------------- */
@@ -4173,7 +4091,7 @@
     function sCol(v) { return v >= 80 ? 'var(--g)' : v >= 60 ? 'var(--o)' : 'var(--r)'; }
     function lGrade(v) { return v >= 90 ? 'A+' : v >= 80 ? 'A' : v >= 70 ? 'B+' : v >= 60 ? 'B' : v >= 50 ? 'C' : v > 0 ? 'F' : '-'; }
     function gCls(v) { const l = lGrade(v); return l.startsWith('A') ? 'bg2' : l.startsWith('B') ? 'bb2' : l === 'C' ? 'bo2' : l === 'F' ? 'br2' : ''; }
-    function today() { return new Date().toISOString().split('T')[0]; }
+    function today() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
     function monthKey(d = today()) { return String(d || today()).slice(0, 7); }
     function fmtDate(d) { if (!d) return '-'; try { return new Date(d).toLocaleDateString('en-GB'); } catch { return d; } }
     function allStus() { return Object.values(DB.students).flat(); }
@@ -4251,10 +4169,18 @@
       DB.fees.payments[sid] = DB.fees.payments[sid] || {};
       DB.fees.payments[sid].f1 = { paid: monthlyFeeDue(sid) === 0, date: today(), amount: rows.reduce((sum, r) => sum + num(r.amount), 0), month: monthKey() };
     }
-    function teacherNetSalary(t) { return Math.max(0, num(t.salary) - num(t.deductions) + num(t.bonus)); }
-    function teacherMonthlyStats(id) {
+    function calcPayrollData(t, month) {
+      const stats = teacherMonthlyStats(t.id, month);
+      const base = num(t.salary);
+      const perDay = base / 26;
+      const lateAbsents = Math.floor(stats.late / 3);
+      const deductionDays = stats.absent + lateAbsents;
+      const attDeduction = Math.round(deductionDays * perDay);
+      return { base, perDay, stats, lateAbsents, deductionDays, attDeduction, expectedNet: Math.max(0, base - attDeduction) };
+    }
+    function teacherMonthlyStats(id, monthFilter) {
       const rec = DB.teacherAttendance[id] || {};
-      const mk = monthKey();
+      const mk = monthFilter || monthKey();
       const entries = Object.entries(rec).filter(([date]) => date.startsWith(mk)).map(([, val]) => val);
       return {
         present: entries.filter(v => v.status === 'Present').length,
@@ -4310,7 +4236,7 @@
     }
 
     /* ------------------------------- AUTH ------------------------------- */
-    let curRole = 'admin', curUser = null, curCls = null, curTerm = 't1', curPage = 'dashboard';
+    let curRole = 'admin', curUser = null, curCls = null, curTerm = 't1', curPage = sessionStorage.getItem('lastPage') || 'dashboard';
     let loginRole = 'admin', _qrS = null, _toastT = null;
 
     function togglePassword(id, btn) {
@@ -4604,17 +4530,12 @@
       const svg = icons[key] || icons.dashboard;
       return `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${svg}</svg>`;
     }
-    function cleanBrokenUI(root = document) {
-      root.querySelectorAll('.sc-ic,.ph-tag,.ct,.hs-tag,.hs-deco,.id-card-logo,.rc-hl,.sl-ok,.scan-fb').forEach(el => {
-        const t = (el.textContent || '').trim();
-        if (/^[?]+$/.test(t) || t.includes('?')) el.textContent = '';
-      });
-      root.querySelectorAll('button').forEach(btn => {
-        const t = (btn.textContent || '').trim();
-        if (/^[?]+$/.test(t) || t.includes('?')) btn.textContent = 'Delete';
-      });
-    }
+
     function navItems() {
+      if (curRole === 'scanner') return [
+        { p: 'dashboard', i: 'dashboard', l: 'Dashboard', s: 'Home' },
+        { p: 'scanner', i: '', l: 'QR Scanner', s: 'Scan' }
+      ];
       if (curRole === 'admin') return [
         { p: 'dashboard', i: 'dashboard', l: 'Dashboard', s: 'Home' },
         { p: 'students', i: '', l: 'Students', s: 'Students' },
@@ -4626,7 +4547,7 @@
         { p: 'classes', i: '', l: 'Classes', s: 'Classes' },
         { p: 'timetable', i: '', l: 'Timetable', s: 'Sched' },
         { p: 'exams', i: '', l: 'Exams', s: 'Exams' },
-        { p: 'notices', i: '', l: 'Notices', s: 'News' },
+        { p: 'notices', i: '', l: 'Notices & Assignments', s: 'News' },
         { p: '---' },
         { p: 'teachers', i: '', l: 'Teachers', s: 'Staff' },
         { p: 'payroll', i: '', l: 'Payroll', s: 'Payroll' },
@@ -4644,7 +4565,7 @@
         { p: 'grades', i: '', l: 'Grades', s: 'Grades' },
         { p: 'students', i: '', l: 'My Students', s: 'Class' },
         { p: 'idcards', i: '', l: 'ID Cards', s: 'ID' },
-        { p: 'notices', i: '', l: 'Notices', s: 'News' },
+        { p: 'notices', i: '', l: 'Notices & Assignments', s: 'News' },
         { p: 'timetable', i: '', l: 'Timetable', s: 'Sched' },
         { p: 'teacheratt', i: '', l: 'My Attendance', s: 'My Att' },
       ];
@@ -4654,7 +4575,7 @@
         { p: 'myattend', i: 'attendance', l: 'Attendance', s: 'Attend' },
         { p: 'qrcard', i: '', l: 'ID Card', s: 'Card' },
         { p: 'myfees', i: '', l: 'My Fees', s: 'Fees' },
-        { p: 'notices', i: '', l: 'Notices', s: 'News' },
+        { p: 'notices', i: '', l: 'Notices & Assignments', s: 'News' },
       ];
     }
 
@@ -4678,24 +4599,24 @@
       const bn = document.getElementById('bn-nav');
       if (bn) bn.innerHTML = nav.filter(n => n.p !== '---').slice(0, 5).map(n => `<button class="bn-it" data-page="${n.p}" onclick="goPage('${n.p}')"><div class="bn-ic">${iconMarkup(n.i && n.i !== '?' ? n.i : n.p)}</div><div class="bn-lb">${n.s}</div></button>`).join('');
       buildNotifPanel();
-      cleanBrokenUI(document);
     }
 
     function goPage(p) {
       if (p === 'scanner') { openScanner(); return; }
       curPage = p;
+      sessionStorage.setItem('lastPage', p);
       document.querySelectorAll('[data-page]').forEach(el => el.classList.toggle('active', el.dataset.page === p));
       document.getElementById('page-root').innerHTML = `<div class="pw fu">${renderPage(p)}</div>`;
       updatePill();
       closeNotif();
-      cleanBrokenUI(document.getElementById('page-root'));
       if (p === 'qrcard') setTimeout(buildQRCard, 90);
       if (p === 'idcards') setTimeout(buildClassIdCardQrs, 120);
+      if (p === 'dashboard' && curRole === 'admin') setTimeout(renderAdminCharts, 120);
     }
 
     function renderPage(p) {
       const map = {
-        dashboard: () => curRole === 'admin' ? pgAdminDash() : curRole === 'teacher' ? pgTeacherDash() : pgStudentDash(),
+        dashboard: () => curRole === 'admin' ? pgAdminDash() : curRole === 'teacher' ? pgTeacherDash() : curRole === 'scanner' ? pgScannerDash() : pgStudentDash(),
         students: pgStudents, admissions: pgAdmissions, classes: pgClasses, attendance: pgAttendance, grades: pgGrades,
         fees: pgFees, exams: pgExams, notices: pgNotices, timetable: pgTimetable,
         teachers: pgTeachers, payroll: pgPayroll, teacheratt: pgTeacherAtt, subjects: pgSubjects,
@@ -4716,6 +4637,11 @@
     function clsBar(fn = 'switchCls') {
       const classes = curRole === 'teacher' ? (curUser?.classIds || []).map(id => DB.classes.find(c => c.id === id)).filter(Boolean) : DB.classes;
       return `<div class="cpb">${classes.map(c => `<button class="cp${c.id === curCls ? ' active' : ''}" onclick="${fn}('${c.id}')">${c.name}${c.section ? ' ' + c.section : ''}</button>`).join('')}</div>`;
+    }
+
+    /* ------------------------------- SCANNER DASHBOARD ------------------------------- */
+    function pgScannerDash() {
+      return `<div class="ph ph-row fu"><div><div class="ph-tag"> Scanner</div><h1>Gate Access Control</h1><div class="ph-sub">Scan ID cards to log attendance</div></div></div><div class="card" style="text-align:center;padding:50px 20px;"><div style="font-size:3.5rem;margin-bottom:15px;">?</div><h3>QR Scanner</h3><p style="color:var(--ink3);margin-bottom:25px;font-size:.85rem;">Open the scanner to mark attendance for students and staff.</p><button class="btn btn-p" onclick="openScanner()" style="font-size:1.1rem;padding:12px 30px;">Open Scanner</button></div>`;
     }
 
     /* ------------------------------- ADMIN DASHBOARD ------------------------------- */
@@ -4748,10 +4674,20 @@
   <div class="sc sv"><div class="sc-ic"></div><div class="sc-val" style="color:var(--v);">${pendingPayroll}/${teacherCount}</div><div class="sc-lbl">Payroll Pending</div></div>
   <div class="sc sp"><div class="sc-ic"></div><div class="sc-val" style="color:var(--p);">${newAdmissions}</div><div class="sc-lbl">New Admissions</div></div>
 </div>
+<div class="g2" style="margin-bottom:15px;">
+  <div class="card fu d2" style="height:250px;display:flex;flex-direction:column;">
+    <div class="ch" style="margin-bottom:5px;"><div class="ct">6-Month Revenue</div><button class="btn btn-gh btn-sm" onclick="goPage('fees')">Ledger</button></div>
+    <div style="flex:1;position:relative;width:100%;"><canvas id="feeChart"></canvas></div>
+  </div>
+  <div class="card fu d3" style="height:250px;display:flex;flex-direction:column;">
+    <div class="ch" style="margin-bottom:5px;"><div class="ct">Today's Attendance</div><button class="btn btn-gh btn-sm" onclick="goPage('attendance')">Register</button></div>
+    <div style="flex:1;position:relative;width:100%;"><canvas id="attChart"></canvas></div>
+  </div>
+</div>
 <div class="g2">
   <div class="card fu d2">
     <div class="ch"><div class="ct"> Class Performance</div><button class="btn btn-gh btn-sm" onclick="goPage('reportcards')">Reports</button></div>
-      ${DB.classes.slice(0, 8).map(c => { const sts = clsStus(c.id); const avg = sts.length ? Math.round(sts.reduce((a, s) => a + avgStu(c.id, s.id), 0) / sts.length) : 0; return `<div style="display:flex;align-items:center;gap:9px;margin-bottom:9px;"><div style="font-size:.74rem;font-weight:600;color:var(--ink3);min-width:78px;">${c.name}${c.section ? ' ' + c.section : ''}</div><div style="flex:1;"><div class="pb" style="height:6px;"><div class="pf" style="width:${avg}%;background:${sCol(avg)};height:6px;"></div></div></div><div style="font-weight:700;font-size:.78rem;min-width:34px;text-align:right;color:${sCol(avg)};">${avg}%</div></div>`; }).join('')}
+      ${DB.classes.slice(0, 8).map(c => { const sts = clsStus(c.id); const avg = sts.length ? Math.round(sts.reduce((a, s) => a + avgStu(c.id, s.id), 0) / sts.length) : 0; return `<div style="display:flex;align-items:center;gap:9px;margin-bottom:9px;"><div style="font-size:.74rem;font-weight:600;color:var(--ink3);min-width:78px;">${escHtml(c.name)}${c.section ? ' ' + escHtml(c.section) : ''}</div><div style="flex:1;"><div class="pb" style="height:6px;"><div class="pf" style="width:${avg}%;background:${sCol(avg)};height:6px;"></div></div></div><div style="font-weight:700;font-size:.78rem;min-width:34px;text-align:right;color:${sCol(avg)};">${avg}%</div></div>`; }).join('')}
   </div>
   <div>
     <div class="card fu d3">
@@ -4873,6 +4809,12 @@
       <div class="ch"><div class="ct"> Upcoming Exams</div></div>
         ${DB.exams.slice(0, 3).map(e => `<div style="display:flex;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);"><div style="background:var(--p);color:#fff;border-radius:8px;padding:5px 7px;text-align:center;min-width:38px;flex-shrink:0;"><div style="font-size:.88rem;font-weight:900;line-height:1;">${e.date ? new Date(e.date).getDate() : '?'}</div><div style="font-size:.52rem;opacity:.8;">${e.date ? new Date(e.date).toLocaleString('en', { month: 'short' }) : '-'}</div></div><div><div style="font-weight:700;font-size:.8rem;">${e.subject}</div><div style="font-size:.67rem;color:var(--ink3);">${e.type} - ${e.time || '-'}</div></div></div>`).join('') || '<div style="color:var(--ink4);font-size:.76rem;text-align:center;padding:12px;">No upcoming exams</div>'}
     </div>
+    <div class="card fu d5" style="margin-top:12px;">
+      <div class="ch"><div class="ct"> Contact Teachers</div></div>
+      <div style="padding:10px 0; display:flex; flex-wrap:wrap; gap:8px;">
+        ${(DB.users || []).filter(u => u.role === 'teacher' && (u.classIds || []).includes(cid)).map(t => `<a href="mailto:${t.email}?subject=Message from ${stu.name} (Parent/Student)" class="btn btn-gh btn-xs" style="text-decoration:none;"><span style="margin-right:4px;">✉</span>${t.name}</a>`).join('') || '<div style="color:var(--ink4);font-size:.76rem;">No teachers assigned</div>'}
+      </div>
+    </div>
   </div>
 </div>
   ${DB.notices.slice(-2).reverse().map(n => `<div style="background:linear-gradient(135deg,var(--p),var(--v));border-radius:var(--radius);padding:12px 14px;color:#fff;margin-bottom:10px;" class="fu d5"><div style="font-weight:700;font-size:.83rem;margin-bottom:2px;"> ${n.title}</div><div style="font-size:.76rem;opacity:.75;">${n.body || ''}</div></div>`).join('')}`;
@@ -4884,7 +4826,8 @@
       return `
 <div class="ph ph-row fu">
   <div><div class="ph-tag"> Students</div><h1>Student Roster</h1><div class="ph-sub">${cls?.name || ''} ${cls?.section || ''} - ${sts.length} enrolled</div></div>
-  <div class="ph-acts">
+<div class="ph-acts">
+    <button class="btn btn-gh btn-sm" onclick="printIDCards('${curCls}')">Print IDs</button>
     <button class="btn btn-gh btn-sm" onclick="openBulkModal()"> Bulk Import</button>
     <button class="btn btn-p" onclick="openAddStudentModal()">+ Add Student</button>
   </div>
@@ -4916,6 +4859,7 @@
           <td><div style="display:flex;gap:3px;flex-wrap:wrap;">
             <button class="btn btn-gh btn-xs" onclick="openStuDetail('${s.id}','${curCls}')">View</button>
             <button class="btn btn-p btn-xs" onclick="openAddStudentModal('${s.id}')">Edit</button>
+            <button class="btn btn-xs" style="background:var(--gl);color:var(--g);" onclick="printAdmissionForm('${s.id}','${curCls}')" title="Print Admission Form">📋 Adm.</button>
             <button class="btn btn-xs" style="background:var(--rl);color:var(--r);" onclick="delStu('${s.id}','${curCls}')">Delete</button>
           </div></td>
         </tr>`;
@@ -4950,7 +4894,7 @@
 <div class="ibox" id="admission-sync-note" style="margin-bottom:12px;">Online applications load from Supabase when Admin is signed in. Public visitors can submit through the landing page after running the SQL setup.</div>
 <div class="card fu">
   <div class="ch"><div class="ct">Applications</div><button class="btn btn-gh btn-sm" onclick="refreshAdmissionApplications()">Refresh Online</button></div>
-    ${apps.length ? `<div class="tbl-wrap"><table><thead><tr><th>Student</th><th>Class</th><th>Parent</th><th>Phone</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody>${apps.map(a => `<tr><td><b>${escHtml(a.studentName)}</b><div style="font-size:.68rem;color:var(--ink4);">${escHtml(a.gender || '')}${a.dob ? ' - DOB ' + fmtDate(a.dob) : ''}</div></td><td>${escHtml(a.className || '-')}</td><td>${escHtml(a.father || '-')}<div style="font-size:.68rem;color:var(--ink4);">${escHtml(a.email || '')}</div></td><td>${escHtml(a.phone || '-')}</td><td>${fmtDate(a.createdAt)}</td><td><span class="badge ${admissionStatusClass(a.status)}">${escHtml(a.status || 'new')}</span></td><td><div style="display:flex;gap:6px;flex-wrap:wrap;"><button class="btn btn-gh btn-xs" onclick="openAdmissionDetail('${a.id}')">View</button><button class="btn btn-g btn-xs" onclick="approveAdmission('${a.id}')">Approve</button></div></td></tr>`).join('')}</tbody></table></div>` : '<div style="text-align:center;color:var(--ink4);padding:24px;">No admission applications yet.</div>'}
+    ${apps.length ? `<div class="tbl-wrap"><table><thead><tr><th>Student</th><th>Class</th><th>Parent</th><th>Phone</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody>${apps.map(a => `<tr><td><b>${escHtml(a.studentName)}</b><div style="font-size:.68rem;color:var(--ink4);">${escHtml(a.gender || '')}${a.dob ? ' - DOB ' + fmtDate(a.dob) : ''}</div></td><td>${escHtml(a.className || '-')}</td><td>${escHtml(a.father || '-')}<div style="font-size:.68rem;color:var(--ink4);">${escHtml(a.email || '')}</div></td><td>${escHtml(a.phone || '-')}</td><td>${fmtDate(a.createdAt)}</td><td><span class="badge ${admissionStatusClass(a.status)}">${escHtml(a.status || 'new')}</span></td><td><div style="display:flex;gap:6px;flex-wrap:wrap;"><button class="btn btn-gh btn-xs" onclick="openAdmissionDetail('${a.id}')">View</button><a href="mailto:${a.email}?subject=Regarding Admission for ${a.studentName}" class="btn btn-gh btn-xs" onclick="contactAdmission('${a.id}')">Email</a><button class="btn btn-g btn-xs" onclick="approveAdmission('${a.id}')">Approve</button></div></td></tr>`).join('')}</tbody></table></div>` : '<div style="text-align:center;color:var(--ink4);padding:24px;">No admission applications yet.</div>'}
 </div>`;
     }
 
@@ -5034,6 +4978,15 @@
       closeModal(); switchCls(classId); goPage('students'); showToast(`Student added from admission. Create/invite ${a.email || 'login email'} in Supabase Auth if login is needed.`, 'ts', 5200);
     }
 
+    async function contactAdmission(id) {
+      const a = findAdmission(id); if (!a || a.status === 'contacted' || a.status === 'approved') return;
+      a.status = 'contacted';
+      saveDB();
+      if (_sb) { try { await _sb.from('admission_applications').update({ status: 'contacted', updated_at: new Date().toISOString() }).eq('id', id); } catch (e) {} }
+      const adminBtn = document.querySelector(`[onclick="goPage('admissions')"]`);
+      if (adminBtn) buildShell();
+    }
+
     /* ------------------------------- ADD STUDENT MODAL ------------------------------- */
     function openAddStudentModal(editId) {
       const isEdit = !!editId;
@@ -5071,6 +5024,18 @@
     <div class="fg"><label class="fl">Blood Group</label>
       <select class="fi" id="m-blood"><option value="">-</option>${['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'].map(b => `<option ${s?.blood === b ? 'selected' : ''}>${b}</option>`).join('')}</select></div>
   </div>
+  <div class="fg2">
+    <div class="fg"><label class="fl">Religion</label>
+      <select class="fi" id="m-religion">
+        <option value="">Select</option>
+        ${['Islam','Christianity','Other'].map(r => `<option value="${r}" ${s?.religion===r?'selected':''}>${r}</option>`).join('')}
+      </select></div>
+    <div class="fg"><label class="fl">Nationality</label>
+      <select class="fi" id="m-nationality">
+        ${['Pakistani','Other'].map(n => `<option value="${n}" ${(s?.nationality||'Pakistani')===n?'selected':''}>${n}</option>`).join('')}
+      </select></div>
+  </div>
+  <div class="fg"><label class="fl">Child B-Form No. (NADRA)</label><input class="fi" id="m-bform" value="${s?.bform || ''}" placeholder="XXXXX-XXXXXXX-X"/></div>
   <div class="fg"><label class="fl">Fee Status</label>
     <select class="fi" id="m-fees"><option value="Pending" ${s?.fees !== 'Paid' ? 'selected' : ''}>Pending</option><option value="Paid" ${s?.fees === 'Paid' ? 'selected' : ''}>Paid</option><option value="Waived">Waived</option></select></div>
   <div class="div"></div>
@@ -5080,10 +5045,25 @@
     <div class="fg"><label class="fl">Father's Phone</label><input class="fi" id="m-fphone" value="${s?.fphone || ''}" placeholder="03XX-XXXXXXX"/></div>
   </div>
   <div class="fg2">
-    <div class="fg"><label class="fl">Mother's Name</label><input class="fi" id="m-mother" value="${s?.mother || ''}" placeholder="Mrs. ..."/></div>
-    <div class="fg"><label class="fl">Parent WhatsApp</label><input class="fi" id="m-wa" value="${s?.whatsapp || ''}" placeholder="923XXXXXXXXX (with code)"/></div><div class="fg"><label class="fl">Monthly Fee</label><input class="fi" type="number" id="m-customfee" value="${(s && s.customFee !== undefined && s.customFee !== '') ? num(s.customFee) : ''}" placeholder="Use default fee"/></div>
+    <div class="fg"><label class="fl">Father's CNIC</label><input class="fi" id="m-cnic" value="${s?.cnic || ''}" placeholder="XXXXX-XXXXXXX-X"/></div>
+    <div class="fg"><label class="fl">Occupation</label><input class="fi" id="m-occupation" value="${s?.occupation || ''}" placeholder="e.g. Business, Teacher"/></div>
   </div>
-  <div class="fg"><label class="fl">Address</label><textarea class="fi" id="m-addr" style="min-height:50px;">${s?.address || ''}</textarea></div>
+  <div class="fg2">
+    <div class="fg"><label class="fl">Mother's Name</label><input class="fi" id="m-mother" value="${s?.mother || ''}" placeholder="Mrs. ..."/></div>
+    <div class="fg"><label class="fl">Parent WhatsApp</label><input class="fi" id="m-wa" value="${s?.whatsapp || ''}" placeholder="923XXXXXXXXX (with code)"/></div>
+  </div>
+  <div class="fg2">
+    <div class="fg"><label class="fl">Monthly Fee</label><input class="fi" type="number" id="m-customfee" value="${(s && s.customFee !== undefined && s.customFee !== '') ? num(s.customFee) : ''}" placeholder="Use default fee"/></div>
+    <div class="fg"><label class="fl">Van Fee (Transport)</label><input class="fi" type="number" id="m-vanfee" value="${(s && s.vanFee !== undefined && s.vanFee !== '') ? num(s.vanFee) : ''}" placeholder="0"/></div>
+  </div>
+  <div class="fg2">
+    <div class="fg"><label class="fl">Previous Arrears</label><input class="fi" type="number" id="m-arrears" value="${s?.arrears || ''}" placeholder="0"/></div>
+    <div class="fg"><label class="fl">Address</label><textarea class="fi" id="m-addr" style="min-height:44px;">${s?.address || ''}</textarea></div>
+  </div>
+  <div class="fg2">
+    <div class="fg"><label class="fl"> Admission Form No. <span style="color:var(--g);font-size:.62rem;font-weight:700;"> AUTO</span></label><input class="fi" id="m-formno" value="${s?.formNo || ('ADM-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random()*9000)+1000))}" placeholder="ADM-2025-0001"/></div>
+    <div class="fg"><label class="fl">Previous School</label><input class="fi" id="m-prevschool" value="${s?.prevSchool || ''}" placeholder="Al-Noor Academy"/></div>
+  </div>
   <div class="div"></div>
   <div style="font-weight:700;font-size:.78rem;color:var(--p);margin-bottom:5px;"> Student Login - <span style="font-weight:500;color:var(--ink4);">Leave blank for no login</span></div>
   <div class="ibox" style="margin-bottom:10px;padding:8px 12px;">Create or invite this email in Supabase Auth. Passwords are no longer stored in portal data.</div>
@@ -5142,7 +5122,9 @@
       }
 
       const cfVal = document.getElementById('m-customfee')?.value;
-      const data = { name, roll, classId, gender: document.getElementById('m-gender')?.value || '', dob: document.getElementById('m-dob')?.value || '', blood: document.getElementById('m-blood')?.value || '', fees: document.getElementById('m-fees')?.value || 'Pending', father: (document.getElementById('m-father')?.value || '').trim(), fphone: (document.getElementById('m-fphone')?.value || '').trim(), mother: (document.getElementById('m-mother')?.value || '').trim(), address: (document.getElementById('m-addr')?.value || '').trim(), whatsapp: wa, photo, familyId, loginEmail, customFee: cfVal === '' ? '' : num(cfVal) };
+      const vfVal = document.getElementById('m-vanfee')?.value;
+      const arrVal = document.getElementById('m-arrears')?.value;
+      const data = { name, roll, classId, gender: document.getElementById('m-gender')?.value || '', dob: document.getElementById('m-dob')?.value || '', blood: document.getElementById('m-blood')?.value || '', religion: (document.getElementById('m-religion')?.value || '').trim(), nationality: (document.getElementById('m-nationality')?.value || '').trim(), bform: (document.getElementById('m-bform')?.value || '').trim(), fees: document.getElementById('m-fees')?.value || 'Pending', father: (document.getElementById('m-father')?.value || '').trim(), fphone: (document.getElementById('m-fphone')?.value || '').trim(), cnic: (document.getElementById('m-cnic')?.value || '').trim(), occupation: (document.getElementById('m-occupation')?.value || '').trim(), formNo: (document.getElementById('m-formno')?.value || '').trim(), prevSchool: (document.getElementById('m-prevschool')?.value || '').trim(), mother: (document.getElementById('m-mother')?.value || '').trim(), address: (document.getElementById('m-addr')?.value || '').trim(), whatsapp: wa, photo, familyId, loginEmail, customFee: cfVal === '' ? '' : num(cfVal), vanFee: vfVal === '' ? '' : num(vfVal), arrears: arrVal === '' ? '' : num(arrVal) };
 
       if (editId) {
         const old = allStus().find(x => x.id === editId); if (!old) { showToast('Not found', 'te'); return; }
@@ -5180,7 +5162,23 @@
         }
     
       }
-      saveDB(); pushCloudDB(); closeModal(); goPage('students');
+        saveDB(); pushCloudDB(); closeModal(); goPage('students');
+        // Prompt to print admission form for new students
+        if (!editId) {
+          const newStu = (DB.students[classId] || []).find(x => x.name === name && x.roll === roll);
+          if (newStu) {
+            setTimeout(() => {
+              openModal(`
+              <h3>🎉 Student Added!</h3>
+              <div class="ibox"><b>${escHtml(name)}</b> has been successfully enrolled in <b>${escHtml(DB.classes.find(c=>c.id===classId)?.name||'')}</b>.</div>
+              <div style="font-size:.85rem;color:var(--ink3);margin:10px 0;">Would you like to print the official <b>Admission Form</b> for this student now?</div>
+              <div class="m-btns">
+                <button class="btn btn-p" style="flex:2;" onclick="closeModal();printAdmissionForm('${newStu.id}','${classId}');">🖨️ Print Admission Form</button>
+                <button class="btn btn-gh" onclick="closeModal()">Skip</button>
+              </div>`);
+            }, 400);
+          }
+        }
     }
 
     function delStu(sid, cid) {
@@ -5325,11 +5323,18 @@
     /* ------------------------------- ATTENDANCE ------------------------------- */
     function pgAttendance() {
       const sts = clsStus(curCls); const cls = DB.classes.find(c => c.id === curCls);
-      const dates = []; for (let i = 9; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); dates.push(d.toISOString().split('T')[0]); }
+      window.attMonth = window.attMonth || monthKey();
+      const [y, m] = window.attMonth.split('-');
+      const dates = [];
+      const daysInMonth = new Date(y, m, 0).getDate();
+      for (let i = 1; i <= daysInMonth; i++) {
+        dates.push(`${y}-${m}-${i.toString().padStart(2, '0')}`);
+      }
       return `
 <div class="ph ph-row fu">
   <div><div class="ph-tag">? Attendance</div><h1>Attendance Register</h1><div class="ph-sub">${cls?.name || ''} - Tap cell to toggle P / A / L</div></div>
   <div class="ph-acts">
+    <input type="month" value="${window.attMonth}" onchange="window.attMonth=this.value; goPage('attendance')" style="padding:6px 10px; border-radius:8px; border:1px solid var(--border); font-size:0.8rem; background:var(--card); color:var(--ink); cursor:pointer;" />
       ${curRole !== 'student' ? `<button class="btn btn-p btn-sm" onclick="openScanner()"> QR Scan</button>` : ''}
     <button class="btn btn-gh btn-sm" onclick="markAll('P')">All Present</button>
     <button class="btn btn-g btn-sm" onclick="saveAtt()"> Save</button>
@@ -5387,12 +5392,20 @@
       // If teacher, show own record
       if (!isAdmin) {
         const myRec = DB.teacherAttendance[curUser?.id] || {};
-        const entries = Object.entries(myRec).sort((a, b) => b[0].localeCompare(a[0]));
+        window.tAttMonth = window.tAttMonth || monthKey();
+        const entries = Object.entries(myRec)
+          .filter(([date]) => date.startsWith(window.tAttMonth))
+          .sort((a, b) => b[0].localeCompare(a[0]));
         const P = entries.filter(([, v]) => v.status === 'Present').length;
         const La = entries.filter(([, v]) => v.status === 'Late').length;
         const A = entries.filter(([, v]) => v.status === 'Absent').length;
         return `
-  <div class="ph fu"><div class="ph-tag"> My Attendance</div><h1>Teacher Attendance</h1><div class="ph-sub">Late threshold: after ${DB.lateAfter || '08:00'} AM</div></div>
+  <div class="ph ph-row fu">
+    <div><div class="ph-tag"> My Attendance</div><h1>Teacher Attendance</h1><div class="ph-sub">Late threshold: after ${DB.lateAfter || '08:00'} AM</div></div>
+    <div class="ph-acts">
+      <input type="month" value="${window.tAttMonth}" onchange="window.tAttMonth=this.value; goPage('teacheratt')" style="padding:6px 10px; border-radius:8px; border:1px solid var(--border); font-size:0.8rem; background:var(--card); color:var(--ink); cursor:pointer;" />
+    </div>
+  </div>
   <div class="sg fu d1">
     <div class="sc sg2"><div class="sc-ic"></div><div class="sc-val" style="color:var(--g);">${P}</div><div class="sc-lbl">Present Days</div></div>
     <div class="sc sv"><div class="sc-ic"></div><div class="sc-val" style="color:var(--y);">${La}</div><div class="sc-lbl">Late Arrivals</div></div>
@@ -5409,57 +5422,94 @@
     </div>`).join('')}
   </div>`;
       }
-
       // Admin view - all teachers
+      window.tAttMonth = window.tAttMonth || monthKey();
+      window.tAttAdminDate = window.tAttAdminDate || today();
+      const [y, m] = window.tAttMonth.split('-');
+      const dates = [];
+      const daysInMonth = new Date(y, m, 0).getDate();
+      for (let i = 1; i <= daysInMonth; i++) {
+        dates.push(`${y}-${m}-${i.toString().padStart(2, '0')}`);
+      }
       return `
 <div class="ph ph-row fu">
-  <div><div class="ph-tag"> Teacher Attendance</div><h1>Staff Attendance</h1><div class="ph-sub">Late after ${DB.lateAfter || '08:00'} - Today: ${fmtDate(d)}</div></div>
-  <button class="btn btn-gh btn-sm" onclick="openLateThreshModal()">? Set Late Time</button>
+  <div><div class="ph-tag"> Staff Attendance</div><h1>Staff Attendance Register</h1><div class="ph-sub">Tap cell to toggle P / A / L / V</div></div>
+  <div class="ph-acts">
+    <input type="month" value="${window.tAttMonth}" onchange="window.tAttMonth=this.value; goPage('teacheratt')" style="padding:6px 10px; border-radius:8px; border:1px solid var(--border); font-size:0.8rem; background:var(--card); color:var(--ink); cursor:pointer;" />
+    <button class="btn btn-p btn-sm" onclick="openScanner()"> QR Scan</button>
+    <button class="btn btn-gh btn-sm" onclick="markAllT('Present')">All Present</button>
+    <button class="btn btn-g btn-sm" onclick="saveAtt()"> Save</button>
+  </div>
 </div>
+
 <div class="card fu d1">
-  <div class="ch"><div class="ct">Today's Status - ${fmtDate(d)}</div></div>
-    ${teachers.length === 0 ? `<div class="empty"><div class="empty-ic"></div><div class="empty-t">No teachers added</div></div>` : `
-  <div style="display:flex;flex-direction:column;gap:2px;">
-      ${teachers.map(t => {
-        const rec = (DB.teacherAttendance[t.id] || {})[d];
-        return `<div class="ta-row">
-        <div class="ava" style="width:32px;height:32px;border-radius:8px;background:${gc(t.name)};font-size:.58rem;flex-shrink:0;">${t.photo ? `<img src="${t.photo}"/>` : ini(t.name)}</div>
-        <div class="ta-name">${t.name}<div style="font-size:.66rem;color:var(--ink4);">${t.subject || '-'}</div></div>
-        <div class="ta-time">${rec?.checkIn ? `In: ${rec.checkIn}` : '-'}</div>
-        <span class="badge ${rec ? rec.status === 'Present' ? 'bg2' : rec.status === 'Late' ? 'by2' : rec.status === 'Leave' ? 'bb2' : 'br2' : 'bo2'}">${rec ? rec.status === 'Late' ? '? Late' : rec.status : 'Not Marked'}</span>
-          ${curRole === 'admin' ? `<div style="display:flex;gap:3px;margin-left:8px;">
-          <button class="btn btn-xs btn-g" onclick="adminMarkTeacher('${t.id}','Present')">P</button>
-          <button class="btn btn-xs" style="background:var(--yl);color:var(--y);font-size:.64rem;font-weight:700;padding:3px 7px;border-radius:6px;cursor:pointer;" onclick="adminMarkTeacher('${t.id}','Late')">L</button>
-          <button class="btn btn-xs btn-r" onclick="adminMarkTeacher('${t.id}','Absent')">A</button>
-        </div>`: ''}
+  <div class="ch" style="margin-bottom:0;"><div class="ct">Daily Scan Log</div>
+    <input type="date" value="${window.tAttAdminDate}" onchange="window.tAttAdminDate=this.value; goPage('teacheratt')" style="padding:4px 8px; border-radius:6px; border:1px solid var(--border); font-size:0.75rem; background:var(--card2); color:var(--ink); cursor:pointer;" />
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;padding-top:12px;">
+    ${teachers.filter(t => DB.teacherAttendance[t.id]?.[window.tAttAdminDate]?.checkIn).length ? teachers.filter(t => DB.teacherAttendance[t.id]?.[window.tAttAdminDate]?.checkIn).map(t => {
+      const rec = DB.teacherAttendance[t.id][window.tAttAdminDate];
+      const isLate = rec.status === 'Late';
+      return `<div style="display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:8px;background:var(--card2);border:1px solid var(--border);">
+        <div class="ava" style="width:20px;height:20px;border-radius:4px;background:${gc(t.name)};font-size:.4rem;flex-shrink:0;">${t.photo ? `<img src="${t.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:4px;"/>` : ini(t.name)}</div>
+        <div style="font-size:0.7rem;font-weight:600;">${t.name}</div>
+        <div style="font-size:0.65rem;color:var(--ink3);margin-left:4px;">In: <b style="color:var(--ink);">${rec.checkIn}</b></div>
+        ${isLate ? `<span style="font-size:0.55rem;background:var(--yl);color:var(--y);padding:2px 4px;border-radius:4px;font-weight:700;margin-left:2px;">LATE</span>` : ''}
       </div>`;
-      }).join('')}
-  </div>`}
+    }).join('') : '<div class="empty" style="padding:10px;margin:0;width:100%;"><div class="empty-t">No scans recorded for this date.</div></div>'}
+  </div>
 </div>
-<div class="card fu d2">
-  <div class="ch"><div class="ct"> Monthly Summary</div></div>
-  <div class="tw" style="border:none;"><table>
-    <thead><tr><th>Teacher</th><th>Present</th><th>Late</th><th>Absent</th><th>Leave</th><th>Att%</th></tr></thead>
-    <tbody>${teachers.map(t => {
-        const rec = DB.teacherAttendance[t.id] || {};
-        const P = Object.values(rec).filter(v => v.status === 'Present').length;
-        const La = Object.values(rec).filter(v => v.status === 'Late').length;
-        const A = Object.values(rec).filter(v => v.status === 'Absent').length;
-        const Lv = Object.values(rec).filter(v => v.status === 'Leave').length;
-        const tot = Object.values(rec).length;
+
+  ${teachers.length === 0 ? `<div class="card"><div class="empty"><div class="empty-ic"></div><div class="empty-t">No staff added</div></div></div>` : `
+<div class="card fu d2" style="padding:0;overflow:hidden;"><div class="tw"><table>
+  <thead><tr><th>Staff</th>${dates.map(d => `<th style="text-align:center;min-width:36px;">${new Date(d).getDate()}<br/><span style="font-weight:400;font-size:.55rem;">${new Date(d).toLocaleString('en', { month: 'short' })}</span></th>`).join('')}<th>%</th></tr></thead>
+  <tbody>${teachers.map(t => {
+        if (!DB.teacherAttendance[t.id]) DB.teacherAttendance[t.id] = {};
+        const att = DB.teacherAttendance[t.id];
+        const P = Object.values(att).filter(v => v.status === 'Present').length;
+        const La = Object.values(att).filter(v => v.status === 'Late').length;
+        const tot = Object.values(att).filter(v => ['Present','Absent','Late','Leave'].includes(v.status)).length;
         const pct = tot ? Math.round((P + La) / tot * 100) : 0;
-        return `<tr><td><b>${t.name}</b><div style="font-size:.65rem;color:var(--ink4);">${t.subject || '-'}</div></td><td><b style="color:var(--g);">${P}</b></td><td><b style="color:var(--y);">${La}</b></td><td><b style="color:var(--r);">${A}</b></td><td>${Lv}</td><td><b style="color:${pct >= 90 ? 'var(--g)' : pct >= 75 ? 'var(--o)' : 'var(--r)'};">${pct}%</b></td></tr>`;
+        return `<tr><td><div style="display:flex;align-items:center;gap:6px;min-width:120px;"><div class="ava" style="width:24px;height:24px;border-radius:6px;background:${gc(t.name)};font-size:.48rem;flex-shrink:0;">${t.photo ? `<img src="${t.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:6px;"/>` : ini(t.name)}</div><div><span style="font-size:.78rem;font-weight:600;white-space:nowrap;">${t.name}</span><div style="font-size:.6rem;color:var(--ink4);">${t.subject||(t.role==='scanner'?'Scanner':'Staff')}</div></div></div></td>
+      ${dates.map(d => { const v = att[d]?.status || ''; const sn = v==='Present'?'P':v==='Absent'?'A':v==='Late'?'L':v==='Leave'?'V':''; return `<td style="text-align:center;padding:5px;"><div class="ac ${sn === 'P' ? 'acP' : sn === 'A' ? 'acA' : sn === 'L' ? 'acLa' : sn === 'V' ? 'acV' : 'ac0'}" id="tac-${t.id}-${d}" onclick="cycleTAtt('${t.id}','${d}')">${sn || '-'}</div></td>`; }).join('')}
+    <td style="font-weight:700;font-size:.8rem;color:${pct >= 90 ? 'var(--g)' : pct >= 75 ? 'var(--o)' : 'var(--r)'};">${pct}%</td></tr>`;
       }).join('')}
-    </tbody></table></div>
-</div>`;
+  </tbody></table></div></div>
+<div style="display:flex;gap:9px;margin-top:9px;align-items:center;font-size:.72rem;flex-wrap:wrap;">
+  <span style="color:var(--ink4);">Legend:</span>
+  <span><span class="ac acP" style="width:22px;height:22px;font-size:.56rem;cursor:default;">P</span> Present</span>
+  <span><span class="ac acA" style="width:22px;height:22px;font-size:.56rem;cursor:default;">A</span> Absent</span>
+  <span><span class="ac acLa" style="width:22px;height:22px;font-size:.56rem;cursor:default;">L</span> Late</span>
+  <span><span class="ac acV" style="width:22px;height:22px;font-size:.56rem;cursor:default;">V</span> Leave</span>
+  <button class="btn btn-gh btn-sm" style="margin-left:auto;" onclick="openLateThreshModal()">? Set Late Time</button>
+</div>`}`;
     }
 
-    function adminMarkTeacher(uid2, status) {
-      const d = today(); const t = nowHHMM();
-      if (!DB.teacherAttendance[uid2]) DB.teacherAttendance[uid2] = {};
-      DB.teacherAttendance[uid2][d] = { checkIn: t, status };
-      saveDB(); showToast(`? ${status} marked`, 'ts'); goPage('teacheratt');
+    function cycleTAtt(tid, d) {
+      if (!DB.teacherAttendance[tid]) DB.teacherAttendance[tid] = {};
+      const c = DB.teacherAttendance[tid][d]?.status || '';
+      const n = c === '' ? 'Present' : c === 'Present' ? 'Absent' : c === 'Absent' ? 'Late' : c === 'Late' ? 'Leave' : '';
+      if (n) {
+        DB.teacherAttendance[tid][d] = { checkIn: DB.teacherAttendance[tid][d]?.checkIn || nowHHMM(), status: n, source: 'manual' };
+      } else {
+        delete DB.teacherAttendance[tid][d];
+      }
+      const el = document.getElementById(`tac-${tid}-${d}`);
+      if (el) { 
+        const sn = n==='Present'?'P':n==='Absent'?'A':n==='Late'?'L':n==='Leave'?'V':'';
+        el.className = `ac ${sn === 'P' ? 'acP' : sn === 'A' ? 'acA' : sn === 'L' ? 'acLa' : sn === 'V' ? 'acV' : 'ac0'}`; el.textContent = sn || '-'; 
+      }
     }
+    function markAllT(status) {
+      const d = today();
+      DB.users.filter(u => u.role === 'teacher' || u.role === 'scanner').forEach(t => {
+        if (!DB.teacherAttendance[t.id]) DB.teacherAttendance[t.id] = {};
+        DB.teacherAttendance[t.id][d] = { checkIn: nowHHMM(), status, source: 'manual' };
+        const el = document.getElementById(`tac-${t.id}-${d}`);
+        if (el) { el.className = `ac acP`; el.textContent = 'P'; }
+      });
+    }
+
     function openLateThreshModal() {
       openModal(`
   <h3>? Late Arrival Threshold</h3>
@@ -5519,15 +5569,24 @@
 
     /* ------------------------------- FEES ------------------------------- */
     function studentFeeSummary(sid) {
-      const payments = DB.fees.payments[sid] || {};
       const stu = allStus().find(x => x.id === sid);
-      const itemAmount = f => (f.id === 'f1' && (stu && stu.customFee !== undefined && stu.customFee !== '')) ? num(stu.customFee) : num(f.amount);
-      const mandatory = DB.fees.items.filter(f => f.mandatory);
       const allItems = DB.fees.items || [];
-      const paidAmount = allItems.reduce((sum, f) => sum + (f.id === 'f1' ? monthlyFeePaidTotal(sid) : (payments[f.id]?.paid ? num(payments[f.id].amount || itemAmount(f)) : 0)), 0);
-      const dueAmount = allItems.reduce((sum, f) => sum + (f.id === 'f1' ? monthlyFeeDue(sid) : (!payments[f.id]?.paid ? itemAmount(f) : 0)), 0);
-      const mandatoryPaid = mandatory.filter(f => payments[f.id]?.paid).length;
-      return { payments, mandatory, mandatoryPaid, paidAmount, dueAmount, totalAmount: paidAmount + dueAmount };
+      const mandatory = allItems.filter(f => f.mandatory);
+      
+      let paidAmount = 0;
+      if (DB.fees.monthlyLedger && DB.fees.monthlyLedger[sid]) {
+         Object.values(DB.fees.monthlyLedger[sid]).forEach(m => paidAmount += num(m.amountPaid));
+      }
+      
+      const dueAmount = num(stu?.arrears || 0);
+      const currentMonth = monthKey();
+      const currentBill = typeof calcStudentFeeBill === 'function' ? calcStudentFeeBill(sid, currentMonth) : null;
+      let totalDue = dueAmount;
+      if (currentBill && !currentBill.isPaid) {
+          totalDue = currentBill.totalDue;
+      }
+
+      return { payments: DB.fees.payments[sid] || {}, mandatory, mandatoryPaid: 0, paidAmount, dueAmount: totalDue, totalAmount: paidAmount + totalDue };
     }
 
     function pgFees() {
@@ -5549,7 +5608,7 @@
 <div class="fee-hero fu">
   <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">
     <div><div style="font-size:.7rem;opacity:.65;">Total Collection</div><div style="font-family:var(--head);font-size:1.7rem;font-weight:700;margin:4px 0;">${fmtMoney(collected)}</div><div style="font-size:.7rem;opacity:.6;">${fullyPaid} fully paid - ${all.length - fullyPaid} pending</div></div>
-    <div style="text-align:right;"><div style="font-size:.7rem;opacity:.65;">Pending Balance</div><div style="font-family:var(--head);font-size:1.1rem;font-weight:700;margin-top:3px;">${fmtMoney(pending)}</div><div style="font-size:.68rem;opacity:.62;">Mandatory/year ${fmtMoney(totalAnnual)}</div></div>
+    <div style="text-align:right;"><div style="font-size:.7rem;opacity:.65;">Pending Balance</div><div style="font-family:var(--head);font-size:1.1rem;font-weight:700;margin-top:3px;">${fmtMoney(pending)}</div><div style="font-size:.68rem;opacity:.62;">Base Mandatory ${fmtMoney(totalAnnual)}</div></div>
   </div>
   <div class="fh-bar"><div class="fh-fill" style="width:${collected + pending ? Math.round(collected / (collected + pending) * 100) : 0}%;"></div></div>
   <div style="display:flex;justify-content:space-between;font-size:.68rem;opacity:.6;margin-top:4px;"><span>${collected + pending ? Math.round(collected / (collected + pending) * 100) : 0}% collected</span><span>${fmtMoney(pending)} pending</span></div>
@@ -5582,37 +5641,187 @@
 </div>`;
     }
 
-    function toggleFee(sid, fid, stayOpen = false) {
-      if (!DB.fees.payments[sid]) DB.fees.payments[sid] = {};
-      const fee = DB.fees.items.find(f => f.id === fid) || { amount: 0 };
-      if (fid === 'f1') {
-        const dueBefore = monthlyFeeDue(sid);
-        if (dueBefore > 0) markMonthlyFeePaid(sid);
-        else {
-          const row = DB.fees.monthlyLedger?.[sid]?.[monthKey()];
-          if (row) { row.paid = false; delete row.date; }
-          DB.fees.payments[sid][fid] = { paid: false, date: '', amount: monthlyFeeAmount(allStus().find(s => s.id === sid)), month: monthKey() };
-        }
-      } else {
-        const cur = DB.fees.payments[sid][fid];
-        DB.fees.payments[sid][fid] = { paid: !cur?.paid, date: today(), amount: num(fee.amount) };
-      }
-      saveDB();
-      if (stayOpen) openStudentFeeModal(sid); else goPage('fees');
-      showToast(DB.fees.payments[sid][fid].paid ? 'Marked paid' : 'Unmarked');
+    function calcStudentFeeBill(sid, month) {
+      const s = allStus().find(x => x.id === sid);
+      if (!s) return null;
+      
+      const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      const dateParts = month ? month.split('-') : [];
+      const monthIndex = dateParts.length === 2 ? parseInt(dateParts[1], 10) - 1 : new Date().getMonth();
+      const monthName = mNames[monthIndex];
+
+      if (!DB.fees.monthlyLedger) DB.fees.monthlyLedger = {};
+      if (!DB.fees.monthlyLedger[sid]) DB.fees.monthlyLedger[sid] = {};
+      const mRow = DB.fees.monthlyLedger[sid][month];
+      const isPaid = mRow ? mRow.paid : false;
+      const amountPaid = mRow ? num(mRow.amountPaid) : 0;
+      
+      const tuition = (s.customFee !== undefined && s.customFee !== '') ? num(s.customFee) : monthlyFeeAmount(s);
+      const van = num(s.vanFee || 0);
+      const arrears = mRow ? num(mRow.arrearsSnapshot || 0) : num(s.arrears || 0);
+      
+      let itemsTotal = 0;
+      let breakdownHtml = `<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span>Monthly Tuition:</span> <b>${fmtMoney(tuition)}</b></div>`;
+      if (van > 0) breakdownHtml += `<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span>Van Transport Fee:</span> <b>${fmtMoney(van)}</b></div>`;
+      if (arrears > 0) breakdownHtml += `<div style="display:flex;justify-content:space-between;margin-bottom:4px;color:var(--o);"><span>Previous Arrears:</span> <b>${fmtMoney(arrears)}</b></div>`;
+
+      let applicableItems = [];
+      DB.fees.items.forEach(f => {
+        if (f.id === 'f1') return; // Handled as tuition above
+        if (f.applyMonth && f.applyMonth !== 'All' && f.applyMonth !== monthName) return;
+        applicableItems.push(f);
+        itemsTotal += num(f.amount);
+        breakdownHtml += `<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span>${escHtml(f.name)}:</span> <b>${fmtMoney(f.amount)}</b></div>`;
+      });
+
+      const totalDue = tuition + van + arrears + itemsTotal;
+      
+      return { tuition, van, arrears, itemsTotal, applicableItems, totalDue, isPaid, amountPaid, mRow, breakdownHtml };
     }
-    function openStudentFeeModal(sid) {
+
+    function openStudentFeeModal(sid, targetMonth = null) {
       const s = allStus().find(x => x.id === sid); if (!s) return;
       const cls = DB.classes.find(c => c.id === s.classId);
-      const sum = studentFeeSummary(sid);
+      const month = targetMonth || monthKey();
+      const bill = calcStudentFeeBill(sid, month);
+      
       openModal(`
-  <h3> ${escHtml(s.name)} Fees</h3>
-  <div class="ibox" style="margin-bottom:12px;">${escHtml(cls?.name || '')} - Roll ${escHtml(s.roll || '-')} - Balance <b style="color:${sum.dueAmount ? 'var(--r)' : 'var(--g)'};">${fmtMoney(sum.dueAmount)}</b></div>
-  <div style="display:grid;gap:8px;">${DB.fees.items.map(f => { const paid = sum.payments[f.id]?.paid; return `<div style="display:flex;align-items:center;gap:10px;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px;"><div style="font-size:1.1rem;">${paid ? '?' : '?'}</div><div style="flex:1;"><div style="font-weight:800;font-size:.82rem;">${escHtml(f.name)}</div><div style="font-size:.68rem;color:var(--ink4);">Due ${escHtml(f.due || '-')} - ${f.mandatory ? 'Mandatory' : 'Optional'}${paid ? ' - Paid ' + fmtDate(sum.payments[f.id]?.date) : ''}</div></div><div style="text-align:right;"><div style="font-weight:900;color:${paid ? 'var(--g)' : 'var(--r)'};">${fmtMoney(f.id === 'f1' ? (monthlyFeeDue(sid) || monthlyFeeAmount(s)) : f.amount)}</div><button class="btn btn-xs ${paid ? 'btn-gh' : 'btn-g'}" onclick="toggleFee('${sid}','${f.id}',true)">${paid ? 'Unmark' : 'Mark Paid'}</button></div></div>`; }).join('')}</div>
-  <div class="m-btns" style="flex-wrap:wrap;">
-      ${s.whatsapp ? `<button class="btn btn-wa btn-sm" onclick="sendFeeWA('${sid}','${(DB.fees.items.find(f => !sum.payments[f.id]?.paid) || DB.fees.items[0] || {}).id || 'f1'}')"> WhatsApp Reminder</button>` : ''}
-    <button class="btn btn-gh btn-sm" onclick="closeModal();goPage('fees')">Close</button>
-  </div>`);
+        <h3> ${escHtml(s.name)} Fees</h3>
+        <div class="ibox" style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+          <div>${escHtml(cls?.name || '')} - Roll ${escHtml(s.roll || '-')} - Arrears <b style="color:${num(s.arrears) ? 'var(--r)' : 'var(--g)'};">${fmtMoney(num(s.arrears))}</b></div>
+          <div><input type="month" value="${month}" onchange="openStudentFeeModal('${sid}', this.value)" style="padding:4px 8px;border-radius:6px;border:1px solid var(--border);outline:none;font-family:inherit;"></div>
+        </div>
+        
+        <div style="background:var(--card2);padding:14px;border-radius:12px;margin-bottom:15px;font-size:0.85rem;display:flex;flex-direction:column;gap:8px;">
+           <div style="font-weight:700;color:var(--ink3);margin-bottom:4px;">Ledger Breakdown: ${month}</div>
+           ${bill.breakdownHtml}
+           <hr style="border:0;border-top:1px dashed var(--border);margin:4px 0;" />
+           <div style="display:flex;justify-content:space-between;color:var(--p);font-size:1.1rem;font-weight:900;"><span>Total Due:</span> <span>${fmtMoney(bill.totalDue)}</span></div>
+        </div>
+
+        ${bill.isPaid ? `
+           <div style="text-align:center;padding:15px;background:var(--pg2);color:var(--g);border-radius:10px;font-weight:800;margin-bottom:15px;">
+              ${fmtMoney(bill.amountPaid)} Paid on ${fmtDate(bill.mRow.paidOn)}
+           </div>
+           <div class="m-btns" style="flex-wrap:wrap;">
+              <button class="btn btn-gh btn-sm" onclick="unmarkStudentPayment('${sid}', '${month}')">Undo Payment</button>
+              <button class="btn btn-g btn-sm" onclick="printFeeReceipt('${sid}', '${month}')">Print Receipt</button>
+              <button class="btn btn-gh btn-sm" onclick="closeModal()">Close</button>
+           </div>
+        ` : `
+           <div class="fg">
+              <label class="fl">Amount Received Today (Partial Payments roll over to Arrears)</label>
+              <input class="fi" type="number" id="ms-receive-amt" value="${bill.totalDue}" />
+           </div>
+           <div class="m-btns" style="flex-wrap:wrap;">
+              <button class="btn btn-p btn-sm" onclick="receiveStudentPayment('${sid}', '${month}', ${bill.totalDue}, ${bill.arrears})">Receive Payment</button>
+              <button class="btn btn-gh btn-sm" onclick="closeModal()">Cancel</button>
+           </div>
+        `}
+      `);
+    }
+
+    function receiveStudentPayment(sid, month, totalDue, snapshotArrears) {
+      const s = allStus().find(x => x.id === sid); if (!s) return;
+      const amountPaid = num(document.getElementById('ms-receive-amt')?.value || 0);
+      
+      if (!DB.fees.monthlyLedger) DB.fees.monthlyLedger = {};
+      if (!DB.fees.monthlyLedger[sid]) DB.fees.monthlyLedger[sid] = {};
+      
+      const remaining = Math.max(0, totalDue - amountPaid);
+      
+      DB.fees.monthlyLedger[sid][month] = { 
+         month, 
+         paid: true, 
+         paidOn: today(), 
+         totalDue: totalDue, 
+         amountPaid: amountPaid, 
+         arrearsRolledOver: remaining,
+         arrearsSnapshot: snapshotArrears
+      };
+      
+      s.arrears = remaining;
+      s.fees = remaining === 0 ? 'Paid' : 'Pending';
+      
+      saveDB();
+      showToast('Payment received & ledger updated');
+      goPage('fees');
+      printFeeReceipt(sid, month);
+    }
+    
+    function unmarkStudentPayment(sid, month) {
+       const s = allStus().find(x => x.id === sid); if (!s) return;
+       if(!confirm('Undo payment? This will revert the student arrears balance.')) return;
+       const mRow = DB.fees.monthlyLedger[sid][month];
+       if(mRow) {
+          s.arrears = mRow.arrearsSnapshot || 0;
+          delete DB.fees.monthlyLedger[sid][month];
+          saveDB();
+          showToast('Payment undone');
+          openStudentFeeModal(sid, month);
+          goPage('fees');
+       }
+    }
+
+    function printFeeReceipt(sid, month) {
+      const s = allStus().find(x => x.id === sid); if (!s) return;
+      const cls = DB.classes.find(c => c.id === s.classId);
+      const bill = calcStudentFeeBill(sid, month);
+      const isPaid = bill.isPaid;
+      
+      const printWindow = window.open('', '', 'width=800,height=600');
+      let html = `<html><head><title>Fee Receipt - ${escHtml(s.name)}</title>
+      <style>
+        body { font-family: sans-serif; padding: 20px; color: #111; max-width: 600px; margin: 0 auto; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .header { text-align: center; border-bottom: 2px solid #ddd; padding-bottom: 15px; margin-bottom: 20px; }
+        .title { font-size: 24px; font-weight: bold; }
+        .sub { color: #555; }
+        .details { margin-bottom: 20px; display: flex; justify-content: space-between; }
+        .table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .table th, .table td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        .table th { background: #f9f9f9; }
+        .totals { text-align: right; font-size: 16px; font-weight: bold; margin-bottom: 5px; }
+      </style></head><body>
+      <div class="header">
+        <div class="title">${escHtml(DB.settings?.name || 'School')}</div>
+        <div class="sub">${escHtml(DB.settings?.address || '')} | ${escHtml(DB.settings?.phone || '')}</div>
+        <h2 style="margin:10px 0 0 0;">Fee Receipt (${isPaid ? 'PAID' : 'PENDING'})</h2>
+      </div>
+      <div class="details">
+        <div>
+          <b>Student:</b> ${escHtml(s.name)}<br>
+          <b>Class:</b> ${escHtml(cls?.name || '')} (Roll: ${escHtml(s.roll || '-')})
+        </div>
+        <div style="text-align:right;">
+          <b>Date:</b> ${fmtDate(isPaid ? bill.mRow.paidOn : today())}<br>
+          <b>Billing Month:</b> ${month}
+        </div>
+      </div>
+      <table class="table">
+        <tr><th>Fee Description</th><th>Amount</th></tr>
+        <tr><td>Monthly Tuition</td><td>${fmtMoney(bill.tuition)}</td></tr>
+        ${bill.van > 0 ? `<tr><td>Van Transport Fee</td><td>${fmtMoney(bill.van)}</td></tr>` : ''}
+        ${bill.arrears > 0 ? `<tr><td style="color:#d32f2f;">Previous Arrears</td><td style="color:#d32f2f;">${fmtMoney(bill.arrears)}</td></tr>` : ''}
+        ${bill.applicableItems.map(f => `<tr><td>${escHtml(f.name)}</td><td>${fmtMoney(f.amount)}</td></tr>`).join('')}
+      </table>
+      <div class="totals">Total Billed: ${fmtMoney(bill.totalDue)}</div>
+      ${isPaid ? `<div class="totals" style="color:green;font-size:18px;">Amount Paid: ${fmtMoney(bill.amountPaid)}</div>
+                   <div class="totals" style="color:red;font-size:16px;">Remaining Arrears: ${fmtMoney(bill.mRow.arrearsRolledOver)}</div>` : 
+                   `<div class="totals" style="color:red;font-size:18px;">Balance Due: ${fmtMoney(bill.totalDue)}</div>`}
+      
+      <div style="margin-top:60px; text-align:right;">
+         <div style="border-top:1px solid #111; width:200px; display:inline-block; text-align:center; padding-top:5px;">Authorized Signature</div>
+      </div>
+      <div style="text-align: center; font-size: 12px; color: #777; margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px;">Thank you for your payment!</div>
+      <scr` + `ipt>
+        window.onload = function() { 
+            setTimeout(() => { window.print(); window.close(); }, 250);
+        };
+      </scr` + `ipt>
+      </body></html>`;
+      
+      printWindow.document.write(html);
+      printWindow.document.close();
     }
 
     function feeReminderText(sid, fid, dueDate, note = '') {
@@ -5739,11 +5948,11 @@
     function openFeeStructModal() {
       openModal(`
   <h3>? Fee Structure</h3>
-  <div id="fee-list">${DB.fees.items.map((f, i) => `<div style="background:var(--card2);border:1px solid var(--border);border-radius:9px;padding:11px;margin-bottom:8px;"><div class="fg2"><div class="fg"><label class="fl">Fee Name</label><input class="fi" value="${f.name}" onchange="DB.fees.items[${i}].name=this.value" style="font-size:.82rem;"/></div><div class="fg"><label class="fl">Amount (${DB.settings?.currency || 'PKR'})</label><input class="fi" type="number" value="${f.amount}" onchange="DB.fees.items[${i}].amount=Number(this.value)" style="font-size:.82rem;"/></div></div><div class="fg2"><div class="fg"><label class="fl">Due Date</label><input class="fi" value="${f.due}" onchange="DB.fees.items[${i}].due=this.value" style="font-size:.82rem;"/></div><div class="fg" style="display:flex;align-items:flex-end;gap:8px;"><label style="display:flex;align-items:center;gap:5px;font-size:.76rem;font-weight:600;cursor:pointer;padding-bottom:2px;"><input type="checkbox" ${f.mandatory ? 'checked' : ''} onchange="DB.fees.items[${i}].mandatory=this.checked"/> Mandatory</label>${f.id === 'f1' ? '<div style="font-size:.65rem;color:var(--ink4);margin-bottom:5px;">System Item</div>' : `<button class="btn btn-xs" style="background:var(--rl);color:var(--r);margin-bottom:0;" onclick="delFeeItem(${i})">Remove</button>`}</div></div></div>`).join('')}</div>
+  <div id="fee-list">${DB.fees.items.map((f, i) => `<div style="background:var(--card2);border:1px solid var(--border);border-radius:9px;padding:11px;margin-bottom:8px;"><div class="fg2"><div class="fg"><label class="fl">Fee Name</label><input class="fi" value="${f.name}" onchange="DB.fees.items[${i}].name=this.value" style="font-size:.82rem;"/></div><div class="fg"><label class="fl">Amount (${DB.settings?.currency || 'PKR'})</label><input class="fi" type="number" value="${f.amount}" onchange="DB.fees.items[${i}].amount=Number(this.value)" style="font-size:.82rem;"/></div></div><div class="fg2"><div class="fg"><label class="fl">Due Date</label><input class="fi" value="${f.due}" onchange="DB.fees.items[${i}].due=this.value" style="font-size:.82rem;"/></div><div class="fg"><label class="fl">Apply Month</label><select class="fi" onchange="DB.fees.items[${i}].applyMonth=this.value" style="font-size:.82rem;"><option value="All" ${f.applyMonth !== 'March' && f.applyMonth !== 'December' ? 'selected' : ''}>Every Month</option><option value="March" ${f.applyMonth === 'March' ? 'selected' : ''}>March</option><option value="December" ${f.applyMonth === 'December' ? 'selected' : ''}>December</option></select></div></div><div class="fg2"><div class="fg" style="display:flex;align-items:flex-end;gap:8px;"><label style="display:flex;align-items:center;gap:5px;font-size:.76rem;font-weight:600;cursor:pointer;padding-bottom:2px;"><input type="checkbox" ${f.mandatory ? 'checked' : ''} onchange="DB.fees.items[${i}].mandatory=this.checked"/> Mandatory</label>${f.id === 'f1' ? '<div style="font-size:.65rem;color:var(--ink4);margin-bottom:5px;">System Item</div>' : `<button class="btn btn-xs" style="background:var(--rl);color:var(--r);margin-bottom:0;" onclick="delFeeItem(${i})">Remove</button>`}</div></div></div>`).join('')}</div>
   <button class="btn btn-gh btn-sm" style="width:100%;justify-content:center;margin-top:4px;" onclick="addFeeItem()">+ Add Fee Item</button>
   <div class="m-btns" style="margin-top:10px;"><button class="btn btn-p" onclick="saveFeeStruct()"> Save</button><button class="btn btn-gh" onclick="closeModal()">Close</button></div>`);
     }
-    function addFeeItem() { DB.fees.items.push({ id: uid(), name: 'New Fee', amount: 1000, due: '5th', mandatory: false, type: 'monthly' }); openFeeStructModal(); }
+    function addFeeItem() { DB.fees.items.push({ id: uid(), name: 'New Fee', amount: 1000, due: '5th', mandatory: false, type: 'monthly', applyMonth: 'All' }); openFeeStructModal(); }
     function delFeeItem(i) { DB.fees.items.splice(i, 1); openFeeStructModal(); }
     function saveFeeStruct() { saveDB(); closeModal(); showToast('? Fee structure saved', 'ts'); goPage('fees'); }
 
@@ -5751,7 +5960,7 @@
     function pgClasses() {
       return `
 <div class="ph ph-row fu"><div><div class="ph-tag"> Classes</div><h1>Class Management</h1></div><button class="btn btn-p" onclick="openAddClsModal()">+ Add Class</button></div>
-<div class="g3 fu d1">${DB.classes.map(c => { const sts = clsStus(c.id); const avg = sts.length ? Math.round(sts.reduce((a, s) => a + avgStu(c.id, s.id), 0) / sts.length) : 0; return `<div class="card" style="cursor:pointer;padding:13px;transition:all .17s;" onclick="switchCls('${c.id}');goPage('students')" onmouseover="this.style.transform='translateY(-2px)';this.style.borderColor='var(--p2)'" onmouseout="this.style.transform='';this.style.borderColor=''"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><div style="width:28px;height:28px;border-radius:7px;background:${gc(c.name)};display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;color:#fff;">${c.name.charAt(0)}</div><button class="btn btn-xs btn-gh" onclick="event.stopPropagation();openAddClsModal('${c.id}')">Edit</button></div><div style="font-weight:700;font-size:.85rem;">${c.name}${c.section ? ' ' + c.section : ''}</div><div style="font-size:.68rem;color:var(--ink3);margin:2px 0 8px;">${sts.length} students - ${c.level === 'primary' ? 'Primary' : 'Secondary'}</div><div class="pb" style="height:4px;"><div class="pf" style="width:${avg}%;background:${sCol(avg)};height:4px;"></div></div><div style="display:flex;justify-content:space-between;margin-top:4px;font-size:.66rem;font-weight:700;"><span style="color:${sCol(avg)};">${avg}% avg</span><span style="color:var(--p);">View</span></div></div>`; }).join('')}<div class="card" style="display:flex;align-items:center;justify-content:center;border:2px dashed var(--border2);background:transparent;cursor:pointer;min-height:120px;" onclick="openAddClsModal()"><div style="text-align:center;color:var(--ink4);"><div style="font-size:1.3rem;">+</div><div style="font-size:.74rem;font-weight:600;margin-top:3px;">Add Class</div></div></div></div>`;
+<div class="g3 fu d1">${DB.classes.map(c => { const sts = clsStus(c.id); const avg = sts.length ? Math.round(sts.reduce((a, s) => a + avgStu(c.id, s.id), 0) / sts.length) : 0; return `<div class="card" style="cursor:pointer;padding:13px;transition:all .17s;" onclick="switchCls('${c.id}');goPage('students')" onmouseover="this.style.transform='translateY(-2px)';this.style.borderColor='var(--p2)'" onmouseout="this.style.transform='';this.style.borderColor=''"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><div style="width:28px;height:28px;border-radius:7px;background:${gc(c.name)};display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;color:#fff;">${c.name.charAt(0)}</div><div style="display:flex;gap:4px;"><button class="btn btn-xs btn-gh" onclick="event.stopPropagation();openPromoteModal('${c.id}')">Promote</button> <button class="btn btn-xs btn-gh" onclick="event.stopPropagation();openAddClsModal('${c.id}')">Edit</button> <button class="btn btn-xs btn-wa" onclick="event.stopPropagation();broadcastClass('${c.id}')">Broadcast</button></div></div><div style="font-weight:700;font-size:.85rem;">${escHtml(c.name)}${c.section ? ' ' + escHtml(c.section) : ''}</div><div style="font-size:.68rem;color:var(--ink3);margin:2px 0 8px;">${sts.length} students - ${c.level === 'primary' ? 'Primary' : 'Secondary'}</div><div class="pb" style="height:4px;"><div class="pf" style="width:${avg}%;background:${sCol(avg)};height:4px;"></div></div><div style="display:flex;justify-content:space-between;margin-top:4px;font-size:.66rem;font-weight:700;"><span style="color:${sCol(avg)};">${avg}% avg</span><span style="color:var(--p);">View</span></div></div>`; }).join('')}<div class="card" style="display:flex;align-items:center;justify-content:center;border:2px dashed var(--border2);background:transparent;cursor:pointer;min-height:120px;" onclick="openAddClsModal()"><div style="text-align:center;color:var(--ink4);"><div style="font-size:1.3rem;">+</div><div style="font-size:.74rem;font-weight:600;margin-top:3px;">Add Class</div></div></div></div>`;
     }
     function openAddClsModal(eid) {
       const c = eid ? DB.classes.find(x => x.id === eid) : null;
@@ -5764,6 +5973,82 @@
     }
     function saveCls(eid) { const name = (document.getElementById('mc-name')?.value || '').trim(); if (!name) { showToast('Name required', 'te'); return; } const obj = { name, section: document.getElementById('mc-sec').value.trim(), level: document.getElementById('mc-lev').value, capacity: document.getElementById('mc-cap').value, teacher: document.getElementById('mc-teach').value.trim() }; if (eid) { const c = DB.classes.find(x => x.id === eid); if (c) Object.assign(c, obj); } else DB.classes.push({ id: uid(), ...obj }); saveDB(); closeModal(); showToast('? Saved', 'ts'); goPage('classes'); }
     function delCls(id) { if (!confirm('Delete class and all students?')) return; DB.classes = DB.classes.filter(c => c.id !== id); delete DB.students[id]; DB.settings.terms.forEach(t => delete DB.grades[id + '_' + t.id]); delete DB.attendance[id]; saveDB(); closeModal(); showToast('Deleted'); goPage('classes'); }
+
+    function openPromoteModal(cid) {
+      const cls = DB.classes.find(c => c.id === cid);
+      if (!cls) return;
+      const students = clsStus(cid);
+      
+      openModal(`
+      <h3> Promote Students</h3>
+      <div class="ibox">Move all <b>${students.length}</b> students from <b>${escHtml(cls.name)}${cls.section ? ' ' + escHtml(cls.section) : ''}</b> to another class for the new academic year.</div>
+      <div class="fg">
+        <label class="fl">Promote to Class</label>
+        <select class="fi" id="promote-target">
+          <option value="graduate">Graduate / De-enroll (Remove from active classes)</option>
+          ${DB.classes.filter(c => c.id !== cid).map(c => `<option value="${c.id}">${escHtml(c.name)}${c.section ? ' ' + escHtml(c.section) : ''}</option>`).join('')}
+        </select>
+      </div>
+      <div class="m-btns">
+        <button class="btn btn-wa" onclick="executePromotion('${cid}')">Confirm Promotion</button>
+        <button class="btn btn-gh" onclick="closeModal()">Cancel</button>
+      </div>`);
+    }
+
+    function executePromotion(sourceCid) {
+      const targetCid = document.getElementById('promote-target').value;
+      if (!confirm('Are you sure you want to move all students? This cannot be easily undone.')) return;
+      
+      const studentsToMove = [...(DB.students[sourceCid] || [])];
+      
+      if (targetCid === 'graduate') {
+        if (!DB.alumni) DB.alumni = [];
+        studentsToMove.forEach(s => { s.classId = 'graduate'; DB.alumni.push(s); });
+        DB.students[sourceCid] = [];
+      } else {
+        if (!DB.students[targetCid]) DB.students[targetCid] = [];
+        studentsToMove.forEach(s => {
+          s.classId = targetCid;
+          DB.students[targetCid].push(s);
+        });
+        DB.students[sourceCid] = [];
+      }
+      
+      // Update the classId in DB.users
+      studentsToMove.forEach(s => {
+        const u = DB.users.find(x => x.studentId === s.id);
+        if (u) u.classId = targetCid;
+      });
+
+      saveDB();
+      closeModal();
+      showToast('Class Promoted Successfully!');
+      goPage('classes');
+    }
+
+    function broadcastClass(cid) {
+      const cls = DB.classes.find(c => c.id === cid);
+      if (!cls) return;
+      const sts = clsStus(cid);
+      const phones = sts.map(s => s.whatsapp || (s.familyId && DB.families[s.familyId] ? DB.families[s.familyId].phone : '')).filter(p => p).map(p => p.replace(/\D/g, ''));
+      const uniquePhones = [...new Set(phones)].filter(p => p.length >= 10);
+      
+      if (uniquePhones.length === 0) return showToast('No valid WhatsApp numbers found for students in this class', 'te');
+      
+      openModal(`
+      <h3> WhatsApp Broadcast</h3>
+      <div class="ibox">Prepare a message to send to <b>${uniquePhones.length}</b> parents in <b>${escHtml(cls.name)}${cls.section ? ' ' + escHtml(cls.section) : ''}</b>.</div>
+      <div class="fg">
+        <label class="fl">Message</label>
+        <textarea class="fi" id="bc-msg" rows="4" placeholder="Dear Parents, tomorrow is a school holiday..."></textarea>
+      </div>
+      <div class="ibox" style="font-size:0.75rem;">Due to WhatsApp Web restrictions, you cannot natively send to a bulk list via URL. You can open a WhatsApp group if you have one, or copy the comma-separated list of numbers below to paste into a bulk-sending tool.</div>
+      <div class="m-btns">
+        <button class="btn btn-wa" onclick="window.open('https://wa.me/?text=' + encodeURIComponent(document.getElementById('bc-msg').value), '_blank')">Open WhatsApp Web</button>
+        <button class="btn btn-gh" onclick="navigator.clipboard.writeText('${uniquePhones.join(',')}');showToast('Numbers copied to clipboard');">Copy Numbers</button>
+        <button class="btn btn-gh" onclick="closeModal()">Close</button>
+      </div>`);
+    }
 
     /* ------------------------------- EXAMS ------------------------------- */
     function pgExams() {
@@ -5824,77 +6109,166 @@
 
     /* ------------------------------- TEACHERS ------------------------------- */
     function pgTeachers() {
-      const teachers = DB.users.filter(u => u.role === 'teacher');
+      const teachers = DB.users.filter(u => u.role === 'teacher' || u.role === 'scanner');
       return `
-<div class="ph ph-row fu"><div><div class="ph-tag"> Teachers</div><h1>Teaching Staff</h1></div><button class="btn btn-p" onclick="openTeachModal()">+ Add Teacher</button></div>
+<div class="ph ph-row fu"><div><div class="ph-tag"> Staff</div><h1>Staff & Teachers</h1></div><button class="btn btn-p" onclick="openTeachModal()">+ Add Staff</button></div>
   ${teachers.length === 0 ? `<div class="card"><div class="empty"><div class="empty-ic"></div><div class="empty-t">No teachers added</div><button class="btn btn-p btn-sm" style="margin-top:10px;" onclick="openTeachModal()">Add First Teacher</button></div></div>` : `
 <div class="card fu d1" style="padding:0;overflow:hidden;"><div class="tw"><table>
-  <thead><tr><th>Photo</th><th>Name</th><th>Subject</th><th>Contact</th><th>Net Salary</th><th>Status</th><th>Actions</th></tr></thead>
-  <tbody>${teachers.map(t => `<tr><td><div class="ava" style="width:30px;height:30px;border-radius:7px;background:${gc(t.name)};font-size:.54rem;">${t.photo ? `<img src="${t.photo}"/>` : ini(t.name)}</div></td><td><div style="font-weight:700;font-size:.8rem;">${t.name}</div><div style="font-size:.66rem;color:var(--ink4);">${(t.classIds || []).map(id => DB.classes.find(x => x.id === id)?.name).filter(Boolean).join(', ') || 'No class assigned'}</div></td><td>${t.subject || '-'}</td><td style="font-size:.74rem;">${t.email}<div style="color:var(--ink4);">${t.phone || 'No phone'}</div></td><td><b style="color:var(--p);">${fmtMoney(teacherNetSalary(t))}</b><div style="font-size:.64rem;color:var(--ink4);">Base ${fmtMoney(t.salary)}</div></td><td><span class="badge ${t.payrollStatus === 'paid' ? 'bg2' : 'bo2'}">${t.payrollStatus === 'paid' ? 'Paid ' + (t.payrollMonth || monthKey()) : 'Pending'}</span></td><td><div style="display:flex;gap:3px;flex-wrap:wrap;"><button class="btn btn-xs btn-gh" onclick="openTeachModal('${t.id}')">Edit</button><button class="btn btn-xs btn-p" onclick="goPage('payroll');setTimeout(()=>payTeacherSalary('${t.id}'),120)">Pay</button><button class="btn btn-xs" style="background:var(--rl);color:var(--r);" onclick="DB.users=DB.users.filter(x=>x.id!=='${t.id}');saveDB();showToast('Deleted');goPage('teachers')">Delete</button></div></td></tr>`).join('')}
+  <thead><tr><th>Photo</th><th>Role & Name</th><th>Subject</th><th>Contact</th><th>Net Salary</th><th>Status</th><th>Actions</th></tr></thead>
+  <tbody>${teachers.map(t => `<tr><td><div class="ava" style="width:30px;height:30px;border-radius:7px;background:${gc(t.name)};font-size:.54rem;">${t.photo ? `<img src="${t.photo}"/>` : ini(t.name)}</div></td><td><div style="font-size:.66rem;color:var(--ink4);text-transform:uppercase;font-weight:700;">${t.role === 'scanner' ? 'Scanner' : 'Teacher'}</div><div style="font-weight:700;font-size:.8rem;">${t.name}</div><div style="font-size:.66rem;color:var(--ink4);">${(t.classIds || []).map(id => DB.classes.find(x => x.id === id)?.name).filter(Boolean).join(', ') || (t.role==='scanner'?'Gate Access':'No class')}</div></td><td>${t.subject || '-'}</td><td style="font-size:.74rem;">${t.email}<div style="color:var(--ink4);">${t.phone || 'No phone'}</div></td><td><b style="color:var(--p);">${fmtMoney(teacherNetSalary(t))}</b><div style="font-size:.64rem;color:var(--ink4);">Base ${fmtMoney(t.salary)}</div></td><td><span class="badge ${t.payrollStatus === 'paid' ? 'bg2' : 'bo2'}">${t.payrollStatus === 'paid' ? 'Paid ' + (t.payrollMonth || monthKey()) : 'Pending'}</span></td><td><div style="display:flex;gap:3px;flex-wrap:wrap;"><button class="btn btn-xs btn-gh" onclick="openTeachModal('${t.id}')">Edit</button><button class="btn btn-xs btn-p" onclick="goPage('payroll');setTimeout(()=>payTeacherSalary('${t.id}'),120)">Pay</button><button class="btn btn-xs" style="background:var(--rl);color:var(--r);" onclick="DB.users=DB.users.filter(x=>x.id!=='${t.id}');saveDB();showToast('Deleted');goPage('teachers')">Delete</button></div></td></tr>`).join('')}
   </tbody></table></div></div>`}`;
     }
     function openTeachModal(eid) {
       const t = eid ? DB.users.find(x => x.id === eid) : null;
       openModal(`
-  <h3>${t ? ' Edit Teacher' : '? Add Teacher'}</h3>
+  <h3>${t ? ' Edit Staff' : '? Add Staff'}</h3>
   <div class="fg2"><div class="fg"><label class="fl">Full Name <span class="req">*</span></label><input class="fi" id="mt-name" value="${t?.name || ''}" placeholder="Ms. Fatima Khan"/></div><div class="fg"><label class="fl">Login Email <span class="req">*</span></label><input class="fi" type="email" id="mt-email" value="${t?.email || ''}" placeholder="teacher@school.edu"/></div></div>
   <div class="fg pw-field"><label class="fl">Login Password</label><input class="fi" type="password" id="mt-pass" placeholder="Enter password (for new logins or resets)" autocomplete="new-password"/><button type="button" class="pw-toggle" onclick="togglePassword(\'mt-pass\',this)">Show</button></div>
   ${t?.email ? `<div style="margin-top:-8px;margin-bottom:10px;text-align:right;"><button type="button" class="btn btn-gh btn-xs" style="color:var(--r);border-color:var(--rl);" onclick="adminResetPassword(document.getElementById('mt-email').value, document.getElementById('mt-pass').value, this)">Force Reset Password</button></div>` : ''}
-  <div class="fg"><label class="fl">Main Subject</label><select class="fi" id="mt-sub"><option value="">Select</option>${DB.subjects.map(s => `<option value="${s.name}" ${t?.subject === s.name ? 'selected' : ''}>${s.name}</option>`).join('')}</select></div></div>
+  <div class="fg2"><div class="fg"><label class="fl">Role <span class="req">*</span></label><select class="fi" id="mt-role"><option value="teacher" ${t?.role !== 'scanner' ? 'selected' : ''}>Teacher</option><option value="scanner" ${t?.role === 'scanner' ? 'selected' : ''}>Gate Scanner</option></select></div><div class="fg"><label class="fl">Main Subject (Teachers)</label><select class="fi" id="mt-sub"><option value="">Select</option>${DB.subjects.map(s => `<option value="${s.name}" ${t?.subject === s.name ? 'selected' : ''}>${s.name}</option>`).join('')}</select></div></div>
   <div class="fg2"><div class="fg"><label class="fl">Phone</label><input class="fi" id="mt-phone" value="${t?.phone || ''}" placeholder="03XXXXXXXXX"/></div><div class="fg"><label class="fl">Joining Date</label><input class="fi" type="date" id="mt-join" value="${t?.joinDate || ''}"/></div></div>
-  <div class="fg2"><div class="fg"><label class="fl">Base Salary</label><input class="fi" type="number" id="mt-salary" value="${num(t?.salary || 40000)}" placeholder="45000"/></div><div class="fg"><label class="fl">Bonus</label><input class="fi" type="number" id="mt-bonus" value="${num(t?.bonus || 0)}" placeholder="0"/></div></div>
-  <div class="fg2"><div class="fg"><label class="fl">Deductions</label><input class="fi" type="number" id="mt-deductions" value="${num(t?.deductions || 0)}" placeholder="0"/></div><div class="fg"><label class="fl">Payroll Status</label><select class="fi" id="mt-paystatus"><option value="pending" ${t?.payrollStatus !== 'paid' ? 'selected' : ''}>Pending</option><option value="paid" ${t?.payrollStatus === 'paid' ? 'selected' : ''}>Paid</option></select></div></div>
-  <div class="fg"><label class="fl">Notes</label><textarea class="fi" id="mt-notes" style="min-height:70px;" placeholder="Optional notes">${t?.notes || ''}</textarea></div>
+  <div class="fg2"><div class="fg"><label class="fl">Base Salary (Per Month)</label><input class="fi" type="number" id="mt-salary" value="${num(t?.salary || 40000)}" placeholder="45000"/></div><div class="fg"><label class="fl">Notes</label><input class="fi" id="mt-notes" value="${t?.notes || ''}" placeholder="Optional notes"/></div></div>
   <div class="fg"><label class="fl">Assigned Classes</label><div style="display:flex;flex-wrap:wrap;gap:7px;padding:10px;background:var(--card2);border:1.5px solid var(--border);border-radius:8px;">${DB.classes.map(c => `<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:.78px;font-weight:600;font-size:.76rem;"><input type="checkbox" value="${c.id}" ${(t?.classIds || []).includes(c.id) ? 'checked' : ''}/> ${c.name}${c.section ? ' ' + c.section : ''}</label>`).join('')}</div></div>
-  <div class="m-btns"><button class="btn btn-p" onclick="saveTeach('${eid || ''}')"> ${t ? 'Update' : 'Add'} Teacher</button><button class="btn btn-gh" onclick="closeModal()">Cancel</button></div>`);
+  <div class="m-btns"><button class="btn btn-p" onclick="saveTeach('${eid || ''}')"> ${t ? 'Update' : 'Add'}</button><button class="btn btn-gh" onclick="closeModal()">Cancel</button></div>`);
     }
-    async function saveTeach(eid) { const name = (document.getElementById('mt-name')?.value || '').trim(); const email = (document.getElementById('mt-email')?.value || '').trim().toLowerCase(); if (!name || !email) { showToast('Name & email required', 'te'); return; } const classIds = [...document.querySelectorAll('#modal-body input[type=checkbox]:checked')].map(x => x.value); const loginPass = (document.getElementById('mt-pass')?.value || '').trim();
+    async function saveTeach(eid) { const name = (document.getElementById('mt-name')?.value || '').trim(); const email = (document.getElementById('mt-email')?.value || '').trim().toLowerCase(); if (!name || !email) { showToast('Name & email required', 'te'); return; } const role = document.getElementById('mt-role')?.value || 'teacher'; const classIds = [...document.querySelectorAll('#modal-body input[type=checkbox]:checked')].map(x => x.value); const loginPass = (document.getElementById('mt-pass')?.value || '').trim();
     if (!eid && loginPass && _sb) {
       const btn = document.querySelector('.m-btns .btn-p'); if (btn) btn.textContent = 'Creating Login...';
       try {
         const { data, error } = await _sb.functions.invoke('create-auth-user', {
-          body: { email, password: loginPass, role: 'teacher' }
+          body: { email, password: loginPass, role: role }
         });
         if (error) throw error;
         if (data?.error) throw new Error(data.error);
-        showToast(`Teacher added & Auth Login created!`, 'ts');
+        showToast(`Staff added & Auth Login created!`, 'ts');
       } catch (err) {
         showToast(err.message, 'te');
         const btn2 = document.querySelector('.m-btns .btn-p'); if (btn2) btn2.textContent = 'Save';
         return;
       }
     }
-    const obj = { name, email, subject: document.getElementById('mt-sub')?.value || '', classIds, role: 'teacher', phone: document.getElementById('mt-phone')?.value?.trim() || '', joinDate: document.getElementById('mt-join')?.value || '', salary: num(document.getElementById('mt-salary')?.value || 0), bonus: num(document.getElementById('mt-bonus')?.value || 0), deductions: num(document.getElementById('mt-deductions')?.value || 0), payrollStatus: document.getElementById('mt-paystatus')?.value || 'pending', notes: document.getElementById('mt-notes')?.value?.trim() || '' }; if (eid) { const t = DB.users.find(x => x.id === eid); if (t) Object.assign(t, obj); } else DB.users.push({ id: uid(), ...obj, photo: '', lastPaid: '', payrollHistory: [] }); saveDB(); pushCloudDB(); closeModal(); showToast('Teacher saved', 'ts'); goPage('teachers'); }
+    const obj = { name, email, subject: document.getElementById('mt-sub')?.value || '', classIds, role: role, phone: document.getElementById('mt-phone')?.value?.trim() || '', joinDate: document.getElementById('mt-join')?.value || '', salary: num(document.getElementById('mt-salary')?.value || 0), notes: document.getElementById('mt-notes')?.value?.trim() || '' }; if (eid) { const t = DB.users.find(x => x.id === eid); if (t) Object.assign(t, obj); } else DB.users.push({ id: uid(), ...obj, photo: '', lastPaid: '', payrollHistory: [] }); saveDB(); pushCloudDB(); closeModal(); showToast('Staff saved', 'ts'); goPage('teachers'); }
 
     function pgPayroll() {
+      window.payrollMonth = window.payrollMonth || monthKey();
       const teachers = DB.users.filter(u => u.role === 'teacher');
-      const total = teachers.reduce((sum, t) => sum + teacherNetSalary(t), 0);
-      const paid = teachers.filter(t => t.payrollStatus === 'paid').length;
+      const total = teachers.reduce((sum, t) => sum + calcPayrollData(t, window.payrollMonth).expectedNet, 0);
+      const paidTeachers = teachers.filter(t => (t.payrollHistory || []).some(h => h.month === window.payrollMonth));
+      const paid = paidTeachers.length;
       return `
-<div class="ph ph-row fu"><div><div class="ph-tag"> Payroll</div><h1>Teacher Salary System</h1><div class="ph-sub">Manage salary, bonus, deductions, and payment status</div></div><button class="btn btn-p" onclick="openTeachModal()">+ Add Teacher</button></div>
+<div class="ph ph-row fu"><div><div class="ph-tag"> Payroll</div><h1>Teacher Salary System</h1><div class="ph-sub">Manage salary, bonus, deductions, and payment status</div></div><div style="display:flex;gap:10px;align-items:center;"><input type="month" value="${window.payrollMonth}" onchange="window.payrollMonth=this.value; goPage('payroll')" style="padding:8px 12px; border-radius:8px; border:1px solid var(--border); font-size:0.9rem; font-weight:700; background:var(--card); color:var(--ink); cursor:pointer;" /><button class="btn btn-p" onclick="openTeachModal()">+ Add Teacher</button></div></div>
 <div class="sg fu d1">
-  <div class="sc sp"><div class="sc-ic"></div><div class="sc-val" style="color:var(--p);">${fmtMoney(total)}</div><div class="sc-lbl">Monthly Payroll</div></div>
+  <div class="sc sp"><div class="sc-ic"></div><div class="sc-val" style="color:var(--p);">${fmtMoney(total)}</div><div class="sc-lbl">Payroll for ${window.payrollMonth}</div></div>
   <div class="sc sg2"><div class="sc-ic"></div><div class="sc-val" style="color:var(--g);">${paid}</div><div class="sc-lbl">Paid Teachers</div></div>
   <div class="sc so"><div class="sc-ic"></div><div class="sc-val" style="color:var(--o);">${teachers.length - paid}</div><div class="sc-lbl">Pending Teachers</div></div>
   <div class="sc sv"><div class="sc-ic"></div><div class="sc-val" style="color:var(--v);">${teachers.length}</div><div class="sc-lbl">Total Staff</div></div>
 </div>
   ${teachers.length === 0 ? `<div class="card"><div class="empty"><div class="empty-ic"></div><div class="empty-t">No teacher payroll records yet</div><button class="btn btn-p btn-sm" style="margin-top:10px;" onclick="openTeachModal()">Add Teacher</button></div></div>` :
-          `<div class="g2">${teachers.map(t => { const stats = teacherMonthlyStats(t.id); return `<div class="card fu"><div class="ch"><div class="ct"> ${t.name}</div><span class="badge ${t.payrollStatus === 'paid' ? 'bg2' : 'bo2'}">${t.payrollStatus === 'paid' ? 'Paid' : 'Pending'}</span></div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px;"><div style="background:var(--card2);padding:10px;border-radius:12px;"><div style="font-size:.66rem;color:var(--ink4);">Base Salary</div><div style="font-weight:900;color:var(--ink);">${fmtMoney(t.salary)}</div></div><div style="background:var(--card2);padding:10px;border-radius:12px;"><div style="font-size:.66rem;color:var(--ink4);">Net Salary</div><div style="font-weight:900;color:var(--p);">${fmtMoney(teacherNetSalary(t))}</div></div><div style="background:var(--card2);padding:10px;border-radius:12px;"><div style="font-size:.66rem;color:var(--ink4);">Bonus</div><div style="font-weight:900;color:var(--g);">${fmtMoney(t.bonus)}</div></div><div style="background:var(--card2);padding:10px;border-radius:12px;"><div style="font-size:.66rem;color:var(--ink4);">Deductions</div><div style="font-weight:900;color:var(--r);">${fmtMoney(t.deductions)}</div></div></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;"><span class="badge bp2">Present ${stats.present}</span><span class="badge by2">Late ${stats.late}</span><span class="badge br2">Absent ${stats.absent}</span>${t.lastPaid ? `<span class="badge bg2">Last Paid ${fmtDate(t.lastPaid)}</span>` : ''}${t.payrollMonth ? `<span class="badge bp2">Month ${t.payrollMonth}</span>` : ''}</div><div style="font-size:.74rem;color:var(--ink3);line-height:1.6;">${t.notes || 'No payroll notes added yet.'}</div>${(t.payrollHistory || []).length ? `<div style="margin-top:9px;font-size:.7rem;color:var(--ink4);"><b>Recent payments:</b> ${(t.payrollHistory || []).slice(-3).reverse().map(h => `${h.month}: ${fmtMoney(h.amount)} on ${fmtDate(h.paidOn)}`).join(' - ')}</div>` : ''}<div class="m-btns" style="margin-top:12px;"><button class="btn btn-p btn-sm" onclick="payTeacherSalary('${t.id}')">Mark Salary Paid</button><button class="btn btn-gh btn-sm" onclick="openTeachModal('${t.id}')">Edit Payroll</button></div></div>`; }).join('')}</div>`}`;
+          `<div class="g2">${teachers.map(t => { 
+            const pd = calcPayrollData(t, window.payrollMonth); 
+            const hasPaid = (t.payrollHistory || []).some(h => h.month === window.payrollMonth);
+            const paidRec = hasPaid ? (t.payrollHistory || []).find(h => h.month === window.payrollMonth) : null;
+            return `<div class="card fu"><div class="ch"><div class="ct"> ${escHtml(t.name)}</div><span class="badge ${hasPaid ? 'bg2' : 'bo2'}">${hasPaid ? 'Paid' : 'Pending'}</span></div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px;"><div style="background:var(--card2);padding:10px;border-radius:12px;"><div style="font-size:.66rem;color:var(--ink4);">Base Salary</div><div style="font-weight:900;color:var(--ink);">${fmtMoney(pd.base)}</div></div><div style="background:var(--card2);padding:10px;border-radius:12px;"><div style="font-size:.66rem;color:var(--ink4);">${hasPaid ? 'Paid Net' : 'Expected Net'}</div><div style="font-weight:900;color:var(--p);">${fmtMoney(hasPaid ? paidRec.amount : pd.expectedNet)}</div></div><div style="background:var(--card2);padding:10px;border-radius:12px;"><div style="font-size:.66rem;color:var(--ink4);">Att. Deduction (-${pd.deductionDays}d)</div><div style="font-weight:900;color:var(--o);">${pd.attDeduction > 0 ? '-' + fmtMoney(pd.attDeduction) : '0'}</div></div><div style="background:var(--card2);padding:10px;border-radius:12px;"><div style="font-size:.66rem;color:var(--ink4);">Other Deductions</div><div style="font-weight:900;color:var(--r);">${hasPaid && paidRec.otherDeductions ? '-' + fmtMoney(paidRec.otherDeductions) : '0'}</div></div></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;"><span class="badge bp2">Present ${pd.stats.present}</span><span class="badge by2">Late ${pd.stats.late}</span><span class="badge br2">Absent ${pd.stats.absent}</span>${t.lastPaid ? `<span class="badge bg2">Last Paid ${fmtDate(t.lastPaid)}</span>` : ''}</div><div style="font-size:.74rem;color:var(--ink3);line-height:1.6;">${t.notes || 'No payroll notes added yet.'}</div>${(t.payrollHistory || []).length ? `<div style="margin-top:9px;font-size:.7rem;color:var(--ink4);"><b>Recent payments:</b> ${(t.payrollHistory || []).slice(-3).reverse().map(h => `<span>${h.month}: ${fmtMoney(h.amount)} <a href="#" onclick="printPaySlip('${t.id}', '${h.id}'); return false;" style="color:var(--p);text-decoration:none;">(Print)</a></span>`).join(' &bull; ')}</div>` : ''}<div class="m-btns" style="margin-top:12px;">${hasPaid ? `<button class="btn btn-gh btn-sm" onclick="unmarkTeacherSalary('${t.id}', '${window.payrollMonth}')">Unmark Paid</button><button class="btn btn-p btn-sm" onclick="printPaySlip('${t.id}', '${paidRec.id}')">Print Pay Slip</button>` : `<button class="btn btn-p btn-sm" onclick="openTeacherSalaryModal('${t.id}', '${window.payrollMonth}')">Mark Salary Paid</button>`}</div></div>`; }).join('')}</div>`}`;
     }
-    function payTeacherSalary(id) {
+    function unmarkTeacherSalary(id, month) {
       const t = DB.users.find(u => u.id === id && u.role === 'teacher'); if (!t) return;
-      const amount = teacherNetSalary(t);
-      if (!confirm(`Mark ${fmtMoney(amount)} as paid to ${t.name}?`)) return;
-      t.payrollStatus = 'paid';
-      t.payrollMonth = monthKey();
-      t.lastPaid = today();
-      t.payrollHistory = t.payrollHistory || [];
-      const existing = t.payrollHistory.find(h => h.month === t.payrollMonth);
-      const rec = { id: uid(), month: t.payrollMonth, paidOn: today(), amount, base: num(t.salary), bonus: num(t.bonus), deductions: num(t.deductions) };
-      if (existing) Object.assign(existing, rec); else t.payrollHistory.push(rec);
+      if (!confirm(`Unmark salary as paid for ${t.name} for ${month}?`)) return;
+      t.payrollHistory = (t.payrollHistory || []).filter(h => h.month !== month);
       saveDB();
-      showToast(`Salary paid to ${t.name}`, 'ts');
+      showToast(`Salary unmarked for ${t.name}`, 'ts');
       goPage('payroll');
+    }
+
+    function openTeacherSalaryModal(id, month) {
+      const t = DB.users.find(u => u.id === id && u.role === 'teacher'); if (!t) return;
+      const pd = calcPayrollData(t, month);
+      openModal(`
+        <h3>Mark Salary Paid: ${escHtml(t.name)}</h3>
+        <div style="background:var(--card2);padding:14px;border-radius:12px;margin-bottom:15px;font-size:0.85rem;display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;justify-content:space-between;"><span>Base Salary:</span> <b>${fmtMoney(pd.base)}</b></div>
+          <div style="display:flex;justify-content:space-between;color:var(--o);"><span>Att. Deduction (-${pd.deductionDays}d):</span> <b>-${fmtMoney(pd.attDeduction)}</b></div>
+          <hr style="border:0;border-top:1px dashed var(--border);margin:4px 0;" />
+          <div style="display:flex;justify-content:space-between;color:var(--p);"><span>Expected Net Pay:</span> <b>${fmtMoney(pd.expectedNet)}</b></div>
+        </div>
+        <div class="fg">
+          <label class="fl">Other/Manual Deductions (e.g. Loan Installment, Advance)</label>
+          <input class="fi" type="number" id="ms-other-deduct" value="0" oninput="updateSalaryModalNet(${pd.expectedNet})" />
+        </div>
+        <div style="margin-bottom:15px;text-align:right;font-size:1.1rem;font-weight:800;color:var(--p);">
+          Final Net Pay: <span id="ms-final-net">${fmtMoney(pd.expectedNet)}</span>
+        </div>
+        <div class="m-btns">
+          <button class="btn btn-p" onclick="confirmTeacherSalary('${id}', '${month}', ${pd.base}, ${pd.attDeduction}, ${pd.expectedNet})">Mark Paid & Print Pay Slip</button>
+          <button class="btn btn-gh" onclick="closeModal()">Cancel</button>
+        </div>
+      `);
+    }
+
+    function updateSalaryModalNet(expectedNet) {
+      const other = num(document.getElementById('ms-other-deduct')?.value || 0);
+      const final = Math.max(0, expectedNet - other);
+      document.getElementById('ms-final-net').textContent = fmtMoney(final);
+    }
+
+    function confirmTeacherSalary(id, month, base, attDeduction, expectedNet) {
+      const t = DB.users.find(u => u.id === id && u.role === 'teacher'); if (!t) return;
+      const otherDeductions = num(document.getElementById('ms-other-deduct')?.value || 0);
+      const amount = Math.max(0, expectedNet - otherDeductions);
+      
+      t.payrollHistory = t.payrollHistory || [];
+      const historyId = uid();
+      t.payrollHistory.push({ 
+        id: historyId, 
+        month: month, 
+        paidOn: today(), 
+        amount: amount, 
+        base: base, 
+        attDeduction: attDeduction, 
+        otherDeductions: otherDeductions 
+      });
+      t.lastPaid = today();
+      saveDB();
+      closeModal();
+      showToast(`Salary marked paid for ${t.name}`, 'ts');
+      goPage('payroll');
+      printPaySlip(t.id, historyId);
+    }
+
+    function printPaySlip(tId, historyId) {
+      const t = DB.users.find(u => u.id === tId); if (!t) return;
+      const h = (t.payrollHistory || []).find(x => x.id === historyId); if (!h) return;
+      const school = DB.school || {};
+      
+      const pw = window.open('', '', 'width=600,height=800');
+      const html = `<!DOCTYPE html><html><head><title>Pay Slip - ${escHtml(t.name)}</title>
+      <style>
+        @page { margin: 0; size: A5; }
+        body { font-family: sans-serif; padding: 30px; font-size: 14px; line-height: 1.5; color:#111; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        h1 { margin:0 0 5px 0; font-size: 20px; text-align:center; }
+        h2 { margin:0 0 20px 0; font-size: 14px; text-align:center; color:#555; border-bottom:1px solid #ddd; padding-bottom:15px; }
+        .row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .row.bold { font-weight: bold; }
+        .row.total { border-top: 2px solid #111; padding-top: 10px; margin-top: 10px; font-size: 16px; }
+      </style></head><body>
+        <h1>${escHtml(school.name || 'School')}</h1>
+        <h2>Pay Slip: ${h.month}</h2>
+        <div style="margin-bottom:20px;">
+          <div class="row"><span>Staff Name:</span> <b>${escHtml(t.name)}</b></div>
+          <div class="row"><span>Paid On:</span> <b>${fmtDate(h.paidOn)}</b></div>
+        </div>
+        <div style="border:1px solid #ddd; padding: 15px;">
+          <div class="row"><span>Base Salary (Per Month):</span> <span>${fmtMoney(h.base)}</span></div>
+          <div class="row" style="color:#d32f2f;"><span>Attendance Deduction:</span> <span>-\${fmtMoney(h.attDeduction)}</span></div>
+          <div class="row" style="color:#d32f2f;"><span>Other Deductions:</span> <span>-\${fmtMoney(h.otherDeductions)}</span></div>
+          <div class="row total"><span>Net Paid Amount:</span> <span><b>${fmtMoney(h.amount)}</b></span></div>
+        </div>
+        <div style="margin-top:50px; text-align:right;">
+          <div style="border-top:1px solid #111; width:200px; display:inline-block; text-align:center; padding-top:5px;">Authorized Signature</div>
+        </div>
+        <scr`+`ipt>window.onload=function(){setTimeout(function(){window.print();},500);};</scr`+`ipt>
+      </body></html>`;
+      pw.document.write(html);
+      pw.document.close();
     }
 
     /* ------------------------------- SUBJECTS ------------------------------- */
@@ -6111,9 +6485,56 @@
     <input type="file" id="imp-file" accept=".json" style="display:none;" onchange="importData(this)"/>
     <button class="btn btn-xs" style="background:var(--rl);color:var(--r);" onclick="resetAll()"> Reset All</button>
   </div>
-  <div class="ibox" style="margin-top:10px;"> Data is saved to Supabase cloud + local browser cache.</div>
+  <div class="ibox" style="margin-top:10px;"> Data is saved to Supabase cloud + local browser cache.  </div>
 </div>`;
     }
+
+    function renderAdminCharts() {
+      if (typeof Chart === 'undefined') return;
+      const fCtx = document.getElementById('feeChart');
+      const aCtx = document.getElementById('attChart');
+      
+      if (fCtx) {
+        const labels = []; const data = [];
+        for (let i=5; i>=0; i--) {
+          const d = new Date(); d.setMonth(d.getMonth() - i);
+          const mk = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+          labels.push(d.toLocaleString('en', {month:'short'}));
+          let mTotal = 0;
+          Object.values(DB.fees.payments || {}).forEach(pf => {
+            Object.values(pf).forEach(pmt => {
+              if (pmt.paid && pmt.month === mk) mTotal += num(pmt.amount);
+            });
+          });
+          data.push(mTotal);
+        }
+        
+        new Chart(fCtx, {
+          type: 'bar',
+          data: { labels, datasets: [{ label: 'Revenue', data, backgroundColor: DB.school?.primaryColor || '#2563eb', borderRadius: 4 }] },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { font: {size: 10} } }, x: { grid: { display: false }, ticks: { font: {size: 10} } } } }
+        });
+      }
+      
+      if (aCtx) {
+        const tKey = today();
+        let p=0, a=0, l=0;
+        Object.values(DB.attendance || {}).forEach(cObj => {
+          Object.values(cObj).forEach(stuAtt => {
+            const v = stuAtt[tKey];
+            if (v === 'P') p++; else if (v === 'A') a++; else if (v === 'L') l++;
+          });
+        });
+        if (p+a+l === 0) { p=85; a=10; l=5; } // Fallback sample if no attendance taken today
+        
+        new Chart(aCtx, {
+          type: 'doughnut',
+          data: { labels: ['Present', 'Absent', 'Late'], datasets: [{ data: [p, a, l], backgroundColor: ['#22c55e', '#ef4444', '#f59e0b'], borderWidth: 0 }] },
+          options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { position: 'right', labels: { usePointStyle: true, boxWidth: 8, font: {size: 11} } } } }
+        });
+      }
+    }
+
     function saveAllSettings() { saveDB(); pushPublicSite(); applyBranding(); showToast('Settings saved and published', 'ts'); }
     function exportData() { const blob = new Blob([JSON.stringify(DB, null, 2)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `oxford-backup-${today()}.json`; a.click(); showToast('? Exported', 'ts'); }
     function importData(inp) { const f = inp.files[0]; if (!f) return; const r = new FileReader(); r.onload = e => { try { DB = JSON.parse(e.target.result); saveDB(); applyBranding(); buildShell(); goPage('dashboard'); showToast('? Data imported', 'ts'); } catch { showToast('? Invalid file', 'te'); } }; r.readAsText(f); }
@@ -6167,17 +6588,7 @@
     }
 
     function studentAttendancePayload(stu) {
-      const cid = stu?.classId || curCls;
-      const cls = DB.classes.find(c => c.id === cid);
-      return JSON.stringify({
-        kind: 'school-attendance-v1',
-        id: stu?.id || '',
-        classId: cid || '',
-        name: stu?.name || 'Student',
-        class: ((cls?.name || '') + ' ' + (cls?.section || '')).trim(),
-        roll: stu?.roll || '-',
-        school: DB.school.name
-      });
+      return JSON.stringify({ id: stu?.id || '' });
     }
 
     function switchIdCardClass(cid) {
@@ -6196,37 +6607,97 @@
       const cls = DB.classes.find(c => c.id === stu.classId) || {};
       const grade = ((cls.name || '') + (cls.section ? ' ' + cls.section : '')).trim() || '-';
       const idNo = (stu.roll || stu.id || '').toString();
-      return `<div class="school-id-card">
-        <div class="idp-brand">
-          <div class="idp-logo">${DB.school.logo ? `<img src="${DB.school.logo}"/>` : (DB.school.name || 'S').slice(0, 1).toUpperCase()}</div>
-          <div class="idp-school">${DB.school.name || 'School'}</div>
+      const yr = DB.settings?.schoolYear || '2025 - 2026';
+      return `<div class="vid-card">
+        <div class="vid-top-deco"></div>
+        <div class="vid-header">
+          <div class="vid-logo-circle">${DB.school.logo ? `<img src="${DB.school.logo}"/>` : `<i class="fas fa-graduation-cap"></i>`}</div>
+          <div class="vid-school-name">${DB.school.name || 'SCHOOL'}</div>
+          <div class="vid-tagline">LEARN &bull; GROW &bull; EXCEL</div>
         </div>
-        <div class="idp-photo">${stu.photo ? `<img src="${stu.photo}"/>` : ini(stu.name || '?')}</div>
-        <div class="idp-main">
-          <div class="idp-name">${stu.name || 'Student'}</div>
-          <div class="idp-role">Student</div>
-          <div class="idp-row"><span>ID Number</span><b>${idNo || '-'}</b></div>
-          <div class="idp-row"><span>Grade</span><b>${grade}</b></div>
+        <div class="vid-body">
+          <div class="vid-photo-col">
+            <div class="vid-photo-wrap">${stu.photo ? `<img src="${stu.photo}"/>` : ini(stu.name || '?')}</div>
+            <div class="vid-qr idp-qr" data-student-id="${stu.id}"></div>
+          </div>
+          <div class="vid-info-col">
+            <div class="vid-name">${stu.name || 'Student'}</div>
+            <div class="vid-role">STUDENT</div>
+            <div class="vid-table">
+              <div class="vid-row"><i class="fas fa-id-badge"></i> <div><span>ID NUMBER</span><b>${idNo || '-'}</b></div></div>
+              <div class="vid-row"><i class="fas fa-graduation-cap"></i> <div><span>GRADE</span><b>${grade}</b></div></div>
+              <div class="vid-row"><i class="fas fa-calendar-alt"></i> <div><span>SESSION</span><b>${yr}</b></div></div>
+              <div class="vid-row"><i class="fas fa-map-marker-alt"></i> <div><span>CAMPUS</span><b>${DB.school.city || 'Karachi'}</b></div></div>
+            </div>
+            <div class="vid-sign">
+               <div style="height:.22in;"></div>
+               <span>PRINCIPAL</span>
+            </div>
+          </div>
         </div>
-        <div class="idp-qr" data-student-id="${stu.id}"></div>
-        <div class="idp-footer">${DB.school.city || ''}${DB.school.phone ? ' | ' + DB.school.phone : ''}</div>
+        <div class="vid-footer">
+           <div class="vid-foot-text">
+              <span>SAFE TODAY</span>
+              <i class="fas fa-shield-alt" style="color:#b48e4b; font-size:1.4em; margin:0 5px;"></i>
+              <span>STRONG TOMORROW</span>
+           </div>
+        </div>
+      </div>`;
+    }
+
+    function staffIdCardHtml(staff) {
+      const yr = DB.settings?.schoolYear || '2025 - 2026';
+      const isScanner = staff.role === 'scanner';
+      return `<div class="vid-card">
+        <div class="vid-top-deco"></div>
+        <div class="vid-header">
+          <div class="vid-logo-circle">${DB.school.logo ? `<img src="${DB.school.logo}"/>` : `<i class="fas fa-graduation-cap"></i>`}</div>
+          <div class="vid-school-name">${DB.school.name || 'SCHOOL'}</div>
+          <div class="vid-tagline">LEARN &bull; GROW &bull; EXCEL</div>
+        </div>
+        <div class="vid-body">
+          <div class="vid-photo-col">
+            <div class="vid-photo-wrap">${staff.photo ? `<img src="${staff.photo}"/>` : ini(staff.name || '?')}</div>
+            <div class="vid-qr idp-qr-staff" data-staff-id="${staff.id}"></div>
+          </div>
+          <div class="vid-info-col">
+            <div class="vid-name">${staff.name || 'Staff Member'}</div>
+            <div class="vid-role">${isScanner ? 'GATE SCANNER' : 'TEACHING STAFF'}</div>
+            <div class="vid-table">
+              <div class="vid-row"><i class="fas fa-id-badge"></i> <div><span>STAFF ID</span><b>${staff.id.substring(0,6).toUpperCase()}</b></div></div>
+              <div class="vid-row"><i class="fas fa-book"></i> <div><span>SUBJECT</span><b>${staff.subject || (isScanner ? 'Gate Access' : '-')}</b></div></div>
+              <div class="vid-row"><i class="fas fa-phone"></i> <div><span>CONTACT</span><b>${staff.phone || '-'}</b></div></div>
+              <div class="vid-row"><i class="fas fa-map-marker-alt"></i> <div><span>CAMPUS</span><b>${DB.school.city || 'Karachi'}</b></div></div>
+            </div>
+            <div class="vid-sign">
+               <div style="height:.22in;"></div>
+               <span>PRINCIPAL</span>
+            </div>
+          </div>
+        </div>
       </div>`;
     }
 
     function pgClassIdCards() {
       if (curRole !== 'admin' && curRole !== 'teacher') return '<div class="empty">ID card printing is available for staff only.</div>';
-      const cls = DB.classes.find(c => c.id === curCls) || DB.classes[0];
-      if (cls && cls.id !== curCls) curCls = cls.id;
-      const students = cls ? clsStus(cls.id) : [];
-      const perPage = 10;
+      
+      const isStaff = curCls === 'staff';
+      const cls = isStaff ? null : (DB.classes.find(c => c.id === curCls) || DB.classes[0]);
+      if (!isStaff && cls && cls.id !== curCls) curCls = cls.id;
+      
+      const entities = isStaff ? DB.users.filter(u => u.role === 'teacher' || u.role === 'scanner') : (cls ? clsStus(cls.id) : []);
+      const perPage = 9;
       const sheets = [];
-      for (let i = 0; i < students.length; i += perPage) sheets.push(students.slice(i, i + perPage));
+      for (let i = 0; i < entities.length; i += perPage) sheets.push(entities.slice(i, i + perPage));
+      
+      const optHtml = `<option value="staff" ${curCls === 'staff' ? 'selected' : ''}>? Staff & Teachers</option>` + DB.classes.map(c => `<option value="${c.id}" ${c.id === curCls ? 'selected' : ''}>${c.name}${c.section ? ' ' + c.section : ''}</option>`).join('');
+
       return `
-<div class="ph ph-row fu no-print"><div><div class="ph-tag">ID Cards</div><h1>Class ID Cards</h1><div class="ph-sub">Print ${students.length} attendance QR cards for ${cls?.name || 'selected class'} on A4 sheets.</div></div>
-  <div class="ph-acts"><select class="fi" style="width:auto;min-width:180px;" onchange="switchIdCardClass(this.value)">${DB.classes.map(c => `<option value="${c.id}" ${c.id === curCls ? 'selected' : ''}>${c.name}${c.section ? ' ' + c.section : ''}</option>`).join('')}</select><button class="btn btn-p btn-sm" onclick="printClassIdCards()">Print A4 Cards</button></div></div>
-<div class="id-print-toolbar no-print"><div class="ibox" style="margin:0;flex:1;">Each card is 3.375in x 2.125in and includes the attendance QR used by the scanner.</div></div>
+<div class="ph ph-row fu no-print"><div><div class="ph-tag">ID Cards</div><h1>${isStaff ? 'Staff ID Cards' : 'Class ID Cards'}</h1><div class="ph-sub">Print ${entities.length} attendance QR cards for ${isStaff ? 'Staff & Teachers' : (cls?.name || 'selected class')} on A4 sheets.</div></div>
+  <div class="ph-acts"><select class="fi" style="width:auto;min-width:180px;" onchange="switchIdCardClass(this.value)">${optHtml}</select><button class="btn btn-p btn-sm" onclick="printClassIdCards()">Print A4 Cards</button></div></div>
+<div class="id-print-toolbar no-print"><div class="ibox" style="margin:0;flex:1;">Each card is 2.125in x 3.375in and includes the attendance QR used by the scanner.</div></div>
 <div class="id-print-area">
-  ${sheets.length ? sheets.map(group => `<section class="id-a4-sheet">${group.map(classIdCardHtml).join('')}</section>`).join('') : '<div class="empty">No students found in this class.</div>'}
+  ${sheets.length ? sheets.map(group => `<section class="id-a4-sheet">${group.map(e => isStaff ? staffIdCardHtml(e) : classIdCardHtml(e)).join('')}</section>`).join('') : '<div class="empty">No records found.</div>'}
 </div>`;
     }
 
@@ -6237,7 +6708,14 @@
         const stu = allStus().find(s => s.id === sid);
         if (!stu) return;
         el.innerHTML = '';
-        try { new QRCode(el, { text: studentAttendancePayload(stu), width: 72, height: 72, colorDark: '#111827', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M }); } catch { }
+        try { new QRCode(el, { text: studentAttendancePayload(stu), width: 200, height: 200, colorDark: '#111827', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.L }); } catch { }
+      });
+      document.querySelectorAll('.idp-qr-staff[data-staff-id]').forEach(el => {
+        const tid = el.dataset.staffId;
+        const staff = DB.users.find(u => u.id === tid);
+        if (!staff) return;
+        el.innerHTML = '';
+        try { new QRCode(el, { text: JSON.stringify({ kind: 'school-teacher-attendance-v1', id: staff.id }), width: 200, height: 200, colorDark: '#111827', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.L }); } catch { }
       });
     }
     function pgQRCard() {
@@ -6250,31 +6728,42 @@
       const chip = isTeacherCard ? (curUser?.subject || 'Teacher') : ((cls?.name || '') + ' ' + (cls?.section || '')).trim();
       return `
 <div class="ph fu"><div class="ph-tag"> ${isTeacherCard ? 'Teacher Gate QR' : 'Student ID Card'}</div><h1>${isTeacherCard ? 'My Gate QR' : 'My ID Card'}</h1><div class="ph-sub">Show this card at the school gate for attendance scanning</div></div>
-<div class="id-card-wrap fu d1">
-  <div class="id-card">
-    <div class="id-card-header">
-      <div class="id-card-logo">${DB.school.logo ? `<img src="${DB.school.logo}"/>` : ''}</div>
-      <div class="id-card-school">${DB.school.name}<br/><span style="font-weight:400;opacity:.65;">${DB.school.city || ''}</span></div>
-    </div>
-    <div class="id-card-body">
-      <div class="id-card-photo">${personPhoto ? `<img src="${personPhoto}"/>` : ini(personName || '?')}</div>
-      <div class="id-card-info">
-        <div class="id-card-name">${personName}</div>
-        <div class="id-card-roll">${isTeacherCard ? 'Staff ID' : 'Roll No. ' + (stu?.roll || '-')}</div>
-        <div class="id-card-chip">${isTeacherCard ? '' : ''} ${chip}</div><br/>
-          ${!isTeacherCard && stu?.dob ? `<div style="font-size:.62rem;opacity:.5;margin-top:3px;">DOB: ${fmtDate(stu.dob)}</div>` : ''}
-          ${!isTeacherCard && stu?.blood ? `<div class="id-card-chip" style="margin-top:4px;"> ${stu.blood}</div>` : ''}
+<div class="id-card-wrap fu d1" style="display:flex; justify-content:center; padding: 20px 0;">
+      <div class="vid-card" style="transform: scale(1.3); transform-origin: top center; margin-bottom: 1in;">
+        <div class="vid-top-deco"></div>
+        <div class="vid-header">
+          <div class="vid-logo-circle">${DB.school.logo ? `<img src="${DB.school.logo}"/>` : `<i class="fas fa-graduation-cap"></i>`}</div>
+          <div class="vid-school-name">${DB.school.name || 'SCHOOL'}</div>
+          <div class="vid-tagline">LEARN &bull; GROW &bull; EXCEL</div>
+        </div>
+        <div class="vid-body">
+          <div class="vid-photo-col">
+            <div class="vid-photo-wrap">${personPhoto ? `<img src="${personPhoto}"/>` : ini(personName || '?')}</div>
+            <div class="vid-qr" id="qr-canvas-wrap"></div>
+          </div>
+          <div class="vid-info-col">
+            <div class="vid-name">${personName || 'Student'}</div>
+            <div class="vid-role">${isTeacherCard ? 'STAFF' : 'STUDENT'}</div>
+            <div class="vid-table">
+              <div class="vid-row"><i class="fas fa-id-badge"></i> <div><span>ID NUMBER</span><b>${isTeacherCard ? 'STAFF' : (stu?.roll || stu?.id || '').toString().slice(-6).toUpperCase()}</b></div></div>
+              <div class="vid-row"><i class="fas fa-graduation-cap"></i> <div><span>${isTeacherCard ? 'SUBJECT' : 'GRADE'}</span><b>${chip}</b></div></div>
+              <div class="vid-row"><i class="fas fa-calendar-alt"></i> <div><span>SESSION</span><b>${DB.settings?.schoolYear || '2025 - 2026'}</b></div></div>
+              <div class="vid-row"><i class="fas fa-map-marker-alt"></i> <div><span>CAMPUS</span><b>${DB.school.city || 'Karachi'}</b></div></div>
+            </div>
+            <div class="vid-sign">
+               <div style="height:.22in;"></div>
+               <span>PRINCIPAL</span>
+            </div>
+          </div>
+        </div>
+        <div class="vid-footer">
+           <div class="vid-foot-text">
+              <span>SAFE TODAY</span>
+              <i class="fas fa-shield-alt" style="color:#b48e4b; font-size:1.4em; margin:0 5px;"></i>
+              <span>STRONG TOMORROW</span>
+           </div>
+        </div>
       </div>
-    </div>
-    <div class="id-card-qr">
-      <div class="qr-wrap" id="qr-canvas-wrap"></div>
-    </div>
-    <div class="id-card-footer">
-      <span>${DB.settings?.schoolYear || ''}</span>
-      <span>ID: ${((isTeacherCard ? curUser?.id : stu?.id) || '').slice(-6).toUpperCase()}</span>
-      <span>${fmtDate(today())}</span>
-    </div>
-  </div>
 </div>
 <div style="display:flex;gap:8px;justify-content:center;margin-top:16px;">
   <button class="btn btn-p btn-sm no-print" onclick="window.print()"> Print Card</button>
@@ -6342,6 +6831,8 @@
         _qrS.start(cam.id, { fps: 10, qrbox: { width: 200, height: 200 } }, onQRScan, () => { }).catch(err => { if (fb) { fb.className = 'scan-fb err show'; fb.textContent = '? Camera access denied. Please allow camera permission.'; } });
       }).catch(() => { if (fb) { fb.className = 'scan-fb err show'; fb.textContent = '? Cannot access camera.'; } });
     }
+    function playBeep(t){try{const x=new(window.AudioContext||window.webkitAudioContext)();const o=x.createOscillator();const g=x.createGain();o.connect(g);g.connect(x.destination);if(t==='ok'){o.type='sine';o.frequency.value=1500;g.gain.setValueAtTime(0.5,x.currentTime);g.gain.exponentialRampToValueAtTime(0.001,x.currentTime+0.1);o.start();o.stop(x.currentTime+0.1);}else{o.type='square';o.frequency.value=250;g.gain.setValueAtTime(0.2,x.currentTime);g.gain.exponentialRampToValueAtTime(0.001,x.currentTime+0.3);o.start();o.stop(x.currentTime+0.3);}}catch(e){}}
+
     function onQRScan(raw) {
       const fb = document.getElementById('scan-fb');
       try {
@@ -6349,15 +6840,19 @@
         const d = today();
 
         if (data.kind === 'school-teacher-attendance-v1' || data.role === 'teacher') {
-          if (curRole !== 'admin') throw new Error('Only gate/admin users can mark teacher attendance');
+          if (curRole !== 'admin' && curRole !== 'scanner') throw new Error('Only gate/admin users can mark teacher attendance');
           const tid = String(data.id || '').trim();
           const teacher = DB.users.find(u => u.id === tid && u.role === 'teacher');
           if (!teacher) throw new Error('Teacher not found');
+          if (DB.teacherAttendance[teacher.id] && DB.teacherAttendance[teacher.id][d]) {
+            throw new Error(`Already scanned today at ${DB.teacherAttendance[teacher.id][d].checkIn}`);
+          }
           const t = nowHHMM();
           const finalStatus = isLate(t) ? 'Late' : 'Present';
           if (!DB.teacherAttendance[teacher.id]) DB.teacherAttendance[teacher.id] = {};
           DB.teacherAttendance[teacher.id][d] = { checkIn: t, status: finalStatus, source: 'gate-qr' };
           saveDB();
+          playBeep('ok');
           if (fb) { fb.className = 'scan-fb show'; fb.innerHTML = `Marked <b>${teacher.name}</b> - Staff - ${finalStatus}<br/><span style="font-size:.7rem;opacity:.75;">Gate check-in at ${t}</span>`; }
           const lb = document.getElementById('scan-log-box');
           if (lb) { lb.className = 'scan-log show'; lb.innerHTML = `<div class="sl-it"><span class="sl-ok">OK</span><span class="sl-nm">${teacher.name}</span><span class="sl-cl">Staff ${finalStatus}</span><span class="sl-t">${t}</span></div>` + lb.innerHTML; }
@@ -6376,16 +6871,24 @@
         if (!cls || !DB.students[scanClassId]?.some(s => s.id === sid)) throw new Error('Student/class mismatch');
         if (curRole === 'teacher' && !(curUser?.classIds || []).includes(scanClassId)) throw new Error('Class not assigned to this teacher');
 
+        if (DB.attendance[scanClassId] && DB.attendance[scanClassId][sid] && DB.attendance[scanClassId][sid][d]) {
+          throw new Error('Already scanned today');
+        }
+
         if (!DB.attendance[scanClassId]) DB.attendance[scanClassId] = {};
         if (!DB.attendance[scanClassId][sid]) DB.attendance[scanClassId][sid] = {};
         DB.attendance[scanClassId][sid][d] = 'P';
         saveDB();
+        playBeep('ok');
+        const el = document.getElementById(`ac-${sid}-${d}`);
+        if (el) { el.className = 'ac acP'; el.textContent = 'P'; }
 
         if (fb) { fb.className = 'scan-fb show'; fb.innerHTML = `Marked <b>${stu.name}</b> - ${cls.name}${cls.section ? ' ' + cls.section : ''} - Roll ${stu.roll || data.roll || '?'}<br/><span style="font-size:.7rem;opacity:.75;">Marked Present for ${fmtDate(d)}</span>`; }
         const lb = document.getElementById('scan-log-box');
         if (lb) { lb.className = 'scan-log show'; const t = new Date().toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' }); lb.innerHTML = `<div class="sl-it"><span class="sl-ok">OK</span><span class="sl-nm">${stu.name}</span><span class="sl-cl">${cls.name}${cls.section ? ' ' + cls.section : ''}</span><span class="sl-t">${t}</span></div>` + lb.innerHTML; }
         if (_qrS) { try { _qrS.pause(true); setTimeout(() => { try { _qrS?.resume(); } catch { } }, 1800); } catch { } }
       } catch (err) {
+        playBeep('err');
         if (fb) { fb.className = 'scan-fb err show'; fb.textContent = ` ${err?.message || 'Invalid QR. Please show a valid student or teacher QR card.'}`; }
       }
     }
@@ -6395,8 +6898,341 @@
       document.getElementById('qr-reader').innerHTML = '';
     }
 
+    function printIDCards(cid) {
+      const cls = DB.classes.find(c => c.id === cid);
+      if (!cls) return;
+      const sts = clsStus(cid);
+      if (sts.length === 0) return showToast('No students to print');
+
+      const printWindow = window.open('', '', 'width=900,height=1200');
+      const schoolName  = DB.school?.name     || 'Oxford Excellence Academy';
+      const schoolTag   = DB.school?.tagline  || 'LEARN • GROW • EXCEL';
+      const schoolCity  = DB.school?.city     || 'Main Campus';
+      const schoolYear  = DB.settings?.schoolYear || (new Date().getFullYear() + ' – ' + (new Date().getFullYear()+1));
+      const logoSrc     = DB.school?.logo     || 'oxford_logo.svg';
+      const navy        = DB.school?.primaryColor || '#0d1e3d';
+      const gold        = '#c9a84c';
+
+      let cards = '';
+      sts.forEach(s => {
+        const qrUrl   = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(s.id)}&color=0d1e3d&bgcolor=ffffff&margin=4`;
+        const rollNum = String(s.roll || '001').padStart(3,'0');
+        const grade   = escHtml(cls.name) + (cls.section ? ' ' + escHtml(cls.section) : '');
+        const photo   = s.photo
+          ? `<img src="${s.photo}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid ${gold};display:block;"/>`
+          : `<div style="width:80px;height:80px;border-radius:50%;border:3px solid ${gold};background:${navy};display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:white;">${ini(s.name)}</div>`;
+        const nameParts = s.name.trim().split(' ');
+        const ln = nameParts.length > 1 ? nameParts.pop() : '';
+        const fn = nameParts.join(' ');
+
+        cards += `
+        <div style="width:85.6mm;min-height:135mm;background:#fff;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 4px 20px rgba(0,0,0,.18);page-break-inside:avoid;">
+
+          <!-- HEADER -->
+          <div style="background:${navy};padding:14px 12px 16px;text-align:center;">
+            <img src="${logoSrc}" onerror="this.style.display='none'" style="width:46px;height:46px;object-fit:contain;border-radius:50%;background:rgba(255,255,255,.15);padding:3px;margin-bottom:5px;display:block;margin-left:auto;margin-right:auto;"/>
+            <div style="color:${gold};font-size:12px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;line-height:1.15;">${escHtml(schoolName)}</div>
+            <div style="color:rgba(255,255,255,.6);font-size:7px;letter-spacing:2px;margin-top:2px;">${escHtml(schoolTag)}</div>
+          </div>
+
+          <!-- BODY: two columns -->
+          <div style="flex:1;padding:14px 14px 10px;display:flex;gap:12px;align-items:flex-start;">
+
+            <!-- LEFT: photo -->
+            <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:8px;">
+              ${photo}
+            </div>
+
+            <!-- RIGHT: name + rows -->
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:15px;font-weight:800;color:${navy};text-transform:uppercase;line-height:1.1;margin-bottom:1px;">${escHtml(fn)}<br>${escHtml(ln)}</div>
+              <div style="font-size:8px;font-weight:700;color:${gold};letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">STUDENT</div>
+
+              <!-- detail rows -->
+              <div style="display:flex;flex-direction:column;gap:5px;">
+                <div style="display:flex;align-items:center;gap:6px;font-size:8px;border-bottom:1px solid #eee;padding-bottom:4px;">
+                  <div style="width:18px;height:18px;border-radius:50%;background:${navy};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;">🪪</div>
+                  <span style="color:#999;font-weight:500;letter-spacing:.5px;text-transform:uppercase;flex:1;">ID NUMBER</span>
+                  <span style="font-weight:700;color:${navy};">${rollNum}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;font-size:8px;border-bottom:1px solid #eee;padding-bottom:4px;">
+                  <div style="width:18px;height:18px;border-radius:50%;background:${navy};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;">🎓</div>
+                  <span style="color:#999;font-weight:500;letter-spacing:.5px;text-transform:uppercase;flex:1;">GRADE</span>
+                  <span style="font-weight:700;color:${navy};">${grade}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;font-size:8px;border-bottom:1px solid #eee;padding-bottom:4px;">
+                  <div style="width:18px;height:18px;border-radius:50%;background:${navy};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;">📅</div>
+                  <span style="color:#999;font-weight:500;letter-spacing:.5px;text-transform:uppercase;flex:1;">SESSION</span>
+                  <span style="font-weight:700;color:${navy};">${escHtml(schoolYear)}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;font-size:8px;">
+                  <div style="width:18px;height:18px;border-radius:50%;background:${navy};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;">📍</div>
+                  <span style="color:#999;font-weight:500;letter-spacing:.5px;text-transform:uppercase;flex:1;">CAMPUS</span>
+                  <span style="font-weight:700;color:${navy};">${escHtml(schoolCity)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- BOTTOM: QR left, signature right -->
+          <div style="padding:6px 14px 10px;display:flex;align-items:flex-end;justify-content:space-between;border-top:1px solid #f0f0f0;">
+            <img src="${qrUrl}" style="width:52px;height:52px;" alt="QR"/>
+            <div style="text-align:center;flex:1;padding-left:10px;">
+              <div style="border-bottom:1px solid #aaa;height:24px;width:80%;margin:0 auto 3px;"></div>
+              <div style="font-size:6.5px;color:#888;letter-spacing:1.5px;font-weight:600;text-transform:uppercase;">PRINCIPAL</div>
+            </div>
+          </div>
+
+          <!-- FOOTER -->
+          <div style="background:${navy};padding:5px 10px;display:flex;align-items:center;justify-content:center;gap:8px;">
+            <span style="color:rgba(255,255,255,.6);font-size:6.5px;letter-spacing:2px;">— SAFE TODAY</span>
+            <span style="color:${gold};font-size:11px;">🛡</span>
+            <span style="color:rgba(255,255,255,.6);font-size:6.5px;letter-spacing:2px;">STRONG TOMORROW —</span>
+          </div>
+
+        </div>`;
+      });
+
+      const html = `<html><head><title>ID Cards – ${escHtml(cls.name)}</title>
+      <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+      <style>
+        @page { margin:8mm; size:A4; }
+        *{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'Poppins',sans-serif;background:#e8e8e8;padding:10px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+        .sheet{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;justify-items:center;}
+        @media print{body{background:#e8e8e8;}}
+      </style></head><body>
+      <div class="sheet">${cards}</div>
+      <scr`+`ipt>window.onload=function(){setTimeout(function(){window.print();},900);};</scr`+`ipt>
+      </body></html>`;
+
+      printWindow.document.write(html);
+      printWindow.document.close();
+    }
+
+    /* ------------------------------- ADMISSION FORM PRINT ------------------------------- */
+    function printAdmissionForm(sid, cid) {
+      const s = (DB.students[cid] || []).find(x => x.id === sid);
+      if (!s) return showToast('Student not found', 'te');
+      const cls = DB.classes.find(c => c.id === cid);
+      const school = DB.school || {};
+      const settings = DB.settings || {};
+      const printDate = new Date().toLocaleDateString('en-PK', { day:'2-digit', month:'long', year:'numeric' });
+      const logoSrc = school.logo || 'oxford_logo.svg';
+      const navy = school.primaryColor || '#0d1e3d';
+      const gold = '#c9a84c';
+
+      const pw = window.open('', '', 'width=900,height=1200');
+      const html = `<!DOCTYPE html><html><head><title>Admission Form - ${escHtml(s.name)}</title>
+      <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+      <style>
+        @page { margin: 0; size: A4; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Poppins', sans-serif; background: #fff; color: #111; font-size: 11px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .page { max-width: 700px; margin: 0 auto; padding: 10mm; }
+
+        /* Header */
+        .hdr { display: flex; align-items: center; gap: 16px; padding: 15px 20px; background: ${navy}; color: white; border-radius: 8px 8px 0 0; }
+        .hdr-logo { width: 60px; height: 60px; object-fit: contain; background: rgba(255,255,255,.15); border-radius: 50%; padding: 4px; flex-shrink: 0; }
+        .hdr-info { flex: 1; }
+        .hdr-name { font-size: 18px; font-weight: 800; color: ${gold}; letter-spacing: 1px; }
+        .hdr-tag { font-size: 10px; color: rgba(255,255,255,.7); letter-spacing: 1.5px; margin-top: 2px; }
+        .hdr-contact { font-size: 9px; color: rgba(255,255,255,.6); margin-top: 4px; }
+        .hdr-right { text-align: right; }
+        .hdr-right .label { font-size: 8px; color: rgba(255,255,255,.5); letter-spacing: 1px; text-transform: uppercase; }
+        .hdr-right .form-no { font-size: 20px; font-weight: 800; color: ${gold}; }
+
+        /* Title bar */
+        .title-bar { background: ${gold}; color: ${navy}; text-align: center; padding: 6px; font-size: 12px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; }
+
+        /* Body */
+        .body { border: 2px solid ${navy}; border-top: none; padding: 15px 20px; }
+
+        /* Photo box */
+        .top-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; gap: 20px; }
+        .photo-box { width: 90px; height: 110px; border: 2px dashed ${navy}; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; font-size: 8px; color: #aaa; text-align: center; }
+        .photo-box img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Section */
+        .section { margin-bottom: 12px; }
+        .section-title { font-size: 10px; font-weight: 800; color: white; background: ${navy}; padding: 4px 10px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+
+        /* Grid of fields */
+        .fg2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+        .fg3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; }
+        .field { border: 1px solid #ddd; padding: 5px 10px; }
+        .field:not(:last-child) { border-right: none; }
+        .fg2 .field:nth-child(2) { border-right: 1px solid #ddd; }
+        .fg3 .field:nth-child(3) { border-right: 1px solid #ddd; }
+        .field-label { font-size: 8px; color: #888; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+        .field-val { font-size: 11px; font-weight: 700; color: ${navy}; min-height: 14px; border-bottom: 1px solid #ccc; padding-bottom: 2px; }
+        .full { grid-column: 1 / -1; border-right: 1px solid #ddd !important; }
+
+        /* Declaration */
+        .decl { margin-top: 12px; border: 1px solid #ddd; border-radius: 6px; padding: 10px; background: #fafafa; font-size: 9.5px; color: #444; line-height: 1.6; }
+
+        /* Signatures */
+        .sigs { display: flex; justify-content: space-between; margin-top: 25px; gap: 20px; }
+        .sig { flex: 1; text-align: center; }
+        .sig-line { border-bottom: 1px solid #333; height: 25px; margin-bottom: 5px; }
+        .sig-label { font-size: 9px; color: #555; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+
+        /* Office use */
+        .office { margin-top: 15px; border: 2px dashed #ccc; border-radius: 6px; padding: 10px; }
+        .office-title { font-size: 9px; font-weight: 800; color: #aaa; text-transform: uppercase; letter-spacing: 2px; text-align: center; margin-bottom: 6px; }
+        .office-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+        .office-field { border-bottom: 1px solid #ccc; padding-bottom: 4px; }
+        .office-label { font-size: 8px; color: #aaa; text-transform: uppercase; }
+        .office-val { font-size: 11px; min-height: 14px; }
+
+        /* Footer */
+        .footer { margin-top: 12px; text-align: center; font-size: 8.5px; color: #777; border-top: 1px solid #eee; padding-top: 10px; }
+        .footer b { color: ${navy}; }
+
+        /* B&W Print Optimization */
+        @media print {
+          .hdr { background: #fff !important; color: #000 !important; border: 2px solid #000 !important; }
+          .hdr-name { color: #000 !important; }
+          .hdr-tag, .hdr-contact { color: #000 !important; }
+          .hdr-right .label, .hdr-right div { color: #000 !important; }
+          .hdr-right .form-no { color: #000 !important; }
+          .hdr-logo { background: transparent !important; }
+          .title-bar { background: #f5f5f5 !important; color: #000 !important; border: 2px solid #000 !important; border-top: none !important; }
+          .body { border: 2px solid #000 !important; border-top: none !important; }
+          .section-title { background: #f5f5f5 !important; color: #000 !important; border: 1px solid #000 !important; }
+          .field { border-color: #666 !important; }
+          .field-label { color: #333 !important; }
+          .field-val { color: #000 !important; border-bottom-color: #666 !important; }
+          .photo-box { border: 2px dashed #000 !important; color: #000 !important; }
+          .decl { border-color: #666 !important; color: #000 !important; background: #fff !important; }
+          .sig-line { border-bottom-color: #000 !important; }
+          .sig-label { color: #000 !important; }
+          .office { border-color: #000 !important; }
+          .office-title, .office-label { color: #000 !important; }
+          .office-field { border-bottom-color: #666 !important; }
+          .footer, .footer b { color: #000 !important; border-top-color: #000 !important; }
+        }
+      </style></head><body>
+      <div class="page">
+
+        <!-- HEADER -->
+        <div class="hdr">
+          <img class="hdr-logo" src="${logoSrc}" onerror="this.style.display='none'"/>
+          <div class="hdr-info">
+            <div class="hdr-name">${escHtml(school.name || 'Oxford Excellence Academy')}</div>
+            <div class="hdr-tag">${escHtml(school.tagline || 'LEARN • GROW • EXCEL')}</div>
+            <div class="hdr-contact">
+              ${school.address ? escHtml(school.address) + ' &nbsp;|&nbsp; ' : ''}${school.phone ? escHtml(school.phone) : ''}
+            </div>
+          </div>
+          <div class="hdr-right">
+            <div class="label">Form No.</div>
+            <div class="form-no">${escHtml(s.formNo || 'ADM-' + new Date().getFullYear() + '-' + String(s.roll||'001').padStart(4,'0'))}</div>
+            <div class="label" style="margin-top:6px;">Date</div>
+            <div style="font-size:10px;color:rgba(255,255,255,.8);font-weight:600;">${printDate}</div>
+          </div>
+        </div>
+
+        <!-- TITLE -->
+        <div class="title-bar">Student Admission Form</div>
+
+        <div class="body">
+
+          <!-- Top row: fields + photo -->
+          <div class="top-row">
+            <div style="flex:1;">
+              <!-- STUDENT INFO -->
+              <div class="section">
+                <div class="section-title">Student Information</div>
+                <div class="fg3" style="border: 1px solid #ddd;">
+                  <div class="field"><div class="field-label">Full Name</div><div class="field-val">${escHtml(s.name)}</div></div>
+                  <div class="field"><div class="field-label">Roll No.</div><div class="field-val">${escHtml(s.roll||'-')}</div></div>
+                  <div class="field"><div class="field-label">B-Form No. (NADRA)</div><div class="field-val">${escHtml(s.bform||'')}</div></div>
+                </div>
+                <div class="fg3" style="border: 1px solid #ddd; border-top: none;">
+                  <div class="field"><div class="field-label">Date of Birth</div><div class="field-val">${s.dob ? fmtDate(s.dob) : ''}</div></div>
+                  <div class="field"><div class="field-label">Gender</div><div class="field-val">${escHtml(s.gender||'')}</div></div>
+                  <div class="field"><div class="field-label">Blood Group</div><div class="field-val">${escHtml(s.blood||'')}</div></div>
+                </div>
+                <div class="fg2" style="border: 1px solid #ddd; border-top: none;">
+                  <div class="field"><div class="field-label">Religion</div><div class="field-val">${escHtml(s.religion||'')}</div></div>
+                  <div class="field"><div class="field-label">Nationality</div><div class="field-val">${escHtml(s.nationality||'Pakistani')}</div></div>
+                </div>
+                <div class="fg2" style="border: 1px solid #ddd; border-top: none;">
+                  <div class="field"><div class="field-label">Class Admitted</div><div class="field-val">${escHtml(cls?.name||'')}${cls?.section?' '+escHtml(cls.section):''}</div></div>
+                  <div class="field"><div class="field-label">Academic Year</div><div class="field-val">${escHtml(settings.schoolYear||new Date().getFullYear())}</div></div>
+                </div>
+              </div>
+            </div>
+            <!-- Photo Box -->
+            <div class="photo-box">
+              ${s.photo ? `<img src="${s.photo}"/>` : '<div>Paste<br>Photo<br>Here</div>'}
+            </div>
+          </div>
+
+          <!-- PARENT / GUARDIAN INFO -->
+          <div class="section">
+            <div class="section-title">Parent / Guardian Information</div>
+            <div class="fg2" style="border: 1px solid #ddd;">
+              <div class="field"><div class="field-label">Father's Name</div><div class="field-val">${escHtml(s.father||'')}</div></div>
+              <div class="field"><div class="field-label">Mother's Name</div><div class="field-val">${escHtml(s.mother||'')}</div></div>
+            </div>
+            <div class="fg3" style="border: 1px solid #ddd; border-top: none;">
+              <div class="field"><div class="field-label">Phone / WhatsApp</div><div class="field-val">${escHtml(s.whatsapp||s.fphone||'')}</div></div>
+              <div class="field"><div class="field-label">Father's CNIC</div><div class="field-val">${escHtml(s.cnic||'')}</div></div>
+              <div class="field"><div class="field-label">Occupation</div><div class="field-val">${escHtml(s.occupation||'')}</div></div>
+            </div>
+            <div style="border: 1px solid #ddd; border-top: none;">
+              <div class="field"><div class="field-label">Home Address</div><div class="field-val" style="min-height:20px;">${escHtml(s.address||'')}</div></div>
+            </div>
+          </div>
+
+          <!-- PREVIOUS SCHOOL -->
+          <div class="section">
+            <div class="section-title">Previous School (if any)</div>
+            <div class="fg2" style="border: 1px solid #ddd;">
+              <div class="field"><div class="field-label">School Name</div><div class="field-val">${escHtml(s.prevSchool||'')}</div></div>
+              <div class="field"><div class="field-label">Last Class Passed</div><div class="field-val"></div></div>
+            </div>
+          </div>
+
+          <!-- DECLARATION -->
+          <div class="decl">
+            <b>Declaration:</b> I/We hereby declare that the information provided above is true and correct to the best of my/our knowledge. I/We agree to abide by all the rules and regulations of the institution and understand that any false information may result in cancellation of admission.
+          </div>
+
+          <!-- SIGNATURES -->
+          <div class="sigs">
+            <div class="sig"><div class="sig-line"></div><div class="sig-label">Parent / Guardian Signature</div></div>
+            <div class="sig"><div class="sig-line"></div><div class="sig-label">Admitting Teacher</div></div>
+            <div class="sig"><div class="sig-line"></div><div class="sig-label">Principal Signature & Stamp</div></div>
+          </div>
+
+          <!-- OFFICE USE ONLY -->
+          <div class="office">
+            <div class="office-title">— For Office Use Only —</div>
+            <div class="office-row">
+              <div class="office-field"><div class="office-label">Fee Structure</div><div class="office-val"></div></div>
+              <div class="office-field"><div class="office-label">Admission Fee Paid</div><div class="office-val"></div></div>
+              <div class="office-field"><div class="office-label">Student ID Issued</div><div class="office-val">${escHtml(s.roll||'')}</div></div>
+            </div>
+          </div>
+
+        </div><!-- /body -->
+
+        <div class="footer">
+          <b>${escHtml(school.name||'Oxford Excellence Academy')}</b> &nbsp;•&nbsp; Admission Form &nbsp;•&nbsp; Generated: ${printDate} &nbsp;•&nbsp; This is an official school document
+        </div>
+      </div>
+      <scr`+`ipt>window.onload=function(){setTimeout(function(){window.print();},700);};</scr`+`ipt>
+      </body></html>`;
+
+      pw.document.write(html);
+      pw.document.close();
+    }
+
     /* ------------------------------- MODAL / TOAST / NOTIF ------------------------------- */
-    function openModal(html) { const body = document.getElementById('modal-body'); body.innerHTML = html; cleanBrokenUI(body); document.getElementById('modal-bg').classList.add('open'); }
+    function openModal(html) { const body = document.getElementById('modal-body'); body.innerHTML = html; document.getElementById('modal-bg').classList.add('open'); }
     function closeModal() { document.getElementById('modal-bg').classList.remove('open'); }
 
     let _toastTimer = null;
@@ -6461,6 +7297,17 @@
     }
 
     startHsTimer();
+
+    // Offline / Online listeners for robust offline scanning
+    window.addEventListener('offline', () => {
+      if (typeof showSyncBadge === 'function') showSyncBadge('Offline - Scans saved locally', '#f59e0b');
+      if (typeof showToast === 'function') showToast('You are offline! Scans will be saved to device memory securely.', 'tw2', 6000);
+    });
+    window.addEventListener('online', () => {
+      if (typeof showSyncBadge === 'function') showSyncBadge('Back online. Syncing...', '#3b82f6');
+      if (typeof showToast === 'function') showToast('Connection Restored! Syncing attendance to cloud...', 'ts', 4000);
+      if (typeof pushCloudDB === 'function') pushCloudDB();
+    });
 </script>
 </body>
 
