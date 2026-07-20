@@ -3200,7 +3200,7 @@
 <!-- LANDING -->
 <div id="landing-page" class="ox-landing">
 
-    <div class="ox-ticker">🎉 Admissions for the Fall 2026 Academic Year are now open! Limited seats available.</div>
+    <div class="ox-ticker"><span class="material-symbols-outlined" style="font-size:inherit;vertical-align:-2px;">celebration</span> Admissions for the Fall 2026 Academic Year are now open! Limited seats available.</div>
 
     <nav class="ox-nav gs-anim">
         <div class="ox-brand">
@@ -3542,9 +3542,9 @@
             <div>
                 <h4>Contact Us</h4>
                 <ul>
-                    <li>📞 +923205772271</li>
-                    <li>📧 info@oxfordexcellenceacademy.com</li>
-                    <li>📍 bagh e korangi karachi</li>
+                    <li><span class="material-symbols-outlined" style="font-size:inherit;vertical-align:-2px;">call</span> +923205772271</li>
+                    <li><span class="material-symbols-outlined" style="font-size:inherit;vertical-align:-2px;">mail</span> info@oxfordexcellenceacademy.com</li>
+                    <li><span class="material-symbols-outlined" style="font-size:inherit;vertical-align:-2px;">location_on</span> bagh e korangi karachi</li>
                 </ul>
             </div>
             <div class="ox-newsletter">
@@ -4827,7 +4827,7 @@
     <div class="card fu d5" style="margin-top:12px;">
       <div class="ch"><div class="ct"> Contact Teachers</div></div>
       <div style="padding:10px 0; display:flex; flex-wrap:wrap; gap:8px;">
-        ${(DB.users || []).filter(u => u.role === 'teacher' && (u.classIds || []).includes(cid)).map(t => `<a href="mailto:${t.email}?subject=Message from ${stu.name} (Parent/Student)" class="btn btn-gh btn-xs" style="text-decoration:none;"><span style="margin-right:4px;">✉</span>${t.name}</a>`).join('') || '<div style="color:var(--ink4);font-size:.76rem;">No teachers assigned</div>'}
+        ${(DB.users || []).filter(u => u.role === 'teacher' && (u.classIds || []).includes(cid)).map(t => `<a href="mailto:${t.email}?subject=Message from ${stu.name} (Parent/Student)" class="btn btn-gh btn-xs" style="text-decoration:none;"><span style="margin-right:4px;"><span class="material-symbols-outlined" style="font-size:inherit;vertical-align:-2px;">mail</span></span>${t.name}</a>`).join('') || '<div style="color:var(--ink4);font-size:.76rem;">No teachers assigned</div>'}
       </div>
     </div>
   </div>
@@ -4874,7 +4874,7 @@
           <td><div style="display:flex;gap:3px;flex-wrap:wrap;">
             <button class="btn btn-gh btn-xs" onclick="openStuDetail('${s.id}','${curCls}')">View</button>
             ${curRole !== 'teacher' ? `<button class="btn btn-p btn-xs" onclick="openAddStudentModal('${s.id}')">Edit</button>
-            <button class="btn btn-xs" style="background:var(--gl);color:var(--g);" onclick="printAdmissionForm('${s.id}','${curCls}')" title="Print Admission Form">📋 Adm.</button>
+            <button class="btn btn-xs" style="background:var(--gl);color:var(--g);" onclick="printAdmissionForm('${s.id}','${curCls}')" title="Print Admission Form"><span class="material-symbols-outlined" style="font-size:inherit;vertical-align:-2px;">assignment</span> Adm.</button>
             <button class="btn btn-xs" style="background:var(--rl);color:var(--r);" onclick="delStu('${s.id}','${curCls}')">Delete</button>` : ''}
           </div></td>
         </tr>`;
@@ -5184,11 +5184,11 @@
           if (newStu) {
             setTimeout(() => {
               openModal(`
-              <h3>🎉 Student Added!</h3>
+              <h3><span class="material-symbols-outlined" style="font-size:inherit;vertical-align:-2px;">celebration</span> Student Added!</h3>
               <div class="ibox"><b>${escHtml(name)}</b> has been successfully enrolled in <b>${escHtml(DB.classes.find(c=>c.id===classId)?.name||'')}</b>.</div>
               <div style="font-size:.85rem;color:var(--ink3);margin:10px 0;">Would you like to print the official <b>Admission Form</b> for this student now?</div>
               <div class="m-btns">
-                <button class="btn btn-p" style="flex:2;" onclick="closeModal();printAdmissionForm('${newStu.id}','${classId}');">🖨️ Print Admission Form</button>
+                <button class="btn btn-p" style="flex:2;" onclick="closeModal();printAdmissionForm('${newStu.id}','${classId}');"><span class="material-symbols-outlined" style="font-size:inherit;vertical-align:-2px;">print</span> Print Admission Form</button>
                 <button class="btn btn-gh" onclick="closeModal()">Skip</button>
               </div>`);
             }, 400);
@@ -6983,17 +6983,17 @@
                   <span style="font-weight:700;color:${navy};">${rollNum}</span>
                 </div>
                 <div style="display:flex;align-items:center;gap:6px;font-size:8px;border-bottom:1px solid #eee;padding-bottom:4px;">
-                  <div style="width:18px;height:18px;border-radius:50%;background:${navy};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;">🎓</div>
+                  <div style="width:18px;height:18px;border-radius:50%;background:${navy};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;"><span class="material-symbols-outlined" style="font-size:inherit;vertical-align:-2px;">school</span></div>
                   <span style="color:#999;font-weight:500;letter-spacing:.5px;text-transform:uppercase;flex:1;">GRADE</span>
                   <span style="font-weight:700;color:${navy};">${grade}</span>
                 </div>
                 <div style="display:flex;align-items:center;gap:6px;font-size:8px;border-bottom:1px solid #eee;padding-bottom:4px;">
-                  <div style="width:18px;height:18px;border-radius:50%;background:${navy};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;">📅</div>
+                  <div style="width:18px;height:18px;border-radius:50%;background:${navy};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;"><span class="material-symbols-outlined" style="font-size:inherit;vertical-align:-2px;">calendar_month</span></div>
                   <span style="color:#999;font-weight:500;letter-spacing:.5px;text-transform:uppercase;flex:1;">SESSION</span>
                   <span style="font-weight:700;color:${navy};">${escHtml(schoolYear)}</span>
                 </div>
                 <div style="display:flex;align-items:center;gap:6px;font-size:8px;">
-                  <div style="width:18px;height:18px;border-radius:50%;background:${navy};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;">📍</div>
+                  <div style="width:18px;height:18px;border-radius:50%;background:${navy};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;"><span class="material-symbols-outlined" style="font-size:inherit;vertical-align:-2px;">location_on</span></div>
                   <span style="color:#999;font-weight:500;letter-spacing:.5px;text-transform:uppercase;flex:1;">CAMPUS</span>
                   <span style="font-weight:700;color:${navy};">${escHtml(schoolCity)}</span>
                 </div>
@@ -7013,7 +7013,7 @@
           <!-- FOOTER -->
           <div style="background:${navy};padding:5px 10px;display:flex;align-items:center;justify-content:center;gap:8px;">
             <span style="color:rgba(255,255,255,.6);font-size:6.5px;letter-spacing:2px;">— SAFE TODAY</span>
-            <span style="color:${gold};font-size:11px;">🛡</span>
+            <span style="color:${gold};font-size:11px;"><span class="material-symbols-outlined" style="font-size:inherit;vertical-align:-2px;">security</span></span>
             <span style="color:rgba(255,255,255,.6);font-size:6.5px;letter-spacing:2px;">STRONG TOMORROW —</span>
           </div>
 
