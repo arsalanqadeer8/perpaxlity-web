@@ -4819,7 +4819,7 @@
 <div class="g2">
   <div class="card fu d2">
     <div class="ch"><div class="ct"> Subject Scores</div><div style="display:flex;gap:5px;"><select class="fi" style="padding:2px 5px;font-size:.7rem;height:auto;" onchange="curTerm=this.value;goPage('dashboard')">${DB.settings.terms.map(t => `<option value="${t.id}" ${curTerm===t.id?'selected':''}>${t.name}</option>`).join('')}</select><button class="btn btn-gh btn-sm" onclick="goPage('mygrades')">Full</button></div></div>
-    <div class="score-mini">${DB.subjects.map(sub => { const v = (DB.grades[cid + '_' + curTerm]?.[stu.id] || {})[sub.id] || 0; return `<div class="sm-row"><div class="sm-lbl">${sub.icon} ${sub.name}</div><div class="sm-bar"><div class="sm-fill" style="width:${v}%;background:${sub.color};"></div></div><div class="sm-val" style="color:${sub.color};">${v || '-'}</div></div>`; }).join('')}</div>
+    <div class="score-mini">${getClsSubjects(stu.classId || curCls).map(sub => { const v = (DB.grades[cid + '_' + curTerm]?.[stu.id] || {})[sub.id] || 0; return `<div class="sm-row"><div class="sm-lbl">${sub.icon} ${sub.name}</div><div class="sm-bar"><div class="sm-fill" style="width:${v}%;background:${sub.color};"></div></div><div class="sm-val" style="color:${sub.color};">${v || '-'}</div></div>`; }).join('')}</div>
   </div>
   <div>
     <div class="card fu d3" style="cursor:pointer;background:linear-gradient(135deg,var(--pl),#fff);border-color:var(--pl2);" onclick="goPage('qrcard')">
@@ -5226,7 +5226,7 @@
     ${sibs.length ? `<div style="background:var(--vl);border:1px solid rgba(124,58,237,.15);border-radius:8px;padding:8px 11px;margin-bottom:11px;font-size:.75rem;"><b style="color:var(--v);">Siblings:</b> ${sibs.map(sb => `${sb.name} (${(DB.classes.find(c => c.id === sb.classId) || {}).name || '?'})`).join(' - ')}</div>` : ''}
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px;">${[['Father', s.father], ['Phone', s.fphone], ['Mother', s.mother], ['WhatsApp', s.whatsapp], ['DOB', fmtDate(s.dob)], ['Login', s.loginEmail]].map(([l, v]) => `<div style="background:var(--card2);border-radius:8px;padding:8px;"><div style="font-size:.62rem;color:var(--ink4);margin-bottom:1px;">${l}</div><div style="font-size:.78rem;font-weight:600;">${v || '-'}</div></div>`).join('')}</div>
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><div style="font-size:.76rem;font-weight:700;color:var(--ink2);">Subject Scores</div><select class="fi" style="width:100px;padding:2px 5px;font-size:.7rem;height:auto;" onchange="curTerm=this.value;closeModal();openStuDetail('${sid}','${cid}')">${DB.settings.terms.map(t => `<option value="${t.id}" ${curTerm===t.id?'selected':''}>${t.name}</option>`).join('')}</select></div>
-  <div class="score-mini">${DB.subjects.map(sub => { const v = (DB.grades[cid + '_' + curTerm]?.[sid] || {})[sub.id] || 0; return `<div class="sm-row"><div class="sm-lbl">${sub.icon} ${sub.name}</div><div class="sm-bar"><div class="sm-fill" style="width:${v}%;background:${sub.color};"></div></div><div class="sm-val" style="color:${sub.color};">${v || '-'}</div></div>`; }).join('')}</div>
+  <div class="score-mini">${getClsSubjects(cid).map(sub => { const v = (DB.grades[cid + '_' + curTerm]?.[sid] || {})[sub.id] || 0; return `<div class="sm-row"><div class="sm-lbl">${sub.icon} ${sub.name}</div><div class="sm-bar"><div class="sm-fill" style="width:${v}%;background:${sub.color};"></div></div><div class="sm-val" style="color:${sub.color};">${v || '-'}</div></div>`; }).join('')}</div>
   <div class="m-btns" style="margin-top:13px;flex-wrap:wrap;">
     ${curRole !== 'teacher' ? `<button class="btn btn-p btn-sm" onclick="closeModal();openAddStudentModal('${sid}')"> Edit</button>` : ''}
       ${s.whatsapp ? `<button class="btn btn-wa btn-sm" onclick="waMsg('${s.whatsapp}','Dear parent of ${s.name}, greetings from ${DB.school.name}.')"> WhatsApp</button>` : ''}
@@ -5555,17 +5555,17 @@
   ${clsBar('switchGrdCls')}
   ${sts.length === 0 ? `<div class="card"><div class="empty"><div class="empty-ic"></div><div class="empty-t">No students</div></div></div>` : `
 <div class="card fu d2" style="padding:0;overflow:hidden;"><div class="tw"><table>
-  <thead><tr><th>Roll</th><th>Student</th>${DB.subjects.map(s => `<th style="text-align:center;">${s.icon}<br/><span style="font-weight:400;">${s.code}</span></th>`).join('')}<th>Avg</th><th>Grade</th></tr></thead>
+  <thead><tr><th>Roll</th><th>Student</th>${getClsSubjects(curCls).map(s => `<th style="text-align:center;">${s.icon}<br/><span style="font-weight:400;">${s.code}</span></th>`).join('')}<th>Avg</th><th>Grade</th></tr></thead>
   <tbody>${sts.map(s => {
         const tKey = curCls + '_' + curTerm;
         if (!DB.grades[tKey]) DB.grades[tKey] = {};
         if (!DB.grades[tKey][s.id]) DB.grades[tKey][s.id] = {};
         const g = DB.grades[tKey][s.id];
-        const filled = DB.subjects.map(sub => g[sub.id] || 0).filter(v => v > 0);
+        const filled = getClsSubjects(curCls).map(sub => g[sub.id] || 0).filter(v => v > 0);
         const av = filled.length ? Math.round(filled.reduce((a, v) => a + v, 0) / filled.length) : 0;
         return `<tr><td style="font-weight:700;font-size:.72rem;">${s.roll || '-'}</td>
     <td style="font-weight:600;font-size:.8rem;white-space:nowrap;">${s.name}</td>
-      ${DB.subjects.map(sub => `<td style="text-align:center;padding:5px 4px;"><input class="si" type="number" min="0" max="100" value="${g[sub.id] || ''}" placeholder="-" style="width:50px;text-align:center;background:var(--card2);border:1.5px solid var(--border);border-radius:7px;padding:6px 4px;font-size:.84rem;font-weight:700;color:var(--ink);outline:none;font-family:var(--font);" oninput="setGrade('${s.id}','${sub.id}',this.value,this)" onfocus="this.style.borderColor='var(--p)';this.style.background='#fff'" onblur="this.style.borderColor='';this.style.background='';"/></td>`).join('')}
+      ${getClsSubjects(curCls).map(sub => `<td style="text-align:center;padding:5px 4px;"><input class="si" type="number" min="0" max="100" value="${g[sub.id] || ''}" placeholder="-" style="width:50px;text-align:center;background:var(--card2);border:1.5px solid var(--border);border-radius:7px;padding:6px 4px;font-size:.84rem;font-weight:700;color:var(--ink);outline:none;font-family:var(--font);" oninput="setGrade('${s.id}','${sub.id}',this.value,this)" onfocus="this.style.borderColor='var(--p)';this.style.background='#fff'" onblur="this.style.borderColor='';this.style.background='';"/></td>`).join('')}
     <td id="av-${s.id}" style="font-weight:800;font-size:.82rem;text-align:center;color:${sCol(av)};">${av || '-'}</td>
     <td id="gr-${s.id}" style="text-align:center;"><span class="badge ${gCls(av)}">${lGrade(av)}</span></td></tr>`;
       }).join('')}
@@ -6281,7 +6281,20 @@
 <div class="g3">${DB.subjects.map(s => `<div class="card fu" style="padding:12px;display:flex;align-items:center;gap:10px;"><div style="width:36px;height:36px;border-radius:8px;background:${s.color}18;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;border:1px solid ${s.color}30;flex-shrink:0;overflow:hidden;letter-spacing:-0.2px;text-align:center;">${cleanIcon(s.icon, s.code || 'SUB')}</div><div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:.83rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.name}</div><div style="font-size:.66rem;color:var(--ink4);">${s.code}</div></div><div style="display:flex;flex-direction:column;gap:3px;"><button class="btn btn-xs btn-gh" onclick="openSubjModal('${s.id}')">Edit</button><button class="btn btn-xs" style="background:var(--rl);color:var(--r);" onclick="DB.subjects=DB.subjects.filter(x=>x.id!=='${s.id}');saveDB();showToast('Deleted');goPage('subjects')">Delete</button></div></div>`).join('')}<div class="card fu" style="display:flex;align-items:center;justify-content:center;border:2px dashed var(--border2);background:transparent;cursor:pointer;min-height:72px;" onclick="openSubjModal()"><div style="text-align:center;color:var(--ink4);"><div style="font-size:1.1rem;">+</div><div style="font-size:.7rem;font-weight:600;">Add Subject</div></div></div></div>`;
     }
     function openSubjModal(eid) { const s = eid ? DB.subjects.find(x => x.id === eid) : null; openModal(`<h3>${s ? 'Edit Subject' : 'Add Subject'}</h3><div class="fg2"><div class="fg"><label class="fl">Name <span class="req">*</span></label><input class="fi" id="ms-name" value="${s?.name || ''}" placeholder="Mathematics"/></div><div class="fg"><label class="fl">Code</label><input class="fi" id="ms-code" value="${s?.code || ''}" placeholder="MATH"/></div></div><div class="fg2"><div class="fg"><label class="fl">Icon Text</label><input class="fi" id="ms-icon" value="${cleanIcon(s?.icon, '')}" placeholder="MATH"/></div><div class="fg"><label class="fl">Color</label><input class="fi" type="color" id="ms-color" value="${s?.color || '#2563eb'}" style="height:44px;cursor:pointer;padding:6px;"/></div></div><div class="m-btns"><button class="btn btn-p" onclick="saveSubj('${eid || ''}')"> ${s ? 'Update' : 'Add'}</button><button class="btn btn-gh" onclick="closeModal()">Cancel</button></div>`); }
-    function saveSubj(eid) { const name = (document.getElementById('ms-name')?.value || '').trim(); if (!name) { showToast('Name required', 'te'); return; } const code = (document.getElementById('ms-code')?.value || '').toUpperCase(); const obj = { name, code, icon: cleanIcon(document.getElementById('ms-icon')?.value || '', code || 'SUB'), color: document.getElementById('ms-color')?.value || '#2563eb' }; if (eid) { const s = DB.subjects.find(x => x.id === eid); if (s) Object.assign(s, obj); } else DB.subjects.push({ id: uid(), ...obj }); saveDB(); closeModal(); showToast('Saved', 'ts'); goPage('subjects'); }
+    function saveSubj(eid) { 
+  const name = (document.getElementById('ms-name')?.value || '').trim(); 
+  if (!name) { showToast('Name required', 'te'); return; } 
+  const code = (document.getElementById('ms-code')?.value || '').toUpperCase(); 
+  const classIds = Array.from(document.querySelectorAll('.subj-cls-cb:checked')).map(cb => cb.value);
+  const obj = { name, code, icon: cleanIcon(document.getElementById('ms-icon')?.value || '', code || 'SUB'), color: document.getElementById('ms-color')?.value || '#2563eb', classIds }; 
+  if (eid) { 
+    const s = DB.subjects.find(x => x.id === eid); 
+    if (s) Object.assign(s, obj); 
+  } else {
+    DB.subjects.push({ id: uid(), ...obj }); 
+  }
+  saveDB(); closeModal(); showToast('Saved', 'ts'); goPage('subjects'); 
+}
 
     /* ------------------------------- REPORT CARDS ------------------------------- */
     function pgReportCards() {
@@ -6304,7 +6317,7 @@
       const cls = DB.classes.find(c => c.id === cid);
       const grades = DB.grades[cid + '_' + curTerm]?.[sid] || {};
       const ap = attPct(cid, sid);
-      const rows = DB.subjects.map(sub => { const v = grades[sub.id] || 0; return { sub, v }; });
+      const rows = getClsSubjects(curCls).map(sub => { const v = grades[sub.id] || 0; return { sub, v }; });
       const filled = rows.filter(r => r.v > 0);
       const total = filled.reduce((a, r) => a + r.v, 0);
       const av = filled.length ? Math.round(total / filled.length) : 0;
