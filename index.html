@@ -4370,7 +4370,12 @@
            }
            return;
         }
-        showToast('Password set successfully! You can now log in.', 'ts', 5000);
+        if (data && data.user && !data.session) {
+           showToast('Account created! Please check your email inbox to confirm your email before logging in.', 'tw2', 8000);
+           console.warn('NOTE: If you want to disable email confirmations, go to Supabase Dashboard -> Authentication -> Providers -> Email and turn off "Confirm email".');
+        } else {
+           showToast('Password set successfully! You can now log in.', 'ts', 5000);
+        }
       } finally {
         if (btn) { btn.disabled = false; btn.textContent = 'Portal Sign In'; }
       }
