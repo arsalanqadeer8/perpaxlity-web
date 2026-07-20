@@ -4859,7 +4859,7 @@
     <table>
       <thead><tr><th>#</th><th>Photo</th><th>Name</th><th>Roll No.</th><th>Gender</th><th>Avg</th><th>Att%</th><th>Fees</th><th>Login</th><th>Actions</th></tr></thead>
       <tbody>
-          ${sts.length === 0 ? `<tr><td colspan="10" style="text-align:center;padding:28px;"><div style="color:var(--ink4);margin-bottom:10px;">No students yet</div><button class="btn btn-p btn-sm" onclick="openAddStudentModal()">+ Add First Student</button></td></tr>` : ''}
+          ${sts.length === 0 ? `<tr><td colspan="10" style="text-align:center;padding:28px;"><div style="color:var(--ink4);margin-bottom:10px;">No students yet</div>${curRole !== 'teacher' ? `<button class="btn btn-p btn-sm" onclick="openAddStudentModal()">+ Add First Student</button>` : ''}</td></tr>` : ''}
           ${sts.map((s, i) => {
         const av = avgStu(curCls, s.id); const ap = attPct(curCls, s.id); const fam = s.familyId ? DB.families[s.familyId] : null; return `<tr>
           <td style="color:var(--ink4);font-size:.7rem;">${i + 1}</td>
@@ -5223,7 +5223,7 @@
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><div style="font-size:.76rem;font-weight:700;color:var(--ink2);">Subject Scores</div><select class="fi" style="width:100px;padding:2px 5px;font-size:.7rem;height:auto;" onchange="curTerm=this.value;closeModal();openStuDetail('${sid}','${cid}')">${DB.settings.terms.map(t => `<option value="${t.id}" ${curTerm===t.id?'selected':''}>${t.name}</option>`).join('')}</select></div>
   <div class="score-mini">${DB.subjects.map(sub => { const v = (DB.grades[cid + '_' + curTerm]?.[sid] || {})[sub.id] || 0; return `<div class="sm-row"><div class="sm-lbl">${sub.icon} ${sub.name}</div><div class="sm-bar"><div class="sm-fill" style="width:${v}%;background:${sub.color};"></div></div><div class="sm-val" style="color:${sub.color};">${v || '-'}</div></div>`; }).join('')}</div>
   <div class="m-btns" style="margin-top:13px;flex-wrap:wrap;">
-    <button class="btn btn-p btn-sm" onclick="closeModal();openAddStudentModal('${sid}')"> Edit</button>
+    ${curRole !== 'teacher' ? `<button class="btn btn-p btn-sm" onclick="closeModal();openAddStudentModal('${sid}')"> Edit</button>` : ''}
       ${s.whatsapp ? `<button class="btn btn-wa btn-sm" onclick="waMsg('${s.whatsapp}','Dear parent of ${s.name}, greetings from ${DB.school.name}.')"> WhatsApp</button>` : ''}
     <button class="btn btn-gh btn-sm" onclick="closeModal();switchCls('${cid}');goPage('reportcards');setTimeout(()=>openReportCard('${sid}','${cid}'),200)"> Report Card</button>
     <button class="btn btn-gh btn-sm" onclick="closeModal();switchCls('${cid}');goPage('qrcard');window._viewSibId='${sid}';"> ID Card</button>
@@ -5356,7 +5356,7 @@
   </div>
 </div>
   ${clsBar('switchAttCls')}
-  ${sts.length === 0 ? `<div class="card"><div class="empty"><div class="empty-ic"></div><div class="empty-t">No students in this class</div><button class="btn btn-p btn-sm" style="margin-top:10px;" onclick="openAddStudentModal()">Add Student</button></div></div>` : `
+  ${sts.length === 0 ? `<div class="card"><div class="empty"><div class="empty-ic"></div><div class="empty-t">No students in this class</div>${curRole !== 'teacher' ? `<button class="btn btn-p btn-sm" style="margin-top:10px;" onclick="openAddStudentModal()">Add Student</button>` : ''}</div></div>` : `
 <div class="card fu d2" style="padding:0;overflow:hidden;"><div class="tw"><table>
   <thead><tr><th>Roll</th><th>Student</th>${dates.map(d => `<th style="text-align:center;min-width:36px;">${new Date(d).getDate()}<br/><span style="font-weight:400;font-size:.55rem;">${new Date(d).toLocaleString('en', { month: 'short' })}</span></th>`).join('')}<th>%</th></tr></thead>
   <tbody>${sts.map(s => {
