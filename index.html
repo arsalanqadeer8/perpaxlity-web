@@ -4594,13 +4594,10 @@
       if (curRole === 'teacher') return [
         { p: 'dashboard', i: 'dashboard', l: 'Dashboard', s: 'Home' },
         { p: 'attendance', i: 'attendance', l: 'Attendance', s: 'Attend' },
-        { p: 'scanner', i: '', l: 'QR Scanner', s: 'Scan' },
         { p: 'grades', i: '', l: 'Grades', s: 'Grades' },
         { p: 'students', i: '', l: 'My Students', s: 'Class' },
-        { p: 'idcards', i: '', l: 'ID Cards', s: 'ID' },
         { p: 'notices', i: '', l: 'Notices & Assignments', s: 'News' },
         { p: 'timetable', i: '', l: 'Timetable', s: 'Sched' },
-        { p: 'teacheratt', i: '', l: 'My Attendance', s: 'My Att' },
         { p: 'mypayroll', i: '', l: 'My Payslips', s: 'Payslip' },
       ];
       return [
@@ -4756,26 +4753,10 @@
       const cls = DB.classes.find(c => c.id === curCls);
       const avg = sts.length ? Math.round(sts.reduce((a, s) => a + avgStu(curCls, s.id), 0) / sts.length) : 0;
       const atRisk = sts.filter(s => avgStu(curCls, s.id) < 50).length;
-      // Teacher own attendance today
-      const myAtt = (DB.teacherAttendance[curUser?.id] || {})[today()];
-      const nowT = nowHHMM();
-      const lateT = isLate(nowT);
       return `
 <div class="ph ph-row fu">
   <div><div class="ph-tag"> Teacher Portal</div><h1>Good Day, ${(curUser?.name || '').split(' ')[0]}!</h1><div class="ph-sub">${cls?.name || ''} - ${new Date().toDateString()}</div></div>
-  <button class="btn btn-p" onclick="openScanner()"> Scan QR</button>
 </div>
-  ${!myAtt ? `<div class="${lateT ? 'late-banner' : 'ibox'}" style="${lateT ? '' : 'background:var(--gl);border-color:rgba(5,150,105,.2);'}">
-  <div>${lateT ? 'Late' : 'OK'}</div>
-  <div>
-    <div class="${lateT ? 'late-t' : 'ct'}">${lateT ? `You're late - Current time: ${nowT}` : 'Mark your attendance for today'}</div>
-    <div class="${lateT ? 'late-s' : ''}" style="font-size:.72rem;${lateT ? '' : 'color:var(--ink3);margin-top:2px;'}">On-time before ${DB.lateAfter || '08:00'} - Late arrival will be recorded</div>
-    <div style="display:flex;gap:7px;margin-top:9px;">
-      <button class="btn btn-g btn-sm" onclick="markTeacherAtt('Present')">Check In (${lateT ? 'Late' : 'On Time'})</button>
-      <button class="btn btn-gh btn-sm" onclick="markTeacherAtt('Leave')"> On Leave</button>
-    </div>
-  </div>
-</div>`: `<div class="ibox"><div>Done</div><div>Attendance marked: <b style="color:var(--g);">${myAtt.status}${myAtt.checkIn ? ' at ' + myAtt.checkIn : ''}</b>${myAtt.status === 'Late' ? ` <span class="badge br2">LATE</span>` : ''}</div></div>`}
   ${clsBar()}
 <div class="sg fu d1">
   <div class="sc sp"><div class="sc-ic"></div><div class="sc-val" style="color:var(--p);">${sts.length}</div><div class="sc-lbl">Students</div></div>
