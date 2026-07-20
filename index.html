@@ -922,15 +922,9 @@
     /* STATS */
     .sg {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
       gap: 10px;
       margin-bottom: 18px;
-    }
-
-    @media(min-width:520px) {
-      .sg {
-        grid-template-columns: repeat(4, 1fr);
-      }
     }
 
     .sc {
@@ -3177,6 +3171,9 @@
         .ox-event-row { flex-direction: column; text-align: center; padding: 25px; }
         .ox-cta h2 { font-size: 2.2rem; }
         .ox-fac-grid { grid-template-columns: 1fr; }
+        .ox-prog-body { padding: 20px; }
+        .ox-testi-card { padding: 20px; }
+        #landing-admission-form { padding: 20px !important; }
     }
     \n</style>
 
@@ -4702,7 +4699,7 @@
     </div>
     <div class="card fu d3">
       <div class="ch"><div class="ct"> Teacher Payroll</div><button class="btn btn-gh btn-sm" onclick="goPage('payroll')">Open</button></div>
-        ${teachers.slice(0, 3).map(t => `<div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);"><div><div style="font-weight:800;font-size:.8rem;">${t.name}</div><div style="font-size:.68rem;color:var(--ink4);">${t.subject || 'General'} - ${t.payrollStatus === 'paid' && t.lastPaid ? `Paid ${fmtDate(t.lastPaid)}` : 'Awaiting salary release'}</div></div><div style="text-align:right;"><div style="font-weight:800;color:var(--p);">${fmtMoney(calcPayrollData(t, monthKey()).netSalary)}</div><span class="badge ${t.payrollStatus === 'paid' ? 'bg2' : 'bo2'}">${t.payrollStatus === 'paid' ? 'Paid' : 'Pending'}</span></div></div>`).join('') || '<div style="font-size:.76rem;color:var(--ink4);">No teachers added yet</div>'}
+        ${teachers.slice(0, 3).map(t => `<div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);"><div><div style="font-weight:800;font-size:.8rem;">${t.name}</div><div style="font-size:.68rem;color:var(--ink4);">${t.subject || 'General'} - ${t.payrollStatus === 'paid' && t.lastPaid ? `Paid ${fmtDate(t.lastPaid)}` : 'Awaiting salary release'}</div></div><div style="text-align:right;"><div style="font-weight:800;color:var(--p);">${fmtMoney(calcPayrollData(t, monthKey()).expectedNet)}</div><span class="badge ${t.payrollStatus === 'paid' ? 'bg2' : 'bo2'}">${t.payrollStatus === 'paid' ? 'Paid' : 'Pending'}</span></div></div>`).join('') || '<div style="font-size:.76rem;color:var(--ink4);">No teachers added yet</div>'}
     </div>
     <div class="card fu d4">
       <div class="ch"><div class="ct"> Recent Notices</div><button class="btn btn-gh btn-sm" onclick="openAddNoticeModal()">+ Add</button></div>
