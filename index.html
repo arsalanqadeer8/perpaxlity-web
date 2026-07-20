@@ -3644,6 +3644,10 @@
       <div class="lf pw-field"><label>Password</label><input id="l-pass" type="password" placeholder="--------"
             onkeydown="if(event.key==='Enter')doLogin()" /><button type="button" class="pw-toggle" onclick="togglePassword('l-pass',this)">Show</button></div>
       <button class="login-btn" onclick="doLogin()">Portal Sign In</button>
+      <div style="margin-top:15px; font-size:0.85rem; display:flex; justify-content:space-between; align-items:center;">
+        <a href="#" onclick="doForgotPass(); return false;" style="color:var(--ink3);text-decoration:none;">Forgot Password?</a>
+        <a href="#" onclick="doSignUp(); return false;" style="color:var(--p);font-weight:700;text-decoration:none;">First time? Set Password</a>
+      </div>
     </div>
     <div class="lp-footer">Oxford Excellence Academy Portal - Data stored securely in your browser</div>
   </div>
@@ -4323,26 +4327,53 @@
       document.getElementById('l-pass').value = '';
     }
 
-    async function adminResetPassword(email, newPass, btnEl) {
-      if (!email || !newPass) { showToast('Email and new password required', 'te'); return; }
-      if (newPass.length < 6) { showToast('Password must be at least 6 characters', 'te'); return; }
-      if (!_sb) { showToast('Supabase not configured', 'te'); return; }
-      if (curRole !== 'admin') { showToast('Admin only', 'te'); return; }
-      const origText = btnEl.textContent;
-      btnEl.disabled = true; btnEl.textContent = 'Resetting...';
+    async function doForgotPass() {
+      const loginValue = (document.getElementById('l-email').value || '').trim().toLowerCase();
+      const em = resolvePortalLoginEmail(loginValue);
+      if (!em) { showToast('Please enter your email first', 'tw2'); return; }
+      if (!_sb) { showToast('Supabase Auth is not configured', 'te'); return; }
+      const btn = document.querySelector('.login-btn');
+      if (btn) btn.textContent = 'Sending...';
       try {
-        const { data: sessionData } = await _sb.auth.getSession();
-        const { data, error } = await _sb.functions.invoke('admin-reset-password', {
-          body: { email, password: newPass },
-          headers: { Authorization: `Bearer ${sessionData?.session?.access_token}` }
-        });
+        const { error } = await _sb.auth.resetPasswordForEmail(em);
         if (error) throw error;
-        if (data?.error) throw new Error(data.error);
-        showToast('Password reset successfully!', 'ts');
+        showToast('Reset link sent to ' + em + '!', 'ts', 5000);
       } catch (e) {
-        showToast(e.message || 'Error resetting password', 'te', 5000);
+        showToast(e.message || 'Error sending reset email', 'te', 5000);
       }
-      btnEl.disabled = false; btnEl.textContent = origText;
+      if (btn) btn.textContent = 'Portal Sign In';
+    }
+
+    async function doSignUp() {
+      const loginValue = (document.getElementById('l-email').value || '').trim().toLowerCase();
+      const em = resolvePortalLoginEmail(loginValue);
+      const pw = (document.getElementById('l-pass').value || '').trim();
+      if (!em || !pw) { showToast('Enter your assigned email and a new password', 'tw2', 5000); return; }
+      if (pw.length < 6) { showToast('Password must be at least 6 characters', 'tw2'); return; }
+      
+      const u = findUserProfile(em, loginRole);
+      if (!u) {
+        showToast(`No ${loginRole} account found for this email. Contact your administrator to be added first.`, 'te', 6000);
+        return;
+      }
+      if (!_sb) { showToast('Supabase Auth is not configured', 'te'); return; }
+      
+      const btn = document.querySelector('.login-btn');
+      if (btn) { btn.disabled = true; btn.textContent = 'Setting up...'; }
+      try {
+        const { data, error } = await _sb.auth.signUp({ email: em, password: pw });
+        if (error) {
+           if (error.message.includes('User already registered') || error.message.includes('already exists')) {
+              showToast('Account already exists! Try signing in, or use Forgot Password.', 'tw2', 5000);
+           } else {
+              showToast(error.message, 'te', 5000);
+           }
+           return;
+        }
+        showToast('Password set successfully! You can now log in.', 'ts', 5000);
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = 'Portal Sign In'; }
+      }
     }
     function openLogin(prefillRole = 'admin') {
       document.getElementById('landing-page').style.display = 'none';
@@ -6121,31 +6152,14 @@
       openModal(`
   <h3>${t ? ' Edit Staff' : '? Add Staff'}</h3>
   <div class="fg2"><div class="fg"><label class="fl">Full Name <span class="req">*</span></label><input class="fi" id="mt-name" value="${t?.name || ''}" placeholder="Ms. Fatima Khan"/></div><div class="fg"><label class="fl">Login Email <span class="req">*</span></label><input class="fi" type="email" id="mt-email" value="${t?.email || ''}" placeholder="teacher@school.edu"/></div></div>
-  <div class="fg pw-field"><label class="fl">Login Password</label><input class="fi" type="password" id="mt-pass" placeholder="Enter password (for new logins or resets)" autocomplete="new-password"/><button type="button" class="pw-toggle" onclick="togglePassword(\'mt-pass\',this)">Show</button></div>
-  ${t?.email ? `<div style="margin-top:-8px;margin-bottom:10px;text-align:right;"><button type="button" class="btn btn-gh btn-xs" style="color:var(--r);border-color:var(--rl);" onclick="adminResetPassword(document.getElementById('mt-email').value, document.getElementById('mt-pass').value, this)">Force Reset Password</button></div>` : ''}
   <div class="fg2"><div class="fg"><label class="fl">Role <span class="req">*</span></label><select class="fi" id="mt-role"><option value="teacher" ${t?.role !== 'scanner' ? 'selected' : ''}>Teacher</option><option value="scanner" ${t?.role === 'scanner' ? 'selected' : ''}>Gate Scanner</option></select></div><div class="fg"><label class="fl">Main Subject (Teachers)</label><select class="fi" id="mt-sub"><option value="">Select</option>${DB.subjects.map(s => `<option value="${s.name}" ${t?.subject === s.name ? 'selected' : ''}>${s.name}</option>`).join('')}</select></div></div>
   <div class="fg2"><div class="fg"><label class="fl">Phone</label><input class="fi" id="mt-phone" value="${t?.phone || ''}" placeholder="03XXXXXXXXX"/></div><div class="fg"><label class="fl">Joining Date</label><input class="fi" type="date" id="mt-join" value="${t?.joinDate || ''}"/></div></div>
   <div class="fg2"><div class="fg"><label class="fl">Base Salary (Per Month)</label><input class="fi" type="number" id="mt-salary" value="${num(t?.salary || 40000)}" placeholder="45000"/></div><div class="fg"><label class="fl">Notes</label><input class="fi" id="mt-notes" value="${t?.notes || ''}" placeholder="Optional notes"/></div></div>
   <div class="fg"><label class="fl">Assigned Classes</label><div style="display:flex;flex-wrap:wrap;gap:7px;padding:10px;background:var(--card2);border:1.5px solid var(--border);border-radius:8px;">${DB.classes.map(c => `<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:.78px;font-weight:600;font-size:.76rem;"><input type="checkbox" value="${c.id}" ${(t?.classIds || []).includes(c.id) ? 'checked' : ''}/> ${c.name}${c.section ? ' ' + c.section : ''}</label>`).join('')}</div></div>
   <div class="m-btns"><button class="btn btn-p" onclick="saveTeach('${eid || ''}')"> ${t ? 'Update' : 'Add'}</button><button class="btn btn-gh" onclick="closeModal()">Cancel</button></div>`);
     }
-    async function saveTeach(eid) { const name = (document.getElementById('mt-name')?.value || '').trim(); const email = (document.getElementById('mt-email')?.value || '').trim().toLowerCase(); if (!name || !email) { showToast('Name & email required', 'te'); return; } const role = document.getElementById('mt-role')?.value || 'teacher'; const classIds = [...document.querySelectorAll('#modal-body input[type=checkbox]:checked')].map(x => x.value); const loginPass = (document.getElementById('mt-pass')?.value || '').trim();
-    if (!eid && loginPass && _sb) {
-      const btn = document.querySelector('.m-btns .btn-p'); if (btn) btn.textContent = 'Creating Login...';
-      try {
-        const { data, error } = await _sb.functions.invoke('create-auth-user', {
-          body: { email, password: loginPass, role: role }
-        });
-        if (error) throw error;
-        if (data?.error) throw new Error(data.error);
-        showToast(`Staff added & Auth Login created!`, 'ts');
-      } catch (err) {
-        showToast(err.message, 'te');
-        const btn2 = document.querySelector('.m-btns .btn-p'); if (btn2) btn2.textContent = 'Save';
-        return;
-      }
-    }
-    const obj = { name, email, subject: document.getElementById('mt-sub')?.value || '', classIds, role: role, phone: document.getElementById('mt-phone')?.value?.trim() || '', joinDate: document.getElementById('mt-join')?.value || '', salary: num(document.getElementById('mt-salary')?.value || 0), notes: document.getElementById('mt-notes')?.value?.trim() || '' }; if (eid) { const t = DB.users.find(x => x.id === eid); if (t) Object.assign(t, obj); } else DB.users.push({ id: uid(), ...obj, photo: '', lastPaid: '', payrollHistory: [] }); saveDB(); pushCloudDB(); closeModal(); showToast('Staff saved', 'ts'); goPage('teachers'); }
+    async function saveTeach(eid) { const name = (document.getElementById('mt-name')?.value || '').trim(); const email = (document.getElementById('mt-email')?.value || '').trim().toLowerCase(); if (!name || !email) { showToast('Name & email required', 'te'); return; } const role = document.getElementById('mt-role')?.value || 'teacher'; const classIds = [...document.querySelectorAll('#modal-body input[type=checkbox]:checked')].map(x => x.value);
+    const obj = { name, email, subject: document.getElementById('mt-sub')?.value || '', classIds, role: role, phone: document.getElementById('mt-phone')?.value?.trim() || '', joinDate: document.getElementById('mt-join')?.value || '', salary: num(document.getElementById('mt-salary')?.value || 0), notes: document.getElementById('mt-notes')?.value?.trim() || '' }; if (eid) { const t = DB.users.find(x => x.id === eid); if (t) Object.assign(t, obj); } else DB.users.push({ id: uid(), ...obj, photo: '', lastPaid: '', payrollHistory: [] }); saveDB(); pushCloudDB(); closeModal(); showToast('Staff saved! They can now set their password via the login screen.', 'ts', 6000); goPage('teachers'); }
 
     function pgPayroll() {
       window.payrollMonth = window.payrollMonth || monthKey();
