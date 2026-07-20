@@ -5026,7 +5026,7 @@
     <div><div style="font-weight:700;font-size:.83rem;">Student Photo</div><div style="font-size:.7rem;color:var(--ink4);margin-top:2px;">Used in ID card, QR card & profile</div>${s?.photo ? `<button class="btn btn-xs btn-gh" style="margin-top:5px;" onclick="clearStuPhoto()">Remove</button>` : ''}</div>
   </div>
   <div class="fg2">
-    <div class="fg"><label class="fl">Full Name <span class="req">*</span></label><input class="fi" id="m-name" value="${s?.name || ''}" placeholder="Ahmed Raza"/></div>
+    <div class="fg"><label class="fl">Full Name <span class="req">*</span></label><input class="fi" id="m-name" value="${s?.name || ''}" placeholder="Arsalan"/></div>
     <div class="fg"><label class="fl">Class <span class="req">*</span></label>
       <select class="fi" id="m-class" onchange="updateAutoRoll(this.value)">${DB.classes.map(c => `<option value="${c.id}" ${(s?.classId || cid) === c.id ? 'selected' : ''}>${c.name}${c.section ? ' ' + c.section : ''}</option>`).join('')}</select></div>
   </div>
@@ -5061,7 +5061,7 @@
   <div class="div"></div>
   <div style="font-weight:700;font-size:.78rem;color:var(--ink3);margin-bottom:9px;"> Parent / Guardian Details</div>
   <div class="fg2">
-    <div class="fg"><label class="fl">Father's Name</label><input class="fi" id="m-father" value="${s?.father || ''}" placeholder="Mr. Raza Ahmed"/></div>
+    <div class="fg"><label class="fl">Father's Name</label><input class="fi" id="m-father" value="${s?.father || ''}" placeholder="Mr"/></div>
     <div class="fg"><label class="fl">Father's Phone</label><input class="fi" id="m-fphone" value="${s?.fphone || ''}" placeholder="03XX-XXXXXXX"/></div>
   </div>
   <div class="fg2">
