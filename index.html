@@ -4565,6 +4565,7 @@
         { p: 'notices', i: '', l: 'Notices & Assignments', s: 'News' },
         { p: 'timetable', i: '', l: 'Timetable', s: 'Sched' },
         { p: 'teacheratt', i: '', l: 'My Attendance', s: 'My Att' },
+        { p: 'mypayroll', i: '', l: 'My Payslips', s: 'Payslip' },
       ];
       return [
         { p: 'dashboard', i: 'dashboard', l: 'Dashboard', s: 'Home' },
@@ -4618,7 +4619,7 @@
         fees: pgFees, exams: pgExams, notices: pgNotices, timetable: pgTimetable,
         teachers: pgTeachers, payroll: pgPayroll, teacheratt: pgTeacherAtt, subjects: pgSubjects,
         reportcards: pgReportCards, idcards: pgClassIdCards, families: pgFamilies, settings: pgSettings,
-        mygrades: pgMyGrades, myattend: pgMyAttend, qrcard: pgQRCard, myfees: pgMyFees, profile: pgProfile,
+        mygrades: pgMyGrades, myattend: pgMyAttend, qrcard: pgQRCard, myfees: pgMyFees, profile: pgProfile, mypayroll: pgMyPayroll
       };
       return (map[p] || pgAdminDash)();
     }
@@ -4825,8 +4826,8 @@
   <div><div class="ph-tag"> Students</div><h1>Student Roster</h1><div class="ph-sub">${cls?.name || ''} ${cls?.section || ''} - ${sts.length} enrolled</div></div>
 <div class="ph-acts">
     <button class="btn btn-gh btn-sm" onclick="printIDCards('${curCls}')">Print IDs</button>
-    <button class="btn btn-gh btn-sm" onclick="openBulkModal()"> Bulk Import</button>
-    <button class="btn btn-p" onclick="openAddStudentModal()">+ Add Student</button>
+    ${curRole !== 'teacher' ? `<button class="btn btn-gh btn-sm" onclick="openBulkModal()"> Bulk Import</button>
+    <button class="btn btn-p" onclick="openAddStudentModal()">+ Add Student</button>` : ''}
   </div>
 </div>
   ${clsBar()}
@@ -4855,9 +4856,9 @@
           <td>${s.loginEmail ? `<span class="badge bg2" style="font-size:.6rem;">Active</span>` : `<span class="badge br2" style="font-size:.6rem;">No Login</span>`}</td>
           <td><div style="display:flex;gap:3px;flex-wrap:wrap;">
             <button class="btn btn-gh btn-xs" onclick="openStuDetail('${s.id}','${curCls}')">View</button>
-            <button class="btn btn-p btn-xs" onclick="openAddStudentModal('${s.id}')">Edit</button>
+            ${curRole !== 'teacher' ? `<button class="btn btn-p btn-xs" onclick="openAddStudentModal('${s.id}')">Edit</button>
             <button class="btn btn-xs" style="background:var(--gl);color:var(--g);" onclick="printAdmissionForm('${s.id}','${curCls}')" title="Print Admission Form">📋 Adm.</button>
-            <button class="btn btn-xs" style="background:var(--rl);color:var(--r);" onclick="delStu('${s.id}','${curCls}')">Delete</button>
+            <button class="btn btn-xs" style="background:var(--rl);color:var(--r);" onclick="delStu('${s.id}','${curCls}')">Delete</button>` : ''}
           </div></td>
         </tr>`;
       }).join('')}
@@ -6793,6 +6794,35 @@
   <div class="fh-bar"><div class="fh-fill" style="width:${mand.length ? Math.round(paidC / mand.length * 100) : 0}%;"></div></div>
 </div>
 <div class="card fu d2">${DB.fees.items.map(f => { const isPaid = paid[f.id]?.paid; return `<div style="display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--border);"><div style="font-size:1.1rem;">${isPaid ? '?' : '?'}</div><div style="flex:1;"><div style="font-weight:700;font-size:.82rem;">${f.name}</div><div style="font-size:.7rem;color:var(--ink3);">Due: ${f.due} - ${f.mandatory ? 'Mandatory' : 'Optional'}</div>${isPaid ? `<div style="font-size:.65rem;color:var(--g);margin-top:1px;">Paid on ${fmtDate(paid[f.id]?.date)}</div>` : ''}</div><div style="text-align:right;flex-shrink:0;"><div style="font-weight:800;color:${isPaid ? 'var(--g)' : 'var(--r)'};">${DB.settings?.currency || 'PKR'} ${Number(f.amount || 0).toLocaleString()}</div><span class="badge ${isPaid ? 'bg2' : 'br2'}">${isPaid ? 'Paid' : 'Pending'}</span></div></div>`; }).join('')}</div>`;
+    }
+
+    function pgMyPayroll() {
+      const t = curUser;
+      window.mypMonth = window.mypMonth || monthKey();
+      const p = calcPayrollData(t, window.mypMonth);
+      const isPaid = (window.mypMonth === monthKey()) ? (t.payrollStatus === 'paid') : (t.lastPaid && t.lastPaid.startsWith(window.mypMonth));
+      return `
+<div class="ph ph-row fu">
+  <div><div class="ph-tag"> My Payslips</div><h1>Payroll History</h1><div class="ph-sub">${t.name}</div></div>
+  <div class="ph-acts">
+    <input type="month" value="${window.mypMonth}" onchange="window.mypMonth=this.value; goPage('mypayroll')" style="padding:6px 10px; border-radius:8px; border:1px solid var(--border); font-size:0.8rem; background:var(--card); color:var(--ink); cursor:pointer;" />
+  </div>
+</div>
+<div class="card fu d1">
+  <div class="ch"><div class="ct">Payslip: ${window.mypMonth}</div></div>
+  <div style="display:flex; justify-content:space-between; margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid var(--border);">
+    <div>Base Salary</div><div style="font-weight:700;">${fmtMoney(p.base)}</div>
+  </div>
+  <div style="display:flex; justify-content:space-between; margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid var(--border); color:var(--r);">
+    <div>Attendance Deduction (${p.deductionDays} days)</div><div style="font-weight:700;">-${fmtMoney(p.attDeduction)}</div>
+  </div>
+  <div style="display:flex; justify-content:space-between; margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid var(--border); color:var(--p);">
+    <div><b>Expected Net Salary</b></div><div style="font-size:1.2rem; font-weight:800;">${fmtMoney(p.expectedNet)}</div>
+  </div>
+  <div style="text-align:right; margin-top:20px;">
+    ${isPaid ? `<span class="badge bg2" style="font-size:1rem; padding:8px 16px;">Paid</span>` : `<span class="badge bo2" style="font-size:1rem; padding:8px 16px;">Pending / Unpaid</span>`}
+  </div>
+</div>`;
     }
 
     function pgProfile() {
