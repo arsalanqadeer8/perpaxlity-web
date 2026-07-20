@@ -5184,7 +5184,7 @@
     function delStu(sid, cid) {
       if (!confirm('Delete this student and all their data?')) return;
       DB.students[cid] = (DB.students[cid] || []).filter(x => x.id !== sid);
-      DB.settings.terms.forEach(t => { delete (DB.grades[cid + '_' + t.id] || {})[sid]; }); delete (DB.attendance[cid] || {})[sid]; delete DB.fees.payments[sid];
+      DB.settings.terms.forEach(t => { delete (DB.grades[cid + '_' + t.id] || {})[sid]; }); delete (DB.attendance[cid] || {})[sid]; delete DB.fees.payments[sid]; delete DB.fees.monthlyLedger[sid];
       DB.users = DB.users.filter(x => x.studentId !== sid);
       Object.values(DB.families).forEach(f => { if (f.studentIds) f.studentIds = f.studentIds.filter(x => x !== sid); });
       saveDB(); showToast('Deleted'); goPage('students');
@@ -5972,7 +5972,7 @@
   <div class="m-btns"><button class="btn btn-p" onclick="saveCls('${eid || ''}')"> ${c ? 'Update' : 'Add'}</button>${c ? `<button class="btn btn-xs" style="background:var(--rl);color:var(--r);" onclick="delCls('${c.id}')">Delete</button>` : ''}<button class="btn btn-gh" onclick="closeModal()">Cancel</button></div>`);
     }
     function saveCls(eid) { const name = (document.getElementById('mc-name')?.value || '').trim(); if (!name) { showToast('Name required', 'te'); return; } const obj = { name, section: document.getElementById('mc-sec').value.trim(), level: document.getElementById('mc-lev').value, capacity: document.getElementById('mc-cap').value, teacher: document.getElementById('mc-teach').value.trim() }; if (eid) { const c = DB.classes.find(x => x.id === eid); if (c) Object.assign(c, obj); } else DB.classes.push({ id: uid(), ...obj }); saveDB(); closeModal(); showToast('? Saved', 'ts'); goPage('classes'); }
-    function delCls(id) { if (!confirm('Delete class and all students?')) return; DB.classes = DB.classes.filter(c => c.id !== id); delete DB.students[id]; DB.settings.terms.forEach(t => delete DB.grades[id + '_' + t.id]); delete DB.attendance[id]; saveDB(); closeModal(); showToast('Deleted'); goPage('classes'); }
+    function delCls(id) { if (!confirm('Delete class and all students?')) return; (DB.students[id] || []).forEach(s => { delete DB.fees.payments[s.id]; delete DB.fees.monthlyLedger[s.id]; }); DB.classes = DB.classes.filter(c => c.id !== id); delete DB.students[id]; DB.settings.terms.forEach(t => delete DB.grades[id + '_' + t.id]); delete DB.attendance[id]; saveDB(); closeModal(); showToast('Deleted'); goPage('classes'); }
 
     function openPromoteModal(cid) {
       const cls = DB.classes.find(c => c.id === cid);
