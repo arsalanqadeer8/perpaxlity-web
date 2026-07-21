@@ -1817,15 +1817,15 @@
 
     /* Name & Role */
     .ox-name-wrap {
-      position: absolute; top: 880px; left: 0; width: 100%; text-align: center; z-index: 2;
+      position: absolute; top: 860px; left: 0; width: 100%; text-align: center; z-index: 2;
     }
     .ox-name { font-size: 60px; font-weight: 900; color: #0a192f; text-transform: uppercase; line-height: 1.1; margin-bottom: 15px; padding: 0 50px; }
     .ox-role { font-size: 28px; font-weight: 800; color: #b48e4b; letter-spacing: 12px; text-transform: uppercase; }
 
     /* Data Grid */
     .ox-grid {
-      position: absolute; top: 1080px; left: 100px; width: 795px;
-      display: grid; grid-template-columns: 1fr 1fr; gap: 40px 60px; z-index: 2;
+      position: absolute; top: 1060px; left: 100px; width: 795px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 30px 60px; z-index: 2;
     }
     .ox-data-item { border-left: 6px solid #b48e4b; padding-left: 20px; }
     .ox-lbl { font-size: 24px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 2px; }
@@ -1843,10 +1843,8 @@
       width: 250px; height: 250px; background: #fff; border-radius: 15px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;
     }
-    .vid-qr, .idp-qr, .idp-qr-staff { width: 220px; height: 220px; position: relative; }
-    .vid-qr > canvas, .vid-qr > img, .vid-qr > table,
-    .idp-qr > canvas, .idp-qr > img, .idp-qr > table,
-    .idp-qr-staff > canvas, .idp-qr-staff > img, .idp-qr-staff > table {
+    .ox-card-qr { width: 220px; height: 220px; position: relative; }
+    .ox-card-qr > canvas, .ox-card-qr > img, .ox-card-qr > table {
       position: absolute !important; top: 0 !important; left: 0 !important;
       width: 220px !important; height: 220px !important; display: block !important;
     }
@@ -6816,7 +6814,7 @@
             
             <div class="ox-footer-bg"></div>
             
-            <div class="ox-qr-wrap"><div class="vid-qr idp-qr" data-student-id="${stu.id}"></div></div>
+            <div class="ox-qr-wrap"><div class="ox-card-qr" data-student-id="${stu.id}"></div></div>
           </div>
         </div>
       </div>`;
@@ -6860,7 +6858,7 @@
             
             <div class="ox-footer-bg"></div>
             
-            <div class="ox-qr-wrap"><div class="vid-qr idp-qr-staff" data-staff-id="${staff.id}"></div></div>
+            <div class="ox-qr-wrap"><div class="ox-card-qr" data-staff-id="${staff.id}"></div></div>
           </div>
         </div>
       </div>`;
@@ -6891,19 +6889,19 @@
 
     function buildClassIdCardQrs() {
       if (typeof QRCode === 'undefined') { showToast('QR library not loaded. Connect internet and refresh.', 'te', 4200); return; }
-      document.querySelectorAll('.idp-qr[data-student-id]').forEach(el => {
+      document.querySelectorAll('.ox-card-qr[data-student-id]').forEach(el => {
         const sid = el.dataset.studentId;
         const stu = allStus().find(s => s.id === sid);
         if (!stu) return;
         el.innerHTML = '';
-        try { new QRCode(el, { text: studentAttendancePayload(stu), width: 200, height: 200, colorDark: '#111827', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.L }); } catch { }
+        try { new QRCode(el, { text: studentAttendancePayload(stu), width: 220, height: 220, colorDark: '#111827', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.L }); } catch { }
       });
-      document.querySelectorAll('.idp-qr-staff[data-staff-id]').forEach(el => {
+      document.querySelectorAll('.ox-card-qr[data-staff-id]').forEach(el => {
         const tid = el.dataset.staffId;
         const staff = DB.users.find(u => u.id === tid);
         if (!staff) return;
         el.innerHTML = '';
-        try { new QRCode(el, { text: JSON.stringify({ kind: 'school-teacher-attendance-v1', id: staff.id }), width: 200, height: 200, colorDark: '#111827', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.L }); } catch { }
+        try { new QRCode(el, { text: JSON.stringify({ kind: 'school-teacher-attendance-v1', id: staff.id }), width: 220, height: 220, colorDark: '#111827', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.L }); } catch { }
       });
     }
     function pgQRCard() {
@@ -6951,7 +6949,7 @@
             
             <div class="ox-footer-bg"></div>
             
-            <div class="ox-qr-wrap"><div class="vid-qr" id="qr-canvas-wrap"></div></div>
+            <div class="ox-qr-wrap"><div class="ox-card-qr" id="qr-canvas-wrap"></div></div>
         </div>
       </div>
 </div>
