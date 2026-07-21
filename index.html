@@ -1769,10 +1769,8 @@
       background: url('id%20card%201.png') 0 0 / 100% 100% no-repeat;
       border-radius: .15in;
       overflow: hidden;
-      box-shadow: 0 12px 40px rgba(0,0,0,0.22);
-      transform: scale(1.5);
-      transform-origin: top center;
-      margin-bottom: 1.2in;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.22);
+      margin-bottom: 0.2in;
     }
     /* Photo oval */
     .vid-photo-wrap {
@@ -1797,9 +1795,9 @@
     .vid-name {
       position: absolute;
       top: 45.5%;
-      left: 48%;
-      right: 5%;
-      font-size: 0.09in;
+      left: 45%;
+      right: 2%;
+      font-size: 0.085in;
       font-weight: 900;
       color: #0a192f;
       line-height: 1.15;
@@ -1820,10 +1818,11 @@
     /* QR code: OVERRIDE ANY grid classes! bottom-left below photo */
     .vid-card .vid-qr, .vid-card .idp-qr, .vid-card .idp-qr-staff {
       position: absolute !important;
-      top: 76.5% !important;
+      bottom: 10.5% !important;
       left: 13.5% !important;
-      width: 20% !important;
-      height: 12.6% !important; /* Perfect square ratio for 995x1581 */
+      width: 21% !important;
+      height: auto !important;
+      aspect-ratio: 1/1 !important;
       background: #fff !important;
       border-radius: 0.02in !important;
       padding: 1px !important;
