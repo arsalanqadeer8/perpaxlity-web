@@ -1759,25 +1759,24 @@
     /* ===== PREMIUM ID CARD — template-based overlay ===== */
     .vid-card {
       width: 2.125in;
-      min-height: 3.4in;
+      height: 3.375in;
       position: relative;
       font-family: 'Poppins', 'Segoe UI', sans-serif;
       box-sizing: border-box;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
-      background: url('id card.png') center center / cover no-repeat;
+      background: url('id%20card.png') center top / 100% 100% no-repeat;
       border-radius: .18in;
       overflow: hidden;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.18);
-      display: block;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.2);
     }
-    /* Student photo — sits inside the circle on the left */
+    /* Student photo — inside the large oval circle (lower-left) */
     .vid-photo-wrap {
       position: absolute;
-      top: 43.5%;
-      left: 4%;
-      width: 36%;
-      aspect-ratio: 1/1;
+      top: 44%;
+      left: 3%;
+      width: 34%;
+      aspect-ratio: 1 / 1;
       border-radius: 50%;
       overflow: hidden;
       background: transparent;
@@ -1785,7 +1784,7 @@
       align-items: center;
       justify-content: center;
       font-weight: 900;
-      font-size: .22in;
+      font-size: .2in;
       color: #0a192f;
     }
     .vid-photo-wrap img {
@@ -1794,49 +1793,46 @@
       object-fit: cover;
       border-radius: 50%;
     }
-    /* Student name — overlaid top-right of the info section */
+    /* Student name — overlaid right where EXCELLENCE ACADEMY text is */
     .vid-name {
       position: absolute;
-      top: 41%;
-      left: 45%;
-      right: 4%;
-      font-size: .115in;
+      top: 43.5%;
+      left: 44%;
+      right: 3%;
+      font-size: .105in;
       font-weight: 900;
       color: #0a192f;
-      line-height: 1.15;
+      line-height: 1.2;
       text-transform: uppercase;
-      letter-spacing: .005in;
+      letter-spacing: .003in;
     }
     /* STUDENT label */
     .vid-role {
       position: absolute;
-      top: 50.5%;
-      left: 45%;
-      font-size: .065in;
+      top: 52.5%;
+      left: 44%;
+      font-size: .06in;
       font-weight: 800;
       color: #b48e4b;
       letter-spacing: .04in;
       text-transform: uppercase;
     }
-    /* Data values overlaid next to the labels */
-    .vid-val-id     { position: absolute; top: 54.5%; left: 58%; right: 4%; font-size: .075in; font-weight: 800; color: #0a192f; text-align: right; }
-    .vid-val-grade  { position: absolute; top: 59.5%; left: 52%; right: 4%; font-size: .07in;  font-weight: 800; color: #0a192f; text-align: right; }
-    .vid-val-session{ position: absolute; top: 64.5%; left: 52%; right: 4%; font-size: .07in;  font-weight: 800; color: #0a192f; text-align: right; }
-    .vid-val-campus { position: absolute; top: 69.5%; left: 52%; right: 4%; font-size: .07in;  font-weight: 800; color: #0a192f; text-align: right; }
-    /* QR code — bottom left corner */
+    /* Data values — right-aligned in each row */
+    .vid-val-id     { position: absolute; top: 55%;   right: 4%; font-size: .072in; font-weight: 800; color: #0a192f; }
+    .vid-val-grade  { position: absolute; top: 60.5%; right: 4%; font-size: .068in; font-weight: 800; color: #0a192f; }
+    .vid-val-session{ position: absolute; top: 65.5%; right: 4%; font-size: .068in; font-weight: 800; color: #0a192f; }
+    .vid-val-campus { position: absolute; top: 71%;   right: 4%; font-size: .068in; font-weight: 800; color: #0a192f; }
+    /* QR code — bottom left (overlaps the blank space in template) */
     .vid-qr {
       position: absolute;
-      bottom: 14%;
+      top: 75%;
       left: 4%;
-      width: .7in;
-      height: .7in;
+      width: 18%;
+      aspect-ratio: 1 / 1;
       background: #fff;
-      border-radius: .03in;
-      padding: 2px;
+      border-radius: .025in;
     }
-    .vid-qr canvas, .vid-qr img { width: 100% !important; height: 100% !important; border-radius: .03in; }
-    /* Spacer so card has correct height */
-    .vid-card-spacer { display: block; width: 100%; padding-top: 160%; }
+    .vid-qr canvas, .vid-qr img { width: 100% !important; height: 100% !important; display: block; border-radius: .025in; }
 
     .school-id-card {
       width: 3.375in;
@@ -6890,19 +6886,18 @@
 <div class="ph fu"><div class="ph-tag"> ${isTeacherCard ? 'Teacher Gate QR' : 'Student ID Card'}</div><h1>${isTeacherCard ? 'My Gate QR' : 'My ID Card'}</h1><div class="ph-sub">Show this card at the school gate for attendance scanning</div></div>
 <div class="id-card-wrap fu d1" style="display:flex; justify-content:center; padding: 20px 0;">
       <div class="vid-card">
-        <span class="vid-card-spacer"></span>
-        <!-- Photo inside the circle -->
-        <div class="vid-photo-wrap">${personPhoto ? `<img src="${personPhoto}"/>` : `<span style="font-size:.22in;font-weight:900;color:#0a192f;">${ini(personName||'?')}</span>`}</div>
-        <!-- Name -->
-        <div class="vid-name">${(personName||'Student').replace(/(\S+)\s+(\S+.*)/, '$1<br>$2')}</div>
+        <!-- Photo inside the oval circle -->
+        <div class="vid-photo-wrap">${personPhoto ? `<img src="${personPhoto}"/>` : `<span style="font-size:.2in;font-weight:900;color:#0a192f;letter-spacing:-.02in">${ini(personName||'?')}</span>`}</div>
+        <!-- Name (covers the EXCELLENCE ACADEMY template text) -->
+        <div class="vid-name">${(personName||'Student').replace(/^(\S+)\s+(.+)$/, '$1<br>$2')}</div>
         <!-- Role -->
         <div class="vid-role">${isTeacherCard ? 'STAFF' : 'STUDENT'}</div>
-        <!-- Data values -->
-        <div class="vid-val-id">${isTeacherCard ? 'STAFF' : String(stu?.roll || stu?.id || '001').padStart(3,'0')}</div>
+        <!-- Data values right-aligned next to each row label -->
+        <div class="vid-val-id">${isTeacherCard ? 'STAFF' : String(stu?.roll || '001').padStart(3,'0')}</div>
         <div class="vid-val-grade">${chip}</div>
         <div class="vid-val-session">${DB.settings?.schoolYear || '2025–2026'}</div>
         <div class="vid-val-campus">${DB.school.city || 'Karachi'}</div>
-        <!-- QR -->
+        <!-- QR code bottom-left -->
         <div class="vid-qr" id="qr-canvas-wrap"></div>
       </div>
 </div>
