@@ -6858,7 +6858,7 @@
               <div class="vid-row"><i class="fas fa-map-marker-alt"></i> <div><span>CAMPUS</span><b>${DB.school.city || 'Karachi'}</b></div></div>
             </div>
             <div class="vid-sign">
-               <div style="height:.22in;"></div>
+               <img src="signature.jpg" style="width:90px;height:36px;object-fit:contain;display:block;margin-bottom:4px;" alt="Principal Signature"/>
                <span>PRINCIPAL</span>
             </div>
           </div>
@@ -7051,7 +7051,7 @@
 
       let cards = '';
       sts.forEach(s => {
-        const qrUrl   = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(s.id)}&color=0d1e3d&bgcolor=ffffff&margin=4`;
+        const qrPayload = encodeURIComponent(studentAttendancePayload(s));
         const rollNum = String(s.roll || '001').padStart(3,'0');
         const grade   = escHtml(cls.name) + (cls.section ? ' ' + escHtml(cls.section) : '');
         const photo   = s.photo
@@ -7112,10 +7112,10 @@
 
           <!-- BOTTOM: QR left, signature right -->
           <div style="padding:6px 14px 10px;display:flex;align-items:flex-end;justify-content:space-between;border-top:1px solid #f0f0f0;">
-            <img src="${qrUrl}" style="width:52px;height:52px;" alt="QR"/>
-            <div style="text-align:center;flex:1;padding-left:10px;">
-              <div style="border-bottom:1px solid #aaa;height:24px;width:80%;margin:0 auto 3px;"></div>
-              <div style="font-size:6.5px;color:#888;letter-spacing:1.5px;font-weight:600;text-transform:uppercase;">PRINCIPAL</div>
+            <div class="idp-qr" data-student-id="${s.id}" data-qr-payload="${studentAttendancePayload(s)}" style="width:54px;height:54px;"></div>
+            <div style="text-align:center;flex:1;padding-left:6px;">
+              <img src="signature.jpg" style="width:75px;height:30px;object-fit:contain;display:block;margin:0 auto;" alt="Principal Signature"/>
+              <div style="border-top:1px solid #bbb;margin-top:2px;padding-top:2px;font-size:6.5px;color:#888;letter-spacing:1.5px;font-weight:600;text-transform:uppercase;">PRINCIPAL</div>
             </div>
           </div>
 
@@ -7131,6 +7131,7 @@
 
       const html = `<html><head><title>ID Cards – ${escHtml(cls.name)}</title>
       <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+      <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"><\/script>
       <style>
         @page { margin:8mm; size:A4; }
         *{box-sizing:border-box;margin:0;padding:0;}
@@ -7139,7 +7140,19 @@
         @media print{body{background:#e8e8e8;}}
       </style></head><body>
       <div class="sheet">${cards}</div>
-      <scr`+`ipt>window.onload=function(){setTimeout(function(){window.print();},900);};</scr`+`ipt>
+      <scr`+`ipt>
+        function genQRs() {
+          document.querySelectorAll('[data-qr-payload]').forEach(function(el) {
+            var canvas = document.createElement('canvas');
+            QRCode.toCanvas(canvas, el.getAttribute('data-qr-payload'), {width:108,margin:1,color:{dark:'#0d1e3d',light:'#ffffff'}}, function(){});
+            el.appendChild(canvas);
+          });
+        }
+        window.onload = function() {
+          if (typeof QRCode !== 'undefined') { genQRs(); setTimeout(function(){window.print();}, 1400); }
+          else { document.querySelector('script[src*="qrcode"]').onload = function(){ genQRs(); setTimeout(function(){window.print();}, 1400); }; }
+        };
+      <\/scr`+`ipt>
       </body></html>`;
 
       printWindow.document.write(html);
