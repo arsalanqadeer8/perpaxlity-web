@@ -1849,6 +1849,13 @@
       width: 220px !important; height: 220px !important; display: block !important;
     }
 
+    /* Teacher/Staff Card Color Override (Premium Deep Burgundy) */
+    .ox-staff .ox-header-bg { background: #4a0a14 !important; }
+    .ox-staff .ox-footer-bg { background: #4a0a14 !important; }
+    .ox-staff .ox-name { color: #4a0a14 !important; }
+    .ox-staff .ox-val { color: #4a0a14 !important; }
+    .ox-staff .ox-photo-wrap span { color: #4a0a14 !important; }
+
     .school-id-card {
       width: 3.375in;
       height: 2.125in;
@@ -6825,7 +6832,7 @@
       const isScanner = staff.role === 'scanner';
       return `<div class="vid-card-wrap" style="display:inline-block; margin:10px;">
         <div class="vid-card">
-          <div class="vid-card-inner">
+          <div class="vid-card-inner ox-staff">
             <div class="ox-header-bg"></div>
             <div class="ox-logo-box"><img src="logo.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/4774/4774574.png'"></div>
             <div class="ox-logo-text">OXFORD EXCELLENCE ACADEMY</div>
@@ -6916,7 +6923,7 @@
 <div class="ph fu"><div class="ph-tag"> ${isTeacherCard ? 'Teacher Gate QR' : 'Student ID Card'}</div><h1>${isTeacherCard ? 'My Gate QR' : 'My ID Card'}</h1><div class="ph-sub">Show this card at the school gate for attendance scanning</div></div>
 <div class="vid-card-wrap fu d1">
       <div class="vid-card">
-        <div class="vid-card-inner">
+        <div class="vid-card-inner ${isTeacherCard ? 'ox-staff' : ''}">
             <div class="ox-header-bg"></div>
             <div class="ox-logo-box"><img src="logo.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/4774/4774574.png'"></div>
             <div class="ox-logo-text">OXFORD EXCELLENCE ACADEMY</div>
