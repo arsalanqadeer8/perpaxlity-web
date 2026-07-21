@@ -1859,6 +1859,18 @@
       width: 226px !important; height: 226px !important; display: block !important; border-radius: 5px !important; 
     }
 
+    /* Signature */
+    .ox-sig-wrap {
+      position: absolute; bottom: 250px; right: 60px; z-index: 5;
+      text-align: center; width: 260px; display: flex; flex-direction: column; align-items: center;
+    }
+    .ox-sig-img {
+      width: 240px; height: 110px; object-fit: contain;
+      mix-blend-mode: multiply; filter: contrast(1.2) brightness(1.05); margin-bottom: 5px;
+    }
+    .ox-sig-line { width: 100%; height: 3px; background: #0a192f; margin-bottom: 5px; opacity: 0.8; }
+    .ox-sig-text { font-size: 20px; font-weight: 800; color: #0a192f; letter-spacing: 6px; }
+
     .school-id-card {
       width: 3.375in;
       height: 2.125in;
@@ -6829,6 +6841,12 @@
               <span>STRONG TOMORROW</span>
             </div>
             
+            <div class="ox-sig-wrap">
+              <img src="signature.jpg" class="ox-sig-img" onerror="this.style.display='none'">
+              <div class="ox-sig-line"></div>
+              <div class="ox-sig-text">PRINCIPAL</div>
+            </div>
+            
             <div class="ox-qr-wrap"><div class="vid-qr idp-qr" data-student-id="${stu.id}"></div></div>
           </div>
         </div>
@@ -6876,6 +6894,12 @@
             <div class="ox-footer-text">
               <span>SAFE TODAY</span>
               <span>STRONG TOMORROW</span>
+            </div>
+            
+            <div class="ox-sig-wrap">
+              <img src="signature.jpg" class="ox-sig-img" onerror="this.style.display='none'">
+              <div class="ox-sig-line"></div>
+              <div class="ox-sig-text">PRINCIPAL</div>
             </div>
             
             <div class="ox-qr-wrap"><div class="vid-qr idp-qr-staff" data-staff-id="${staff.id}"></div></div>
@@ -6972,6 +6996,12 @@
             <div class="ox-footer-text">
               <span>SAFE TODAY</span>
               <span>STRONG TOMORROW</span>
+            </div>
+            
+            <div class="ox-sig-wrap">
+              <img src="signature.jpg" class="ox-sig-img" onerror="this.style.display='none'">
+              <div class="ox-sig-line"></div>
+              <div class="ox-sig-text">PRINCIPAL</div>
             </div>
             
             <div class="ox-qr-wrap"><div class="vid-qr" id="qr-canvas-wrap"></div></div>
