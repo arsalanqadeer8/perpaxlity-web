@@ -1771,22 +1771,16 @@
       background: #fff;
     }
     
-    /* The high-res pixel grid perfectly matching id card 1.png */
+    /* The high-res pixel grid */
     .vid-card-inner {
-      width: 995px;
-      height: 1581px;
-      position: absolute;
-      top: 0;
-      left: 0;
-      transform-origin: top left;
-      transform: scale(0.2050251); 
+      width: 995px; height: 1581px;
+      position: absolute; top: 0; left: 0;
+      transform-origin: top left; transform: scale(0.2050251); 
       background: #ffffff;
       font-family: 'Poppins', 'Segoe UI', sans-serif;
       box-sizing: border-box;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-      overflow: hidden;
-      z-index: 1;
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+      overflow: hidden; z-index: 1;
     }
 
     /* Background Subtle Waves */
@@ -1797,123 +1791,74 @@
       z-index: -1;
     }
 
-    /* Top Left Decor */
-    .ox-decor-tl {
-      position: absolute;
-      top: -150px; left: -150px;
-      width: 450px; height: 450px;
-      background: #0a192f;
-      border-radius: 50%;
-      box-shadow: 0 0 0 25px #b48e4b;
-      z-index: 0;
-    }
-
-    /* Bottom Decor */
-    .ox-decor-br {
-      position: absolute;
-      bottom: 0; left: -10%;
-      width: 120%; height: 260px;
-      background: #0a192f;
-      border-radius: 50% 50% 0 0 / 80px 80px 0 0;
-      border-top: 15px solid #b48e4b;
-      z-index: 0;
-    }
+    /* Decors */
+    .ox-decor-tl-gold { position: absolute; top: 0; left: 0; width: 280px; height: 280px; background: #b48e4b; border-radius: 0 0 100% 0; z-index: 0; }
+    .ox-decor-tl      { position: absolute; top: 0; left: 0; width: 250px; height: 250px; background: #0a192f; border-radius: 0 0 100% 0; z-index: 1; }
+    
+    .ox-decor-br-gold { position: absolute; bottom: 0; left: 0; width: 100%; height: 235px; background: #b48e4b; clip-path: polygon(0 40%, 100% 0, 100% 100%, 0 100%); z-index: 0; }
+    .ox-decor-br      { position: absolute; bottom: 0; left: 0; width: 100%; height: 220px; background: #0a192f; clip-path: polygon(0 40%, 100% 0, 100% 100%, 0 100%); z-index: 1; }
 
     /* Header */
-    .ox-header {
-      position: relative; z-index: 2;
-      text-align: center;
-      padding-top: 100px;
-    }
+    .ox-header { position: relative; z-index: 2; text-align: center; padding-top: 80px; }
     .ox-logo-box {
-      width: 280px; height: 280px; margin: 0 auto 30px;
+      width: 450px; height: 450px; margin: 0 auto;
       display: flex; align-items: center; justify-content: center;
-      background: #fff; border-radius: 50%;
-      border: 8px solid #b48e4b;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-      overflow: hidden;
-      padding: 20px;
     }
     .ox-logo-box img { width: 100%; height: 100%; object-fit: contain; }
-    .ox-title { 
-      display: inline-block;
-      background: #0a192f; color: #fff; 
-      padding: 15px 70px; 
-      font-size: 70px; font-weight: 900; letter-spacing: 12px; font-family: 'Times New Roman', serif;
-      box-shadow: 0 15px 30px rgba(0,0,0,0.2);
-      border-top: 5px solid #b48e4b;
-      border-bottom: 5px solid #b48e4b;
-    }
-    .ox-subtitle { font-size: 34px; font-weight: 800; color: #0a192f; letter-spacing: 10px; margin-top: 25px; }
-    .ox-motto { font-size: 20px; font-weight: 700; color: #b48e4b; letter-spacing: 16px; margin-top: 25px; }
 
     /* Body */
     .ox-body {
-      position: relative; z-index: 2;
-      display: flex;
-      margin-top: 60px;
-      padding: 0 50px;
-      align-items: flex-start;
+      position: relative; z-index: 2; display: flex;
+      margin-top: 20px; padding: 0 40px; align-items: flex-start;
     }
-    .ox-left { width: 420px; display: flex; flex-direction: column; align-items: center; }
+    .ox-left { width: 380px; display: flex; flex-direction: column; align-items: center; }
     .ox-photo-wrap {
-      width: 360px; height: 480px;
-      border-radius: 50%;
-      border: 10px solid #b48e4b;
-      padding: 12px;
-      background: #fff;
-      box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+      width: 320px; height: 380px;
+      border-radius: 160px; /* Pill shape */
+      border: 8px solid #b48e4b; padding: 10px;
+      background: #fff; box-shadow: 0 15px 40px rgba(0,0,0,0.15);
       display: flex; align-items: center; justify-content: center;
       overflow: hidden;
     }
-    .ox-photo-wrap img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-    .ox-photo-wrap span { font-size: 130px; font-weight: 900; color: #0a192f; }
+    .ox-photo-wrap img { width: 100%; height: 100%; object-fit: cover; border-radius: 150px; }
+    .ox-photo-wrap span { font-size: 110px; font-weight: 900; color: #0a192f; }
 
-    .ox-right { flex: 1; padding-left: 20px; padding-top: 50px; }
+    .ox-right { flex: 1; padding-left: 20px; padding-top: 20px; }
     .ox-name { font-size: 50px; font-weight: 900; color: #0a192f; line-height: 1.15; text-transform: uppercase; margin-bottom: 5px; }
     .ox-role { font-size: 24px; font-weight: 700; color: #b48e4b; letter-spacing: 10px; margin-bottom: 40px; }
 
-    .ox-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid #f1f5f9; padding: 20px 0; }
+    .ox-data { width: 100%; }
+    .ox-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #cbd5e1; padding: 15px 0; }
     .ox-row:last-child { border-bottom: none; }
-    .ox-lbl { font-size: 28px; font-weight: 700; color: #475569; display: flex; align-items: center; gap: 15px; }
-    .ox-lbl i { font-size: 40px; color: #0a192f; }
-    .ox-val { font-size: 34px; font-weight: 800; color: #0a192f; }
+    .ox-lbl { font-size: 26px; font-weight: 700; color: #64748b; }
+    .ox-val { font-size: 30px; font-weight: 800; color: #0a192f; text-align: right; }
 
-    /* Bottom Elements */
+    /* QR Code - Bulletproof Stacked Rendering */
     .ox-qr-wrap {
-      position: absolute; bottom: 130px; left: 80px; z-index: 5;
+      position: absolute; bottom: 120px; left: 50px; z-index: 5;
       width: 250px; height: 250px;
-      background: #fff; border-radius: 15px; padding: 10px;
-      box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+      background: #fff; border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
     }
-    .vid-card .vid-qr, .vid-card .idp-qr, .vid-card .idp-qr-staff { width: 100% !important; height: 100% !important; margin: 0 !important; }
-    .vid-card .vid-qr canvas, .vid-card .vid-qr img, 
-    .vid-card .idp-qr canvas, .vid-card .idp-qr img,
-    .vid-card .idp-qr-staff canvas, .vid-card .idp-qr-staff img { 
-      width: 100% !important; height: 100% !important; display: block !important; border-radius: 8px !important; 
+    .vid-qr, .idp-qr, .idp-qr-staff { width: 100%; height: 100%; position: relative; }
+    .vid-qr canvas, .vid-qr img, .idp-qr canvas, .idp-qr img, .idp-qr-staff canvas, .idp-qr-staff img { 
+      position: absolute !important; top: 15px !important; left: 15px !important;
+      width: 220px !important; height: 220px !important; display: block !important; border-radius: 5px !important; 
     }
 
+    /* Signature & Footer */
     .ox-sig-wrap {
-      position: absolute; bottom: 210px; right: 80px; z-index: 5;
-      text-align: center; width: 350px;
+      position: absolute; bottom: 140px; right: 50px; z-index: 5;
+      text-align: center; width: 320px;
     }
-    .ox-sig-line { width: 100%; height: 3px; background: #b48e4b; margin-bottom: 15px; opacity: 0.5; }
-    .ox-sig-text { font-size: 22px; font-weight: 700; color: #fff; letter-spacing: 5px; opacity: 0.9; }
+    .ox-sig-line { width: 100%; height: 3px; background: #0a192f; margin-bottom: 10px; }
+    .ox-sig-text { font-size: 22px; font-weight: 700; color: #0a192f; letter-spacing: 5px; }
 
     .ox-footer {
-      position: absolute; bottom: 50px; left: 0; width: 100%; z-index: 5;
+      position: absolute; bottom: 40px; left: 0; width: 100%; z-index: 5;
       text-align: center;
     }
-    .ox-footer-text { font-size: 20px; font-weight: 700; color: #b48e4b; letter-spacing: 12px; }
-    .ox-shield {
-      position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%);
-      width: 90px; height: 110px;
-      background: #b48e4b;
-      clip-path: polygon(50% 100%, 100% 80%, 100% 0, 0 0, 0 80%);
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: inset 0 0 0 5px rgba(10,25,47,0.2);
-    }
-    .ox-shield i { color: #0a192f; font-size: 55px; margin-top: -15px; }
+    .ox-footer-text { font-size: 22px; font-weight: 700; color: #b48e4b; letter-spacing: 12px; }
 
     .school-id-card {
       width: 3.375in;
@@ -6848,12 +6793,10 @@
       return `<div class="vid-card-wrap" style="display:inline-block; margin:10px;">
         <div class="vid-card">
           <div class="vid-card-inner">
-            <div class="ox-decor-tl"></div><div class="ox-decor-br"></div>
+            <div class="ox-decor-tl-gold"></div><div class="ox-decor-tl"></div>
+            <div class="ox-decor-br-gold"></div><div class="ox-decor-br"></div>
             <div class="ox-header">
               <div class="ox-logo-box"><img src="logo.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/4774/4774574.png'"></div>
-              <div class="ox-title">OXFORD</div>
-              <div class="ox-subtitle">EXCELLENCE ACADEMY</div>
-              <div class="ox-motto">L E A R N  •  G R O W  •  E X C E L</div>
             </div>
             <div class="ox-body">
               <div class="ox-left">
@@ -6862,15 +6805,17 @@
               <div class="ox-right">
                 <div class="ox-name">${(stu.name||'Student').replace(/^(\S+)\s+(.+)$/, '$1<br>$2')}</div>
                 <div class="ox-role">STUDENT</div>
-                <div class="ox-row"><span class="ox-lbl"><i class="ph ph-identification-card"></i> ID NUMBER</span> <span class="ox-val">${String(idNo || '001').padStart(3,'0')}</span></div>
-                <div class="ox-row"><span class="ox-lbl"><i class="ph ph-graduation-cap"></i> GRADE</span> <span class="ox-val">${grade}</span></div>
-                <div class="ox-row"><span class="ox-lbl"><i class="ph ph-calendar"></i> SESSION</span> <span class="ox-val">${yr}</span></div>
-                <div class="ox-row"><span class="ox-lbl"><i class="ph ph-map-pin"></i> CAMPUS</span> <span class="ox-val">${DB.school.city || 'Karachi'}</span></div>
+                <div class="ox-data">
+                  <div class="ox-row"><span class="ox-lbl">ID NUMBER</span> <span class="ox-val">${String(idNo || '001').padStart(3,'0')}</span></div>
+                  <div class="ox-row"><span class="ox-lbl">GRADE</span> <span class="ox-val">${grade}</span></div>
+                  <div class="ox-row"><span class="ox-lbl">SESSION</span> <span class="ox-val">${yr}</span></div>
+                  <div class="ox-row"><span class="ox-lbl">CAMPUS</span> <span class="ox-val">${DB.school.city || 'Karachi'}</span></div>
+                </div>
               </div>
             </div>
             <div class="ox-qr-wrap"><div class="vid-qr idp-qr" data-student-id="${stu.id}"></div></div>
             <div class="ox-sig-wrap"><div class="ox-sig-line"></div><div class="ox-sig-text">PRINCIPAL</div></div>
-            <div class="ox-footer"><div class="ox-footer-text">SAFE TODAY &nbsp;•&nbsp; STRONG TOMORROW</div><div class="ox-shield"><i class="ph-fill ph-shield-check"></i></div></div>
+            <div class="ox-footer"><div class="ox-footer-text">SAFE TODAY &nbsp;•&nbsp; STRONG TOMORROW</div></div>
           </div>
         </div>
       </div>`;
@@ -6882,12 +6827,10 @@
       return `<div class="vid-card-wrap" style="display:inline-block; margin:10px;">
         <div class="vid-card">
           <div class="vid-card-inner">
-            <div class="ox-decor-tl"></div><div class="ox-decor-br"></div>
+            <div class="ox-decor-tl-gold"></div><div class="ox-decor-tl"></div>
+            <div class="ox-decor-br-gold"></div><div class="ox-decor-br"></div>
             <div class="ox-header">
               <div class="ox-logo-box"><img src="logo.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/4774/4774574.png'"></div>
-              <div class="ox-title">OXFORD</div>
-              <div class="ox-subtitle">EXCELLENCE ACADEMY</div>
-              <div class="ox-motto">L E A R N  •  G R O W  •  E X C E L</div>
             </div>
             <div class="ox-body">
               <div class="ox-left">
@@ -6896,15 +6839,17 @@
               <div class="ox-right">
                 <div class="ox-name">${(staff.name||'Staff').replace(/^(\S+)\s+(.+)$/, '$1<br>$2')}</div>
                 <div class="ox-role">${isScanner ? 'SECURITY' : 'STAFF'}</div>
-                <div class="ox-row"><span class="ox-lbl"><i class="ph ph-identification-card"></i> ID NUMBER</span> <span class="ox-val">STAFF</span></div>
-                <div class="ox-row"><span class="ox-lbl"><i class="ph ph-briefcase"></i> ROLE</span> <span class="ox-val">${staff.subject || (isScanner ? 'Gate Duty' : 'Teacher')}</span></div>
-                <div class="ox-row"><span class="ox-lbl"><i class="ph ph-calendar"></i> SESSION</span> <span class="ox-val">${yr}</span></div>
-                <div class="ox-row"><span class="ox-lbl"><i class="ph ph-map-pin"></i> CAMPUS</span> <span class="ox-val">${DB.school.city || 'Karachi'}</span></div>
+                <div class="ox-data">
+                  <div class="ox-row"><span class="ox-lbl">ID NUMBER</span> <span class="ox-val">STAFF</span></div>
+                  <div class="ox-row"><span class="ox-lbl">ROLE</span> <span class="ox-val">${staff.subject || (isScanner ? 'Gate Duty' : 'Teacher')}</span></div>
+                  <div class="ox-row"><span class="ox-lbl">SESSION</span> <span class="ox-val">${yr}</span></div>
+                  <div class="ox-row"><span class="ox-lbl">CAMPUS</span> <span class="ox-val">${DB.school.city || 'Karachi'}</span></div>
+                </div>
               </div>
             </div>
             <div class="ox-qr-wrap"><div class="vid-qr idp-qr-staff" data-staff-id="${staff.id}"></div></div>
             <div class="ox-sig-wrap"><div class="ox-sig-line"></div><div class="ox-sig-text">PRINCIPAL</div></div>
-            <div class="ox-footer"><div class="ox-footer-text">SAFE TODAY &nbsp;•&nbsp; STRONG TOMORROW</div><div class="ox-shield"><i class="ph-fill ph-shield-check"></i></div></div>
+            <div class="ox-footer"><div class="ox-footer-text">SAFE TODAY &nbsp;•&nbsp; STRONG TOMORROW</div></div>
           </div>
         </div>
       </div>`;
@@ -6963,12 +6908,10 @@
 <div class="vid-card-wrap fu d1">
       <div class="vid-card">
         <div class="vid-card-inner">
-            <div class="ox-decor-tl"></div><div class="ox-decor-br"></div>
+            <div class="ox-decor-tl-gold"></div><div class="ox-decor-tl"></div>
+            <div class="ox-decor-br-gold"></div><div class="ox-decor-br"></div>
             <div class="ox-header">
               <div class="ox-logo-box"><img src="logo.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/4774/4774574.png'"></div>
-              <div class="ox-title">OXFORD</div>
-              <div class="ox-subtitle">EXCELLENCE ACADEMY</div>
-              <div class="ox-motto">L E A R N  •  G R O W  •  E X C E L</div>
             </div>
             <div class="ox-body">
               <div class="ox-left">
@@ -6977,15 +6920,17 @@
               <div class="ox-right">
                 <div class="ox-name">${(personName||'Student').replace(/^(\S+)\s+(.+)$/, '$1<br>$2')}</div>
                 <div class="ox-role">${isTeacherCard ? 'STAFF' : 'STUDENT'}</div>
-                <div class="ox-row"><span class="ox-lbl"><i class="ph ph-identification-card"></i> ID NUMBER</span> <span class="ox-val">${isTeacherCard ? 'STAFF' : String(stu?.roll || '001').padStart(3,'0')}</span></div>
-                <div class="ox-row"><span class="ox-lbl"><i class="ph ph-graduation-cap"></i> ${isTeacherCard ? 'ROLE' : 'GRADE'}</span> <span class="ox-val">${chip}</span></div>
-                <div class="ox-row"><span class="ox-lbl"><i class="ph ph-calendar"></i> SESSION</span> <span class="ox-val">${DB.settings?.schoolYear || '2025–2026'}</span></div>
-                <div class="ox-row"><span class="ox-lbl"><i class="ph ph-map-pin"></i> CAMPUS</span> <span class="ox-val">${DB.school.city || 'Karachi'}</span></div>
+                <div class="ox-data">
+                  <div class="ox-row"><span class="ox-lbl">ID NUMBER</span> <span class="ox-val">${isTeacherCard ? 'STAFF' : String(stu?.roll || '001').padStart(3,'0')}</span></div>
+                  <div class="ox-row"><span class="ox-lbl">${isTeacherCard ? 'ROLE' : 'GRADE'}</span> <span class="ox-val">${chip}</span></div>
+                  <div class="ox-row"><span class="ox-lbl">SESSION</span> <span class="ox-val">${DB.settings?.schoolYear || '2025–2026'}</span></div>
+                  <div class="ox-row"><span class="ox-lbl">CAMPUS</span> <span class="ox-val">${DB.school.city || 'Karachi'}</span></div>
+                </div>
               </div>
             </div>
             <div class="ox-qr-wrap"><div class="vid-qr" id="qr-canvas-wrap"></div></div>
             <div class="ox-sig-wrap"><div class="ox-sig-line"></div><div class="ox-sig-text">PRINCIPAL</div></div>
-            <div class="ox-footer"><div class="ox-footer-text">SAFE TODAY &nbsp;•&nbsp; STRONG TOMORROW</div><div class="ox-shield"><i class="ph-fill ph-shield-check"></i></div></div>
+            <div class="ox-footer"><div class="ox-footer-text">SAFE TODAY &nbsp;•&nbsp; STRONG TOMORROW</div></div>
         </div>
       </div>
 </div>
