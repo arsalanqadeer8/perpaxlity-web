@@ -6764,39 +6764,20 @@
       const grade = ((cls.name || '') + (cls.section ? ' ' + cls.section : '')).trim() || '-';
       const idNo = (stu.roll || stu.id || '').toString();
       const yr = DB.settings?.schoolYear || '2025 - 2026';
-      return `<div class="vid-card">
-        <div class="vid-top-deco"></div>
-        <div class="vid-header">
-          <div class="vid-logo-circle">${DB.school.logo ? `<img src="${DB.school.logo}"/>` : `<i class="fas fa-graduation-cap"></i>`}</div>
-          <div class="vid-school-name">${DB.school.name || 'SCHOOL'}</div>
-          <div class="vid-tagline">LEARN &bull; GROW &bull; EXCEL</div>
-        </div>
-        <div class="vid-body">
-          <div class="vid-photo-col">
-            <div class="vid-photo-wrap">${stu.photo ? `<img src="${stu.photo}"/>` : ini(stu.name || '?')}</div>
-            <div class="vid-qr idp-qr" data-student-id="${stu.id}"></div>
-          </div>
-          <div class="vid-info-col">
-            <div class="vid-name">${stu.name || 'Student'}</div>
-            <div class="vid-role">STUDENT</div>
-            <div class="vid-table">
-              <div class="vid-row"><i class="fas fa-id-badge"></i> <div><span>ID NUMBER</span><b>${idNo || '-'}</b></div></div>
-              <div class="vid-row"><i class="fas fa-graduation-cap"></i> <div><span>GRADE</span><b>${grade}</b></div></div>
-              <div class="vid-row"><i class="fas fa-calendar-alt"></i> <div><span>SESSION</span><b>${yr}</b></div></div>
-              <div class="vid-row"><i class="fas fa-map-marker-alt"></i> <div><span>CAMPUS</span><b>${DB.school.city || 'Karachi'}</b></div></div>
-            </div>
-            <div class="vid-sign">
-               <div style="height:.22in;"></div>
-               <span>PRINCIPAL</span>
-            </div>
-          </div>
-        </div>
-        <div class="vid-footer">
-           <div class="vid-foot-text">
-              <span>SAFE TODAY</span>
-              <i class="fas fa-shield-alt" style="color:#b48e4b; font-size:1.4em; margin:0 5px;"></i>
-              <span>STRONG TOMORROW</span>
-           </div>
+      return `<div class="vid-card-wrap" style="display:inline-block; margin:10px;">
+        <div class="vid-card">
+          <!-- Photo inside the oval circle -->
+          <div class="vid-photo-wrap">${stu.photo ? `<img src="${stu.photo}"/>` : `<span style="font-size:0.19in;font-weight:900;color:#0a192f;letter-spacing:-.01in">${ini(stu.name||'?')}</span>`}</div>
+          <!-- Name (covers the EXCELLENCE ACADEMY template text) -->
+          <div class="vid-name">${(stu.name||'Student').replace(/^(\S+)\s+(.+)$/, '$1<br>$2')}</div>
+          <!-- Role -->
+          <div class="vid-role">STUDENT</div>
+          <!-- Data values right-aligned next to each row label -->
+          <div class="vid-val-id">${String(idNo || '001').padStart(3,'0')}</div>
+          <div class="vid-val-grade">${grade}</div>
+          <div class="vid-val-session">${yr}</div>
+          <div class="vid-val-campus">${DB.school.city || 'Karachi'}</div>
+          <div class="vid-qr idp-qr" data-student-id="${stu.id}"></div>
         </div>
       </div>`;
     }
@@ -6804,32 +6785,16 @@
     function staffIdCardHtml(staff) {
       const yr = DB.settings?.schoolYear || '2025 - 2026';
       const isScanner = staff.role === 'scanner';
-      return `<div class="vid-card">
-        <div class="vid-top-deco"></div>
-        <div class="vid-header">
-          <div class="vid-logo-circle">${DB.school.logo ? `<img src="${DB.school.logo}"/>` : `<i class="fas fa-graduation-cap"></i>`}</div>
-          <div class="vid-school-name">${DB.school.name || 'SCHOOL'}</div>
-          <div class="vid-tagline">LEARN &bull; GROW &bull; EXCEL</div>
-        </div>
-        <div class="vid-body">
-          <div class="vid-photo-col">
-            <div class="vid-photo-wrap">${staff.photo ? `<img src="${staff.photo}"/>` : ini(staff.name || '?')}</div>
-            <div class="vid-qr idp-qr-staff" data-staff-id="${staff.id}"></div>
-          </div>
-          <div class="vid-info-col">
-            <div class="vid-name">${staff.name || 'Staff Member'}</div>
-            <div class="vid-role">${isScanner ? 'GATE SCANNER' : 'TEACHING STAFF'}</div>
-            <div class="vid-table">
-              <div class="vid-row"><i class="fas fa-id-badge"></i> <div><span>STAFF ID</span><b>${staff.id.substring(0,6).toUpperCase()}</b></div></div>
-              <div class="vid-row"><i class="fas fa-book"></i> <div><span>SUBJECT</span><b>${staff.subject || (isScanner ? 'Gate Access' : '-')}</b></div></div>
-              <div class="vid-row"><i class="fas fa-phone"></i> <div><span>CONTACT</span><b>${staff.phone || '-'}</b></div></div>
-              <div class="vid-row"><i class="fas fa-map-marker-alt"></i> <div><span>CAMPUS</span><b>${DB.school.city || 'Karachi'}</b></div></div>
-            </div>
-            <div class="vid-sign">
-               <div style="height:.22in;"></div>
-               <span>PRINCIPAL</span>
-            </div>
-          </div>
+      return `<div class="vid-card-wrap" style="display:inline-block; margin:10px;">
+        <div class="vid-card">
+          <div class="vid-photo-wrap">${staff.photo ? `<img src="${staff.photo}"/>` : `<span style="font-size:0.19in;font-weight:900;color:#0a192f;letter-spacing:-.01in">${ini(staff.name||'?')}</span>`}</div>
+          <div class="vid-name">${(staff.name||'Staff').replace(/^(\S+)\s+(.+)$/, '$1<br>$2')}</div>
+          <div class="vid-role">${isScanner ? 'SECURITY' : 'STAFF'}</div>
+          <div class="vid-val-id">STAFF</div>
+          <div class="vid-val-grade">${staff.subject || (isScanner ? 'Gate Duty' : 'Teacher')}</div>
+          <div class="vid-val-session">${yr}</div>
+          <div class="vid-val-campus">${DB.school.city || 'Karachi'}</div>
+          <div class="vid-qr idp-qr-staff" data-staff-id="${staff.id}"></div>
         </div>
       </div>`;
     }
