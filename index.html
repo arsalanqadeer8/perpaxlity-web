@@ -1756,34 +1756,46 @@
       box-shadow: var(--sh2);
       border: 1px solid var(--border);
     }
-    .vid-card { width: 2.125in; height: 3.375in; background: #ffffff; border-radius: .15in; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; box-sizing: border-box; color: #0a192f; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .vid-top-deco { position: absolute; top: -.2in; left: -.2in; width: 1.2in; height: .8in; background: #0a192f; border-radius: 50%; box-shadow: 0 0 0 .06in #fff, 0 0 0 .12in #b48e4b; z-index: 1; }
-    .vid-header { text-align: center; padding-top: .15in; position: relative; z-index: 2; }
-    .vid-logo-circle { width: .6in; height: .6in; margin: 0 auto; border-radius: 50%; border: 2px solid #b48e4b; display: flex; align-items: center; justify-content: center; background: #fff; font-size: .3in; color: #0a192f; overflow: hidden; }
-    .vid-logo-circle img { width: 100%; height: 100%; object-fit: contain; }
-    .vid-school-name { font-weight: 800; font-size: .11in; letter-spacing: .02in; margin-top: .05in; color: #0a192f; }
-    .vid-tagline { font-size: .06in; font-weight: 700; color: #b48e4b; letter-spacing: .03in; margin-top: .02in; }
-    .vid-body { display: flex; margin-top: .1in; padding: 0 .1in; position: relative; z-index: 2; gap: .08in; }
-    .vid-photo-col { width: .75in; display: flex; flex-direction: column; align-items: center; gap: .12in; }
-    .vid-photo-wrap { width: .75in; height: .75in; border-radius: 50%; border: .03in solid #b48e4b; overflow: hidden; background: #eee; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size: .2in; }
+    .vid-card { width: 2.125in; min-height: 3.375in; background: #ffffff; border-radius: .18in; position: relative; box-shadow: 0 8px 30px rgba(0,0,0,0.15); font-family: 'Poppins', 'Segoe UI', sans-serif; overflow: hidden; box-sizing: border-box; color: #0a192f; -webkit-print-color-adjust: exact; print-color-adjust: exact; display: flex; flex-direction: column; }
+    /* top-left and bottom-right corner decorations like reference */
+    .vid-top-deco { position: absolute; top: 0; left: 0; width: .55in; height: .9in; background: #0a192f; border-radius: 0 0 50% 0; z-index: 1; }
+    .vid-top-deco::after { content: ''; position: absolute; top: 0; right: -.12in; bottom: -.12in; width: .25in; height: .35in; background: #b48e4b; border-radius: 0 0 50% 0; }
+    .vid-btm-deco { position: absolute; bottom: 0; right: 0; width: .4in; height: .55in; background: #0a192f; border-radius: 50% 0 0 0; z-index: 1; }
+    .vid-btm-deco::after { content: ''; position: absolute; top: -.1in; left: -.1in; width: .2in; height: .25in; background: #b48e4b; border-radius: 50% 0 0 0; }
+    /* Lanyard hole at top */
+    .vid-hole { width: .18in; height: .1in; background: #ddd; border-radius: .05in; margin: .08in auto .02in; position: relative; z-index: 3; }
+    /* Header: big centred logo */
+    .vid-header { text-align: center; padding: .04in .1in .06in; position: relative; z-index: 2; }
+    .vid-logo-circle { width: .75in; height: .75in; margin: 0 auto .05in; border-radius: 50%; border: .025in solid #b48e4b; display: flex; align-items: center; justify-content: center; background: #fff; overflow: hidden; box-shadow: 0 0 0 .025in rgba(180,142,75,.25); }
+    .vid-logo-circle img { width: 90%; height: 90%; object-fit: contain; }
+    .vid-oxford-banner { background: #0a192f; color: #b48e4b; font-weight: 900; font-size: .12in; letter-spacing: .06in; text-transform: uppercase; padding: .025in .15in; display: inline-block; border-radius: .02in; margin-bottom: .03in; }
+    .vid-school-name { font-weight: 700; font-size: .07in; letter-spacing: .04in; text-transform: uppercase; color: #0a192f; margin-bottom: .02in; }
+    .vid-tagline { font-size: .055in; font-weight: 600; color: #888; letter-spacing: .025in; display: flex; align-items: center; justify-content: center; gap: .04in; }
+    .vid-tagline::before, .vid-tagline::after { content: ''; flex: 1; height: .5px; background: #ddd; }
+    /* Body */
+    .vid-body { display: flex; padding: .08in .1in .04in; position: relative; z-index: 2; gap: .08in; flex: 1; }
+    .vid-photo-col { width: .75in; display: flex; flex-direction: column; align-items: center; gap: .1in; }
+    .vid-photo-wrap { width: .75in; height: .75in; border-radius: 50%; border: .03in solid #b48e4b; overflow: hidden; background: #eee; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size: .22in; color:#0a192f; }
     .vid-photo-wrap img { width: 100%; height: 100%; object-fit: cover; }
-    .vid-qr { width: .6in; height: .6in; background: #fff; border-radius: .05in; }
-    .vid-qr canvas, .vid-qr img { width: 100% !important; height: 100% !important; border-radius: .05in; }
+    .vid-qr { width: .62in; height: .62in; background: #fff; border-radius: .03in; border: .5px solid #eee; }
+    .vid-qr canvas, .vid-qr img { width: 100% !important; height: 100% !important; border-radius: .03in; }
     .vid-info-col { flex: 1; display:flex; flex-direction:column; }
-    .vid-name { font-size: .12in; font-weight: 800; color: #0a192f; line-height: 1.1; text-transform: uppercase; }
-    .vid-role { font-size: .08in; font-weight: 700; color: #b48e4b; margin-top: .02in; letter-spacing: .02in; text-transform: uppercase; }
-    .vid-role::after { content:''; display:block; width:.4in; height:1px; background:#b48e4b; margin-top:.04in; }
-    .vid-table { margin-top: .08in; display:flex; flex-direction:column; gap:.04in; flex:1; }
-    .vid-row { display: flex; align-items: center; gap: .04in; font-size: .06in; border-bottom: .5px solid rgba(10,25,47,0.1); padding-bottom:.02in; }
-    .vid-row i { color: #fff; background: #0a192f; border-radius: 50%; width: .12in; height: .12in; display: flex; align-items: center; justify-content: center; font-size: .07in; flex-shrink:0; }
+    .vid-name { font-size: .13in; font-weight: 900; color: #0a192f; line-height: 1.1; text-transform: uppercase; letter-spacing: .005in; }
+    .vid-role { font-size: .065in; font-weight: 800; color: #b48e4b; margin-top: .02in; letter-spacing: .04in; text-transform: uppercase; }
+    .vid-role::after { content:''; display:block; width:.4in; height:1px; background:#b48e4b; margin-top:.035in; }
+    .vid-table { margin-top: .07in; display:flex; flex-direction:column; gap:.045in; flex:1; }
+    .vid-row { display: flex; align-items: center; gap: .04in; font-size: .058in; border-bottom: .5px solid rgba(10,25,47,0.08); padding-bottom:.03in; }
+    .vid-row i { color: #fff; background: #0a192f; border-radius: 50%; width: .115in; height: .115in; display: flex; align-items: center; justify-content: center; font-size: .065in; flex-shrink:0; }
     .vid-row > div { display: flex; justify-content: space-between; flex: 1; align-items: center; }
-    .vid-row span { opacity: 0.8; }
-    .vid-row b { font-weight: 700; font-size: .065in; color: #0a192f; text-align:right;}
-    .vid-sign { text-align: center; margin-top: .02in; }
-    .vid-sign img { height: .22in; display: block; margin: 0 auto; opacity: 0.8; }
-    .vid-sign span { font-size: .05in; font-weight: 700; color: #0a192f; border-top: .5px solid #b48e4b; padding-top: .02in; display: inline-block; width: .6in; }
-    .vid-footer { position: absolute; bottom: 0; left: -5%; width: 110%; height: .4in; background: #0a192f; border-radius: 50% 50% 0 0 / 100% 100% 0 0; border-top: .02in solid #b48e4b; display: flex; justify-content: center; align-items: flex-end; padding-bottom: .08in; z-index: 1; }
-    .vid-foot-text { font-size: .06in; color: #fff; font-weight: 600; letter-spacing: .02in; display: flex; align-items: center; gap: .05in; }
+    .vid-row span { opacity: 0.65; font-size:.055in; font-weight:600; }
+    .vid-row b { font-weight: 800; font-size: .065in; color: #0a192f; text-align:right; }
+    .vid-sign { text-align: center; margin-top: .03in; }
+    .vid-sign img { height: .2in; display: block; margin: 0 auto; }
+    .vid-sign span { font-size: .048in; font-weight: 700; color: #555; border-top: .5px solid #ccc; padding-top: .02in; display: inline-block; width: .65in; margin-top: .01in; letter-spacing: .03in; }
+    /* Footer */
+    .vid-footer { background: #0a192f; padding: .06in .1in; display: flex; justify-content: center; align-items: center; position: relative; z-index: 2; margin-top: auto; }
+    .vid-footer::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: .18in; height: .18in; background: #b48e4b; clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); }
+    .vid-foot-text { font-size: .055in; color: rgba(255,255,255,0.7); font-weight: 700; letter-spacing: .03in; display: flex; align-items: center; gap: .05in; }
 
     .school-id-card {
       width: 3.375in;
@@ -6836,11 +6848,14 @@
       return `
 <div class="ph fu"><div class="ph-tag"> ${isTeacherCard ? 'Teacher Gate QR' : 'Student ID Card'}</div><h1>${isTeacherCard ? 'My Gate QR' : 'My ID Card'}</h1><div class="ph-sub">Show this card at the school gate for attendance scanning</div></div>
 <div class="id-card-wrap fu d1" style="display:flex; justify-content:center; padding: 20px 0;">
-      <div class="vid-card" style="transform: scale(1.3); transform-origin: top center; margin-bottom: 1in;">
+      <div class="vid-card">
         <div class="vid-top-deco"></div>
+        <div class="vid-btm-deco"></div>
+        <div class="vid-hole"></div>
         <div class="vid-header">
           <div class="vid-logo-circle">${DB.school.logo ? `<img src="${DB.school.logo}"/>` : `<i class="fas fa-graduation-cap"></i>`}</div>
-          <div class="vid-school-name">${DB.school.name || 'SCHOOL'}</div>
+          <div class="vid-oxford-banner">OXFORD</div>
+          <div class="vid-school-name">EXCELLENCE ACADEMY</div>
           <div class="vid-tagline">LEARN &bull; GROW &bull; EXCEL</div>
         </div>
         <div class="vid-body">
