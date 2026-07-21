@@ -1756,27 +1756,31 @@
       box-shadow: var(--sh2);
       border: 1px solid var(--border);
     }
-    /* ===== PREMIUM ID CARD — id card 1.png overlay ===== */
+    /* ===== ID CARD — pixel-perfect positions from 995×1581 template ===== */
+    .vid-card-wrap { display:flex; justify-content:center; align-items:flex-start; padding:20px 0; }
     .vid-card {
       width: 2.125in;
       height: 3.375in;
       position: relative;
-      font-family: 'Poppins', 'Segoe UI', sans-serif;
+      font-family: 'Poppins','Segoe UI',sans-serif;
       box-sizing: border-box;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
-      background: url('id%20card%201.png') center top / 100% 100% no-repeat;
-      border-radius: .18in;
+      background: url('id%20card%201.png') 0 0 / 100% 100% no-repeat;
+      border-radius: .15in;
       overflow: hidden;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.22);
+      transform: scale(1.5);
+      transform-origin: top center;
+      margin-bottom: 1.2in;
     }
-    /* ---- Photo oval (left column, below header) ---- */
+    /* Photo oval: template 50–410px left, 740–1230px top → card: 0.107–0.875in left, 1.58–2.626in top */
     .vid-photo-wrap {
       position: absolute;
-      top: 46.5%;
-      left: 4.5%;
-      width: 36.5%;
-      aspect-ratio: 1 / 1.24;
+      top: 1.58in;
+      left: 0.107in;
+      width: 0.769in;
+      height: 1.046in;
       border-radius: 50%;
       overflow: hidden;
       background: transparent;
@@ -1784,48 +1788,48 @@
       align-items: center;
       justify-content: center;
       font-weight: 900;
-      font-size: .18in;
+      font-size: 0.19in;
       color: #0a192f;
     }
     .vid-photo-wrap img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
-    /* ---- Student name (top-right, above ID row) ---- */
+    /* Student name: right of photo, template x~430, y~750 */
     .vid-name {
       position: absolute;
-      top: 45.5%;
-      left: 46%;
-      right: 3%;
-      font-size: .1in;
+      top: 1.58in;
+      left: 0.92in;
+      right: 0.08in;
+      font-size: 0.1in;
       font-weight: 900;
       color: #0a192f;
-      line-height: 1.2;
+      line-height: 1.25;
       text-transform: uppercase;
-      letter-spacing: .003in;
+      letter-spacing: .002in;
     }
-    /* ---- STUDENT label ---- */
+    /* STUDENT label: just below name */
     .vid-role {
       position: absolute;
-      top: 50.5%;
-      left: 46%;
-      font-size: .055in;
+      top: 1.78in;
+      left: 0.92in;
+      font-size: 0.055in;
       font-weight: 800;
       color: #b48e4b;
       letter-spacing: .04in;
       text-transform: uppercase;
     }
-    /* ---- Data values right-aligned on each row ---- */
-    .vid-val-id     { position:absolute; top:54.5%; right:4%; font-size:.072in; font-weight:800; color:#0a192f; }
-    .vid-val-grade  { position:absolute; top:62%;   right:4%; font-size:.072in; font-weight:800; color:#0a192f; }
-    .vid-val-session{ position:absolute; top:69.5%; right:4%; font-size:.072in; font-weight:800; color:#0a192f; }
-    .vid-val-campus { position:absolute; top:77%;   right:4%; font-size:.072in; font-weight:800; color:#0a192f; }
-    /* ---- QR code (bottom-left, below photo oval) ---- */
+    /* Data values — right-aligned. template rows at y=860, 975, 1107, 1238px */
+    .vid-val-id     { position:absolute; top:1.84in;  right:0.08in; font-size:0.07in; font-weight:800; color:#0a192f; }
+    .vid-val-grade  { position:absolute; top:2.08in;  right:0.08in; font-size:0.07in; font-weight:800; color:#0a192f; }
+    .vid-val-session{ position:absolute; top:2.36in;  right:0.08in; font-size:0.07in; font-weight:800; color:#0a192f; }
+    .vid-val-campus { position:absolute; top:2.64in;  right:0.08in; font-size:0.07in; font-weight:800; color:#0a192f; }
+    /* QR code: bottom-left just below photo oval, template y≈1240–1370 */
     .vid-qr {
       position: absolute;
-      top: 66%;
-      left: 4.5%;
-      width: 17%;
-      aspect-ratio: 1 / 1;
+      top: 2.65in;
+      left: 0.107in;
+      width: 0.5in;
+      height: 0.5in;
       background: #fff;
-      border-radius: .02in;
+      border-radius: 0.02in;
       padding: 1px;
     }
     .vid-qr canvas, .vid-qr img { width:100% !important; height:100% !important; display:block; border-radius:.02in; }
@@ -6880,20 +6884,19 @@
       const chip = isTeacherCard ? (curUser?.subject || 'Teacher') : ((cls?.name || '') + ' ' + (cls?.section || '')).trim();
       return `
 <div class="ph fu"><div class="ph-tag"> ${isTeacherCard ? 'Teacher Gate QR' : 'Student ID Card'}</div><h1>${isTeacherCard ? 'My Gate QR' : 'My ID Card'}</h1><div class="ph-sub">Show this card at the school gate for attendance scanning</div></div>
-<div class="id-card-wrap fu d1" style="display:flex; justify-content:center; padding: 20px 0;">
+<div class="vid-card-wrap fu d1">
       <div class="vid-card">
-        <!-- Photo inside the oval circle -->
-        <div class="vid-photo-wrap">${personPhoto ? `<img src="${personPhoto}"/>` : `<span style="font-size:.2in;font-weight:900;color:#0a192f;letter-spacing:-.02in">${ini(personName||'?')}</span>`}</div>
-        <!-- Name (covers the EXCELLENCE ACADEMY template text) -->
+        <!-- Photo inside the oval -->
+        <div class="vid-photo-wrap">${personPhoto ? `<img src="${personPhoto}"/>` : `<span style="font-size:0.19in;font-weight:900;color:#0a192f;letter-spacing:-.01in">${ini(personName||'?')}</span>`}</div>
+        <!-- Student name + role -->
         <div class="vid-name">${(personName||'Student').replace(/^(\S+)\s+(.+)$/, '$1<br>$2')}</div>
-        <!-- Role -->
         <div class="vid-role">${isTeacherCard ? 'STAFF' : 'STUDENT'}</div>
-        <!-- Data values right-aligned next to each row label -->
+        <!-- Data values -->
         <div class="vid-val-id">${isTeacherCard ? 'STAFF' : String(stu?.roll || '001').padStart(3,'0')}</div>
         <div class="vid-val-grade">${chip}</div>
         <div class="vid-val-session">${DB.settings?.schoolYear || '2025–2026'}</div>
         <div class="vid-val-campus">${DB.school.city || 'Karachi'}</div>
-        <!-- QR code bottom-left -->
+        <!-- QR code -->
         <div class="vid-qr" id="qr-canvas-wrap"></div>
       </div>
 </div>
