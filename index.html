@@ -1817,15 +1817,15 @@
 
     /* Name & Role */
     .ox-name-wrap {
-      position: absolute; top: 880px; left: 0; width: 100%; text-align: center; z-index: 2;
+      position: absolute; top: 820px; left: 0; width: 100%; text-align: center; z-index: 2;
     }
     .ox-name { font-size: 60px; font-weight: 900; color: #0a192f; text-transform: uppercase; line-height: 1.1; margin-bottom: 15px; padding: 0 50px; }
     .ox-role { font-size: 28px; font-weight: 800; color: #b48e4b; letter-spacing: 12px; text-transform: uppercase; }
 
     /* Data Grid */
     .ox-grid {
-      position: absolute; top: 1080px; left: 100px; width: 795px;
-      display: grid; grid-template-columns: 1fr 1fr; gap: 40px 60px; z-index: 2;
+      position: absolute; top: 1000px; left: 100px; width: 795px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 30px 60px; z-index: 2;
     }
     .ox-data-item { border-left: 6px solid #b48e4b; padding-left: 20px; }
     .ox-lbl { font-size: 24px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 2px; }
@@ -1836,18 +1836,9 @@
       position: absolute; bottom: 0; left: 0; width: 100%; height: 220px;
       background: #0a192f; z-index: 0;
     }
-    .ox-footer-shield {
-      position: absolute; bottom: 180px; left: 50%; transform: translateX(-50%);
-      width: 80px; height: 100px; background: #b48e4b;
-      clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%); z-index: 1;
-    }
-    .ox-footer-text-left {
-      position: absolute; bottom: 50px; right: 550px; z-index: 2;
-      font-size: 20px; font-weight: 800; color: #b48e4b; letter-spacing: 6px;
-    }
-    .ox-footer-text-right {
-      position: absolute; bottom: 50px; left: 550px; z-index: 2;
-      font-size: 20px; font-weight: 800; color: #b48e4b; letter-spacing: 6px;
+    .ox-footer-number {
+      position: absolute; bottom: 70px; left: 0; width: 100%; text-align: center; z-index: 2;
+      font-size: 32px; font-weight: 800; color: #b48e4b; letter-spacing: 8px; text-transform: uppercase;
     }
 
     /* QR Code */
@@ -1857,8 +1848,8 @@
       box-shadow: 0 10px 25px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;
     }
     .vid-qr, .idp-qr, .idp-qr-staff { width: 220px; height: 220px; display: flex; align-items: center; justify-content: center; }
-    .vid-qr canvas, .idp-qr canvas, .idp-qr-staff canvas { width: 100% !important; height: auto !important; }
-    .vid-qr img, .idp-qr img, .idp-qr-staff img { display: none !important; }
+    .vid-qr canvas, .idp-qr canvas, .idp-qr-staff canvas { display: none !important; }
+    .vid-qr img, .idp-qr img, .idp-qr-staff img { display: block !important; width: 100% !important; height: auto !important; object-fit: contain; }
 
     .school-id-card {
       width: 3.375in;
@@ -6824,9 +6815,7 @@
             </div>
             
             <div class="ox-footer-bg"></div>
-            <div class="ox-footer-shield"></div>
-            <div class="ox-footer-text-left">SAFE TODAY</div>
-            <div class="ox-footer-text-right">STRONG TOMORROW</div>
+            <div class="ox-footer-number">SCHOOL NUMBER</div>
             
             <div class="ox-qr-wrap"><div class="vid-qr idp-qr" data-student-id="${stu.id}"></div></div>
           </div>
@@ -6871,9 +6860,7 @@
             </div>
             
             <div class="ox-footer-bg"></div>
-            <div class="ox-footer-shield"></div>
-            <div class="ox-footer-text-left">SAFE TODAY</div>
-            <div class="ox-footer-text-right">STRONG TOMORROW</div>
+            <div class="ox-footer-number">SCHOOL NUMBER</div>
             
             <div class="ox-qr-wrap"><div class="vid-qr idp-qr-staff" data-staff-id="${staff.id}"></div></div>
           </div>
@@ -6965,9 +6952,7 @@
             </div>
             
             <div class="ox-footer-bg"></div>
-            <div class="ox-footer-shield"></div>
-            <div class="ox-footer-text-left">SAFE TODAY</div>
-            <div class="ox-footer-text-right">STRONG TOMORROW</div>
+            <div class="ox-footer-number">SCHOOL NUMBER</div>
             
             <div class="ox-qr-wrap"><div class="vid-qr" id="qr-canvas-wrap"></div></div>
         </div>
