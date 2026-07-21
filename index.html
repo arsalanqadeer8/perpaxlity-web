@@ -3142,19 +3142,23 @@
     .ox-cta .ox-btn:hover { background: #fff; transform: translateY(-3px); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
 
     /* Comprehensive Footer */
-    .ox-footer { background: #050d1a; color: #94a3b8; padding: 80px 5% 40px; }
-    .ox-footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 50px; max-width: 1200px; margin: 0 auto 60px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 60px; }
-    .ox-footer h4 { color: #ffffff; font-size: 1.2rem; margin-bottom: 25px; font-weight: 700; font-family: var(--ox-heading); }
-    .ox-footer p { line-height: 1.7; margin-bottom: 20px; font-size: 1rem; }
+    .ox-footer { background: #060e1a; color: #a1b0c7; padding: 100px 5% 40px; position: relative; border-top: 1px solid rgba(255,255,255,0.05); }
+    .ox-footer::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.3), transparent); }
+    .ox-footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 60px; max-width: 1240px; margin: 0 auto 60px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 60px; }
+    .ox-footer h4 { color: #ffffff; font-size: 1.05rem; margin-bottom: 28px; font-weight: 800; font-family: var(--ox-heading); text-transform: uppercase; letter-spacing: 1.5px; }
+    .ox-footer p { line-height: 1.8; margin-bottom: 24px; font-size: 1.05rem; color: #cbd5e1; }
     .ox-footer ul { list-style: none; padding: 0; margin: 0; }
-    .ox-footer ul li { margin-bottom: 14px; }
-    .ox-footer ul a { color: #94a3b8; text-decoration: none; transition: all 0.3s; display: inline-block; }
-    .ox-footer ul a:hover { color: var(--ox-gold); transform: translateX(5px); }
-    .ox-newsletter input { width: 100%; padding: 16px 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); color: white; margin-bottom: 15px; font-size: 1rem; transition: border 0.3s; }
-    .ox-newsletter input:focus { outline: none; border-color: var(--ox-gold); }
-    .ox-newsletter button { width: 100%; background: var(--ox-gold); color: var(--ox-primary); border: none; padding: 16px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.3s; font-size: 1rem; }
-    .ox-newsletter button:hover { background: #ffffff; transform: translateY(-2px); }
-    .ox-footer-bottom { text-align: center; font-size: 0.95rem; color: #64748b; }
+    .ox-footer ul li { margin-bottom: 18px; display: flex; align-items: center; gap: 12px; color: #a1b0c7; }
+    .ox-footer ul li .material-symbols-outlined { color: var(--ox-gold); font-size: 1.3rem !important; }
+    .ox-footer ul a { color: #a1b0c7; text-decoration: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: inline-block; position: relative; }
+    .ox-footer ul a::after { content: ''; position: absolute; width: 0; height: 1px; bottom: -2px; left: 0; background-color: var(--ox-gold); transition: width 0.3s ease; }
+    .ox-footer ul a:hover { color: #ffffff; transform: translateX(6px); }
+    .ox-footer ul a:hover::after { width: 100%; }
+    .ox-newsletter input { width: 100%; padding: 18px 24px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); color: white; margin-bottom: 18px; font-size: 1rem; transition: all 0.3s ease; backdrop-filter: blur(10px); }
+    .ox-newsletter input:focus { outline: none; border-color: var(--ox-gold); background: rgba(255,255,255,0.08); box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1); }
+    .ox-newsletter button { width: 100%; background: var(--ox-gold); color: #0a192f; border: none; padding: 18px; border-radius: 50px; font-weight: 800; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-size: 1.05rem; letter-spacing: 0.5px; box-shadow: 0 10px 25px -5px rgba(212, 175, 55, 0.3); }
+    .ox-newsletter button:hover { background: #ffffff; transform: translateY(-3px); box-shadow: 0 15px 30px -5px rgba(255, 255, 255, 0.2); }
+    .ox-footer-bottom { text-align: center; font-size: 0.95rem; color: #64748b; font-weight: 500; }
     
     /* Mobile Overrides & Hamburger Menu */
     .mobile-only { display: none !important; }
@@ -3548,9 +3552,9 @@
             <div>
                 <h4>Contact Us</h4>
                 <ul>
-                    <li><span class="material-symbols-outlined" style="font-size:inherit;vertical-align:-2px;">call</span> +923205772271</li>
-                    <li><span class="material-symbols-outlined" style="font-size:inherit;vertical-align:-2px;">mail</span> info@oxfordexcellenceacademy.com</li>
-                    <li><span class="material-symbols-outlined" style="font-size:inherit;vertical-align:-2px;">location_on</span> bagh e korangi karachi</li>
+                    <li><span class="material-symbols-outlined">call</span> +923205772271</li>
+                    <li><span class="material-symbols-outlined">mail</span> info@oxfordexcellenceacademy.com</li>
+                    <li><span class="material-symbols-outlined">location_on</span> bagh e korangi karachi</li>
                 </ul>
             </div>
             <div class="ox-newsletter">
@@ -3588,20 +3592,37 @@
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         .ox-socials {
-            margin-top: 20px;
+            margin-top: 30px;
             display: flex;
-            gap: 15px;
+            gap: 16px;
         }
         .ox-socials a {
             color: white !important;
             opacity: 1;
-            transition: 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
             justify-content: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .ox-socials a:hover {
+            background: var(--ox-gold);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px -5px rgba(212, 175, 55, 0.4);
+            border-color: var(--ox-gold);
         }
         .ox-socials a svg {
             fill: white !important;
+            width: 20px;
+            height: 20px;
+            transition: transform 0.3s ease;
+        }
+        .ox-socials a:hover svg {
+            transform: scale(1.1);
         }
         .wa-float:hover {
             transform: scale(1.1) translateY(-5px);
