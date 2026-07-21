@@ -3155,6 +3155,14 @@
     .ox-footer ul a:hover { color: #ffffff; transform: translateX(6px); }
     .ox-footer ul a:hover::after { width: 100%; }
     .ox-newsletter input { width: 100%; padding: 18px 24px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); color: white; margin-bottom: 18px; font-size: 1rem; transition: all 0.3s ease; backdrop-filter: blur(10px); }
+    .ox-newsletter input:-webkit-autofill,
+    .ox-newsletter input:-webkit-autofill:hover, 
+    .ox-newsletter input:-webkit-autofill:focus, 
+    .ox-newsletter input:-webkit-autofill:active {
+        -webkit-box-shadow: 0 0 0 30px #060e1a inset !important;
+        -webkit-text-fill-color: white !important;
+        transition: background-color 5000s ease-in-out 0s;
+    }
     .ox-newsletter input:focus { outline: none; border-color: var(--ox-gold); background: rgba(255,255,255,0.08); box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1); }
     .ox-newsletter button { width: 100%; background: var(--ox-gold); color: #0a192f; border: none; padding: 18px; border-radius: 50px; font-weight: 800; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-size: 1.05rem; letter-spacing: 0.5px; box-shadow: 0 10px 25px -5px rgba(212, 175, 55, 0.3); }
     .ox-newsletter button:hover { background: #ffffff; transform: translateY(-3px); box-shadow: 0 15px 30px -5px rgba(255, 255, 255, 0.2); }
