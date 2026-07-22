@@ -5229,7 +5229,7 @@
     <div class="fg"><label class="fl">Parent WhatsApp</label><input class="fi" id="m-wa" value="${s?.whatsapp || ''}" placeholder="923XXXXXXXXX (with code)"/></div>
   </div>
   <div class="fg2">
-    <div class="fg"><label class="fl">Monthly Fee</label><input class="fi" type="number" id="m-customfee" value="${(s && s.customFee !== undefined && s.customFee !== '') ? num(s.customFee) : ''}" placeholder="Use default fee"/></div>
+    <div class="fg"><label class="fl">Monthly Fee (Tuition)</label><input class="fi" type="number" id="m-customfee" value="${s ? monthlyFeeAmount(s) : ''}" placeholder="Use default fee"/><div class="fhint" style="font-size:.64rem;color:var(--ink4);margin-top:2px;">Effective monthly tuition fee for this student</div></div>
     <div class="fg"><label class="fl">Van Fee (Transport)</label><input class="fi" type="number" id="m-vanfee" value="${(s && s.vanFee !== undefined && s.vanFee !== '') ? num(s.vanFee) : ''}" placeholder="0"/></div>
   </div>
   <div class="fg2">
@@ -5380,7 +5380,7 @@
     </div>
   </div>
     ${sibs.length ? `<div style="background:var(--vl);border:1px solid rgba(124,58,237,.15);border-radius:8px;padding:8px 11px;margin-bottom:11px;font-size:.75rem;"><b style="color:var(--v);">Siblings:</b> ${sibs.map(sb => `${sb.name} (${(DB.classes.find(c => c.id === sb.classId) || {}).name || '?'})`).join(' - ')}</div>` : ''}
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px;">${[['Father', s.father], ['Phone', s.fphone], ['Mother', s.mother], ['WhatsApp', s.whatsapp], ['DOB', fmtDate(s.dob)], ['Login', s.loginEmail]].map(([l, v]) => `<div style="background:var(--card2);border-radius:8px;padding:8px;"><div style="font-size:.62rem;color:var(--ink4);margin-bottom:1px;">${l}</div><div style="font-size:.78rem;font-weight:600;">${v || '-'}</div></div>`).join('')}</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px;">${[['Father', s.father], ['Phone', s.fphone], ['Mother', s.mother], ['WhatsApp', s.whatsapp], ['Monthly Fee', fmtMoney(monthlyFeeAmount(s))], ['Previous Arrears', fmtMoney(num(s.arrears))], ['DOB', fmtDate(s.dob)], ['Login', s.loginEmail]].map(([l, v]) => `<div style="background:var(--card2);border-radius:8px;padding:8px;"><div style="font-size:.62rem;color:var(--ink4);margin-bottom:1px;">${l}</div><div style="font-size:.78rem;font-weight:600;">${v || '-'}</div></div>`).join('')}</div>
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><div style="font-size:.76rem;font-weight:700;color:var(--ink2);">Subject Scores</div><select class="fi" style="width:100px;padding:2px 5px;font-size:.7rem;height:auto;" onchange="curTerm=this.value;closeModal();openStuDetail('${sid}','${cid}')">${DB.settings.terms.map(t => `<option value="${t.id}" ${curTerm===t.id?'selected':''}>${t.name}</option>`).join('')}</select></div>
   <div class="score-mini">${getClsSubjects(cid).map(sub => { const v = (DB.grades[cid + '_' + curTerm]?.[sid] || {})[sub.id] || 0; return `<div class="sm-row"><div class="sm-lbl">${sub.icon} ${sub.name}</div><div class="sm-bar"><div class="sm-fill" style="width:${v}%;background:${sub.color};"></div></div><div class="sm-val" style="color:${sub.color};">${v || '-'}</div></div>`; }).join('')}</div>
   <div class="m-btns" style="margin-top:13px;flex-wrap:wrap;">
