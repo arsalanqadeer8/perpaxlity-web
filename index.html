@@ -4318,11 +4318,12 @@
       DB.fees.payments = DB.fees.payments || {};
       DB.fees.monthlyLedger = DB.fees.monthlyLedger || {};
       const cm = monthKey();
+      const isBeforeAugust = cm < '2026-08';
       allStus().forEach(s => {
         if (s.customFee === 0 || s.customFee === '0') s.customFee = '';
         const sid = s.id;
         DB.fees.monthlyLedger[sid] = DB.fees.monthlyLedger[sid] || {};
-        const activeFee = monthlyFeeAmount(s);
+        const activeFee = isBeforeAugust ? 0 : monthlyFeeAmount(s);
         if (!DB.fees.monthlyLedger[sid][cm]) {
           DB.fees.monthlyLedger[sid][cm] = { month: cm, paid: false, amount: activeFee };
         } else if (!DB.fees.monthlyLedger[sid][cm].paid) {
@@ -5902,8 +5903,10 @@
       const isPaid = mRow ? mRow.paid : false;
       const amountPaid = mRow ? num(mRow.amountPaid) : 0;
       
-      const tuition = monthlyFeeAmount(s);
-      const van = num(s.vanFee || 0);
+      const billMonth = month || monthKey();
+      const isBeforeAugust = billMonth < '2026-08';
+      const tuition = isBeforeAugust ? 0 : monthlyFeeAmount(s);
+      const van = isBeforeAugust ? 0 : num(s.vanFee || 0);
       const arrears = mRow ? num(mRow.arrearsSnapshot || 0) : num(s.arrears || 0);
       
       let itemsTotal = 0;
