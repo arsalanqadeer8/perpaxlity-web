@@ -5438,7 +5438,7 @@
         if (!DB.families[familyId]) DB.families[familyId] = { id: familyId, parentName: familyName || parentEmail || (name + ' Family'), phone: row.parent_phone || row.father_phone || row.phone || '', email: parentEmail, address: row.address || '', whatsapp: row.whatsapp || '', studentIds: [] };
       }
       const newId = uid();
-      const student = { id: newId, name, roll, classId, gender: row.gender || '', dob: row.dob || row.date_of_birth || '', blood: row.blood || row.blood_group || '', fees: row.fee_status || row.fees || 'Pending', father: row.father_name || row.father || row.parent_name || '', fphone: row.father_phone || row.parent_phone || row.phone || '', mother: row.mother_name || row.mother || '', address: row.address || '', whatsapp: row.whatsapp || '', photo: row.photo || row.photo_url || row.image || row.image_url || '', familyId, loginEmail, customFee: num(row.monthly_fee || row.custom_fee || row.fee_amount || 0), attendance: 0 };
+      const student = { id: newId, name, roll, classId, gender: row.gender || '', dob: row.dob || row.date_of_birth || '', blood: row.blood || row.blood_group || '', fees: row.fee_status || row.fees || 'Pending', father: row.father_name || row.father || row.parent_name || '', fphone: row.father_phone || row.parent_phone || row.phone || '', mother: row.mother_name || row.mother || '', address: row.address || '', whatsapp: row.whatsapp || '', photo: row.photo || row.photo_url || row.image || row.image_url || '', familyId, loginEmail, customFee: num(row.monthly_fee || row.custom_fee || row.fee_amount || 0), previousSchool: row.previous_school || row.previousSchool || '', notes: row.notes || row.message || row.remarks || '', attendance: 0 };
       DB.students[classId].push(student);
       DB.users.push({ id: uid(), name, email: loginEmail, role: 'student', photo: student.photo, studentId: newId, classId });
       if (familyId) {
@@ -5451,6 +5451,8 @@
           else DB.users.push({ id: uid(), name: fam.parentName, email: parentEmail, role: 'parent', photo: '', familyId });
         }
       }
+      DB.admissions = DB.admissions || [];
+      DB.admissions.push({ id: uid(), studentName: name, classId, className: DB.classes.find(c => c.id === classId)?.name || '', father: student.father, mother: student.mother, phone: student.fphone, whatsapp: student.whatsapp, email: loginEmail, dob: student.dob, gender: student.gender, previousSchool: student.previousSchool, address: student.address, notes: student.notes, status: 'approved', convertedStudentId: newId, createdAt: today() });
       return true;
     }
 
