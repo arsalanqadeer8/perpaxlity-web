@@ -5818,21 +5818,24 @@
       const stu = allStus().find(x => x.id === sid);
       const allItems = DB.fees.items || [];
       const mandatory = allItems.filter(f => f.mandatory);
-      
+      const cm = monthKey();
+      const isBeforeAugust = cm < '2026-08';
+
       let paidAmount = 0;
       if (DB.fees.monthlyLedger && DB.fees.monthlyLedger[sid]) {
-         Object.values(DB.fees.monthlyLedger[sid]).forEach(m => paidAmount += num(m.amountPaid));
-      }
-      
-      const dueAmount = num(stu?.arrears || 0);
-      const currentMonth = monthKey();
-      const currentBill = typeof calcStudentFeeBill === 'function' ? calcStudentFeeBill(sid, currentMonth) : null;
-      let totalDue = dueAmount;
-      if (currentBill && !currentBill.isPaid) {
-          totalDue = currentBill.totalDue;
+        Object.values(DB.fees.monthlyLedger[sid]).forEach(m => paidAmount += num(m.amountPaid));
       }
 
-      return { payments: DB.fees.payments[sid] || {}, mandatory, mandatoryPaid: 0, paidAmount, dueAmount: totalDue, totalAmount: paidAmount + totalDue };
+      // For July and before: balance = previous_arrears only (monthly fee starts August)
+      // For August+: balance = arrears + current month tuition + van + items
+      const arrears = num(stu?.arrears || 0);
+      let totalDue = arrears;
+      if (!isBeforeAugust) {
+        const currentBill = typeof calcStudentFeeBill === 'function' ? calcStudentFeeBill(sid, cm) : null;
+        if (currentBill && !currentBill.isPaid) totalDue = currentBill.totalDue;
+      }
+
+      return { payments: DB.fees.payments[sid] || {}, mandatory, mandatoryPaid: 0, paidAmount, dueAmount: totalDue, arrears, totalAmount: paidAmount + totalDue };
     }
 
     function pgFees() {
@@ -5841,8 +5844,11 @@
       const summaries = all.map(s => studentFeeSummary(s.id));
       const collected = summaries.reduce((sum, x) => sum + x.paidAmount, 0);
       const pending = summaries.reduce((sum, x) => sum + x.dueAmount, 0);
+      const totalArrears = all.reduce((sum, s) => sum + num(s.arrears || 0), 0);
       const fullyPaid = summaries.filter(x => x.mandatory.length && x.mandatoryPaid === x.mandatory.length).length;
       const totalAnnual = DB.fees.items.filter(f => f.mandatory).reduce((a, f) => a + Number(f.amount || 0), 0);
+      const cm = monthKey();
+      const isBeforeAugust = cm < '2026-08';
       return `
 <div class="ph ph-row fu">
   <div><div class="ph-tag"> Fees</div><h1>Fee Management</h1><div class="ph-sub">Year ${DB.settings?.schoolYear || ''} - all fee items per student</div></div>
@@ -5854,11 +5860,19 @@
 </div>
 <div class="fee-hero fu">
   <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-    <div><div style="font-size:.7rem;opacity:.65;">Total Collection</div><div style="font-family:var(--head);font-size:1.7rem;font-weight:700;margin:4px 0;">${fmtMoney(collected)}</div><div style="font-size:.7rem;opacity:.6;">${fullyPaid} fully paid - ${all.length - fullyPaid} pending</div></div>
-    <div style="text-align:right;"><div style="font-size:.7rem;opacity:.65;">Pending Balance</div><div style="font-family:var(--head);font-size:1.1rem;font-weight:700;margin-top:3px;">${fmtMoney(pending)}</div><div style="font-size:.68rem;opacity:.62;">Base Mandatory ${fmtMoney(totalAnnual)}</div></div>
+    <div>
+      <div style="font-size:.7rem;opacity:.65;">Total Collection</div>
+      <div style="font-family:var(--head);font-size:1.7rem;font-weight:700;margin:4px 0;">${fmtMoney(collected)}</div>
+      <div style="font-size:.7rem;opacity:.6;">${fullyPaid} fully paid - ${all.length - fullyPaid} pending</div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:.7rem;opacity:.65;">${isBeforeAugust ? 'Total Prev. Arrears' : 'Pending Balance'}</div>
+      <div style="font-family:var(--head);font-size:1.1rem;font-weight:700;margin-top:3px;color:var(--o);">${fmtMoney(isBeforeAugust ? totalArrears : pending)}</div>
+      <div style="font-size:.68rem;opacity:.62;">${isBeforeAugust ? 'Monthly fee starts Aug 2026' : 'Base Mandatory ' + fmtMoney(totalAnnual)}</div>
+    </div>
   </div>
   <div class="fh-bar"><div class="fh-fill" style="width:${collected + pending ? Math.round(collected / (collected + pending) * 100) : 0}%;"></div></div>
-  <div style="display:flex;justify-content:space-between;font-size:.68rem;opacity:.6;margin-top:4px;"><span>${collected + pending ? Math.round(collected / (collected + pending) * 100) : 0}% collected</span><span>${fmtMoney(pending)} pending</span></div>
+  <div style="display:flex;justify-content:space-between;font-size:.68rem;opacity:.6;margin-top:4px;"><span>${collected + (isBeforeAugust ? totalArrears : pending) ? Math.round(collected / (collected + (isBeforeAugust ? totalArrears : pending)) * 100) : 0}% collected</span><span>${isBeforeAugust ? fmtMoney(totalArrears) + ' total arrears' : fmtMoney(pending) + ' pending'}</span></div>
 </div>
 <div class="g2">
   <div class="card fu d2">
@@ -5877,7 +5891,8 @@
         const sum = studentFeeSummary(s.id);
         const complete = sum.mandatory.length && sum.mandatoryPaid === sum.mandatory.length;
         const cls = DB.classes.find(c => c.id === s.classId);
-        return `<tr><td><div style="font-weight:700;font-size:.78rem;">${s.name}</div><div style="font-size:.63rem;color:var(--ink4);">Roll ${s.roll}</div></td><td style="font-size:.72rem;">${cls?.name || '-'}</td><td><span class="badge ${complete ? 'bg2' : 'br2'}">${sum.mandatoryPaid}/${sum.mandatory.length} paid</span></td><td><div style="font-weight:800;color:${sum.dueAmount ? 'var(--r)' : 'var(--g)'};font-size:.85rem;">${fmtMoney(sum.dueAmount)}</div>${num(s.arrears) > 0 ? `<div style="font-size:.65rem;color:var(--o);font-weight:700;margin-top:1px;">Arrears: ${fmtMoney(num(s.arrears))}</div>` : `<div style="font-size:.65rem;color:var(--ink4);margin-top:1px;">Monthly: ${fmtMoney(monthlyFeeAmount(s))}</div>`}</td>
+        const arrBalance = num(s.arrears || 0);
+        return `<tr><td><div style="font-weight:700;font-size:.78rem;">${s.name}</div><div style="font-size:.63rem;color:var(--ink4);">Roll ${s.roll}</div></td><td style="font-size:.72rem;">${cls?.name || '-'}</td><td><span class="badge ${complete ? 'bg2' : 'br2'}">${sum.mandatoryPaid}/${sum.mandatory.length} paid</span></td><td><div style="font-weight:800;color:${arrBalance > 0 ? 'var(--r)' : 'var(--g)'};font-size:.85rem;">${fmtMoney(arrBalance)}</div><div style="font-size:.65rem;color:var(--ink4);margin-top:1px;">Monthly (Aug+): ${fmtMoney(monthlyFeeAmount(s))}</div></td>
         <td><div style="display:flex;gap:3px;flex-wrap:wrap;">
           <button class="btn btn-xs btn-p" onclick="openStudentFeeModal('${s.id}')">Manage</button>
             ${s.whatsapp && sum.dueAmount ? `<button class="btn btn-xs btn-wa" onclick="openFeeReminderModal('${s.id}')">WA</button>` : ''}
