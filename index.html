@@ -5561,8 +5561,22 @@
       if (!rows.length) { showToast('CSV has no student rows', 'te'); return; }
       const fallbackClassId = document.getElementById('bi-cls')?.value || curCls || DB.classes[0]?.id;
       let added = 0;
-      rows.filter(r => !r.role || String(r.role).toLowerCase() === 'student').forEach((row, i) => { if (addBulkStudent(row, fallbackClassId, i)) added++; });
-      saveDB(); closeModal(); showToast(`? ${added} students imported. Create Auth users from the same CSV passwords.`, 'ts'); goPage('students');
+      // Debug: log each row's arrears parsing
+      const studentRows = rows.filter(r => !r.role || String(r.role).toLowerCase() === 'student');
+      let csvArrearsTotal = 0;
+      studentRows.forEach((row, i) => {
+        const rawA = row.previous_arrears || row.previous_arrear || row.arrears || row.arrear || row.previous_arrears_balance || row.arrear_balance || row.prev_arrears || '';
+        const parsed = num(rawA);
+        csvArrearsTotal += parsed;
+        console.log(`[Import] Row ${i+1} "${row.name}": raw arrears="${rawA}" → parsed=${parsed}`);
+        if (addBulkStudent(row, fallbackClassId, i)) added++;
+      });
+      const dbArrearsTotal = allStus().reduce((s, x) => s + num(x.arrears || 0), 0);
+      console.log(`[Import] CSV arrears total: ${csvArrearsTotal} | DB arrears total after import: ${dbArrearsTotal}`);
+      saveDB();
+      closeModal();
+      showToast(`✅ ${added} students imported. CSV Arrears: PKR ${csvArrearsTotal.toLocaleString()} | DB Arrears: PKR ${dbArrearsTotal.toLocaleString()}`, 'ts');
+      goPage('students');
     }
 
     /* ------------------------------- ATTENDANCE ------------------------------- */
