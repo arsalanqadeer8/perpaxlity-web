@@ -4262,7 +4262,18 @@
     function attPct(cid, sid) { const a = (DB.attendance[cid] || {})[sid] || {}; const arr = Object.values(a); if (!arr.length) return clsStus(cid).find(s => s.id === sid)?.attendance || 0; return Math.round(arr.filter(x => x === 'P').length / arr.length * 100); }
     function nextRoll(cid) { const s = clsStus(cid); return String(s.length + 1).padStart(3, '0'); }
     function nowHHMM() { const n = new Date(); return `${String(n.getHours()).padStart(2, '0')}:${String(n.getMinutes()).padStart(2, '0')}`; }
-    function num(v) { return Number(v) || 0; }
+    function num(v) {
+      if (typeof v === 'number') return isNaN(v) ? 0 : v;
+      const str = String(v || '').trim().replace(/,/g, '');
+      return Number(str) || 0;
+    }
+    function parseFeeVal(v) {
+      if (v === undefined || v === null || v === '') return '';
+      if (typeof v === 'number') return isNaN(v) ? '' : v;
+      const str = String(v).trim().replace(/,/g, '');
+      const n = Number(str);
+      return isNaN(n) ? '' : n;
+    }
     function fmtMoney(v) { return `${DB.settings?.currency || 'PKR'} ${num(v).toLocaleString()}`; }
     function normalizePhone(v) {
       let phone = String(v || '').trim().replace(/[^\d+]/g, '');
@@ -5441,14 +5452,14 @@
         familyId = existing?.id || uid();
         if (!DB.families[familyId]) DB.families[familyId] = { id: familyId, parentName: familyName || parentEmail || (name + ' Family'), phone: row.parent_phone || row.father_phone || row.phone || '', email: parentEmail, address: row.address || '', whatsapp: row.whatsapp || '', studentIds: [] };
       }
-      const rawFeeStatus = row.fee_status || row.feestatus || (row.fees && isNaN(Number(row.fees)) ? row.fees : '');
+      const rawFeeStatus = row.fee_status || row.feestatus || (row.fees && isNaN(Number(String(row.fees).replace(/,/g,''))) ? row.fees : '');
       const fees = (rawFeeStatus && String(rawFeeStatus).toLowerCase() === 'paid') ? 'Paid' : 'Pending';
-      const rawCustomFee = row.monthly_fee || row.monthlyfee || row.monthly || row.custom_fee || row.customfee || row.fee_amount || row.fee || row.tuition_fee || row.tuitionfee || row.tuition || row.fees_amount || row.monthly_dues || (row.fees && !isNaN(Number(row.fees)) ? row.fees : '');
-      const customFee = (rawCustomFee !== undefined && rawCustomFee !== '' && !isNaN(Number(rawCustomFee)) && Number(rawCustomFee) > 0) ? Number(rawCustomFee) : '';
+      const rawCustomFee = row.monthly_fee || row.monthlyfee || row.monthly || row.custom_fee || row.customfee || row.fee_amount || row.fee || row.tuition_fee || row.tuitionfee || row.tuition || row.fees_amount || row.monthly_dues || (row.fees && !isNaN(Number(String(row.fees).replace(/,/g,''))) ? row.fees : '');
+      const customFee = parseFeeVal(rawCustomFee);
       const rawVanFee = row.van_fee || row.vanfee || row.transport_fee || row.transportfee || row.bus_fee || row.busfee;
-      const vanFee = (rawVanFee !== undefined && rawVanFee !== '' && !isNaN(Number(rawVanFee))) ? Number(rawVanFee) : '';
+      const vanFee = parseFeeVal(rawVanFee);
       const rawArrears = row.previous_arrears || row.previous_arrear || row.arrears || row.arrear || row.previous_arrears_balance || row.arrear_balance;
-      const arrears = (rawArrears !== undefined && rawArrears !== '' && !isNaN(Number(rawArrears))) ? Number(rawArrears) : 0;
+      const arrears = num(rawArrears);
       const student = { id: newId, name, roll, classId, gender: row.gender || '', dob: row.dob || row.date_of_birth || '', blood: row.blood || row.blood_group || '', fees, father: row.father_name || row.father || row.parent_name || '', fphone: row.father_phone || row.parent_phone || row.phone || '', mother: row.mother_name || row.mother || '', address: row.address || '', whatsapp: row.whatsapp || '', photo: row.photo || row.photo_url || row.image || row.image_url || '', familyId, loginEmail, customFee, vanFee, arrears, previousSchool: row.previous_school || row.previousSchool || '', notes: row.notes || row.message || row.remarks || '', attendance: 0 };
       DB.students[classId].push(student);
       DB.users.push({ id: uid(), name, email: loginEmail, role: 'student', photo: student.photo, studentId: newId, classId });
