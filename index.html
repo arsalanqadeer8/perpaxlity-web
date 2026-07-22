@@ -4318,12 +4318,11 @@
       DB.fees.payments = DB.fees.payments || {};
       DB.fees.monthlyLedger = DB.fees.monthlyLedger || {};
       const cm = monthKey();
-      const isBeforeAugust = cm < '2026-08';
       allStus().forEach(s => {
         if (s.customFee === 0 || s.customFee === '0') s.customFee = '';
         const sid = s.id;
         DB.fees.monthlyLedger[sid] = DB.fees.monthlyLedger[sid] || {};
-        const activeFee = isBeforeAugust ? 0 : monthlyFeeAmount(s);
+        const activeFee = monthlyFeeAmount(s);
         if (!DB.fees.monthlyLedger[sid][cm]) {
           DB.fees.monthlyLedger[sid][cm] = { month: cm, paid: false, amount: activeFee };
         } else if (!DB.fees.monthlyLedger[sid][cm].paid) {
@@ -5497,11 +5496,12 @@
         attendance: 0
       };
 
-      const existingStudent = DB.students[classId].find(s => (s.roll && String(s.roll).trim() === String(roll).trim()) || (s.name && s.name.trim().toLowerCase() === name.trim().toLowerCase()));
+      const existingStudent = allStus().find(s => (s.roll && String(s.roll).trim() === String(roll).trim()) || (s.name && s.name.trim().toLowerCase() === name.trim().toLowerCase()));
       let newId;
       if (existingStudent) {
         newId = existingStudent.id;
-        Object.assign(existingStudent, studentData);
+        const targetClassId = existingStudent.classId || classId;
+        Object.assign(existingStudent, studentData, { classId: targetClassId });
       } else {
         newId = uid();
         const student = { id: newId, ...studentData };
@@ -5877,7 +5877,7 @@
         const sum = studentFeeSummary(s.id);
         const complete = sum.mandatory.length && sum.mandatoryPaid === sum.mandatory.length;
         const cls = DB.classes.find(c => c.id === s.classId);
-        return `<tr><td><div style="font-weight:700;font-size:.78rem;">${s.name}</div><div style="font-size:.63rem;color:var(--ink4);">Roll ${s.roll}</div></td><td style="font-size:.72rem;">${cls?.name || '-'}</td><td><span class="badge ${complete ? 'bg2' : 'br2'}">${sum.mandatoryPaid}/${sum.mandatory.length} paid</span></td><td><b style="color:${sum.dueAmount ? 'var(--r)' : 'var(--g)'};">${fmtMoney(sum.dueAmount)}</b></td>
+        return `<tr><td><div style="font-weight:700;font-size:.78rem;">${s.name}</div><div style="font-size:.63rem;color:var(--ink4);">Roll ${s.roll}</div></td><td style="font-size:.72rem;">${cls?.name || '-'}</td><td><span class="badge ${complete ? 'bg2' : 'br2'}">${sum.mandatoryPaid}/${sum.mandatory.length} paid</span></td><td><div style="font-weight:800;color:${sum.dueAmount ? 'var(--r)' : 'var(--g)'};font-size:.85rem;">${fmtMoney(sum.dueAmount)}</div>${num(s.arrears) > 0 ? `<div style="font-size:.65rem;color:var(--o);font-weight:700;margin-top:1px;">Arrears: ${fmtMoney(num(s.arrears))}</div>` : `<div style="font-size:.65rem;color:var(--ink4);margin-top:1px;">Monthly: ${fmtMoney(monthlyFeeAmount(s))}</div>`}</td>
         <td><div style="display:flex;gap:3px;flex-wrap:wrap;">
           <button class="btn btn-xs btn-p" onclick="openStudentFeeModal('${s.id}')">Manage</button>
             ${s.whatsapp && sum.dueAmount ? `<button class="btn btn-xs btn-wa" onclick="openFeeReminderModal('${s.id}')">WA</button>` : ''}
@@ -5903,10 +5903,8 @@
       const isPaid = mRow ? mRow.paid : false;
       const amountPaid = mRow ? num(mRow.amountPaid) : 0;
       
-      const billMonth = month || monthKey();
-      const isBeforeAugust = billMonth < '2026-08';
-      const tuition = isBeforeAugust ? 0 : monthlyFeeAmount(s);
-      const van = isBeforeAugust ? 0 : num(s.vanFee || 0);
+      const tuition = monthlyFeeAmount(s);
+      const van = num(s.vanFee || 0);
       const arrears = mRow ? num(mRow.arrearsSnapshot || 0) : num(s.arrears || 0);
       
       let itemsTotal = 0;
