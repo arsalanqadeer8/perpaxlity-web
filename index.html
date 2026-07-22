@@ -5518,7 +5518,7 @@
         }
       }
       DB.admissions = DB.admissions || [];
-      DB.admissions.push({ id: uid(), studentName: name, classId, className: DB.classes.find(c => c.id === classId)?.name || '', father: student.father, mother: student.mother, phone: student.fphone, whatsapp: student.whatsapp, email: loginEmail, dob: student.dob, gender: student.gender, previousSchool: student.previousSchool, address: student.address, notes: student.notes, status: 'approved', convertedStudentId: newId, createdAt: today() });
+      DB.admissions.push({ id: uid(), studentName: name, classId, className: DB.classes.find(c => c.id === classId)?.name || '', father: studentData.father, mother: studentData.mother, phone: studentData.fphone, whatsapp: studentData.whatsapp, email: loginEmail, dob: studentData.dob, gender: studentData.gender, previousSchool: studentData.previousSchool, address: studentData.address, notes: studentData.notes, status: 'approved', convertedStudentId: newId, createdAt: today() });
       return true;
     }
 
