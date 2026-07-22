@@ -5429,65 +5429,81 @@
       row.push(cur);
       if (row.some(v => String(v).trim())) rows.push(row);
       if (rows.length < 2) return [];
-      const headers = rows[0].map(h => String(h || '').trim().toLowerCase().replace(/\s+/g, '_'));
+      const headers = rows[0].map(h => String(h || '').trim().toLowerCase().replace(/[\s\-\.]+/g, '_'));
       return rows.slice(1).map(r => Object.fromEntries(headers.map((h, i) => [h, String(r[i] || '').trim()])));
     }
 
     function findClassFromBulk(value, fallbackId) {
-      const v = String(value || '').trim().toLowerCase();
-      if (!v) return fallbackId;
-      const found = DB.classes.find(c => c.id.toLowerCase() === v || c.name.toLowerCase() === v || (c.name + ' ' + (c.section || '')).trim().toLowerCase() === v);
+      const raw = String(value || '').trim();
+      if (!raw) return fallbackId;
+      const v = raw.toLowerCase();
+      const numOnly = v.replace(/\D/g, '');
+      const found = DB.classes.find(c => {
+        const cn = c.name.toLowerCase();
+        const cid = c.id.toLowerCase();
+        const cnum = cn.replace(/\D/g, '');
+        return cid === v || cn === v || (c.name + ' ' + (c.section || '')).trim().toLowerCase() === v || (numOnly && cnum === numOnly);
+      });
       return found?.id || fallbackId;
     }
 
     function addBulkStudent(row, fallbackClassId, index) {
-      const name = row.name || row.student_name || row.full_name;
+      const name = row.name || row.student_name || row.full_name || row.studentname || row.fullname;
       if (!name) return false;
-      const classId = findClassFromBulk(row.class || row.class_id || row.class_name, fallbackClassId);
+      const classId = findClassFromBulk(row.class || row.class_id || row.class_name || row.classname || row.grade || row.standard, fallbackClassId);
       if (!DB.students[classId]) DB.students[classId] = [];
-      const roll = row.roll || row.roll_no || row.roll_number || String(DB.students[classId].length + 1 + index).padStart(3, '0');
+      const roll = row.roll || row.roll_no || row.roll_number || row.rollno || row.rollnumber || row.gr_no || row.grno || row.gr_number || row.id || String(DB.students[classId].length + 1 + index).padStart(3, '0');
       const clsName = (DB.classes.find(c => c.id === classId)?.name || 'class').toLowerCase().replace(/\s/g, '');
-      const loginEmail = (row.email || row.student_email || (String(roll).toLowerCase() + '.' + clsName + '@school.edu')).toLowerCase();
-      const familyName = row.parent_name || row.family || '';
-      const parentEmail = (row.parent_email || '').toLowerCase();
+      const loginEmail = (row.email || row.student_email || row.studentemail || (String(roll).toLowerCase() + '.' + clsName + '@school.edu')).toLowerCase();
+      const familyName = row.parent_name || row.family || row.family_name || row.familyname || '';
+      const parentEmail = (row.parent_email || row.parentemail || row.guardian_email || '').toLowerCase();
       let familyId = null;
       if (familyName || parentEmail) {
         const existing = Object.values(DB.families || {}).find(f => (parentEmail && (f.email || '').toLowerCase() === parentEmail) || (familyName && (f.parentName || '').toLowerCase() === familyName.toLowerCase()));
         familyId = existing?.id || uid();
-        if (!DB.families[familyId]) DB.families[familyId] = { id: familyId, parentName: familyName || parentEmail || (name + ' Family'), phone: row.parent_phone || row.father_phone || row.phone || '', email: parentEmail, address: row.address || '', whatsapp: row.whatsapp || '', studentIds: [] };
+        if (!DB.families[familyId]) DB.families[familyId] = { id: familyId, parentName: familyName || parentEmail || (name + ' Family'), phone: row.parent_phone || row.father_phone || row.phone || row.contact || '', email: parentEmail, address: row.address || '', whatsapp: row.whatsapp || '', studentIds: [] };
       }
       const rawFeeStatus = row.fee_status || row.feestatus || (row.fees && isNaN(Number(String(row.fees).replace(/,/g,''))) ? row.fees : '');
       const fees = (rawFeeStatus && String(rawFeeStatus).toLowerCase() === 'paid') ? 'Paid' : 'Pending';
       const rawCustomFee = row.monthly_fee || row.monthlyfee || row.monthly || row.custom_fee || row.customfee || row.fee_amount || row.fee || row.tuition_fee || row.tuitionfee || row.tuition || row.fees_amount || row.monthly_dues || (row.fees && !isNaN(Number(String(row.fees).replace(/,/g,''))) ? row.fees : '');
       const customFee = parseFeeVal(rawCustomFee);
-      const rawVanFee = row.van_fee || row.vanfee || row.transport_fee || row.transportfee || row.bus_fee || row.busfee;
+      const rawVanFee = row.van_fee || row.vanfee || row.transport_fee || row.transportfee || row.bus_fee || row.busfee || row.van;
       const vanFee = parseFeeVal(rawVanFee);
-      const rawArrears = row.previous_arrears || row.previous_arrear || row.arrears || row.arrear || row.previous_arrears_balance || row.arrear_balance;
+      const rawArrears = row.previous_arrears || row.previous_arrear || row.arrears || row.arrear || row.previous_arrears_balance || row.arrear_balance || row.prev_arrears;
       const arrears = num(rawArrears);
+
+      const studentData = {
+        name, roll, classId,
+        gender: row.gender || row.sex || '',
+        dob: row.dob || row.date_of_birth || row.dateofbirth || row.birth_date || '',
+        blood: row.blood || row.blood_group || row.bloodgroup || '',
+        religion: (row.religion || '').trim(),
+        nationality: (row.nationality || '').trim(),
+        cnic: (row.cnic || row.father_cnic || row.fathercnic || '').trim(),
+        bform: (row.bform || row.b_form || row.bform_no || '').trim(),
+        occupation: (row.occupation || row.father_occupation || '').trim(),
+        formNo: (row.form_no || row.formno || row.admission_form_no || '').trim(),
+        fees,
+        father: row.father_name || row.father || row.fathername || row.parent_name || row.parentname || row.guardian_name || '',
+        fphone: row.father_phone || row.fatherphone || row.parent_phone || row.parentphone || row.phone || row.mobile || row.contact || row.contact_no || '',
+        mother: row.mother_name || row.mother || row.mothername || '',
+        address: row.address || row.home_address || row.residence || row.addr || '',
+        whatsapp: row.whatsapp || row.whatsapp_no || row.whatsapp_number || row.wa || '',
+        photo: row.photo || row.photo_url || row.image || row.image_url || row.picture || '',
+        familyId, loginEmail, customFee, vanFee, arrears,
+        previousSchool: row.previous_school || row.previousschool || row.prev_school || row.prevschool || row.last_school || '',
+        notes: row.notes || row.message || row.remarks || row.comment || '',
+        attendance: 0
+      };
+
       const existingStudent = DB.students[classId].find(s => (s.roll && String(s.roll).trim() === String(roll).trim()) || (s.name && s.name.trim().toLowerCase() === name.trim().toLowerCase()));
       let newId;
       if (existingStudent) {
         newId = existingStudent.id;
-        Object.assign(existingStudent, {
-          name, roll, gender: row.gender || existingStudent.gender,
-          dob: row.dob || row.date_of_birth || existingStudent.dob,
-          blood: row.blood || row.blood_group || existingStudent.blood,
-          fees,
-          father: row.father_name || row.father || row.parent_name || existingStudent.father,
-          fphone: row.father_phone || row.parent_phone || row.phone || existingStudent.fphone,
-          mother: row.mother_name || row.mother || existingStudent.mother,
-          address: row.address || existingStudent.address,
-          whatsapp: row.whatsapp || existingStudent.whatsapp,
-          photo: row.photo || row.photo_url || row.image || row.image_url || existingStudent.photo,
-          customFee: customFee !== '' ? customFee : existingStudent.customFee,
-          vanFee: vanFee !== '' ? vanFee : existingStudent.vanFee,
-          arrears: arrears || existingStudent.arrears || 0,
-          previousSchool: row.previous_school || row.previousSchool || existingStudent.previousSchool,
-          notes: row.notes || row.message || row.remarks || existingStudent.notes
-        });
+        Object.assign(existingStudent, studentData);
       } else {
         newId = uid();
-        const student = { id: newId, name, roll, classId, gender: row.gender || '', dob: row.dob || row.date_of_birth || '', blood: row.blood || row.blood_group || '', fees, father: row.father_name || row.father || row.parent_name || '', fphone: row.father_phone || row.parent_phone || row.phone || '', mother: row.mother_name || row.mother || '', address: row.address || '', whatsapp: row.whatsapp || '', photo: row.photo || row.photo_url || row.image || row.image_url || '', familyId, loginEmail, customFee, vanFee, arrears, previousSchool: row.previous_school || row.previousSchool || '', notes: row.notes || row.message || row.remarks || '', attendance: 0 };
+        const student = { id: newId, ...studentData };
         DB.students[classId].push(student);
         DB.users.push({ id: uid(), name, email: loginEmail, role: 'student', photo: student.photo, studentId: newId, classId });
       }
