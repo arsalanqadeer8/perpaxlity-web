@@ -4296,8 +4296,11 @@
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
     }
     function monthlyFeeAmount(stu) {
-      const fee = (DB.fees.items || []).find(f => f.id === 'f1') || { amount: 0 };
-      return (stu && stu.customFee !== undefined && stu.customFee !== '') ? num(stu.customFee) : num(fee.amount);
+      const fee = (DB.fees.items || []).find(f => f.id === 'f1') || { amount: 5000 };
+      if (!stu) return num(fee.amount || 5000);
+      const cf = num(stu.customFee);
+      if (cf > 0) return cf;
+      return num(fee.amount || 5000);
     }
     function ensureMonthlyFeeLedger() {
       if (!DB?.fees) return;
@@ -4305,6 +4308,7 @@
       DB.fees.monthlyLedger = DB.fees.monthlyLedger || {};
       const cm = monthKey();
       allStus().forEach(s => {
+        if (s.customFee === 0 || s.customFee === '0') s.customFee = '';
         const sid = s.id;
         DB.fees.monthlyLedger[sid] = DB.fees.monthlyLedger[sid] || {};
         if (!DB.fees.monthlyLedger[sid][cm]) DB.fees.monthlyLedger[sid][cm] = { month: cm, paid: false, amount: monthlyFeeAmount(s) };
@@ -5229,7 +5233,7 @@
     <div class="fg"><label class="fl">Parent WhatsApp</label><input class="fi" id="m-wa" value="${s?.whatsapp || ''}" placeholder="923XXXXXXXXX (with code)"/></div>
   </div>
   <div class="fg2">
-    <div class="fg"><label class="fl">Monthly Fee</label><input class="fi" type="number" id="m-customfee" value="${(s && s.customFee !== undefined && s.customFee !== '') ? num(s.customFee) : ''}" placeholder="Use default fee"/></div>
+    <div class="fg"><label class="fl">Monthly Fee</label><input class="fi" type="number" id="m-customfee" value="${s ? monthlyFeeAmount(s) : ''}" placeholder="Use default fee"/></div>
     <div class="fg"><label class="fl">Van Fee (Transport)</label><input class="fi" type="number" id="m-vanfee" value="${(s && s.vanFee !== undefined && s.vanFee !== '') ? num(s.vanFee) : ''}" placeholder="0"/></div>
   </div>
   <div class="fg2">
@@ -5440,7 +5444,7 @@
       const rawFeeStatus = row.fee_status || row.feestatus || (row.fees && isNaN(Number(row.fees)) ? row.fees : '');
       const fees = (rawFeeStatus && String(rawFeeStatus).toLowerCase() === 'paid') ? 'Paid' : 'Pending';
       const rawCustomFee = row.monthly_fee || row.monthlyfee || row.monthly || row.custom_fee || row.customfee || row.fee_amount || row.fee || row.tuition_fee || row.tuitionfee || row.tuition || row.fees_amount || row.monthly_dues || (row.fees && !isNaN(Number(row.fees)) ? row.fees : '');
-      const customFee = (rawCustomFee !== undefined && rawCustomFee !== '' && !isNaN(Number(rawCustomFee))) ? Number(rawCustomFee) : '';
+      const customFee = (rawCustomFee !== undefined && rawCustomFee !== '' && !isNaN(Number(rawCustomFee)) && Number(rawCustomFee) > 0) ? Number(rawCustomFee) : '';
       const rawVanFee = row.van_fee || row.vanfee || row.transport_fee || row.transportfee || row.bus_fee || row.busfee;
       const vanFee = (rawVanFee !== undefined && rawVanFee !== '' && !isNaN(Number(rawVanFee))) ? Number(rawVanFee) : '';
       const rawArrears = row.previous_arrears || row.previous_arrear || row.arrears || row.arrear || row.previous_arrears_balance || row.arrear_balance;
