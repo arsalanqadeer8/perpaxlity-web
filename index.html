@@ -4257,6 +4257,7 @@
     function fmtDate(d) { if (!d) return '-'; try { return new Date(d).toLocaleDateString('en-GB'); } catch { return d; } }
     function allStus() { return Object.values(DB.students).flat(); }
     function clsStus(cid) { return DB.students[cid] || []; }
+    function getClsSubjects(cid) { const cls = (DB.classes || []).find(c => c.id === cid); if (cls && cls.subjectIds && Array.isArray(cls.subjectIds) && cls.subjectIds.length) { const list = (DB.subjects || []).filter(s => cls.subjectIds.includes(s.id)); if (list.length) return list; } return DB.subjects || []; }
     function avgStu(cid, sid, tid = curTerm) { const g = (DB.grades[cid + '_' + tid] || {})[sid] || {}; const v = Object.values(g).filter(x => x > 0); return v.length ? Math.round(v.reduce((a, b) => a + b, 0) / v.length) : 0; }
     function attPct(cid, sid) { const a = (DB.attendance[cid] || {})[sid] || {}; const arr = Object.values(a); if (!arr.length) return clsStus(cid).find(s => s.id === sid)?.attendance || 0; return Math.round(arr.filter(x => x === 'P').length / arr.length * 100); }
     function nextRoll(cid) { const s = clsStus(cid); return String(s.length + 1).padStart(3, '0'); }
@@ -5696,6 +5697,7 @@
 
     /* ------------------------------- GRADES ------------------------------- */
     function pgGrades() {
+      if (curCls === 'staff' || !(DB.classes || []).find(c => c.id === curCls)) { curCls = DB.classes[0]?.id || 'c1'; }
       const sts = clsStus(curCls); const cls = DB.classes.find(c => c.id === curCls);
       return `
 <div class="ph ph-row fu">
