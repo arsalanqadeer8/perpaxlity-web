@@ -4801,7 +4801,7 @@
       updatePill();
       closeNotif();
       if (p === 'qrcard') setTimeout(buildQRCard, 90);
-      if (p === 'idcards') setTimeout(buildClassIdCardQrs, 120);
+      if (p === 'idcards') { setTimeout(buildClassIdCardQrs, 50); setTimeout(buildClassIdCardQrs, 150); setTimeout(buildClassIdCardQrs, 350); }
       if (p === 'dashboard' && curRole === 'admin') setTimeout(renderAdminCharts, 120);
     }
 
@@ -5002,7 +5002,7 @@
 <div class="ph ph-row fu">
   <div><div class="ph-tag"> Students</div><h1>Student Roster</h1><div class="ph-sub">${cls?.name || ''} ${cls?.section || ''} - ${sts.length} enrolled</div></div>
 <div class="ph-acts">
-    <button class="btn btn-gh btn-sm" onclick="printIDCards('${curCls}')">Print IDs</button>
+    <button class="btn btn-gh btn-sm" onclick="switchIdCardClass('${curCls}')">Print IDs</button>
     ${curRole !== 'teacher' ? `<button class="btn btn-gh btn-sm" onclick="openBulkModal()"> Bulk Import</button>
     <button class="btn btn-p" onclick="openAddStudentModal()">+ Add Student</button>` : ''}
   </div>
@@ -6898,17 +6898,17 @@
       if (typeof QRCode === 'undefined') { showToast('QR library not loaded. Connect internet and refresh.', 'te', 4200); return; }
       document.querySelectorAll('.ox-card-qr[data-student-id]').forEach(el => {
         const sid = el.dataset.studentId;
-        const stu = allStus().find(s => s.id === sid);
-        if (!stu) return;
+        const stu = allStus().find(s => String(s.id) === String(sid));
+        const payload = stu ? studentAttendancePayload(stu) : JSON.stringify({ kind: 'school-student-v1', id: sid });
         el.innerHTML = '';
-        try { new QRCode(el, { text: studentAttendancePayload(stu), width: 220, height: 220, colorDark: '#111827', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.L }); } catch { }
+        try { new QRCode(el, { text: payload, width: 220, height: 220, colorDark: '#111827', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.L }); } catch { }
       });
       document.querySelectorAll('.ox-card-qr[data-staff-id]').forEach(el => {
         const tid = el.dataset.staffId;
-        const staff = DB.users.find(u => u.id === tid);
-        if (!staff) return;
+        const staff = (DB.users || []).find(u => String(u.id) === String(tid));
+        const payload = staff ? JSON.stringify({ kind: 'school-teacher-attendance-v1', id: staff.id }) : JSON.stringify({ kind: 'school-teacher-attendance-v1', id: tid });
         el.innerHTML = '';
-        try { new QRCode(el, { text: JSON.stringify({ kind: 'school-teacher-attendance-v1', id: staff.id }), width: 220, height: 220, colorDark: '#111827', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.L }); } catch { }
+        try { new QRCode(el, { text: payload, width: 220, height: 220, colorDark: '#111827', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.L }); } catch { }
       });
     }
     function pgQRCard() {
