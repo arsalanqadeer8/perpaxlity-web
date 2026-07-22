@@ -5457,7 +5457,7 @@
     function openBulkModal() {
       openModal(`
   <h3> Bulk Import Students</h3>
-  <div class="ibox">Upload <b>students_bulk_template.csv</b>. Use the <b>photo</b> column for an image URL or base64 data URL. The <b>password</b> column is for Supabase Auth bulk creation, not stored in the portal.</div>
+  <div class="ibox">Upload <b>students_bulk_template.csv</b>. Use the <b>photo</b> column for an image URL. <a href="students_bulk_template.csv" download="students_bulk_template.csv" class="btn btn-gh btn-xs" style="margin-top:6px;display:inline-flex;align-items:center;gap:4px;text-decoration:none;"> Download CSV Template</a></div>
   <div class="fg"><label class="fl">Fallback Class</label>
     <select class="fi" id="bi-cls">${DB.classes.map(c => `<option value="${c.id}" ${c.id === curCls ? 'selected' : ''}>${c.name}${c.section ? ' ' + c.section : ''}</option>`).join('')}</select></div>
   <div class="fg"><label class="fl">CSV File</label><input class="fi" type="file" id="bi-csv" accept=".csv,text/csv"/></div>
