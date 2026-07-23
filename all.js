@@ -1,0 +1,3703 @@
+
+
+
+
+
+  for(let i=0; i<sessionStorage.length; i++){
+    if(sessionStorage.key(i).startsWith('sb-') && sessionStorage.key(i).endsWith('-auth-token')){
+      document.write('<style>#landing-page { display: none !important; }</style>');
+      break;
+    }
+  }
+
+
+            const leadershipSlider = document.getElementById('leadership-slider');
+            leadershipSlider.addEventListener('scroll', function(e) {
+                const scrollLeft = e.target.scrollLeft;
+                const width = e.target.clientWidth;
+                const index = Math.round(scrollLeft / width);
+                const dots = document.getElementById('leadership-dots').children;
+                for(let i=0; i<dots.length; i++) {
+                    dots[i].style.background = i === index ? '#d4af37' : '#e2e8f0';
+                }
+            });
+
+            setInterval(() => {
+                const width = leadershipSlider.clientWidth;
+                const maxScroll = leadershipSlider.scrollWidth - width;
+                if (leadershipSlider.scrollLeft >= maxScroll - 10) {
+                    leadershipSlider.scrollTo({ left: 0, behavior: 'smooth' });
+                } else {
+                    leadershipSlider.scrollBy({ left: width, behavior: 'smooth' });
+                }
+            }, 5000);
+        
+
+            async function submitLandingForm(e) {
+                e.preventDefault();
+                const name = document.getElementById('lf-name').value;
+                const email = document.getElementById('lf-email').value;
+                const phone = document.getElementById('lf-phone').value;
+                const grade = document.getElementById('lf-grade').value;
+                const btn = e.target.querySelector('button[type="submit"]');
+                
+                if (!name || !phone || !grade) return;
+                if (btn) { btn.disabled = true; btn.textContent = 'Submitting...'; }
+                
+                const app = {
+                    id: 'adm-' + Date.now(),
+                    createdAt: new Date().toISOString(),
+                    status: 'new',
+                    studentName: name,
+                    className: grade,
+                    father: 'Parent/Guardian (via Web)',
+                    phone: phone,
+                    email: email.toLowerCase(),
+                    notes: 'Submitted via landing page form.'
+                };
+                
+                try {
+                    if (typeof _sb !== 'undefined' && _sb) {
+                        const { error } = await _sb.from('admission_applications').insert({
+                            student_name: app.studentName,
+                            applying_class_name: app.className,
+                            father_name: app.father,
+                            phone: app.phone,
+                            email: app.email,
+                            notes: app.notes,
+                            status: app.status
+                        });
+                        if (error) throw error;
+                    }
+                } catch(err) {
+                    console.error("Admission Sync Error:", err);
+                }
+                
+                if (typeof DB !== 'undefined' && DB && typeof saveLocalDB !== 'undefined') {
+                    DB.admissions = [app, ...(DB.admissions || [])].slice(0, 100);
+                    saveLocalDB();
+                }
+                
+                alert('Application submitted successfully! Our admissions team will contact you soon.');
+                e.target.reset();
+                if (btn) { btn.disabled = false; btn.textContent = 'Submit Application'; }
+            }
+
+            function toggleMenu() {
+                const navLinks = document.getElementById('oxNavLinks');
+                const menuIcon = document.getElementById('menuIcon');
+                navLinks.classList.toggle('menu-open');
+                if (navLinks.classList.contains('menu-open')) {
+                    menuIcon.innerText = 'close';
+                } else {
+                    menuIcon.innerText = 'menu';
+                }
+            }
+        
+
+
+
+        document.addEventListener("DOMContentLoaded", (event) => {
+            if (typeof gsap !== 'undefined') {
+                gsap.registerPlugin(ScrollTrigger);
+
+                // Initial Load
+                gsap.from(".gs-anim", { y: -50, opacity: 0, duration: 1, ease: "power3.out" });
+                gsap.from(".gs-anim-up", { y: 50, opacity: 0, duration: 1, delay: 0.2, ease: "power3.out" });
+                gsap.from(".gs-anim-in", { x: 50, opacity: 0, duration: 1.5, delay: 0.4, ease: "power3.out" });
+
+                // (Hero Image Slider Removed)
+
+                // Stats Counters
+                ScrollTrigger.create({
+                    trigger: ".gs-stats",
+                    start: "top 85%",
+                    onEnter: () => {
+                        const counters = document.querySelectorAll('.gs-counter');
+                        counters.forEach(counter => {
+                            const target = +counter.getAttribute('data-target');
+                            gsap.to(counter, { innerHTML: target, duration: 2.5, snap: { innerHTML: 1 }, ease: "power2.out" });
+                        });
+                    },
+                    once: true
+                });
+
+                // Scroll Up Elements
+                const upElements = document.querySelectorAll('.gs-scroll-up');
+                upElements.forEach(el => {
+                    gsap.from(el, { scrollTrigger: { trigger: el, start: "top 85%" }, y: 40, opacity: 0, duration: 1, ease: "power3.out" });
+                });
+
+                // Staggered Grids
+                const staggerGroups = document.querySelectorAll('.gs-stagger');
+                staggerGroups.forEach(group => {
+                    gsap.from(group.children, { scrollTrigger: { trigger: group, start: "top 80%" }, y: 40, opacity: 0, duration: 0.8, stagger: 0.15, ease: "power3.out" });
+                });
+
+                // Scale In
+                const scaleElements = document.querySelectorAll('.gs-scale-in');
+                scaleElements.forEach(el => {
+                    gsap.from(el, { scrollTrigger: { trigger: el, start: "top 85%" }, scale: 0.8, opacity: 0, duration: 1.2, ease: "power3.out" });
+                });
+
+                // Slide Left
+                const leftElements = document.querySelectorAll('.gs-slide-left');
+                leftElements.forEach(el => {
+                    gsap.from(el, { scrollTrigger: { trigger: el, start: "top 85%" }, x: -100, opacity: 0, duration: 1, ease: "power3.out" });
+                });
+
+                // Slide Right
+                const rightElements = document.querySelectorAll('.gs-slide-right');
+                rightElements.forEach(el => {
+                    gsap.from(el, { scrollTrigger: { trigger: el, start: "top 85%" }, x: 100, opacity: 0, duration: 1, ease: "power3.out" });
+                });
+            }
+        });
+    
+
+    'use strict';
+    /* ------------------------------- SUPABASE CONFIG ------------------------------- */
+    const SUPABASE_URL  = 'https://iprqtkmtelgdhlenlsrc.supabase.co';
+    const SUPABASE_KEY  = 'sb_publishable_DX0GG-V6vp9ey7_FxbvLdw_ql-E8nEt';
+    const _sb = (typeof supabase !== 'undefined' && SUPABASE_URL) 
+      ? supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { storage: window.sessionStorage } })
+      : null;
+
+    /* ------------------------------- DATA ------------------------------- */
+    const SK = 'oxford_v1';
+    let DB = null;
+    let _sbPending = false;
+    let _sbTimer   = null;
+
+    // -- local read / write ----------------------------------------------
+    function loadDB() {
+      try { const d = localStorage.getItem(SK); return d ? JSON.parse(d) : null; } catch { return null; }
+    }
+
+    function saveLocalDB() {
+      try { localStorage.setItem(SK, JSON.stringify(DB)); } catch (e) { console.warn('Storage full'); }
+    }
+
+    // -- cloud read / write ----------------------------------------------
+
+    function publicSiteData() {
+      const s = DB?.school || {};
+      return { school: {
+        name: s.name || '', tagline: s.tagline || '', logo: s.logo || '', primaryColor: s.primaryColor || '',
+        heroText: s.heroText || '', slides: s.slides || [], city: s.city || '', phone: s.phone || '', whatsapp: s.whatsapp || '',
+        email: s.email || '', address: s.address || '', website: s.website || ''
+      }};
+    }
+    function mergePublicSite(data) {
+      if (!data?.school) return false;
+      DB.school = { ...(DB.school || {}), ...data.school };
+      return true;
+    }
+    async function loadPublicSite() {
+      if (!_sb) return null;
+      try {
+        const { data, error } = await _sb.from('site_public').select('data').eq('id', 1).maybeSingle();
+        if (error) return null;
+        return data?.data || null;
+      } catch { return null; }
+    }
+    async function pushPublicSite(silent = false) {
+      if (!_sb || !DB) return;
+      try {
+        await _sb.from('site_public').upsert({ id: 1, data: publicSiteData(), updated_at: new Date().toISOString() });
+        if (!silent) showSyncBadge('Website branding published', '#4caf50');
+      } catch (e) { if (!silent) showSyncBadge('Public website publish failed', '#f59e0b'); }
+    }
+    async function loadCloudDB() {
+      if (!_sb) return null;
+      const { data: authData } = await _sb.auth.getSession();
+      if (!authData?.session) return null;
+      try {
+        const { data, error } = await _sb.from('db_snapshot').select('data').eq('id', 1).maybeSingle();
+        if (error) { console.warn('Supabase load error:', error.message); return null; }
+        return data?.data || null;
+      } catch (e) { console.warn('Supabase unreachable', e); return null; }
+    }
+
+    async function pushCloudDB() {
+      if (!_sb || !DB) return;
+      const { data: authData } = await _sb.auth.getSession();
+      if (!authData?.session) { showSyncBadge('Sign in to sync cloud data', '#f59e0b'); return; }
+      if (curRole === 'student' || curRole === 'parent') {
+        showSyncBadge('Local save only (No permission)', '#f59e0b');
+        return;
+      }
+      try {
+        _lastPushTime = new Date().toISOString();
+        await _sb.from('db_snapshot').upsert({ id: 1, data: DB, updated_at: _lastPushTime });
+        await pushPublicSite(true);
+        _sbPending = false;
+        showSyncBadge('Saved to cloud', '#4caf50');
+      } catch (e) {
+        showSyncBadge(' Cloud sync failed', '#f59e0b');
+        console.warn('Supabase push error:', e);
+      }
+    }
+
+    // -- saveDB: local (instant) + cloud (debounced 2 s) -----------------
+    function saveDB() {
+      saveLocalDB();
+      if (!_sb) return;
+      _sbPending = true;
+      clearTimeout(_sbTimer);
+      _sbTimer = setTimeout(pushCloudDB, 2000);
+    }
+
+    // -- sync status badge ------------------------------------------------
+    function showSyncBadge(msg, color) {
+      let b = document.getElementById('sync-badge');
+      if (!b) { b = document.createElement('div'); b.id = 'sync-badge'; b.style.cssText='position:fixed;bottom:72px;right:14px;z-index:9999;background:'+color+';color:#fff;font-size:.65rem;font-weight:700;padding:5px 10px;border-radius:20px;box-shadow:0 2px 8px rgba(0,0,0,.18);pointer-events:none;transition:opacity .4s'; document.body.appendChild(b); }
+      b.style.background = color; b.textContent = msg; b.style.opacity = '1';
+      clearTimeout(b._t); b._t = setTimeout(() => b.style.opacity = '0', 2600);
+    }
+
+    // -- initDB: load cloud ? merge local ? fall back to default ---------
+
+    function defaultSlides() {
+      return [
+        { tag: 'Welcome to Our School', title: 'Where Every Child\'s Future Begins', text: 'A safe, caring campus where students learn with confidence, character, and curiosity.', image: '', accent: '#1e3a5f', icon: '' },
+        { tag: 'Academic Excellence', title: 'Strong Learning, Strong Results', text: 'Structured lessons, committed teachers, and regular progress tracking for every learner.', image: '', accent: '#166534', icon: '' },
+        { tag: 'Beyond the Classroom', title: 'Activities That Build Confidence', text: 'Sports, arts, clubs, and practical learning help children grow into well-rounded students.', image: '', accent: '#7c2d6b', icon: '' },
+        { tag: 'Parent Partnership', title: 'Connected With Families', text: 'Parents can follow attendance, grades, fees, and school notices through the portal.', image: '', accent: '#b45309', icon: '' }
+      ];
+    }
+
+    async function initDB() {
+      const landBtn = document.getElementById('land-login-btn');
+      if (landBtn) { landBtn.disabled = false; landBtn.textContent = 'Login to School Portal'; }
+      DB = loadDB() || defaultDB();
+      DB.school.name = 'Oxford Excellence Academy';
+      DB.school.tagline = 'Learn • Grow • Excel';
+      DB.school.logo = 'oxford_logo.svg';
+      DB.school.primaryColor = '#0a192f';
+      const publicData = await loadPublicSite();
+      if (publicData) mergePublicSite(publicData);
+      stripStoredPasswords();
+      saveLocalDB();
+    }
+
+
+    async function restoreSession() {
+      if (!_sb) return;
+      const { data: sessionData } = await _sb.auth.getSession();
+      const email = (sessionData?.session?.user?.email || '').toLowerCase();
+      if (!email) return;
+      const cloud = await loadCloudDB();
+      if (cloud) DB = cloud;
+      stripStoredPasswords();
+      ensureEnhancements();
+      saveLocalDB();
+      const u = findUserProfile(email);
+      if (!u) return;
+      loginRole = u.role;
+      setCurrentUser(u);
+      document.getElementById('landing-page').style.display = 'none';
+      document.getElementById('login-page').style.display = 'none';
+      const app = document.getElementById('app');
+      app.style.display = 'flex';
+      app.style.flexDirection = 'column';
+      buildShell();
+      goPage(curPage || 'dashboard');
+      if (curRole === 'admin') refreshAdmissionApplications(true);
+      applyBranding();
+    }
+    function stripStoredPasswords() {
+      if (!DB) return;
+      DB.users = (DB.users || []).map(({ password, ...u }) => u);
+      Object.values(DB.students || {}).flat().forEach(s => { if (s) delete s.loginPass; });
+      Object.values(DB.families || {}).forEach(f => { if (f) delete f.loginPass; });
+    }
+
+    const CP1252_BYTES = { '\u20ac': 0x80, '\u201a': 0x82, '\u0192': 0x83, '\u201e': 0x84, '\u2026': 0x85, '\u2020': 0x86, '\u2021': 0x87, '\u02c6': 0x88, '\u2030': 0x89, '\u0160': 0x8A, '\u2039': 0x8B, '\u0152': 0x8C, '\u017d': 0x8E, '\u2018': 0x91, '\u2019': 0x92, '\u201c': 0x93, '\u201d': 0x94, '\u2022': 0x95, '\u2013': 0x96, '\u2014': 0x97, '\u02dc': 0x98, '\u2122': 0x99, '\u0161': 0x9A, '\u203a': 0x9B, '\u0153': 0x9C, '\u017e': 0x9E, '\u0178': 0x9F };
+    function repairMojibakeString(value) {
+      if (typeof value !== 'string' || !/[\u00c3\u00c2\u00e2\u00f0\u00ef]/.test(value)) return value;
+      const bytes = [];
+      for (const ch of value) {
+        const code = ch.charCodeAt(0);
+        if (code <= 255) bytes.push(code);
+        else if (CP1252_BYTES[ch] !== undefined) bytes.push(CP1252_BYTES[ch]);
+        else return value;
+      }
+      try { return new TextDecoder('utf-8', { fatal: true }).decode(new Uint8Array(bytes)); }
+      catch { return value; }
+    }
+    function repairMojibakeDeep(value, seen = new WeakSet()) {
+      let changed = false;
+      const walk = item => {
+        if (typeof item === 'string') {
+          const fixed = repairMojibakeString(item);
+          if (fixed !== item) changed = true;
+          return fixed;
+        }
+        if (!item || typeof item !== 'object') return item;
+        if (seen.has(item)) return item;
+        seen.add(item);
+        if (Array.isArray(item)) {
+          item.forEach((v, i) => { item[i] = walk(v); });
+        } else {
+          Object.keys(item).forEach(k => { item[k] = walk(item[k]); });
+        }
+        return item;
+      };
+      walk(value);
+      return changed;
+    }
+
+    function brokenIcon(value) {
+      const s = String(value || '').trim();
+      return !s || /^[?]+$/.test(s) || s.includes('?');
+    }
+    function cleanIcon(value, fallback = '') {
+      return brokenIcon(value) ? fallback : String(value).trim();
+    }
+
+    function repairPortalProfilesAndIcons() {
+      DB.users = DB.users || [];
+      DB.subjects = DB.subjects || [];
+      const subjectFallbacks = ['MATH', 'SCI', 'ENG', 'URD', 'ISL', 'SS', 'CS', 'PS'];
+      DB.subjects.forEach((s, i) => { s.icon = cleanIcon(s.icon, subjectFallbacks[i] || (s.code || 'SUB')); });
+      (DB.school?.slides || []).forEach(slide => { slide.icon = cleanIcon(slide.icon, ''); });
+      allStus().forEach(stu => syncStudentLoginProfile(stu, stu.id));
+      DB.users.forEach(u => { u.email = emailKey(u.email); });
+    }
+
+    function emailKey(value) { return String(value || '').trim().toLowerCase(); }
+    function findStudentByLoginEmail(email) { return allStus().find(s => emailKey(s.loginEmail) === emailKey(email)); }
+    function findFamilyByLoginEmail(email) { return Object.values(DB.families || {}).find(f => emailKey(f.email) === emailKey(email)); }
+
+    function syncStudentLoginProfile(stu, studentId) {
+      if (!stu || !studentId) return null;
+      const em = emailKey(stu.loginEmail);
+      if (!em) {
+        DB.users = (DB.users || []).filter(u => !(u.role === 'student' && u.studentId === studentId));
+        return null;
+      }
+      DB.users = DB.users || [];
+      let u = DB.users.find(x => x.role === 'student' && x.studentId === studentId) || DB.users.find(x => x.role === 'student' && emailKey(x.email) === em);
+      const profile = { name: stu.name || em, email: em, role: 'student', photo: stu.photo || '', studentId, classId: stu.classId || '' };
+      if (u) Object.assign(u, profile);
+      else { u = { id: uid(), ...profile }; DB.users.push(u); }
+      return u;
+    }
+
+    function ensurePortalProfileForEmail(email, preferredRole = '') {
+      const em = emailKey(email);
+      if (!em) return null;
+      DB.users = DB.users || [];
+      let u = DB.users.find(x => emailKey(x.email) === em);
+      if (u) return u;
+
+      const stu = findStudentByLoginEmail(em);
+      if (stu) {
+        u = { id: uid(), name: stu.name || em, email: em, role: 'student', photo: stu.photo || '', studentId: stu.id, classId: stu.classId };
+        DB.users.push(u);
+        return u;
+      }
+
+      const fam = findFamilyByLoginEmail(em);
+      if (fam) {
+        u = { id: uid(), name: fam.parentName || em, email: em, role: 'parent', photo: '', familyId: fam.id };
+        DB.users.push(u);
+        return u;
+      }
+      if (preferredRole === 'admin') {
+        u = { id: uid(), name: em.split('@')[0].replace(/[._-]+/g, ' '), email: em, role: 'admin', photo: '' };
+        DB.users.push(u);
+        return u;
+      }
+      if (preferredRole === 'admin') {
+        u = { id: uid(), name: em.split('@')[0].replace(/[._-]+/g, ' '), email: em, role: 'admin', photo: '' };
+        DB.users.push(u);
+        return u;
+      }
+
+      if (preferredRole === 'teacher') {
+        u = { id: uid(), name: em.split('@')[0].replace(/[._-]+/g, ' '), email: em, role: 'teacher', photo: '', phone: '', subject: '', classIds: [], salary: 0, bonus: 0, deductions: 0, payrollStatus: 'pending', lastPaid: '', joinDate: '', notes: '' };
+        DB.users.push(u);
+        return u;
+      }
+      return null;
+    }
+
+    function findUserProfile(email, role = '') {
+      const em = emailKey(email);
+      const users = DB.users || [];
+      let u = role ? users.find(x => emailKey(x.email) === em && x.role === role) : null;
+      if (!u) u = users.find(x => emailKey(x.email) === em);
+      if (u) return u;
+      return ensurePortalProfileForEmail(em, role);
+    }
+    
+    let realtimeSub = null;
+    let _lastPushTime = 0;
+    function setupRealtime() {
+      if (!_sb || realtimeSub || curRole === 'student' || curRole === 'parent') return;
+      realtimeSub = _sb.channel('public:db_snapshot')
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'db_snapshot' }, payload => {
+          if (!payload.new || !payload.new.data) return;
+          const diff = Math.abs(new Date(payload.new.updated_at) - new Date(_lastPushTime));
+          if (diff < 5000) return; // Ignore echoes of our own pushes
+
+          DB = payload.new.data;
+          saveLocalDB();
+          
+          if (document.querySelector('.modal')) {
+             showToast('Data updated by another user! (Changes will appear after you close this modal)', 'tw2', 5000);
+          } else {
+             buildShell();
+             showToast('Live update synced', 'ts');
+          }
+        })
+        .subscribe();
+    }
+
+    function setCurrentUser(u) {
+      setupRealtime();
+      curUser = u; curRole = u.role;
+      if (u.role === 'teacher') curCls = (u.classIds || [])[0] || DB.classes[0]?.id;
+      else if (u.role === 'student') curCls = u.classId || DB.classes[0]?.id;
+      else if (u.role === 'parent') { const fam = DB.families[u.familyId]; const sid = (fam?.studentIds || [])[0]; curCls = allStus().find(s => s.id === sid)?.classId || DB.classes[0]?.id; }
+      else curCls = DB.classes[0]?.id;
+      curTerm = DB?.settings?.activeTerm || 't1';
+    }
+
+    function defaultDB() {
+      return {
+        school: { name: 'Oxford Excellence Academy', tagline: 'Learn • Grow • Excel', logo: 'oxford_logo.svg', address: '', city: 'Karachi', phone: '', whatsapp: '', email: '', principal: '', primaryColor: '#0a192f', founded: '', motto: 'Learn • Grow • Excel', website: '', heroText: 'Oxford Excellence Academy portal with complete management tools for staff and parents.' },
+        admissions: [],
+        classes: [
+          { id: 'c1', name: 'Class 1', section: 'A', level: 'primary', capacity: 35, teacher: '' },
+          { id: 'c2', name: 'Class 2', section: 'A', level: 'primary', capacity: 35, teacher: '' },
+          { id: 'c3', name: 'Class 3', section: 'A', level: 'primary', capacity: 35, teacher: '' },
+          { id: 'c4', name: 'Class 4', section: 'A', level: 'primary', capacity: 35, teacher: '' },
+          { id: 'c5', name: 'Class 5', section: 'A', level: 'primary', capacity: 35, teacher: '' },
+          { id: 'c6', name: 'Class 6', section: 'A', level: 'secondary', capacity: 40, teacher: '' },
+          { id: 'c7', name: 'Class 7', section: 'A', level: 'secondary', capacity: 40, teacher: '' },
+          { id: 'c8', name: 'Class 8', section: 'A', level: 'secondary', capacity: 40, teacher: '' },
+          { id: 'c9', name: 'Class 9', section: 'A', level: 'secondary', capacity: 40, teacher: '' },
+          { id: 'c10', name: 'Class 10', section: 'A', level: 'secondary', capacity: 40, teacher: '' },
+        ],
+        subjects: [
+          { id: 's1', name: 'Mathematics', code: 'MATH', icon: '', color: '#2563eb' },
+          { id: 's2', name: 'Science', code: 'SCI', icon: '', color: '#0891b2' },
+          { id: 's3', name: 'English', code: 'ENG', icon: '', color: '#059669' },
+          { id: 's4', name: 'Urdu', code: 'URD', icon: '', color: '#7c3aed' },
+          { id: 's5', name: 'Islamiyat', code: 'ISL', icon: '', color: '#065f46' },
+          { id: 's6', name: 'Social Studies', code: 'SS', icon: '', color: '#b45309' },
+          { id: 's7', name: 'Computer', code: 'CS', icon: '', color: '#db2777' },
+          { id: 's8', name: 'Pak. Studies', code: 'PS', icon: 'PS', color: '#166534' },
+        ],
+        students: {},
+        grades: {},
+        attendance: {},
+        teacherAttendance: {}, // {userId:{date:{checkIn:'HH:MM',status:'Present/Late/Absent'}}}
+        lateAfter: '08:00', // configurable late time
+        fees: {
+          items: [
+            { id: 'f1', name: 'Monthly Tuition', amount: 5000, due: '5th of month', mandatory: true, type: 'monthly' },
+            { id: 'f2', name: 'Annual Fund', amount: 10000, due: 'Jan 10', mandatory: true, type: 'annual' },
+            { id: 'f3', name: 'Exam Fee', amount: 2000, due: 'Nov 15', mandatory: true, type: 'exam' },
+            { id: 'f4', name: 'Transport', amount: 2500, due: '5th of month', mandatory: false, type: 'monthly' },
+            { id: 'f5', name: 'Books & Stationery', amount: 3000, due: 'Jan', mandatory: false, type: 'annual' },
+          ], payments: {}
+        },
+        exams: [],
+        notices: [],
+        timetable: {},
+        users: [
+          { id: 'u1', name: 'School Admin', email: 'admin@oxfordexcellence.com', role: 'admin', photo: '', phone: '', createdAt: '' },
+          { id: 'u2', name: 'Ms. Sana Malik', email: 'teacher@school.edu', role: 'teacher', photo: '', phone: '03001230000', subject: 'Mathematics', classIds: ['c6', 'c7'], salary: 45000, bonus: 3000, deductions: 0, payrollStatus: 'pending', lastPaid: '', joinDate: '2025-01-10', notes: 'Senior mathematics teacher' },
+          { id: 'u3', name: 'Ahmed Raza', email: 'student@school.edu', role: 'student', photo: '', studentId: '', classId: 'c9' },
+          { id: 'u4', name: 'Mr. Raza Sr.', email: 'parent@school.edu', role: 'parent', photo: '', phone: '', familyId: 'fam1' },
+        ],
+        families: { fam1: { id: 'fam1', parentName: 'Raza Family', phone: '03001234567', email: 'parent@school.edu', address: '', studentIds: [], whatsapp: '923001234567' } },
+        settings: { currency: 'PKR', schoolYear: '2025-26', theme: 'light', defaultFeeDueDay: '5th of month' },
+      };
+    }
+
+    initDB().then(() => {
+      ensureEnhancements();
+      saveLocalDB(); // don't re-trigger cloud push here
+      applyBranding();
+      restoreSession();
+    });
+
+    /* ------------------------------- UTILS ------------------------------- */
+    const COLORS = ['#2563eb', '#059669', '#b45309', '#7c3aed', '#dc2626', '#0891b2', '#db2777', '#065f46', '#92400e', '#1e40af'];
+    function gc(s) { return COLORS[(s || '?').charCodeAt(0) % COLORS.length]; }
+    function uid() { return 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5); }
+    function ini(n) { return (n || '?').split(' ').slice(0, 2).map(x => x[0] || '').join('').toUpperCase(); }
+    function sCol(v) { return v >= 80 ? 'var(--g)' : v >= 60 ? 'var(--o)' : 'var(--r)'; }
+    function lGrade(v) { return v >= 90 ? 'A+' : v >= 80 ? 'A' : v >= 70 ? 'B+' : v >= 60 ? 'B' : v >= 50 ? 'C' : v > 0 ? 'F' : '-'; }
+    function gCls(v) { const l = lGrade(v); return l.startsWith('A') ? 'bg2' : l.startsWith('B') ? 'bb2' : l === 'C' ? 'bo2' : l === 'F' ? 'br2' : ''; }
+    function today() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+    function monthKey(d = today()) { return String(d || today()).slice(0, 7); }
+    function fmtDate(d) { if (!d) return '-'; try { return new Date(d).toLocaleDateString('en-GB'); } catch { return d; } }
+    function allStus() { return Object.values(DB.students).flat(); }
+    function clsStus(cid) { return DB.students[cid] || []; }
+    function avgStu(cid, sid, tid = curTerm) { const g = (DB.grades[cid + '_' + tid] || {})[sid] || {}; const v = Object.values(g).filter(x => x > 0); return v.length ? Math.round(v.reduce((a, b) => a + b, 0) / v.length) : 0; }
+    function attPct(cid, sid) { const a = (DB.attendance[cid] || {})[sid] || {}; const arr = Object.values(a); if (!arr.length) return clsStus(cid).find(s => s.id === sid)?.attendance || 0; return Math.round(arr.filter(x => x === 'P').length / arr.length * 100); }
+    function nextRoll(cid) { const s = clsStus(cid); return String(s.length + 1).padStart(3, '0'); }
+    function nowHHMM() { const n = new Date(); return `${String(n.getHours()).padStart(2, '0')}:${String(n.getMinutes()).padStart(2, '0')}`; }
+    function num(v) { return Number(v) || 0; }
+    function fmtMoney(v) { return `${DB.settings?.currency || 'PKR'} ${num(v).toLocaleString()}`; }
+    function normalizePhone(v) {
+      let phone = String(v || '').trim().replace(/[^\d+]/g, '');
+      if (phone.startsWith('+')) phone = phone.slice(1);
+      phone = phone.replace(/\D/g, '');
+      if (phone.startsWith('0092')) phone = phone.slice(2);
+      if (phone.startsWith('92')) return phone;
+      if (phone.startsWith('0') && phone.length >= 10) return `92${phone.slice(1)}`;
+      if (phone.startsWith('3') && phone.length === 10) return `92${phone}`;
+      return phone;
+    }
+    function whatsappLink(phone, message) {
+      const clean = normalizePhone(phone);
+      if (!clean) return '';
+      return `https://api.whatsapp.com/send?phone=${clean}&text=${encodeURIComponent(message || '')}`;
+    }
+    function openWhatsAppMessage(phone, message) {
+      const url = whatsappLink(phone, message);
+      if (!url) return false;
+      const win = window.open(url, '_blank', 'noopener');
+      if (!win) {
+        navigator.clipboard?.writeText(message || '').catch(() => {});
+        showToast('Popup blocked. Message copied; allow popups or paste it in WhatsApp.', 'tw2', 5200);
+        return false;
+      }
+      return true;
+    }
+    function addMonthsKey(key, delta) {
+      const [y, m] = String(key || monthKey()).split('-').map(Number);
+      const d = new Date(y || new Date().getFullYear(), (m || 1) - 1 + delta, 1);
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    }
+    function monthlyFeeAmount(stu) {
+      const fee = (DB.fees.items || []).find(f => f.id === 'f1') || { amount: 0 };
+      return (stu && stu.customFee !== undefined && stu.customFee !== '') ? num(stu.customFee) : num(fee.amount);
+    }
+    function ensureMonthlyFeeLedger() {
+      if (!DB?.fees) return;
+      DB.fees.payments = DB.fees.payments || {};
+      DB.fees.monthlyLedger = DB.fees.monthlyLedger || {};
+      const cm = monthKey();
+      allStus().forEach(s => {
+        const sid = s.id;
+        DB.fees.monthlyLedger[sid] = DB.fees.monthlyLedger[sid] || {};
+        if (!DB.fees.monthlyLedger[sid][cm]) DB.fees.monthlyLedger[sid][cm] = { month: cm, paid: false, amount: monthlyFeeAmount(s) };
+        if (!DB.fees.monthlyLedger[sid][cm].paid) DB.fees.monthlyLedger[sid][cm].amount = monthlyFeeAmount(s);
+        const old = DB.fees.payments[sid]?.f1;
+        if (old?.paid && !DB.fees.monthlyLedger[sid][monthKey(old.date || today())]?.paid) {
+          const mk = monthKey(old.date || today());
+          DB.fees.monthlyLedger[sid][mk] = { month: mk, paid: true, date: old.date || today(), amount: num(old.amount) || monthlyFeeAmount(s) };
+        }
+      });
+      DB.fees.lastMonthlyRoll = cm;
+    }
+    function monthlyFeeRows(sid) {
+      ensureMonthlyFeeLedger();
+      return Object.values(DB.fees.monthlyLedger?.[sid] || {}).sort((a, b) => String(a.month).localeCompare(String(b.month)));
+    }
+    function monthlyFeeDue(sid) { return monthlyFeeRows(sid).filter(r => !r.paid).reduce((sum, r) => sum + num(r.amount), 0); }
+    function monthlyFeePaidTotal(sid) { return monthlyFeeRows(sid).filter(r => r.paid).reduce((sum, r) => sum + num(r.amount), 0); }
+    function markMonthlyFeePaid(sid) {
+      const stu = allStus().find(s => s.id === sid);
+      const rows = monthlyFeeRows(sid).filter(r => !r.paid);
+      if (!rows.length && stu) rows.push(DB.fees.monthlyLedger[sid][monthKey()] = { month: monthKey(), paid: false, amount: monthlyFeeAmount(stu) });
+      rows.forEach(r => { r.paid = true; r.date = today(); r.amount = num(r.amount) || monthlyFeeAmount(stu); });
+      DB.fees.payments[sid] = DB.fees.payments[sid] || {};
+      DB.fees.payments[sid].f1 = { paid: monthlyFeeDue(sid) === 0, date: today(), amount: rows.reduce((sum, r) => sum + num(r.amount), 0), month: monthKey() };
+    }
+    function calcPayrollData(t, month) {
+      const stats = teacherMonthlyStats(t.id, month);
+      const base = num(t.salary);
+      const perDay = base / 26;
+      const lateAbsents = Math.floor(stats.late / 3);
+      const deductionDays = stats.absent + lateAbsents;
+      const attDeduction = Math.round(deductionDays * perDay);
+      return { base, perDay, stats, lateAbsents, deductionDays, attDeduction, expectedNet: Math.max(0, base - attDeduction) };
+    }
+    function teacherMonthlyStats(id, monthFilter) {
+      const rec = DB.teacherAttendance[id] || {};
+      const mk = monthFilter || monthKey();
+      const entries = Object.entries(rec).filter(([date]) => date.startsWith(mk)).map(([, val]) => val);
+      return {
+        present: entries.filter(v => v.status === 'Present').length,
+        late: entries.filter(v => v.status === 'Late').length,
+        absent: entries.filter(v => v.status === 'Absent').length,
+        leave: entries.filter(v => v.status === 'Leave').length,
+      };
+    }
+    function ensureEnhancements() {
+      const repairedSymbols = repairMojibakeDeep(DB);
+      if (repairedSymbols) saveLocalDB();
+      DB.school = DB.school || {};
+      DB.school.primaryColor = DB.school.primaryColor || '#ff8a00';
+      DB.school.tagline = DB.school.tagline || 'Playful learning, powerful management';
+      DB.school.heroText = DB.school.heroText || 'A friendlier school website with complete management tools for staff and parents.';
+      DB.school.whatsapp = DB.school.whatsapp || '';
+      DB.school.slides = (DB.school.slides && DB.school.slides.length ? DB.school.slides : defaultSlides()).slice(0, 4);
+      DB.admissions = DB.admissions || [];
+      while (DB.school.slides.length < 4) DB.school.slides.push(defaultSlides()[DB.school.slides.length]);
+      repairPortalProfilesAndIcons();
+      DB.settings = DB.settings || {};
+      DB.settings.currency = DB.settings.currency || 'PKR';
+      DB.settings.schoolYear = DB.settings.schoolYear || '2025-26';
+      DB.settings.defaultFeeDueDay = DB.settings.defaultFeeDueDay || '5th of month';
+      DB.settings.terms = DB.settings.terms || [{id:'t1', name:'Midterm'}, {id:'t2', name:'Final Term'}];
+      DB.settings.activeTerm = DB.settings.activeTerm || 't1';
+      DB.grades = DB.grades || {};
+      Object.keys(DB.grades).forEach(k => {
+        if (!k.includes('_')) {
+          DB.grades[k + '_t1'] = DB.grades[k];
+          delete DB.grades[k];
+        }
+      });
+      DB.fees = DB.fees || { items: [], payments: {}, monthlyLedger: {} };
+      if (!DB.fees.items) DB.fees.items = [];
+      if (!DB.fees.items.find(f => f.id === 'f1')) {
+        DB.fees.items.unshift({ id: 'f1', name: 'Monthly Tuition', amount: 5000, due: '5th of month', mandatory: true, type: 'monthly' });
+      }
+      ensureMonthlyFeeLedger();
+      stripStoredPasswords();
+      DB.users = (DB.users || []).map(u => {
+        if (u.role !== 'teacher') return u;
+        const payrollMonth = u.payrollMonth || (u.lastPaid ? monthKey(u.lastPaid) : '');
+        const payrollStatus = (u.payrollStatus === 'paid' && payrollMonth === monthKey()) ? 'paid' : 'pending';
+        return { ...u, phone: u.phone || '', salary: num(u.salary || 40000), bonus: num(u.bonus || 0), deductions: num(u.deductions || 0), payrollStatus, payrollMonth, payrollHistory: u.payrollHistory || [], lastPaid: u.lastPaid || '', joinDate: u.joinDate || '', notes: u.notes || '' };
+      });
+    }
+    function isLate(timeStr) {
+      if (!timeStr) return false;
+      const [lh, lm] = (DB.lateAfter || '08:00').split(':').map(Number);
+      const [h, m] = timeStr.split(':').map(Number);
+      return h * 60 + m > lh * 60 + lm;
+    }
+
+    /* ------------------------------- AUTH ------------------------------- */
+    let curRole = 'admin', curUser = null, curCls = null, curTerm = 't1', curPage = sessionStorage.getItem('lastPage') || 'dashboard';
+    let loginRole = 'admin', _qrS = null, _toastT = null;
+
+    function togglePassword(id, btn) {
+      const input = document.getElementById(id);
+      if (!input) return;
+      const show = input.type === 'password';
+      input.type = show ? 'text' : 'password';
+      if (btn) btn.textContent = show ? 'Hide' : 'Show';
+    }
+
+    function setRole(r, el) {
+      loginRole = r;
+      document.querySelectorAll('.rtab').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+    }
+
+    function resolvePortalLoginEmail(value) {
+      const raw = emailKey(value);
+      if (!raw || raw.includes('@')) return raw;
+      const stu = allStus().find(s => emailKey(s.roll) === raw || emailKey(s.id) === raw || emailKey(s.loginEmail) === raw);
+      if (stu?.loginEmail) return emailKey(stu.loginEmail);
+      const u = (DB.users || []).find(x => emailKey(x.id) === raw || emailKey(x.name) === raw);
+      return emailKey(u?.email) || raw;
+    }
+
+    async function doLogin() {
+      const loginValue = (document.getElementById('l-email').value || '').trim().toLowerCase();
+      const em = resolvePortalLoginEmail(loginValue);
+      const pw = (document.getElementById('l-pass').value || '').trim();
+      if (!em || !pw) { showToast('Enter email and password', 'tw2'); return; }
+      if (!em.includes('@')) { showToast('Supabase Auth login must use the Login Email saved in the portal.', 'te', 5200); return; }
+      if (!_sb) { showToast('Supabase Auth is not configured', 'te'); return; }
+      const btn = document.querySelector('.login-btn');
+      if (btn) { btn.disabled = true; btn.textContent = 'Signing in...'; }
+      try {
+        const { error } = await _sb.auth.signInWithPassword({ email: em, password: pw });
+        if (error) { showToast(error.message || 'Incorrect email or password', 'te', 5200); return; }
+        const cloud = await loadCloudDB();
+        if (cloud) DB = cloud;
+        stripStoredPasswords();
+        ensureEnhancements();
+        const u = findUserProfile(em, loginRole);
+        if (!u) { if(!error) await _sb.auth.signOut(); showToast('Signed in, but this email is not linked to a teacher, student, parent, or admin profile.', 'te', 5200); return; }
+        if (u.role !== loginRole) {
+          if (!error) await _sb.auth.signOut();
+          const err = `This email is registered as a ${u.role}, not ${loginRole}. Please select the correct tab.`;
+          alert(err);
+          showToast(err, 'te', 5200);
+          if (btn) { btn.disabled = false; btn.textContent = 'Portal Sign In'; }
+          return;
+        }
+        saveDB();
+        setCurrentUser(u);
+        document.getElementById('landing-page').style.display = 'none';
+        document.getElementById('login-page').style.display = 'none';
+        const app = document.getElementById('app');
+        app.style.display = 'flex'; app.style.flexDirection = 'column';
+        buildShell(); goPage('dashboard'); applyBranding();
+        if (loginRole === 'admin') refreshAdmissionApplications(true);
+        refreshCloudAfterLogin(em, u.role);
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = 'Sign In'; }
+      }
+    }
+    async function refreshCloudAfterLogin(email, role) {
+      const cloud = await loadCloudDB();
+      if (!cloud) return;
+      DB = cloud;
+      stripStoredPasswords();
+      ensureEnhancements();
+      saveLocalDB();
+      const refreshedUser = findUserProfile(email, role);
+      if (!refreshedUser) return;
+      setCurrentUser(refreshedUser);
+      buildShell();
+      goPage(curPage || 'dashboard');
+      applyBranding();
+      showSyncBadge('Cloud data refreshed', '#4caf50');
+    }
+    async function logout() {
+      if (_sb) { try { await _sb.auth.signOut(); } catch (e) {} }
+      document.getElementById('app').style.display = 'none';
+      document.getElementById('login-page').style.display = 'none';
+      document.getElementById('landing-page').style.display = 'block';
+      curUser = null;
+      document.getElementById('l-email').value = '';
+      document.getElementById('l-pass').value = '';
+    }
+
+    async function adminResetPassword(email, newPass, btnEl) {
+      if (!email || !newPass) { showToast('Email and new password required', 'te'); return; }
+      if (newPass.length < 6) { showToast('Password must be at least 6 characters', 'te'); return; }
+      if (!_sb) { showToast('Supabase not configured', 'te'); return; }
+      if (curRole !== 'admin') { showToast('Admin only', 'te'); return; }
+      const origText = btnEl.textContent;
+      btnEl.disabled = true; btnEl.textContent = 'Resetting...';
+      try {
+        const { data: sessionData } = await _sb.auth.getSession();
+        const { data, error } = await _sb.functions.invoke('admin-reset-password', {
+          body: { email, password: newPass },
+          headers: { Authorization: `Bearer ${sessionData?.session?.access_token}` }
+        });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        showToast('Password reset successfully!', 'ts');
+      } catch (e) {
+        showToast(e.message || 'Error resetting password', 'te', 5000);
+      }
+      btnEl.disabled = false; btnEl.textContent = origText;
+    }
+    function openLogin(prefillRole = 'admin') {
+      document.getElementById('landing-page').style.display = 'none';
+      document.getElementById('login-page').style.display = 'flex';
+      const btn = [...document.querySelectorAll('.rtab')].find(b => b.textContent.toLowerCase().includes(prefillRole));
+      if (btn) setRole(prefillRole, btn);
+    }
+    function closeLogin() {
+      document.getElementById('login-page').style.display = 'none';
+      document.getElementById('landing-page').style.display = '';
+    }
+    function openManualParentWhatsApp() {
+      const phone = normalizePhone(DB.school?.whatsapp || DB.school?.phone || '');
+      if (!phone || phone.length < 11) {
+        showToast('School WhatsApp number is not configured yet.', 'tw2', 5200);
+        return;
+      }
+      const msg = `Assalam o Alaikum, I want information about ${DB.school?.name || 'the school'}.`;
+      openWhatsAppMessage(phone, msg);
+    }
+
+    /* ------------------------------- BRANDING ------------------------------- */
+
+    function escAttr(v) { return String(v || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+    function escHtml(v) { return String(v || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+
+
+    function renderAdmissionClassOptions() {
+      const sel = document.getElementById('adm-class');
+      if (!sel || !DB?.classes) return;
+      const current = sel.value;
+      sel.innerHTML = '<option value="">Select class</option>' + DB.classes.map(c => '<option value="' + escAttr(c.id) + '">' + escHtml(c.name) + (c.section ? ' ' + escHtml(c.section) : '') + '</option>').join('');
+      if (current) sel.value = current;
+    }
+
+    function admissionFormValue(id) { return (document.getElementById(id)?.value || '').trim(); }
+
+    function localToSupabaseAdmission(app) {
+      return {
+        student_name: app.studentName, applying_class: app.classId, applying_class_name: app.className,
+        dob: app.dob || null, gender: app.gender || '', father_name: app.father || '', mother_name: app.mother || '',
+        phone: app.phone || '', whatsapp: app.whatsapp || '', email: app.email || '', address: app.address || '',
+        previous_school: app.previousSchool || '', notes: app.notes || '', status: app.status || 'new'
+      };
+    }
+
+    function supabaseToLocalAdmission(row) {
+      return {
+        id: row.id || uid(), createdAt: row.created_at || new Date().toISOString(), status: row.status || 'new',
+        studentName: row.student_name || '', classId: row.applying_class || '', className: row.applying_class_name || '',
+        dob: row.dob || '', gender: row.gender || '', father: row.father_name || '', mother: row.mother_name || '',
+        phone: row.phone || '', whatsapp: row.whatsapp || '', email: row.email || '', address: row.address || '',
+        previousSchool: row.previous_school || '', notes: row.notes || '', convertedStudentId: row.converted_student_id || ''
+      };
+    }
+
+    async function submitOnlineAdmission() {
+      const status = document.getElementById('adm-status');
+      const btn = document.getElementById('adm-submit');
+      const classId = admissionFormValue('adm-class');
+      const cls = DB.classes.find(c => c.id === classId);
+      const app = {
+        id: uid(), createdAt: new Date().toISOString(), status: 'new',
+        studentName: admissionFormValue('adm-student'), classId,
+        className: cls ? cls.name + (cls.section ? ' ' + cls.section : '') : '',
+        dob: admissionFormValue('adm-dob'), gender: admissionFormValue('adm-gender'),
+        father: admissionFormValue('adm-father'), mother: admissionFormValue('adm-mother'),
+        phone: admissionFormValue('adm-phone'), whatsapp: admissionFormValue('adm-whatsapp'),
+        email: admissionFormValue('adm-email').toLowerCase(), address: admissionFormValue('adm-address'),
+        previousSchool: admissionFormValue('adm-prev'), notes: admissionFormValue('adm-notes')
+      };
+      if (!app.studentName || !app.classId || !app.father || !app.phone) {
+        if (status) { status.style.color = 'var(--r)'; status.textContent = 'Please fill student name, class, guardian name, and phone.'; }
+        return;
+      }
+      if (btn) { btn.disabled = true; btn.textContent = 'Submitting...'; }
+      let onlineSaved = false;
+      try {
+        if (_sb) {
+          const { error } = await _sb.from('admission_applications').insert(localToSupabaseAdmission(app));
+          if (error) throw error;
+          onlineSaved = true;
+        }
+      } catch (err) {
+        console.warn('Online admission insert failed:', err?.message || err);
+      }
+      DB.admissions = [app, ...(DB.admissions || [])].slice(0, 100);
+      saveLocalDB();
+      ['adm-student','adm-class','adm-dob','adm-gender','adm-father','adm-mother','adm-phone','adm-whatsapp','adm-email','adm-address','adm-prev','adm-notes'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+      renderAdmissionClassOptions();
+      if (status) {
+        status.style.color = onlineSaved ? 'var(--g)' : 'var(--o)';
+        status.textContent = onlineSaved ? 'Application submitted online. Our office will contact you soon.' : 'Saved on this browser. Run the admission SQL in Supabase to receive online applications.';
+      }
+      setTimeout(() => { if (btn) { btn.disabled = false; btn.textContent = 'Submit Application'; } }, 1200);
+    }
+
+    function slideStyle(slide, i) {
+      const accent = slide.accent || ['#1e3a5f', '#166534', '#7c2d6b', '#b45309'][i % 4];
+      const fallbackImages = [
+        'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1800&q=80',
+        'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1800&q=80',
+        'https://images.unsplash.com/photo-1588072432836-e10032774350?auto=format&fit=crop&w=1800&q=80',
+        'https://images.unsplash.com/photo-1540479859555-17af45c78602?auto=format&fit=crop&w=1800&q=80'
+      ];
+      const img = (slide.image || fallbackImages[i % fallbackImages.length] || '').trim();
+      if (img) return "background-image:linear-gradient(rgba(17,24,39,.36),rgba(17,24,39,.46)), url('" + escAttr(img) + "');background-size:cover;background-position:center;";
+      return 'background:linear-gradient(135deg, ' + accent + ' 0%, #0f766e 100%);';
+    }
+
+    function renderLandingSlides() {}
+
+    function applyBranding() {
+      if (!DB || !DB.school) return;
+      const s = DB.school;
+      const setText = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
+      setText('doc-title', s.name || 'Oxford Excellence Academy');
+      setText('tb-sname', s.name || 'Oxford Excellence Academy');
+      setText('lp-title', s.name || 'Oxford Excellence Academy');
+      setText('lp-sub', s.tagline || 'Learn • Grow • Excel');
+      setText('land-name', s.name || 'Oxford Excellence Academy');
+      setText('land-copy', s.tagline || 'Learn • Grow • Excel');
+      ['tb-ico', 'lp-logo', 'land-mark', 'foot-logo'].forEach(id => {
+        const el = document.getElementById(id); if (!el) return;
+        el.innerHTML = s.logo ? `<img src="${s.logo}" alt="logo" style="width:100%;height:100%;object-fit:contain;"/>` : `<img src="oxford_logo.svg" alt="logo" style="width:100%;height:100%;object-fit:contain;"/>`;
+        el.style.background = 'transparent';
+      });
+      document.documentElement.style.setProperty('--p', s.primaryColor || '#ff8a00');
+      renderLandingSlides();
+      renderAdmissionClassOptions();
+    }
+
+    
+    async function uploadToStorage(file) {
+      if (!_sb) throw new Error("No Supabase connection");
+      const ext = file.name.split('.').pop();
+      const fileName = `${Date.now()}_${Math.random().toString(36).substring(2,9)}.${ext}`;
+      const { data, error } = await _sb.storage.from('portal_images').upload(fileName, file);
+      if (error) throw error;
+      const { data: publicUrlData } = _sb.storage.from('portal_images').getPublicUrl(fileName);
+      return publicUrlData.publicUrl;
+    }
+
+    async function uploadLogo(inp) {
+      const f = inp.files[0]; if (!f) return;
+      try {
+        showToast('Uploading logo...', 'ts');
+        const url = await uploadToStorage(f);
+        DB.school.logo = url; saveDB(); pushPublicSite(); applyBranding(); showToast('Logo updated and published', 'ts');
+      } catch(e) { showToast(e.message, 'te'); }
+    }
+
+    /* ------------------------------- SHELL ------------------------------- */
+    function iconMarkup(name) {
+      const key = String(name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const icons = {
+        dashboard: '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/>',
+        students: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/>',
+        admissions: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 18v-6"/><path d="M9 15h6"/>',
+        attendance: '<path d="M8 2v4"/><path d="M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/><path d="M9 16l2 2 4-5"/>',
+        scanner: '<path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/>',
+        grades: '<path d="M12 2l3 7h7l-5.5 4.5L18.5 21 12 16.8 5.5 21l2-7.5L2 9h7z"/>',
+        fees: '<circle cx="12" cy="12" r="9"/><path d="M12 7v10"/><path d="M8 10c0-1.7 1.8-3 4-3s4 1.3 4 3-1.8 2-4 2-4 .3-4 2 1.8 3 4 3 4-1.3 4-3"/>',
+        classes: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5z"/>',
+        timetable: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/>',
+        exams: '<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',
+        notices: '<path d="M3 11l18-5v12L3 13v-2z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>',
+        teachers: '<path d="M22 10L12 4 2 10l10 6 10-6z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',
+        payroll: '<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/>',
+        teacheratt: '<path d="M8 7a4 4 0 1 0 8 0 4 4 0 0 0-8 0"/><path d="M6 21v-2a6 6 0 0 1 12 0v2"/><path d="M17 11l2 2 4-5"/>',
+        subjects: '<path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h10"/>',
+        reportcards: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h5"/>',
+        idcards: '<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8" cy="11" r="2"/><path d="M6 16c.8-1.4 3.2-1.4 4 0"/><path d="M13 10h5"/><path d="M13 14h4"/>',
+        families: '<path d="M16 21v-2a4 4 0 0 0-8 0v2"/><circle cx="12" cy="7" r="4"/><path d="M4 21v-2a3 3 0 0 1 3-3"/><path d="M20 21v-2a3 3 0 0 0-3-3"/>',
+        settings: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1A2 2 0 1 1 4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1A2 2 0 1 1 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.6V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1A2 2 0 1 1 19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9v.1a1.7 1.7 0 0 0 1.6 1h.1a2 2 0 1 1 0 4H21a1.7 1.7 0 0 0-1.6 1z"/>',
+        qrcard: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h3v3H7z"/><path d="M14 9h3v3h-3z"/><path d="M7 15h3"/><path d="M14 15h3"/>',
+        mygrades: '<path d="M12 2l3 7h7l-5.5 4.5L18.5 21 12 16.8 5.5 21l2-7.5L2 9h7z"/>',
+        myattend: '<path d="M8 2v4"/><path d="M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/><path d="M9 16l2 2 4-5"/>',
+        myfees: '<circle cx="12" cy="12" r="9"/><path d="M12 7v10"/><path d="M8 10c0-1.7 1.8-3 4-3s4 1.3 4 3-1.8 2-4 2-4 .3-4 2 1.8 3 4 3 4-1.3 4-3"/>',
+        logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/>'
+      };
+      const svg = icons[key] || icons.dashboard;
+      return `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${svg}</svg>`;
+    }
+
+    function navItems() {
+      if (curRole === 'scanner') return [
+        { p: 'dashboard', i: 'dashboard', l: 'Dashboard', s: 'Home' },
+        { p: 'scanner', i: '', l: 'QR Scanner', s: 'Scan' }
+      ];
+      if (curRole === 'admin') return [
+        { p: 'dashboard', i: 'dashboard', l: 'Dashboard', s: 'Home' },
+        { p: 'students', i: '', l: 'Students', s: 'Students' },
+        { p: 'admissions', i: '', l: 'Admissions', s: 'Apply' },
+        { p: 'attendance', i: 'attendance', l: 'Attendance', s: 'Attend' },
+        { p: 'grades', i: '', l: 'Grades', s: 'Grades' },
+        { p: 'fees', i: '', l: 'Fees', s: 'Fees' },
+        { p: '---' },
+        { p: 'classes', i: '', l: 'Classes', s: 'Classes' },
+        { p: 'timetable', i: '', l: 'Timetable', s: 'Sched' },
+        { p: 'exams', i: '', l: 'Exams', s: 'Exams' },
+        { p: 'notices', i: '', l: 'Notices & Assignments', s: 'News' },
+        { p: '---' },
+        { p: 'teachers', i: '', l: 'Teachers', s: 'Staff' },
+        { p: 'payroll', i: '', l: 'Payroll', s: 'Payroll' },
+        { p: 'teacheratt', i: '', l: 'Teacher Attendance', s: 'T.Att' },
+        { p: 'subjects', i: '', l: 'Subjects', s: 'Subj' },
+        { p: 'reportcards', i: '', l: 'Report Cards', s: 'Report' },
+        { p: 'idcards', i: '', l: 'ID Cards', s: 'ID' },
+        { p: 'families', i: '', l: 'Families', s: 'Family' },
+        { p: 'settings', i: 'settings', l: 'Settings', s: 'Setup' },
+      ];
+      if (curRole === 'teacher') return [
+        { p: 'dashboard', i: 'dashboard', l: 'Dashboard', s: 'Home' },
+        { p: 'attendance', i: 'attendance', l: 'Attendance', s: 'Attend' },
+        { p: 'scanner', i: '', l: 'QR Scanner', s: 'Scan' },
+        { p: 'grades', i: '', l: 'Grades', s: 'Grades' },
+        { p: 'students', i: '', l: 'My Students', s: 'Class' },
+        { p: 'idcards', i: '', l: 'ID Cards', s: 'ID' },
+        { p: 'notices', i: '', l: 'Notices & Assignments', s: 'News' },
+        { p: 'timetable', i: '', l: 'Timetable', s: 'Sched' },
+        { p: 'teacheratt', i: '', l: 'My Attendance', s: 'My Att' },
+      ];
+      return [
+        { p: 'dashboard', i: 'dashboard', l: 'Dashboard', s: 'Home' },
+        { p: 'mygrades', i: '', l: 'My Grades', s: 'Grades' },
+        { p: 'myattend', i: 'attendance', l: 'Attendance', s: 'Attend' },
+        { p: 'qrcard', i: '', l: 'ID Card', s: 'Card' },
+        { p: 'myfees', i: '', l: 'My Fees', s: 'Fees' },
+        { p: 'notices', i: '', l: 'Notices & Assignments', s: 'News' },
+      ];
+    }
+
+    function buildShell() {
+      const av = document.getElementById('uc-ava');
+      if (av) { av.style.background = gc(curUser?.name || '?'); av.innerHTML = curUser?.photo ? `<img src="${curUser.photo}" alt="ava"/>` : `<span>${ini(curUser?.name)}</span>`; }
+      document.getElementById('uc-name').textContent = (curUser?.name || '').split(' ')[0];
+      // Show cloud connected dot
+      const cd = document.getElementById('cloud-dot');
+      if (cd) cd.style.display = _sb ? 'inline' : 'none';
+      const nav = navItems();
+      const sb = document.getElementById('sb-nav');
+      if (sb) sb.innerHTML = `
+  <div class="sb-who"><div class="sb-role">${curRole} - ${DB.settings?.schoolYear || ''}</div><div class="sb-nm">${curUser?.name || ''}</div></div>
+  <div class="sb-sep"></div>
+  <div class="nb">${nav.map(n => {
+        if (n.p === '---') return '<div class="sb-sep"></div>';
+        return `<button class="ni" data-page="${n.p}" onclick="goPage('${n.p}')"><span class="ni-ic">${iconMarkup(n.i && n.i !== '?' ? n.i : n.p)}</span><span>${n.l}</span></button>`;
+      }).join('')}</div>
+  <button class="sb-out" onclick="logout()"><span class="ni-ic">${iconMarkup('logout')}</span> Sign Out</button>`;
+      const bn = document.getElementById('bn-nav');
+      if (bn) bn.innerHTML = nav.filter(n => n.p !== '---').slice(0, 5).map(n => `<button class="bn-it" data-page="${n.p}" onclick="goPage('${n.p}')"><div class="bn-ic">${iconMarkup(n.i && n.i !== '?' ? n.i : n.p)}</div><div class="bn-lb">${n.s}</div></button>`).join('');
+      buildNotifPanel();
+    }
+
+    function goPage(p) {
+      if (p === 'scanner') { openScanner(); return; }
+      curPage = p;
+      sessionStorage.setItem('lastPage', p);
+      document.querySelectorAll('[data-page]').forEach(el => el.classList.toggle('active', el.dataset.page === p));
+      document.getElementById('page-root').innerHTML = `<div class="pw fu">${renderPage(p)}</div>`;
+      updatePill();
+      closeNotif();
+      if (p === 'qrcard') setTimeout(buildQRCard, 90);
+      if (p === 'idcards') setTimeout(buildClassIdCardQrs, 120);
+      if (p === 'dashboard' && curRole === 'admin') setTimeout(renderAdminCharts, 120);
+    }
+
+    function renderPage(p) {
+      const map = {
+        dashboard: () => curRole === 'admin' ? pgAdminDash() : curRole === 'teacher' ? pgTeacherDash() : curRole === 'scanner' ? pgScannerDash() : pgStudentDash(),
+        students: pgStudents, admissions: pgAdmissions, classes: pgClasses, attendance: pgAttendance, grades: pgGrades,
+        fees: pgFees, exams: pgExams, notices: pgNotices, timetable: pgTimetable,
+        teachers: pgTeachers, payroll: pgPayroll, teacheratt: pgTeacherAtt, subjects: pgSubjects,
+        reportcards: pgReportCards, idcards: pgClassIdCards, families: pgFamilies, settings: pgSettings,
+        mygrades: pgMyGrades, myattend: pgMyAttend, qrcard: pgQRCard, myfees: pgMyFees, profile: pgProfile,
+      };
+      return (map[p] || pgAdminDash)();
+    }
+
+    function updatePill() {
+      const el = document.getElementById('tb-pill'); if (!el) return;
+      const cls = DB.classes.find(c => c.id === curCls);
+      el.textContent = cls ? `${cls.name}${cls.section ? ' ' + cls.section : ''}` : '';
+      el.style.display = (curRole === 'student' || curRole === 'parent') ? 'none' : 'flex';
+    }
+    function switchCls(cid) { curCls = cid; updatePill(); goPage(curPage); }
+
+    function clsBar(fn = 'switchCls') {
+      const classes = curRole === 'teacher' ? (curUser?.classIds || []).map(id => DB.classes.find(c => c.id === id)).filter(Boolean) : DB.classes;
+      return `<div class="cpb">${classes.map(c => `<button class="cp${c.id === curCls ? ' active' : ''}" onclick="${fn}('${c.id}')">${c.name}${c.section ? ' ' + c.section : ''}</button>`).join('')}</div>`;
+    }
+
+    /* ------------------------------- SCANNER DASHBOARD ------------------------------- */
+    function pgScannerDash() {
+      return `<div class="ph ph-row fu"><div><div class="ph-tag"> Scanner</div><h1>Gate Access Control</h1><div class="ph-sub">Scan ID cards to log attendance</div></div></div><div class="card" style="text-align:center;padding:50px 20px;"><div style="font-size:3.5rem;margin-bottom:15px;">?</div><h3>QR Scanner</h3><p style="color:var(--ink3);margin-bottom:25px;font-size:.85rem;">Open the scanner to mark attendance for students and staff.</p><button class="btn btn-p" onclick="openScanner()" style="font-size:1.1rem;padding:12px 30px;">Open Scanner</button></div>`;
+    }
+
+    /* ------------------------------- ADMIN DASHBOARD ------------------------------- */
+    function pgAdminDash() {
+      const all = allStus(); const tot = all.length;
+      const feeOk = all.filter(s => (DB.fees.payments[s.id] || {})['f1']?.paid).length;
+      const avgSc = tot ? Math.round(all.reduce((a, s) => a + avgStu(s.classId, s.id), 0) / tot) : 0;
+      const teachers = DB.users.filter(u => u.role === 'teacher');
+      const teacherCount = teachers.length;
+      const pendingPayroll = teachers.filter(t => t.payrollStatus !== 'paid').length;
+      const newAdmissions = (DB.admissions || []).filter(a => (a.status || 'new') === 'new').length;
+      return `
+<div class="ph fu ph-row">
+  <div>
+    <div class="ph-tag"> Admin Overview</div>
+    <h1>${DB.school.name}</h1>
+    <div class="ph-sub">${new Date().toDateString()} - Academic Year ${DB.settings?.schoolYear || ''}</div>
+  </div>
+  <div class="ph-acts">
+    <button class="btn btn-gh btn-sm" onclick="goPage('admissions')"> Admissions${newAdmissions ? ' (' + newAdmissions + ')' : ''}</button>
+    <button class="btn btn-gh btn-sm" onclick="goPage('notices')"> Notice</button>
+    <button class="btn btn-gh btn-sm" onclick="goPage('payroll')"> Payroll</button>
+    <button class="btn btn-p btn-sm" onclick="openAddStudentModal()">+ Add Student</button>
+  </div>
+</div>
+<div class="sg fu d1">
+  <div class="sc sp"><div class="sc-ic"></div><div class="sc-val" style="color:var(--p);">${tot}</div><div class="sc-lbl">Total Students</div></div>
+  <div class="sc sg2"><div class="sc-ic"></div><div class="sc-val" style="color:var(--g);">${avgSc}%</div><div class="sc-lbl">Average Score</div></div>
+  <div class="sc sr"><div class="sc-ic"></div><div class="sc-val" style="color:var(--r);">${tot - feeOk}</div><div class="sc-lbl">Fee Pending</div></div>
+  <div class="sc sv"><div class="sc-ic"></div><div class="sc-val" style="color:var(--v);">${pendingPayroll}/${teacherCount}</div><div class="sc-lbl">Payroll Pending</div></div>
+  <div class="sc sp"><div class="sc-ic"></div><div class="sc-val" style="color:var(--p);">${newAdmissions}</div><div class="sc-lbl">New Admissions</div></div>
+</div>
+<div class="g2" style="margin-bottom:15px;">
+  <div class="card fu d2" style="height:250px;display:flex;flex-direction:column;">
+    <div class="ch" style="margin-bottom:5px;"><div class="ct">6-Month Revenue</div><button class="btn btn-gh btn-sm" onclick="goPage('fees')">Ledger</button></div>
+    <div style="flex:1;position:relative;width:100%;"><canvas id="feeChart"></canvas></div>
+  </div>
+  <div class="card fu d3" style="height:250px;display:flex;flex-direction:column;">
+    <div class="ch" style="margin-bottom:5px;"><div class="ct">Today's Attendance</div><button class="btn btn-gh btn-sm" onclick="goPage('attendance')">Register</button></div>
+    <div style="flex:1;position:relative;width:100%;"><canvas id="attChart"></canvas></div>
+  </div>
+</div>
+<div class="g2">
+  <div class="card fu d2">
+    <div class="ch"><div class="ct"> Class Performance</div><button class="btn btn-gh btn-sm" onclick="goPage('reportcards')">Reports</button></div>
+      ${DB.classes.slice(0, 8).map(c => { const sts = clsStus(c.id); const avg = sts.length ? Math.round(sts.reduce((a, s) => a + avgStu(c.id, s.id), 0) / sts.length) : 0; return `<div style="display:flex;align-items:center;gap:9px;margin-bottom:9px;"><div style="font-size:.74rem;font-weight:600;color:var(--ink3);min-width:78px;">${escHtml(c.name)}${c.section ? ' ' + escHtml(c.section) : ''}</div><div style="flex:1;"><div class="pb" style="height:6px;"><div class="pf" style="width:${avg}%;background:${sCol(avg)};height:6px;"></div></div></div><div style="font-weight:700;font-size:.78rem;min-width:34px;text-align:right;color:${sCol(avg)};">${avg}%</div></div>`; }).join('')}
+  </div>
+  <div>
+    <div class="card fu d3">
+      <div class="ch"><div class="ct"> Fee Overview</div><button class="btn btn-gh btn-sm" onclick="goPage('fees')">Manage</button></div>
+      <div class="fee-hero">
+        <div style="font-size:.72rem;opacity:.65;">Monthly Collection</div>
+        <div style="font-family:var(--head);font-size:1.7rem;font-weight:700;margin:4px 0;">${DB.settings?.currency || 'PKR'} ${(feeOk * (DB.fees.items[0]?.amount || 0)).toLocaleString()}</div>
+        <div style="font-size:.7rem;opacity:.6;">${feeOk} of ${tot} students paid</div>
+        <div class="fh-bar"><div class="fh-fill" style="width:${tot ? Math.round(feeOk / tot * 100) : 0}%;"></div></div>
+      </div>
+      <button class="btn btn-wa btn-sm" style="width:100%;justify-content:center;" onclick="sendBulkFeeReminder()">WhatsApp Reminders to Pending</button>
+    </div>
+    <div class="card fu d3">
+      <div class="ch"><div class="ct"> Teacher Payroll</div><button class="btn btn-gh btn-sm" onclick="goPage('payroll')">Open</button></div>
+        ${teachers.slice(0, 3).map(t => `<div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);"><div><div style="font-weight:800;font-size:.8rem;">${t.name}</div><div style="font-size:.68rem;color:var(--ink4);">${t.subject || 'General'} - ${t.payrollStatus === 'paid' && t.lastPaid ? `Paid ${fmtDate(t.lastPaid)}` : 'Awaiting salary release'}</div></div><div style="text-align:right;"><div style="font-weight:800;color:var(--p);">${fmtMoney(teacherNetSalary(t))}</div><span class="badge ${t.payrollStatus === 'paid' ? 'bg2' : 'bo2'}">${t.payrollStatus === 'paid' ? 'Paid' : 'Pending'}</span></div></div>`).join('') || '<div style="font-size:.76rem;color:var(--ink4);">No teachers added yet</div>'}
+    </div>
+    <div class="card fu d4">
+      <div class="ch"><div class="ct"> Recent Notices</div><button class="btn btn-gh btn-sm" onclick="openAddNoticeModal()">+ Add</button></div>
+        ${DB.notices.slice(-3).reverse().map(n => `<div style="display:flex;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);"><div style="width:3px;border-radius:99px;flex-shrink:0;background:var(--p);"></div><div><div style="font-weight:600;font-size:.81rem;">${n.title}</div><div style="font-size:.68rem;color:var(--ink4);margin-top:1px;">${fmtDate(n.date)}</div></div></div>`).join('') || '<div style="color:var(--ink4);font-size:.78rem;text-align:center;padding:10px;">No notices yet</div>'}
+    </div>
+  </div>
+</div>
+<div class="card fu d5">
+  <div class="ch"><div class="ct"> All Classes</div><button class="btn btn-gh btn-sm" onclick="goPage('classes')">Manage</button></div>
+  <div class="g3">${DB.classes.map(c => { const sts = clsStus(c.id); const avg = sts.length ? Math.round(sts.reduce((a, s) => a + avgStu(c.id, s.id), 0) / sts.length) : 0; return `<div style="background:var(--card2);border:1px solid var(--border);border-radius:var(--radius);padding:12px;cursor:pointer;transition:all .17s;" onclick="switchCls('${c.id}');goPage('students')" onmouseover="this.style.transform='translateY(-2px)';this.style.borderColor='var(--p2)'" onmouseout="this.style.transform='';this.style.borderColor=''"><div style="width:28px;height:28px;border-radius:7px;background:${gc(c.name)};display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;color:#fff;margin-bottom:7px;">${c.name.charAt(0)}</div><div style="font-weight:700;font-size:.84rem;">${c.name}${c.section ? ' ' + c.section : ''}</div><div style="font-size:.68rem;color:var(--ink3);margin:2px 0 7px;">${sts.length} students</div><div class="pb" style="height:4px;"><div class="pf" style="width:${avg}%;background:${sCol(avg)};height:4px;"></div></div><div style="display:flex;justify-content:space-between;margin-top:4px;font-size:.66rem;font-weight:700;"><span style="color:${sCol(avg)};">${avg}%</span><span style="color:var(--p);">View</span></div></div>`; }).join('')}</div>
+</div>`;
+    }
+
+    /* ------------------------------- TEACHER DASHBOARD ------------------------------- */
+    function pgTeacherDash() {
+      const sts = clsStus(curCls);
+      const cls = DB.classes.find(c => c.id === curCls);
+      const avg = sts.length ? Math.round(sts.reduce((a, s) => a + avgStu(curCls, s.id), 0) / sts.length) : 0;
+      const atRisk = sts.filter(s => avgStu(curCls, s.id) < 50).length;
+      // Teacher own attendance today
+      const myAtt = (DB.teacherAttendance[curUser?.id] || {})[today()];
+      const nowT = nowHHMM();
+      const lateT = isLate(nowT);
+      return `
+<div class="ph ph-row fu">
+  <div><div class="ph-tag"> Teacher Portal</div><h1>Good Day, ${(curUser?.name || '').split(' ')[0]}!</h1><div class="ph-sub">${cls?.name || ''} - ${new Date().toDateString()}</div></div>
+  <button class="btn btn-p" onclick="openScanner()"> Scan QR</button>
+</div>
+  ${!myAtt ? `<div class="${lateT ? 'late-banner' : 'ibox'}" style="${lateT ? '' : 'background:var(--gl);border-color:rgba(5,150,105,.2);'}">
+  <div>${lateT ? 'Late' : 'OK'}</div>
+  <div>
+    <div class="${lateT ? 'late-t' : 'ct'}">${lateT ? `You're late - Current time: ${nowT}` : 'Mark your attendance for today'}</div>
+    <div class="${lateT ? 'late-s' : ''}" style="font-size:.72rem;${lateT ? '' : 'color:var(--ink3);margin-top:2px;'}">On-time before ${DB.lateAfter || '08:00'} - Late arrival will be recorded</div>
+    <div style="display:flex;gap:7px;margin-top:9px;">
+      <button class="btn btn-g btn-sm" onclick="markTeacherAtt('Present')">Check In (${lateT ? 'Late' : 'On Time'})</button>
+      <button class="btn btn-gh btn-sm" onclick="markTeacherAtt('Leave')"> On Leave</button>
+    </div>
+  </div>
+</div>`: `<div class="ibox"><div>Done</div><div>Attendance marked: <b style="color:var(--g);">${myAtt.status}${myAtt.checkIn ? ' at ' + myAtt.checkIn : ''}</b>${myAtt.status === 'Late' ? ` <span class="badge br2">LATE</span>` : ''}</div></div>`}
+  ${clsBar()}
+<div class="sg fu d1">
+  <div class="sc sp"><div class="sc-ic"></div><div class="sc-val" style="color:var(--p);">${sts.length}</div><div class="sc-lbl">Students</div></div>
+  <div class="sc sg2"><div class="sc-ic"></div><div class="sc-val" style="color:var(--g);">${avg}%</div><div class="sc-lbl">Class Average</div></div>
+  <div class="sc sr"><div class="sc-ic"></div><div class="sc-val" style="color:var(--r);">${atRisk}</div><div class="sc-lbl">At Risk</div></div>
+  <div class="sc so"><div class="sc-ic"></div><div class="sc-val" style="color:var(--o);">${DB.exams.length}</div><div class="sc-lbl">Exams</div></div>
+</div>
+<div class="g2">
+  <div class="card fu d2">
+    <div class="ch"><div class="ct">? Quick Attendance - ${cls?.name || ''}</div><button class="btn btn-gh btn-sm" onclick="goPage('attendance')">Full Register</button></div>
+    <div style="display:flex;flex-wrap:wrap;gap:9px;">
+        ${sts.slice(0, 16).map(s => { const att = (DB.attendance[curCls]?.[s.id] || {})[today()]; return `<div style="text-align:center;"><div class="ava" style="width:36px;height:36px;border-radius:9px;background:${gc(s.name)};font-size:.6rem;margin:0 auto 2px;">${s.photo ? `<img src="${s.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:9px;"/>` : ini(s.name)}</div><div style="font-size:.55rem;color:var(--ink3);max-width:38px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${s.name.split(' ')[0]}</div><div style="display:flex;gap:2px;margin-top:2px;"><button style="width:19px;height:19px;border-radius:5px;border:none;font-size:.52rem;font-weight:800;cursor:pointer;background:${att === 'P' ? 'var(--g)' : 'var(--gl)'};color:${att === 'P' ? '#fff' : 'var(--g)'};" onclick="qkAtt('${s.id}','P',this)">P</button><button style="width:19px;height:19px;border-radius:5px;border:none;font-size:.52rem;font-weight:800;cursor:pointer;background:${att === 'A' ? 'var(--r)' : 'var(--rl)'};color:${att === 'A' ? '#fff' : 'var(--r)'};" onclick="qkAtt('${s.id}','A',this)">A</button></div></div>`; }).join('')}
+    </div>
+    <button class="btn btn-g btn-sm" style="margin-top:10px;width:100%;justify-content:center;" onclick="saveQkAtt()"> Save Attendance</button>
+  </div>
+  <div class="card fu d3">
+    <div class="ch"><div class="ct"> Top Performers</div></div>
+      ${sts.sort((a, b) => avgStu(curCls, b.id) - avgStu(curCls, a.id)).slice(0, 6).map((s, i) => { const a = avgStu(curCls, s.id); return `<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);"><div style="font-size:.76rem;font-weight:800;color:${i < 3 ? 'var(--o)' : 'var(--ink5)'};min-width:16px;">${i + 1}</div><div class="ava" style="width:30px;height:30px;border-radius:7px;background:${gc(s.name)};font-size:.56rem;">${s.photo ? `<img src="${s.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:7px;"/>` : ini(s.name)}</div><div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.name}</div><div style="font-size:.65rem;color:var(--ink4);">Roll ${s.roll || '-'}</div></div><div style="font-weight:800;color:${sCol(a)};font-size:.85rem;">${a || 0}%</div></div>`; }).join('') || '<div class="empty" style="padding:16px;"><div style="color:var(--ink4);font-size:.8rem;">No grade data</div></div>'}
+  </div>
+</div>`;
+    }
+
+    let _qkAD = {};
+    function qkAtt(sid, val, btn) { _qkAD[sid] = val; const p = btn.parentElement; const bs = p.querySelectorAll('button'); bs[0].style.background = val === 'P' ? 'var(--g)' : 'var(--gl)'; bs[0].style.color = val === 'P' ? '#fff' : 'var(--g)'; bs[1].style.background = val === 'A' ? 'var(--r)' : 'var(--rl)'; bs[1].style.color = val === 'A' ? '#fff' : 'var(--r)'; }
+    function saveQkAtt() { const d = today(); Object.entries(_qkAD).forEach(([sid, val]) => { if (!DB.attendance[curCls]) DB.attendance[curCls] = {}; if (!DB.attendance[curCls][sid]) DB.attendance[curCls][sid] = {}; DB.attendance[curCls][sid][d] = val; }); saveDB(); _qkAD = {}; showToast('Attendance saved', 'ts'); }
+
+    function markTeacherAtt(status) {
+      const t = nowHHMM(); const d = today();
+      if (!DB.teacherAttendance[curUser.id]) DB.teacherAttendance[curUser.id] = {};
+      const finalStatus = (status === 'Present' && isLate(t)) ? 'Late' : status;
+      DB.teacherAttendance[curUser.id][d] = { checkIn: t, status: finalStatus };
+      saveDB(); goPage('dashboard'); showToast(`Attendance marked: ${finalStatus} at ${t}`, 'ts');
+    }
+
+    /* ------------------------------- STUDENT DASHBOARD ------------------------------- */
+    function pgStudentDash() {
+      const isParent = curRole === 'parent';
+      const fam = isParent ? DB.families[curUser?.familyId] : null;
+      const allSibIds = fam?.studentIds || [];
+      const viewSid = window._viewSibId || (curUser?.studentId || allSibIds[0]);
+      const stu = allStus().find(s => s.id === viewSid) || { name: curUser?.name, id: '', classId: curCls };
+      const cid = stu.classId || curCls;
+      const a = avgStu(cid, stu.id); const ap = attPct(cid, stu.id);
+      const cls = DB.classes.find(c => c.id === cid);
+      const siblings = allSibIds.filter(id => id !== stu.id).map(id => allStus().find(s => s.id === id)).filter(Boolean);
+      return `
+<div class="ph fu"><div class="ph-tag">${isParent ? ' Parent Portal' : ' Student Portal'}</div><h1>Welcome, ${(stu.name || curUser?.name || '').split(' ')[0]}!</h1><div class="ph-sub">${cls?.name || ''} - Roll No. ${stu.roll || '-'} - ${new Date().toDateString()}</div></div>
+  ${isParent && allSibIds.length > 1 ? `<div class="fam-bar fu"><span style="font-size:.72rem;font-weight:700;color:var(--v);"> Children:</span>${allSibIds.map(id => { const s = allStus().find(x => x.id === id); if (!s) return ''; return `<div class="fam-chip${id === viewSid ? ' active' : ''}" onclick="window._viewSibId='${id}';goPage('dashboard')"><div class="ava" style="width:20px;height:20px;border-radius:5px;background:${gc(s.name)};font-size:.5rem;">${s.photo ? `<img src="${s.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:5px;"/>` : ini(s.name)}</div>${s.name.split(' ')[0]} <span class="badge ${s.fees === 'Paid' ? 'bg2' : 'br2'}" style="font-size:.55rem;">${s.fees === 'Paid' ? '?' : '!'}</span></div>`; }).join('')}</div>` : ''}
+<div class="sg fu d1">
+  <div class="sc sp"><div class="sc-ic"></div><div class="sc-val" style="color:var(--p);">${a}%</div><div class="sc-lbl">Avg Score</div></div>
+  <div class="sc sg2"><div class="sc-ic"></div><div class="sc-val" style="color:var(--g);font-size:1.45rem;">${lGrade(a)}</div><div class="sc-lbl">Grade</div></div>
+  <div class="sc so"><div class="sc-ic"></div><div class="sc-val" style="color:var(--o);">${ap}%</div><div class="sc-lbl">Attendance</div></div>
+  <div class="sc sr"><div class="sc-ic"></div><div class="sc-val" style="color:${stu.fees === 'Paid' ? 'var(--g)' : 'var(--r)'};">${stu.fees === 'Paid' ? '?' : '!'}</div><div class="sc-lbl">Fees</div></div>
+</div>
+<div class="g2">
+  <div class="card fu d2">
+    <div class="ch"><div class="ct"> Subject Scores</div><div style="display:flex;gap:5px;"><select class="fi" style="padding:2px 5px;font-size:.7rem;height:auto;" onchange="curTerm=this.value;goPage('dashboard')">${DB.settings.terms.map(t => `<option value="${t.id}" ${curTerm===t.id?'selected':''}>${t.name}</option>`).join('')}</select><button class="btn btn-gh btn-sm" onclick="goPage('mygrades')">Full</button></div></div>
+    <div class="score-mini">${DB.subjects.map(sub => { const v = (DB.grades[cid + '_' + curTerm]?.[stu.id] || {})[sub.id] || 0; return `<div class="sm-row"><div class="sm-lbl">${sub.icon} ${sub.name}</div><div class="sm-bar"><div class="sm-fill" style="width:${v}%;background:${sub.color};"></div></div><div class="sm-val" style="color:${sub.color};">${v || '-'}</div></div>`; }).join('')}</div>
+  </div>
+  <div>
+    <div class="card fu d3" style="cursor:pointer;background:linear-gradient(135deg,var(--pl),#fff);border-color:var(--pl2);" onclick="goPage('qrcard')">
+      <div style="display:flex;align-items:center;gap:11px;"><div style="font-size:1.7rem;"></div><div><div style="font-weight:700;font-size:.86rem;">My Student ID Card</div><div style="font-size:.72rem;color:var(--ink3);margin-top:2px;">Tap to view & print QR card</div></div><div style="margin-left:auto;color:var(--p);font-weight:700;font-size:.78rem;">Open</div></div>
+    </div>
+    <div class="card fu d4">
+      <div class="ch"><div class="ct"> Upcoming Exams</div></div>
+        ${DB.exams.slice(0, 3).map(e => `<div style="display:flex;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);"><div style="background:var(--p);color:#fff;border-radius:8px;padding:5px 7px;text-align:center;min-width:38px;flex-shrink:0;"><div style="font-size:.88rem;font-weight:900;line-height:1;">${e.date ? new Date(e.date).getDate() : '?'}</div><div style="font-size:.52rem;opacity:.8;">${e.date ? new Date(e.date).toLocaleString('en', { month: 'short' }) : '-'}</div></div><div><div style="font-weight:700;font-size:.8rem;">${e.subject}</div><div style="font-size:.67rem;color:var(--ink3);">${e.type} - ${e.time || '-'}</div></div></div>`).join('') || '<div style="color:var(--ink4);font-size:.76rem;text-align:center;padding:12px;">No upcoming exams</div>'}
+    </div>
+    <div class="card fu d5" style="margin-top:12px;">
+      <div class="ch"><div class="ct"> Contact Teachers</div></div>
+      <div style="padding:10px 0; display:flex; flex-wrap:wrap; gap:8px;">
+        ${(DB.users || []).filter(u => u.role === 'teacher' && (u.classIds || []).includes(cid)).map(t => `<a href="mailto:${t.email}?subject=Message from ${stu.name} (Parent/Student)" class="btn btn-gh btn-xs" style="text-decoration:none;"><span style="margin-right:4px;">✉</span>${t.name}</a>`).join('') || '<div style="color:var(--ink4);font-size:.76rem;">No teachers assigned</div>'}
+      </div>
+    </div>
+  </div>
+</div>
+  ${DB.notices.slice(-2).reverse().map(n => `<div style="background:linear-gradient(135deg,var(--p),var(--v));border-radius:var(--radius);padding:12px 14px;color:#fff;margin-bottom:10px;" class="fu d5"><div style="font-weight:700;font-size:.83rem;margin-bottom:2px;"> ${n.title}</div><div style="font-size:.76rem;opacity:.75;">${n.body || ''}</div></div>`).join('')}`;
+    }
+
+    /* ------------------------------- STUDENTS PAGE ------------------------------- */
+    function pgStudents() {
+      const sts = clsStus(curCls); const cls = DB.classes.find(c => c.id === curCls);
+      return `
+<div class="ph ph-row fu">
+  <div><div class="ph-tag"> Students</div><h1>Student Roster</h1><div class="ph-sub">${cls?.name || ''} ${cls?.section || ''} - ${sts.length} enrolled</div></div>
+<div class="ph-acts">
+    <button class="btn btn-gh btn-sm" onclick="printIDCards('${curCls}')">Print IDs</button>
+    <button class="btn btn-gh btn-sm" onclick="openBulkModal()"> Bulk Import</button>
+    <button class="btn btn-p" onclick="openAddStudentModal()">+ Add Student</button>
+  </div>
+</div>
+  ${clsBar()}
+<div class="sg fu d1">
+  <div class="sc sp"><div class="sc-ic"></div><div class="sc-val" style="color:var(--p);">${sts.length}</div><div class="sc-lbl">Students</div></div>
+  <div class="sc sg2"><div class="sc-ic"></div><div class="sc-val" style="color:var(--g);">${sts.filter(s => s.fees === 'Paid').length}</div><div class="sc-lbl">Fees Paid</div></div>
+  <div class="sc sr"><div class="sc-ic"></div><div class="sc-val" style="color:var(--r);">${sts.filter(s => s.fees !== 'Paid').length}</div><div class="sc-lbl">Fee Pending</div></div>
+  <div class="sc sv"><div class="sc-ic"></div><div class="sc-val" style="color:var(--v);">${sts.filter(s => s.familyId).length}</div><div class="sc-lbl">In Family</div></div>
+</div>
+<div class="card fu d2" style="padding:0;overflow:hidden;">
+  <div class="tw">
+    <table>
+      <thead><tr><th>#</th><th>Photo</th><th>Name</th><th>Roll No.</th><th>Gender</th><th>Avg</th><th>Att%</th><th>Fees</th><th>Login</th><th>Actions</th></tr></thead>
+      <tbody>
+          ${sts.length === 0 ? `<tr><td colspan="10" style="text-align:center;padding:28px;"><div style="color:var(--ink4);margin-bottom:10px;">No students yet</div><button class="btn btn-p btn-sm" onclick="openAddStudentModal()">+ Add First Student</button></td></tr>` : ''}
+          ${sts.map((s, i) => {
+        const av = avgStu(curCls, s.id); const ap = attPct(curCls, s.id); const fam = s.familyId ? DB.families[s.familyId] : null; return `<tr>
+          <td style="color:var(--ink4);font-size:.7rem;">${i + 1}</td>
+          <td><div class="ava" style="width:30px;height:30px;border-radius:7px;background:${gc(s.name)};font-size:.54rem;">${s.photo ? `<img src="${s.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:7px;"/>` : ini(s.name)}</div></td>
+          <td><div style="font-weight:700;font-size:.8rem;">${s.name}</div>${fam ? `<div style="font-size:.62rem;color:var(--v);"> ${fam.parentName}</div>` : ''}</td>
+          <td><span class="badge bp2" style="font-size:.68rem;">${s.roll || '-'}</span></td>
+          <td>${s.gender ? `<span class="badge ${s.gender === 'Male' ? 'bb2' : 'bpk2'}">${s.gender}</span>` : '-'}</td>
+          <td><b style="color:${sCol(av)};">${av || 0}%</b> <span style="font-size:.62rem;color:var(--ink4);">${lGrade(av)}</span></td>
+          <td><b style="color:${ap >= 90 ? 'var(--g)' : ap >= 75 ? 'var(--o)' : 'var(--r)'};">${ap}%</b></td>
+          <td><span class="badge ${s.fees === 'Paid' ? 'bg2' : 'br2'}">${s.fees || 'Pending'}</span></td>
+          <td>${s.loginEmail ? `<span class="badge bg2" style="font-size:.6rem;">Active</span>` : `<span class="badge br2" style="font-size:.6rem;">No Login</span>`}</td>
+          <td><div style="display:flex;gap:3px;flex-wrap:wrap;">
+            <button class="btn btn-gh btn-xs" onclick="openStuDetail('${s.id}','${curCls}')">View</button>
+            <button class="btn btn-p btn-xs" onclick="openAddStudentModal('${s.id}')">Edit</button>
+            <button class="btn btn-xs" style="background:var(--gl);color:var(--g);" onclick="printAdmissionForm('${s.id}','${curCls}')" title="Print Admission Form">📋 Adm.</button>
+            <button class="btn btn-xs" style="background:var(--rl);color:var(--r);" onclick="delStu('${s.id}','${curCls}')">Delete</button>
+          </div></td>
+        </tr>`;
+      }).join('')}
+      </tbody>
+    </table>
+  </div>
+</div>`;
+    }
+
+    /* ------------------------------- ADMISSIONS PAGE ------------------------------- */
+    function admissionStatusClass(s) {
+      s = s || 'new';
+      return s === 'approved' ? 'bg2' : s === 'rejected' ? 'br2' : s === 'contacted' ? 'bo2' : 'bp2';
+    }
+
+    function pgAdmissions() {
+      const apps = (DB.admissions || []).slice().sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+      const newCount = apps.filter(a => (a.status || 'new') === 'new').length;
+      const contactedCount = apps.filter(a => a.status === 'contacted').length;
+      const approvedCount = apps.filter(a => a.status === 'approved').length;
+      return `
+<div class="ph ph-row fu">
+  <div><div class="ph-tag"> Online Admissions</div><h1>Admission Applications</h1><div class="ph-sub">Review landing page forms, contact parents, and convert approved applicants into students.</div></div>
+  <div class="ph-acts"><button class="btn btn-gh btn-sm" onclick="refreshAdmissionApplications()">Refresh Online</button><button class="btn btn-gh btn-sm" onclick="openLandingAdmissionForm()">Open Form</button><button class="btn btn-p btn-sm" onclick="goPage('students')">Students</button></div>
+</div>
+<div class="sg fu d1">
+  <div class="sc sp"><div class="sc-ic"></div><div class="sc-val" style="color:var(--p);">${newCount}</div><div class="sc-lbl">New</div></div>
+  <div class="sc sg2"><div class="sc-ic"></div><div class="sc-val" style="color:var(--o);">${contactedCount}</div><div class="sc-lbl">Contacted</div></div>
+  <div class="sc sv"><div class="sc-ic"></div><div class="sc-val" style="color:var(--g);">${approvedCount}</div><div class="sc-lbl">Approved</div></div>
+</div>
+<div class="ibox" id="admission-sync-note" style="margin-bottom:12px;">Online applications load from Supabase when Admin is signed in. Public visitors can submit through the landing page after running the SQL setup.</div>
+<div class="card fu">
+  <div class="ch"><div class="ct">Applications</div><button class="btn btn-gh btn-sm" onclick="refreshAdmissionApplications()">Refresh Online</button></div>
+    ${apps.length ? `<div class="tbl-wrap"><table><thead><tr><th>Student</th><th>Class</th><th>Parent</th><th>Phone</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody>${apps.map(a => `<tr><td><b>${escHtml(a.studentName)}</b><div style="font-size:.68rem;color:var(--ink4);">${escHtml(a.gender || '')}${a.dob ? ' - DOB ' + fmtDate(a.dob) : ''}</div></td><td>${escHtml(a.className || '-')}</td><td>${escHtml(a.father || '-')}<div style="font-size:.68rem;color:var(--ink4);">${escHtml(a.email || '')}</div></td><td>${escHtml(a.phone || '-')}</td><td>${fmtDate(a.createdAt)}</td><td><span class="badge ${admissionStatusClass(a.status)}">${escHtml(a.status || 'new')}</span></td><td><div style="display:flex;gap:6px;flex-wrap:wrap;"><button class="btn btn-gh btn-xs" onclick="openAdmissionDetail('${a.id}')">View</button><a href="mailto:${a.email}?subject=Regarding Admission for ${a.studentName}" class="btn btn-gh btn-xs" onclick="contactAdmission('${a.id}')">Email</a><button class="btn btn-g btn-xs" onclick="approveAdmission('${a.id}')">Approve</button></div></td></tr>`).join('')}</tbody></table></div>` : '<div style="text-align:center;color:var(--ink4);padding:24px;">No admission applications yet.</div>'}
+</div>`;
+    }
+
+    async function refreshAdmissionApplications(silent = false) {
+      if (!_sb) { if (!silent) showToast('Supabase is not configured', 'tw2'); return; }
+      const note = document.getElementById('admission-sync-note');
+      if (note && !silent) note.textContent = 'Refreshing online admission applications...';
+      const { data, error } = await _sb.from('admission_applications').select('*').order('created_at', { ascending: false }).limit(200);
+      if (error) {
+        if (note) note.textContent = 'Could not load online applications. Run school_database_setup.sql in Supabase first.';
+        if (!silent) showToast('Admission table not ready in Supabase', 'te');
+        return;
+      }
+      DB.admissions = (data || []).map(supabaseToLocalAdmission);
+      saveLocalDB();
+      if (!silent) {
+        goPage('admissions');
+        showToast('Online admissions refreshed', 'ts');
+      } else {
+        const adminBtn = document.querySelector(`[onclick="goPage('admissions')"]`);
+        if (adminBtn) buildShell();
+      }
+    }
+
+    function findAdmission(id) { return (DB.admissions || []).find(a => String(a.id) === String(id)); }
+
+    function openLandingAdmissionForm() {
+      document.getElementById('app').style.display = 'none';
+      document.getElementById('login-page').style.display = 'none';
+      document.getElementById('landing-page').style.display = 'block';
+      setTimeout(() => document.getElementById('land-admission')?.scrollIntoView({ behavior: 'smooth' }), 80);
+    }
+
+    function openAdmissionDetail(id) {
+      const a = findAdmission(id); if (!a) return;
+      openModal(`
+  <h3> Admission Application</h3>
+  <div class="ibox" style="margin-bottom:12px;"><b>${escHtml(a.studentName)}</b> - ${escHtml(a.className || 'Class not selected')}</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">${[
+      ['Status', a.status || 'new'], ['Applied', fmtDate(a.createdAt)], ['Father/Guardian', a.father], ['Mother', a.mother], ['Phone', a.phone], ['WhatsApp', a.whatsapp], ['Email', a.email], ['DOB', fmtDate(a.dob)], ['Gender', a.gender], ['Previous School', a.previousSchool]
+    ].map(([l, v]) => `<div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:9px;"><div style="font-size:.62rem;color:var(--ink4);">${l}</div><div style="font-size:.78rem;font-weight:700;word-break:break-word;">${escHtml(v || '-')}</div></div>`).join('')}</div>
+  <div class="fg"><label class="fl">Address</label><div class="ibox">${escHtml(a.address || '-')}</div></div>
+  <div class="fg"><label class="fl">Message</label><div class="ibox">${escHtml(a.notes || '-')}</div></div>
+  <div class="fg"><label class="fl">Monthly Fee (admin only)</label><input class="fi" id="adm-admin-fee" type="number" min="0" value="${num(a.customFee || 0) || ''}" placeholder="Example: 5000"/></div>
+  <div class="m-btns" style="flex-wrap:wrap;">
+    <button class="btn btn-g btn-sm" onclick="approveAdmission('${a.id}')">Approve & Add Student</button>
+    <button class="btn btn-gh btn-sm" onclick="setAdmissionStatus('${a.id}','contacted')"> Mark Contacted</button>
+    <button class="btn btn-xs" style="background:var(--rl);color:var(--r);" onclick="setAdmissionStatus('${a.id}','rejected')">Reject</button>
+      ${(a.whatsapp || a.phone) ? `<button class="btn btn-wa btn-sm" onclick="waMsg('${normalizePhone(a.whatsapp || a.phone)}','Dear parent, your admission application for ${escAttr(a.studentName)} has been received by ${escAttr(DB.school.name)}.')">WhatsApp</button>` : ''}
+    <button class="btn btn-gh btn-sm" onclick="closeModal()">Close</button>
+  </div>`);
+    }
+
+    async function setAdmissionStatus(id, status) {
+      const a = findAdmission(id); if (!a) return;
+      a.status = status;
+      saveDB();
+      if (_sb) { try { await _sb.from('admission_applications').update({ status, updated_at: new Date().toISOString() }).eq('id', id); } catch (e) {} }
+      closeModal(); goPage('admissions'); showToast('Admission status updated', 'ts');
+    }
+
+    async function approveAdmission(id) {
+      const a = findAdmission(id); if (!a) return;
+      if (a.convertedStudentId) { showToast('Already added as student', 'tw2'); return; }
+      const classId = a.classId || curCls || DB.classes[0]?.id;
+      if (!classId) { showToast('Create a class first', 'te'); return; }
+      const roll = nextRoll(classId);
+      const newId = uid();
+      const familyId = uid();
+      const feeInput = document.getElementById('adm-admin-fee');
+      if (feeInput) a.customFee = num(feeInput.value || 0);
+      const wa = normalizePhone(a.whatsapp || a.phone);
+      DB.families[familyId] = { id: familyId, parentName: a.father || 'Parent', phone: a.phone || '', email: a.email || '', address: a.address || '', whatsapp: wa, studentIds: [newId] };
+      DB.students[classId] = DB.students[classId] || [];
+      DB.students[classId].push({ id: newId, name: a.studentName, roll, classId, gender: a.gender || '', dob: a.dob || '', blood: '', fees: 'Pending', father: a.father || '', fphone: a.phone || '', mother: a.mother || '', address: a.address || '', whatsapp: wa, photo: '', familyId, loginEmail: a.email || '', customFee: num(a.customFee) });
+      if (a.email) DB.users.push({ id: uid(), name: a.studentName, email: a.email, role: 'student', photo: '', studentId: newId, classId });
+      a.status = 'approved';
+      a.convertedStudentId = newId;
+      saveDB();
+      if (_sb) { try { await _sb.from('admission_applications').update({ status: 'approved', converted_student_id: newId, updated_at: new Date().toISOString() }).eq('id', id); } catch (e) {} }
+      closeModal(); switchCls(classId); goPage('students'); showToast(`Student added from admission. Create/invite ${a.email || 'login email'} in Supabase Auth if login is needed.`, 'ts', 5200);
+    }
+
+    async function contactAdmission(id) {
+      const a = findAdmission(id); if (!a || a.status === 'contacted' || a.status === 'approved') return;
+      a.status = 'contacted';
+      saveDB();
+      if (_sb) { try { await _sb.from('admission_applications').update({ status: 'contacted', updated_at: new Date().toISOString() }).eq('id', id); } catch (e) {} }
+      const adminBtn = document.querySelector(`[onclick="goPage('admissions')"]`);
+      if (adminBtn) buildShell();
+    }
+
+    /* ------------------------------- ADD STUDENT MODAL ------------------------------- */
+    function openAddStudentModal(editId) {
+      const isEdit = !!editId;
+      const s = isEdit ? allStus().find(x => x.id === editId) : null;
+      const cid = s?.classId || curCls;
+      const autoRoll = isEdit ? s.roll : nextRoll(cid);
+      const famOpts = Object.entries(DB.families).map(([fid, f]) => `<option value="${fid}" ${s?.familyId === fid ? 'selected' : ''}>${f.parentName} (${(f.studentIds || []).length} children)</option>`).join('');
+
+      openModal(`
+  <h3>${isEdit ? ' Edit Student' : 'Add New Student'}</h3>
+  <div style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--card2);border:1px solid var(--border);border-radius:10px;margin-bottom:14px;">
+    <div class="pup" id="m-pup" onclick="document.getElementById('m-pf').click()">
+        ${s?.photo ? `<img src="${s.photo}"/>` : '<div class="pup-ic"></div><div class="pup-tx">Add Photo</div>'}
+    </div>
+    <input type="file" id="m-pf" accept="image/*" style="display:none;" onchange="prevStuPhoto(this)"/>
+    <input type="hidden" id="m-pd" value="${s?.photo || ''}"/>
+    <div><div style="font-weight:700;font-size:.83rem;">Student Photo</div><div style="font-size:.7rem;color:var(--ink4);margin-top:2px;">Used in ID card, QR card & profile</div>${s?.photo ? `<button class="btn btn-xs btn-gh" style="margin-top:5px;" onclick="clearStuPhoto()">Remove</button>` : ''}</div>
+  </div>
+  <div class="fg2">
+    <div class="fg"><label class="fl">Full Name <span class="req">*</span></label><input class="fi" id="m-name" value="${s?.name || ''}" placeholder="Ahmed Raza"/></div>
+    <div class="fg"><label class="fl">Class <span class="req">*</span></label>
+      <select class="fi" id="m-class" onchange="updateAutoRoll(this.value)">${DB.classes.map(c => `<option value="${c.id}" ${(s?.classId || cid) === c.id ? 'selected' : ''}>${c.name}${c.section ? ' ' + c.section : ''}</option>`).join('')}</select></div>
+  </div>
+  <div class="fg2">
+    <div class="fg">
+      <label class="fl">Roll No. <span style="color:var(--g);font-size:.62rem;font-weight:700;"> AUTO</span></label>
+      <input class="fi" id="m-roll" value="${autoRoll}" placeholder="001"/>
+      <div class="fhint">Auto-assigned - You can override if needed</div>
+    </div>
+    <div class="fg"><label class="fl">Gender</label>
+      <select class="fi" id="m-gender"><option value="">Select</option><option ${s?.gender === 'Male' ? 'selected' : ''}>Male</option><option ${s?.gender === 'Female' ? 'selected' : ''}>Female</option></select></div>
+  </div>
+  <div class="fg2">
+    <div class="fg"><label class="fl">Date of Birth</label><input class="fi" type="date" id="m-dob" value="${s?.dob || ''}"/></div>
+    <div class="fg"><label class="fl">Blood Group</label>
+      <select class="fi" id="m-blood"><option value="">-</option>${['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'].map(b => `<option ${s?.blood === b ? 'selected' : ''}>${b}</option>`).join('')}</select></div>
+  </div>
+  <div class="fg2">
+    <div class="fg"><label class="fl">Religion</label>
+      <select class="fi" id="m-religion">
+        <option value="">Select</option>
+        ${['Islam','Christianity','Other'].map(r => `<option value="${r}" ${s?.religion===r?'selected':''}>${r}</option>`).join('')}
+      </select></div>
+    <div class="fg"><label class="fl">Nationality</label>
+      <select class="fi" id="m-nationality">
+        ${['Pakistani','Other'].map(n => `<option value="${n}" ${(s?.nationality||'Pakistani')===n?'selected':''}>${n}</option>`).join('')}
+      </select></div>
+  </div>
+  <div class="fg"><label class="fl">Child B-Form No. (NADRA)</label><input class="fi" id="m-bform" value="${s?.bform || ''}" placeholder="XXXXX-XXXXXXX-X"/></div>
+  <div class="fg"><label class="fl">Fee Status</label>
+    <select class="fi" id="m-fees"><option value="Pending" ${s?.fees !== 'Paid' ? 'selected' : ''}>Pending</option><option value="Paid" ${s?.fees === 'Paid' ? 'selected' : ''}>Paid</option><option value="Waived">Waived</option></select></div>
+  <div class="div"></div>
+  <div style="font-weight:700;font-size:.78rem;color:var(--ink3);margin-bottom:9px;"> Parent / Guardian Details</div>
+  <div class="fg2">
+    <div class="fg"><label class="fl">Father's Name</label><input class="fi" id="m-father" value="${s?.father || ''}" placeholder="Mr. Raza Ahmed"/></div>
+    <div class="fg"><label class="fl">Father's Phone</label><input class="fi" id="m-fphone" value="${s?.fphone || ''}" placeholder="03XX-XXXXXXX"/></div>
+  </div>
+  <div class="fg2">
+    <div class="fg"><label class="fl">Father's CNIC</label><input class="fi" id="m-cnic" value="${s?.cnic || ''}" placeholder="XXXXX-XXXXXXX-X"/></div>
+    <div class="fg"><label class="fl">Occupation</label><input class="fi" id="m-occupation" value="${s?.occupation || ''}" placeholder="e.g. Business, Teacher"/></div>
+  </div>
+  <div class="fg2">
+    <div class="fg"><label class="fl">Mother's Name</label><input class="fi" id="m-mother" value="${s?.mother || ''}" placeholder="Mrs. ..."/></div>
+    <div class="fg"><label class="fl">Parent WhatsApp</label><input class="fi" id="m-wa" value="${s?.whatsapp || ''}" placeholder="923XXXXXXXXX (with code)"/></div>
+  </div>
+  <div class="fg2">
+    <div class="fg"><label class="fl">Monthly Fee</label><input class="fi" type="number" id="m-customfee" value="${(s && s.customFee !== undefined && s.customFee !== '') ? num(s.customFee) : ''}" placeholder="Use default fee"/></div>
+    <div class="fg"><label class="fl">Previous Arrears</label><input class="fi" type="number" id="m-arrears" value="${s?.arrears || ''}" placeholder="0"/></div>
+  </div>
+  <div class="fg"><label class="fl">Address</label><textarea class="fi" id="m-addr" style="min-height:50px;">${s?.address || ''}</textarea></div>
+  <div class="fg2">
+    <div class="fg"><label class="fl"> Admission Form No. <span style="color:var(--g);font-size:.62rem;font-weight:700;"> AUTO</span></label><input class="fi" id="m-formno" value="${s?.formNo || ('ADM-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random()*9000)+1000))}" placeholder="ADM-2025-0001"/></div>
+    <div class="fg"><label class="fl">Previous School</label><input class="fi" id="m-prevschool" value="${s?.prevSchool || ''}" placeholder="Al-Noor Academy"/></div>
+  </div>
+  <div class="div"></div>
+  <div style="font-weight:700;font-size:.78rem;color:var(--p);margin-bottom:5px;"> Student Login - <span style="font-weight:500;color:var(--ink4);">Leave blank for no login</span></div>
+  <div class="ibox" style="margin-bottom:10px;padding:8px 12px;">Create or invite this email in Supabase Auth. Passwords are no longer stored in portal data.</div>
+  <div class="fg"><label class="fl">Login Email</label><input class="fi" id="m-lemail" value="${s?.loginEmail || ''}" placeholder="student@email.com" autocomplete="new-password"/></div>
+  <div class="fg pw-field"><label class="fl">Login Password</label><input class="fi" type="password" id="m-lpass" placeholder="Enter password (for new logins or resets)" autocomplete="new-password"/><button type="button" class="pw-toggle" onclick="togglePassword('m-lpass',this)">Show</button></div>
+  ${s?.loginEmail ? `<div style="margin-top:-8px;margin-bottom:10px;text-align:right;"><button type="button" class="btn btn-gh btn-xs" style="color:var(--r);border-color:var(--rl);" onclick="adminResetPassword(document.getElementById('m-lemail').value, document.getElementById('m-lpass').value, this)">Force Reset Password</button></div>` : ''}
+  <div class="div"></div>
+  <div style="font-weight:700;font-size:.78rem;color:var(--v);margin-bottom:9px;"> Family / Siblings - one parent login for all children</div>
+  <div class="fg2">
+    <div class="fg"><label class="fl">Link to Existing Family</label>
+      <select class="fi" id="m-fam"><option value="">No family</option>${famOpts}</select></div>
+    <div class="fg"><label class="fl">Or Create New Family</label><input class="fi" id="m-famname" placeholder="e.g. Khan Family"/></div>
+  </div>
+  <div class="m-btns">
+    <button class="btn btn-p" style="flex:2;" onclick="saveStu('${editId || ''}')"> ${isEdit ? 'Update Student' : 'Add Student'}</button>
+    <button class="btn btn-gh" onclick="closeModal()">Cancel</button>
+  </div>`);
+    }
+
+    function updateAutoRoll(cid) {
+      const rollEl = document.getElementById('m-roll');
+      if (rollEl && !rollEl.dataset.manual) rollEl.value = nextRoll(cid);
+    }
+
+    function prevStuPhoto(inp) {
+      const f = inp.files[0]; if (!f) return;
+      const r = new FileReader();
+      r.onload = e => {
+        document.getElementById('m-pd').value = e.target.result;
+        const p = document.getElementById('m-pup');
+        if (p) p.innerHTML = `<img src="${e.target.result}"/>`;
+      };
+      r.readAsDataURL(f);
+    }
+    function clearStuPhoto() { document.getElementById('m-pd').value = ''; const p = document.getElementById('m-pup'); if (p) p.innerHTML = '<div class="pup-ic"></div><div class="pup-tx">Add Photo</div>'; }
+
+    async function saveStu(editId) {
+      const name = (document.getElementById('m-name')?.value || '').trim();
+      if (!name) { showToast(' Name is required', 'te'); return; }
+      const classId = document.getElementById('m-class')?.value;
+      if (!classId) { showToast(' Class is required', 'te'); return; }
+      const photo = document.getElementById('m-pd')?.value || '';
+      const famSel = document.getElementById('m-fam')?.value || '';
+      const famName = (document.getElementById('m-famname')?.value || '').trim();
+      const wa = (document.getElementById('m-wa')?.value || '').replace(/\s/g, '');
+      const roll = document.getElementById('m-roll')?.value || nextRoll(classId);
+
+      const autoEmail = `${roll.toLowerCase()}.${(DB.classes.find(c => c.id === classId)?.name || 'class').toLowerCase().replace(/\s/g, '')}@school.edu`;
+      const loginEmail = ((document.getElementById('m-lemail')?.value || '').trim().toLowerCase()) || autoEmail;
+      const loginPass = document.getElementById('m-lpass')?.value || '';
+
+      let familyId = famSel || null;
+      if (!familyId && famName) {
+        familyId = uid();
+        DB.families[familyId] = { id: familyId, parentName: famName, phone: document.getElementById('m-fphone')?.value || '', email: loginEmail, address: '', studentIds: [], whatsapp: wa };
+      }
+
+      const cfVal = document.getElementById('m-customfee')?.value;
+      const arrVal = document.getElementById('m-arrears')?.value;
+      const data = { name, roll, classId, gender: document.getElementById('m-gender')?.value || '', dob: document.getElementById('m-dob')?.value || '', blood: document.getElementById('m-blood')?.value || '', religion: (document.getElementById('m-religion')?.value || '').trim(), nationality: (document.getElementById('m-nationality')?.value || '').trim(), bform: (document.getElementById('m-bform')?.value || '').trim(), fees: document.getElementById('m-fees')?.value || 'Pending', father: (document.getElementById('m-father')?.value || '').trim(), fphone: (document.getElementById('m-fphone')?.value || '').trim(), cnic: (document.getElementById('m-cnic')?.value || '').trim(), occupation: (document.getElementById('m-occupation')?.value || '').trim(), formNo: (document.getElementById('m-formno')?.value || '').trim(), prevSchool: (document.getElementById('m-prevschool')?.value || '').trim(), mother: (document.getElementById('m-mother')?.value || '').trim(), address: (document.getElementById('m-addr')?.value || '').trim(), whatsapp: wa, photo, familyId, loginEmail, customFee: cfVal === '' ? '' : num(cfVal), arrears: arrVal === '' ? '' : num(arrVal) };
+
+      if (editId) {
+        const old = allStus().find(x => x.id === editId); if (!old) { showToast('Not found', 'te'); return; }
+        const oldCid = old.classId;
+        if (oldCid !== classId) {
+          DB.students[oldCid] = (DB.students[oldCid] || []).filter(x => x.id !== editId);
+          if (!DB.students[classId]) DB.students[classId] = [];
+          DB.students[classId].push({ ...old, ...data, classId });
+        } else Object.assign(old, data);
+        if (familyId) { if (!DB.families[familyId]) DB.families[familyId] = { id: familyId, parentName: famName, studentIds: [] }; if (!(DB.families[familyId].studentIds || []).includes(editId)) { (DB.families[familyId].studentIds = DB.families[familyId].studentIds || []).push(editId); } }
+        syncStudentLoginProfile({ ...data, name, photo, classId, loginEmail }, editId);
+        showToast('Student updated!', 'ts');
+      } else {
+        const newId = uid();
+        if (!DB.students[classId]) DB.students[classId] = [];
+        DB.students[classId].push({ id: newId, ...data });
+        if (familyId) { if (!DB.families[familyId]) DB.families[familyId] = { id: familyId, parentName: famName, studentIds: [] }; (DB.families[familyId].studentIds = DB.families[familyId].studentIds || []).push(newId); }
+        syncStudentLoginProfile({ ...data, name, photo, classId, loginEmail }, newId);
+        
+        if (_sb && loginPass) {
+          try {
+            showToast('Creating secure Auth login...', 'ti');
+            const { data, error } = await _sb.functions.invoke('create-auth-user', {
+              body: { email: loginEmail, password: loginPass, role: 'student' }
+            });
+            if (error) throw error;
+            if (data?.error) throw new Error(data.error);
+            showToast(`Student added & Auth Login created for ${loginEmail}!`, 'ts');
+          } catch(e) {
+            console.error('Edge function error:', e);
+            showToast(`Student added locally. Auth creation failed: ${e.message}`, 'te', 8000);
+          }
+        } else {
+          showToast(`Student added. No password provided for Auth.`, 'ts');
+        }
+    
+      }
+        saveDB(); pushCloudDB(); closeModal(); goPage('students');
+        // Prompt to print admission form for new students
+        if (!editId) {
+          const newStu = (DB.students[classId] || []).find(x => x.name === name && x.roll === roll);
+          if (newStu) {
+            setTimeout(() => {
+              openModal(`
+              <h3>🎉 Student Added!</h3>
+              <div class="ibox"><b>${escHtml(name)}</b> has been successfully enrolled in <b>${escHtml(DB.classes.find(c=>c.id===classId)?.name||'')}</b>.</div>
+              <div style="font-size:.85rem;color:var(--ink3);margin:10px 0;">Would you like to print the official <b>Admission Form</b> for this student now?</div>
+              <div class="m-btns">
+                <button class="btn btn-p" style="flex:2;" onclick="closeModal();printAdmissionForm('${newStu.id}','${classId}');">🖨️ Print Admission Form</button>
+                <button class="btn btn-gh" onclick="closeModal()">Skip</button>
+              </div>`);
+            }, 400);
+          }
+        }
+    }
+
+    function delStu(sid, cid) {
+      if (!confirm('Delete this student and all their data?')) return;
+      DB.students[cid] = (DB.students[cid] || []).filter(x => x.id !== sid);
+      DB.settings.terms.forEach(t => { delete (DB.grades[cid + '_' + t.id] || {})[sid]; }); delete (DB.attendance[cid] || {})[sid]; delete DB.fees.payments[sid];
+      DB.users = DB.users.filter(x => x.studentId !== sid);
+      Object.values(DB.families).forEach(f => { if (f.studentIds) f.studentIds = f.studentIds.filter(x => x !== sid); });
+      saveDB(); showToast('Deleted'); goPage('students');
+    }
+
+    function openStuDetail(sid, cid) {
+      const s = clsStus(cid).find(x => x.id === sid); if (!s) return;
+      const av = avgStu(cid, sid); const ap = attPct(cid, sid);
+      const fam = s.familyId ? DB.families[s.familyId] : null;
+      const sibs = (fam?.studentIds || []).filter(id => id !== sid).map(id => allStus().find(x => x.id === id)).filter(Boolean);
+      openModal(`
+  <h3> ${s.name}</h3>
+  <div style="display:flex;gap:12px;margin-bottom:13px;">
+    <div class="ava" style="width:56px;height:56px;border-radius:12px;background:${gc(s.name)};font-size:1rem;flex-shrink:0;">${s.photo ? `<img src="${s.photo}"/>` : ini(s.name)}</div>
+    <div><div style="font-weight:700;font-size:.92rem;">${s.name}</div><div style="font-size:.72rem;color:var(--ink3);margin-top:2px;">${(DB.classes.find(c => c.id === cid) || {}).name || ''} - Roll <b>${s.roll}</b></div>
+    <div style="display:flex;gap:5px;margin-top:5px;flex-wrap:wrap;"><span class="badge ${gCls(av)}">${av}% ${lGrade(av)}</span><span class="badge ${ap >= 90 ? 'bg2' : ap >= 75 ? 'bo2' : 'br2'}">${ap}% att</span><span class="badge ${s.fees === 'Paid' ? 'bg2' : 'br2'}">${s.fees || 'Pending'}</span>${s.blood ? `<span class="badge bp2">${s.blood}</span>` : ''}</div>
+    </div>
+  </div>
+    ${sibs.length ? `<div style="background:var(--vl);border:1px solid rgba(124,58,237,.15);border-radius:8px;padding:8px 11px;margin-bottom:11px;font-size:.75rem;"><b style="color:var(--v);">Siblings:</b> ${sibs.map(sb => `${sb.name} (${(DB.classes.find(c => c.id === sb.classId) || {}).name || '?'})`).join(' - ')}</div>` : ''}
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px;">${[['Father', s.father], ['Phone', s.fphone], ['Mother', s.mother], ['WhatsApp', s.whatsapp], ['DOB', fmtDate(s.dob)], ['Login', s.loginEmail]].map(([l, v]) => `<div style="background:var(--card2);border-radius:8px;padding:8px;"><div style="font-size:.62rem;color:var(--ink4);margin-bottom:1px;">${l}</div><div style="font-size:.78rem;font-weight:600;">${v || '-'}</div></div>`).join('')}</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><div style="font-size:.76rem;font-weight:700;color:var(--ink2);">Subject Scores</div><select class="fi" style="width:100px;padding:2px 5px;font-size:.7rem;height:auto;" onchange="curTerm=this.value;closeModal();openStuDetail('${sid}','${cid}')">${DB.settings.terms.map(t => `<option value="${t.id}" ${curTerm===t.id?'selected':''}>${t.name}</option>`).join('')}</select></div>
+  <div class="score-mini">${DB.subjects.map(sub => { const v = (DB.grades[cid + '_' + curTerm]?.[sid] || {})[sub.id] || 0; return `<div class="sm-row"><div class="sm-lbl">${sub.icon} ${sub.name}</div><div class="sm-bar"><div class="sm-fill" style="width:${v}%;background:${sub.color};"></div></div><div class="sm-val" style="color:${sub.color};">${v || '-'}</div></div>`; }).join('')}</div>
+  <div class="m-btns" style="margin-top:13px;flex-wrap:wrap;">
+    <button class="btn btn-p btn-sm" onclick="closeModal();openAddStudentModal('${sid}')"> Edit</button>
+      ${s.whatsapp ? `<button class="btn btn-wa btn-sm" onclick="waMsg('${s.whatsapp}','Dear parent of ${s.name}, greetings from ${DB.school.name}.')"> WhatsApp</button>` : ''}
+    <button class="btn btn-gh btn-sm" onclick="closeModal();switchCls('${cid}');goPage('reportcards');setTimeout(()=>openReportCard('${sid}','${cid}'),200)"> Report Card</button>
+    <button class="btn btn-gh btn-sm" onclick="closeModal();switchCls('${cid}');goPage('qrcard');window._viewSibId='${sid}';"> ID Card</button>
+    <button class="btn btn-gh btn-sm" onclick="closeModal()">Close</button>
+  </div>`);
+    }
+
+    function parseCSV(text) {
+      const rows = [];
+      let row = [], cur = '', q = false;
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i], nx = text[i + 1];
+        if (ch === '"' && q && nx === '"') { cur += '"'; i++; }
+        else if (ch === '"') q = !q;
+        else if (ch === ',' && !q) { row.push(cur); cur = ''; }
+        else if ((ch === '\n' || ch === '\r') && !q) {
+          if (ch === '\r' && nx === '\n') i++;
+          row.push(cur); cur = '';
+          if (row.some(v => String(v).trim())) rows.push(row);
+          row = [];
+        } else cur += ch;
+      }
+      row.push(cur);
+      if (row.some(v => String(v).trim())) rows.push(row);
+      if (rows.length < 2) return [];
+      const headers = rows[0].map(h => String(h || '').trim().toLowerCase().replace(/\s+/g, '_'));
+      return rows.slice(1).map(r => Object.fromEntries(headers.map((h, i) => [h, String(r[i] || '').trim()])));
+    }
+
+    function findClassFromBulk(value, fallbackId) {
+      const v = String(value || '').trim().toLowerCase();
+      if (!v) return fallbackId;
+      const found = DB.classes.find(c => c.id.toLowerCase() === v || c.name.toLowerCase() === v || (c.name + ' ' + (c.section || '')).trim().toLowerCase() === v);
+      return found?.id || fallbackId;
+    }
+
+    function addBulkStudent(row, fallbackClassId, index) {
+      const name = row.name || row.student_name || row.full_name;
+      if (!name) return false;
+      const classId = findClassFromBulk(row.class || row.class_id || row.class_name, fallbackClassId);
+      if (!DB.students[classId]) DB.students[classId] = [];
+      const roll = row.roll || row.roll_no || row.roll_number || String(DB.students[classId].length + 1 + index).padStart(3, '0');
+      const clsName = (DB.classes.find(c => c.id === classId)?.name || 'class').toLowerCase().replace(/\s/g, '');
+      const loginEmail = (row.email || row.student_email || (String(roll).toLowerCase() + '.' + clsName + '@school.edu')).toLowerCase();
+      const familyName = row.parent_name || row.family || '';
+      const parentEmail = (row.parent_email || '').toLowerCase();
+      let familyId = null;
+      if (familyName || parentEmail) {
+        const existing = Object.values(DB.families || {}).find(f => (parentEmail && (f.email || '').toLowerCase() === parentEmail) || (familyName && (f.parentName || '').toLowerCase() === familyName.toLowerCase()));
+        familyId = existing?.id || uid();
+        if (!DB.families[familyId]) DB.families[familyId] = { id: familyId, parentName: familyName || parentEmail || (name + ' Family'), phone: row.parent_phone || row.father_phone || row.phone || '', email: parentEmail, address: row.address || '', whatsapp: row.whatsapp || '', studentIds: [] };
+      }
+      const newId = uid();
+      const student = { id: newId, name, roll, classId, gender: row.gender || '', dob: row.dob || row.date_of_birth || '', blood: row.blood || row.blood_group || '', fees: row.fee_status || row.fees || 'Pending', father: row.father_name || row.father || row.parent_name || '', fphone: row.father_phone || row.parent_phone || row.phone || '', mother: row.mother_name || row.mother || '', address: row.address || '', whatsapp: row.whatsapp || '', photo: row.photo || row.photo_url || row.image || row.image_url || '', familyId, loginEmail, customFee: num(row.monthly_fee || row.custom_fee || row.fee_amount || 0), attendance: 0 };
+      DB.students[classId].push(student);
+      DB.users.push({ id: uid(), name, email: loginEmail, role: 'student', photo: student.photo, studentId: newId, classId });
+      if (familyId) {
+        const fam = DB.families[familyId];
+        fam.studentIds = fam.studentIds || [];
+        if (!fam.studentIds.includes(newId)) fam.studentIds.push(newId);
+        if (parentEmail) {
+          let pu = DB.users.find(x => x.role === 'parent' && x.familyId === familyId);
+          if (pu) { pu.email = parentEmail; pu.name = fam.parentName; }
+          else DB.users.push({ id: uid(), name: fam.parentName, email: parentEmail, role: 'parent', photo: '', familyId });
+        }
+      }
+      return true;
+    }
+
+    function openBulkModal() {
+      openModal(`
+  <h3> Bulk Import Students</h3>
+  <div class="ibox">Upload <b>students_bulk_template.csv</b>. Use the <b>photo</b> column for an image URL or base64 data URL. The <b>password</b> column is for Supabase Auth bulk creation, not stored in the portal.</div>
+  <div class="fg"><label class="fl">Fallback Class</label>
+    <select class="fi" id="bi-cls">${DB.classes.map(c => `<option value="${c.id}" ${c.id === curCls ? 'selected' : ''}>${c.name}${c.section ? ' ' + c.section : ''}</option>`).join('')}</select></div>
+  <div class="fg"><label class="fl">CSV File</label><input class="fi" type="file" id="bi-csv" accept=".csv,text/csv"/></div>
+  <div class="fg"><label class="fl">Or paste names - one per line</label>
+    <textarea class="fi" id="bi-names" style="min-height:110px;font-size:.8rem;" placeholder="Ahmed Raza&#10;Sara Khan&#10;Bilal Hussain"></textarea></div>
+  <div class="fg2">
+    <div class="fg"><label class="fl">Default Gender</label><select class="fi" id="bi-gen"><option value="">Mixed</option><option>Male</option><option>Female</option></select></div>
+    <div class="fg"><label class="fl">Default Fee Status</label><select class="fi" id="bi-fees"><option>Pending</option><option>Paid</option></select></div>
+  </div>
+  <div class="m-btns">
+    <button class="btn btn-p" onclick="doBulk()"> Import Students</button>
+    <button class="btn btn-gh" onclick="closeModal()">Cancel</button>
+  </div>`);
+    }
+
+    function doBulk() {
+      const file = document.getElementById('bi-csv')?.files?.[0];
+      if (file) {
+        const r = new FileReader();
+        r.onload = e => importBulkRows(parseCSV(e.target.result || ''));
+        r.readAsText(file);
+        return;
+      }
+      const cid = document.getElementById('bi-cls').value;
+      const raw = (document.getElementById('bi-names').value || '').trim();
+      if (!raw) { showToast(' Select CSV or enter names', 'te'); return; }
+      const rows = raw.split('\n').map(name => ({ name: name.trim(), class_id: cid, gender: document.getElementById('bi-gen').value, fee_status: document.getElementById('bi-fees').value })).filter(r => r.name);
+      importBulkRows(rows);
+    }
+
+    function importBulkRows(rows) {
+      if (!rows.length) { showToast('CSV has no student rows', 'te'); return; }
+      const fallbackClassId = document.getElementById('bi-cls')?.value || curCls || DB.classes[0]?.id;
+      let added = 0;
+      rows.filter(r => !r.role || String(r.role).toLowerCase() === 'student').forEach((row, i) => { if (addBulkStudent(row, fallbackClassId, i)) added++; });
+      saveDB(); closeModal(); showToast(`? ${added} students imported. Create Auth users from the same CSV passwords.`, 'ts'); goPage('students');
+    }
+
+    /* ------------------------------- ATTENDANCE ------------------------------- */
+    function pgAttendance() {
+      const sts = clsStus(curCls); const cls = DB.classes.find(c => c.id === curCls);
+      window.attMonth = window.attMonth || monthKey();
+      const [y, m] = window.attMonth.split('-');
+      const dates = [];
+      const daysInMonth = new Date(y, m, 0).getDate();
+      for (let i = 1; i <= daysInMonth; i++) {
+        dates.push(`${y}-${m}-${i.toString().padStart(2, '0')}`);
+      }
+      return `
+<div class="ph ph-row fu">
+  <div><div class="ph-tag">? Attendance</div><h1>Attendance Register</h1><div class="ph-sub">${cls?.name || ''} - Tap cell to toggle P / A / L</div></div>
+  <div class="ph-acts">
+    <input type="month" value="${window.attMonth}" onchange="window.attMonth=this.value; goPage('attendance')" style="padding:6px 10px; border-radius:8px; border:1px solid var(--border); font-size:0.8rem; background:var(--card); color:var(--ink); cursor:pointer;" />
+      ${curRole !== 'student' ? `<button class="btn btn-p btn-sm" onclick="openScanner()"> QR Scan</button>` : ''}
+    <button class="btn btn-gh btn-sm" onclick="markAll('P')">All Present</button>
+    <button class="btn btn-g btn-sm" onclick="saveAtt()"> Save</button>
+  </div>
+</div>
+  ${clsBar('switchAttCls')}
+  ${sts.length === 0 ? `<div class="card"><div class="empty"><div class="empty-ic"></div><div class="empty-t">No students in this class</div><button class="btn btn-p btn-sm" style="margin-top:10px;" onclick="openAddStudentModal()">Add Student</button></div></div>` : `
+<div class="card fu d2" style="padding:0;overflow:hidden;"><div class="tw"><table>
+  <thead><tr><th>Roll</th><th>Student</th>${dates.map(d => `<th style="text-align:center;min-width:36px;">${new Date(d).getDate()}<br/><span style="font-weight:400;font-size:.55rem;">${new Date(d).toLocaleString('en', { month: 'short' })}</span></th>`).join('')}<th>%</th></tr></thead>
+  <tbody>${sts.map(s => {
+        if (!DB.attendance[curCls]) DB.attendance[curCls] = {};
+        if (!DB.attendance[curCls][s.id]) DB.attendance[curCls][s.id] = {};
+        const att = DB.attendance[curCls][s.id];
+        const P = Object.values(att).filter(v => v === 'P').length; const tot = Object.values(att).length;
+        const pct = tot ? Math.round(P / tot * 100) : (s.attendance || 0);
+        return `<tr><td style="font-weight:700;font-size:.72rem;">${s.roll || '-'}</td><td><div style="display:flex;align-items:center;gap:6px;min-width:96px;"><div class="ava" style="width:24px;height:24px;border-radius:6px;background:${gc(s.name)};font-size:.48rem;flex-shrink:0;">${s.photo ? `<img src="${s.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:6px;"/>` : ini(s.name)}</div><span style="font-size:.78rem;font-weight:600;white-space:nowrap;">${s.name}</span></div></td>
+      ${dates.map(d => { const v = att[d] || ''; return `<td style="text-align:center;padding:5px;"><div class="ac ${v === 'P' ? 'acP' : v === 'A' ? 'acA' : v === 'L' ? 'acL' : 'ac0'}" id="ac-${s.id}-${d}" onclick="cycleAtt('${s.id}','${d}')">${v || '-'}</div></td>`; }).join('')}
+    <td style="font-weight:700;font-size:.8rem;color:${pct >= 90 ? 'var(--g)' : pct >= 75 ? 'var(--o)' : 'var(--r)'};">${pct}%</td></tr>`;
+      }).join('')}
+  </tbody></table></div></div>
+<div style="display:flex;gap:9px;margin-top:9px;align-items:center;font-size:.72rem;flex-wrap:wrap;">
+  <span style="color:var(--ink4);">Legend:</span>
+  <span><span class="ac acP" style="width:22px;height:22px;font-size:.56rem;cursor:default;">P</span> Present</span>
+  <span><span class="ac acA" style="width:22px;height:22px;font-size:.56rem;cursor:default;">A</span> Absent</span>
+  <span><span class="ac acL" style="width:22px;height:22px;font-size:.56rem;cursor:default;">L</span> Leave</span>
+  <button class="btn btn-wa btn-sm" style="margin-left:auto;" onclick="sendAbsentAlerts()"> Absent Alerts</button>
+</div>`}`;
+    }
+    function cycleAtt(sid, d) {
+      if (!DB.attendance[curCls]) DB.attendance[curCls] = {};
+      if (!DB.attendance[curCls][sid]) DB.attendance[curCls][sid] = {};
+      const c = DB.attendance[curCls][sid][d] || '';
+      const n = c === '' ? 'P' : c === 'P' ? 'A' : c === 'A' ? 'L' : '';
+      DB.attendance[curCls][sid][d] = n;
+      const el = document.getElementById(`ac-${sid}-${d}`);
+      if (el) { el.className = `ac ${n === 'P' ? 'acP' : n === 'A' ? 'acA' : n === 'L' ? 'acL' : 'ac0'}`; el.textContent = n || '-'; }
+    }
+    function markAll(v) { const d = today(); clsStus(curCls).forEach(s => { if (!DB.attendance[curCls]) DB.attendance[curCls] = {}; if (!DB.attendance[curCls][s.id]) DB.attendance[curCls][s.id] = {}; DB.attendance[curCls][s.id][d] = v; const el = document.getElementById(`ac-${s.id}-${d}`); if (el) { el.className = `ac ${v === 'P' ? 'acP' : 'acA'}`; el.textContent = v; } }); }
+    function saveAtt() { saveDB(); showToast('Attendance saved', 'ts'); }
+    function switchAttCls(cid) { curCls = cid; updatePill(); goPage('attendance'); }
+    function sendAbsentAlerts() {
+      const d = today();
+      const absent = clsStus(curCls).filter(s => (DB.attendance[curCls]?.[s.id] || {})[d] === 'A');
+      if (!absent.length) { showToast('No absent students today', 'tw2'); return; }
+      const cls = DB.classes.find(c => c.id === curCls);
+      absent.forEach(s => { if (s.whatsapp) openWhatsAppMessage(s.whatsapp, `Dear Parent, ${s.name} was ABSENT from ${DB.school.name} (${cls?.name || ''}) on ${fmtDate(d)}. Please ensure regular attendance.` + "\n\nThank you.\n" + `${DB.school.name}`); });
+      showToast(` WhatsApp opened for ${absent.length} absent students`, 'ts');
+    }
+
+    /* ------------------------------- TEACHER ATTENDANCE PAGE ------------------------------- */
+    function pgTeacherAtt() {
+      const isAdmin = curRole === 'admin';
+      const teachers = DB.users.filter(u => u.role === 'teacher');
+      const d = today();
+      // If teacher, show own record
+      if (!isAdmin) {
+        const myRec = DB.teacherAttendance[curUser?.id] || {};
+        window.tAttMonth = window.tAttMonth || monthKey();
+        const entries = Object.entries(myRec)
+          .filter(([date]) => date.startsWith(window.tAttMonth))
+          .sort((a, b) => b[0].localeCompare(a[0]));
+        const P = entries.filter(([, v]) => v.status === 'Present').length;
+        const La = entries.filter(([, v]) => v.status === 'Late').length;
+        const A = entries.filter(([, v]) => v.status === 'Absent').length;
+        return `
+  <div class="ph ph-row fu">
+    <div><div class="ph-tag"> My Attendance</div><h1>Teacher Attendance</h1><div class="ph-sub">Late threshold: after ${DB.lateAfter || '08:00'} AM</div></div>
+    <div class="ph-acts">
+      <input type="month" value="${window.tAttMonth}" onchange="window.tAttMonth=this.value; goPage('teacheratt')" style="padding:6px 10px; border-radius:8px; border:1px solid var(--border); font-size:0.8rem; background:var(--card); color:var(--ink); cursor:pointer;" />
+    </div>
+  </div>
+  <div class="sg fu d1">
+    <div class="sc sg2"><div class="sc-ic"></div><div class="sc-val" style="color:var(--g);">${P}</div><div class="sc-lbl">Present Days</div></div>
+    <div class="sc sv"><div class="sc-ic"></div><div class="sc-val" style="color:var(--y);">${La}</div><div class="sc-lbl">Late Arrivals</div></div>
+    <div class="sc sr"><div class="sc-ic"></div><div class="sc-val" style="color:var(--r);">${A}</div><div class="sc-lbl">Absent Days</div></div>
+    <div class="sc sp"><div class="sc-ic"></div><div class="sc-val" style="color:var(--p);">${entries.length}</div><div class="sc-lbl">Total Recorded</div></div>
+  </div>
+  <div class="card fu d2">
+    <div class="ch"><div class="ct"> Attendance History</div></div>
+      ${entries.length === 0 ? `<div class="empty"><div class="empty-ic"></div><div class="empty-t">No records yet</div></div>` :
+            entries.map(([date, rec]) => `<div class="ta-row">
+      <div class="ta-time" style="font-size:.75rem;color:var(--ink3);font-weight:600;">${fmtDate(date)}</div>
+      <div class="ta-name">${rec.checkIn ? `Check-in: ${rec.checkIn}` : '-'}</div>
+      <span class="badge ${rec.status === 'Present' ? 'bg2' : rec.status === 'Late' ? 'by2' : rec.status === 'Leave' ? 'bb2' : 'br2'}">${rec.status === 'Late' ? '? ' + rec.status : rec.status}</span>
+    </div>`).join('')}
+  </div>`;
+      }
+      // Admin view - all teachers
+      window.tAttMonth = window.tAttMonth || monthKey();
+      window.tAttAdminDate = window.tAttAdminDate || today();
+      const [y, m] = window.tAttMonth.split('-');
+      const dates = [];
+      const daysInMonth = new Date(y, m, 0).getDate();
+      for (let i = 1; i <= daysInMonth; i++) {
+        dates.push(`${y}-${m}-${i.toString().padStart(2, '0')}`);
+      }
+      return `
+<div class="ph ph-row fu">
+  <div><div class="ph-tag"> Staff Attendance</div><h1>Staff Attendance Register</h1><div class="ph-sub">Tap cell to toggle P / A / L / V</div></div>
+  <div class="ph-acts">
+    <input type="month" value="${window.tAttMonth}" onchange="window.tAttMonth=this.value; goPage('teacheratt')" style="padding:6px 10px; border-radius:8px; border:1px solid var(--border); font-size:0.8rem; background:var(--card); color:var(--ink); cursor:pointer;" />
+    <button class="btn btn-p btn-sm" onclick="openScanner()"> QR Scan</button>
+    <button class="btn btn-gh btn-sm" onclick="markAllT('Present')">All Present</button>
+    <button class="btn btn-g btn-sm" onclick="saveAtt()"> Save</button>
+  </div>
+</div>
+
+<div class="card fu d1">
+  <div class="ch" style="margin-bottom:0;"><div class="ct">Daily Scan Log</div>
+    <input type="date" value="${window.tAttAdminDate}" onchange="window.tAttAdminDate=this.value; goPage('teacheratt')" style="padding:4px 8px; border-radius:6px; border:1px solid var(--border); font-size:0.75rem; background:var(--card2); color:var(--ink); cursor:pointer;" />
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;padding-top:12px;">
+    ${teachers.filter(t => DB.teacherAttendance[t.id]?.[window.tAttAdminDate]?.checkIn).length ? teachers.filter(t => DB.teacherAttendance[t.id]?.[window.tAttAdminDate]?.checkIn).map(t => {
+      const rec = DB.teacherAttendance[t.id][window.tAttAdminDate];
+      const isLate = rec.status === 'Late';
+      return `<div style="display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:8px;background:var(--card2);border:1px solid var(--border);">
+        <div class="ava" style="width:20px;height:20px;border-radius:4px;background:${gc(t.name)};font-size:.4rem;flex-shrink:0;">${t.photo ? `<img src="${t.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:4px;"/>` : ini(t.name)}</div>
+        <div style="font-size:0.7rem;font-weight:600;">${t.name}</div>
+        <div style="font-size:0.65rem;color:var(--ink3);margin-left:4px;">In: <b style="color:var(--ink);">${rec.checkIn}</b></div>
+        ${isLate ? `<span style="font-size:0.55rem;background:var(--yl);color:var(--y);padding:2px 4px;border-radius:4px;font-weight:700;margin-left:2px;">LATE</span>` : ''}
+      </div>`;
+    }).join('') : '<div class="empty" style="padding:10px;margin:0;width:100%;"><div class="empty-t">No scans recorded for this date.</div></div>'}
+  </div>
+</div>
+
+  ${teachers.length === 0 ? `<div class="card"><div class="empty"><div class="empty-ic"></div><div class="empty-t">No staff added</div></div></div>` : `
+<div class="card fu d2" style="padding:0;overflow:hidden;"><div class="tw"><table>
+  <thead><tr><th>Staff</th>${dates.map(d => `<th style="text-align:center;min-width:36px;">${new Date(d).getDate()}<br/><span style="font-weight:400;font-size:.55rem;">${new Date(d).toLocaleString('en', { month: 'short' })}</span></th>`).join('')}<th>%</th></tr></thead>
+  <tbody>${teachers.map(t => {
+        if (!DB.teacherAttendance[t.id]) DB.teacherAttendance[t.id] = {};
+        const att = DB.teacherAttendance[t.id];
+        const P = Object.values(att).filter(v => v.status === 'Present').length;
+        const La = Object.values(att).filter(v => v.status === 'Late').length;
+        const tot = Object.values(att).filter(v => ['Present','Absent','Late','Leave'].includes(v.status)).length;
+        const pct = tot ? Math.round((P + La) / tot * 100) : 0;
+        return `<tr><td><div style="display:flex;align-items:center;gap:6px;min-width:120px;"><div class="ava" style="width:24px;height:24px;border-radius:6px;background:${gc(t.name)};font-size:.48rem;flex-shrink:0;">${t.photo ? `<img src="${t.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:6px;"/>` : ini(t.name)}</div><div><span style="font-size:.78rem;font-weight:600;white-space:nowrap;">${t.name}</span><div style="font-size:.6rem;color:var(--ink4);">${t.subject||(t.role==='scanner'?'Scanner':'Staff')}</div></div></div></td>
+      ${dates.map(d => { const v = att[d]?.status || ''; const sn = v==='Present'?'P':v==='Absent'?'A':v==='Late'?'L':v==='Leave'?'V':''; return `<td style="text-align:center;padding:5px;"><div class="ac ${sn === 'P' ? 'acP' : sn === 'A' ? 'acA' : sn === 'L' ? 'acLa' : sn === 'V' ? 'acV' : 'ac0'}" id="tac-${t.id}-${d}" onclick="cycleTAtt('${t.id}','${d}')">${sn || '-'}</div></td>`; }).join('')}
+    <td style="font-weight:700;font-size:.8rem;color:${pct >= 90 ? 'var(--g)' : pct >= 75 ? 'var(--o)' : 'var(--r)'};">${pct}%</td></tr>`;
+      }).join('')}
+  </tbody></table></div></div>
+<div style="display:flex;gap:9px;margin-top:9px;align-items:center;font-size:.72rem;flex-wrap:wrap;">
+  <span style="color:var(--ink4);">Legend:</span>
+  <span><span class="ac acP" style="width:22px;height:22px;font-size:.56rem;cursor:default;">P</span> Present</span>
+  <span><span class="ac acA" style="width:22px;height:22px;font-size:.56rem;cursor:default;">A</span> Absent</span>
+  <span><span class="ac acLa" style="width:22px;height:22px;font-size:.56rem;cursor:default;">L</span> Late</span>
+  <span><span class="ac acV" style="width:22px;height:22px;font-size:.56rem;cursor:default;">V</span> Leave</span>
+  <button class="btn btn-gh btn-sm" style="margin-left:auto;" onclick="openLateThreshModal()">? Set Late Time</button>
+</div>`}`;
+    }
+
+    function cycleTAtt(tid, d) {
+      if (!DB.teacherAttendance[tid]) DB.teacherAttendance[tid] = {};
+      const c = DB.teacherAttendance[tid][d]?.status || '';
+      const n = c === '' ? 'Present' : c === 'Present' ? 'Absent' : c === 'Absent' ? 'Late' : c === 'Late' ? 'Leave' : '';
+      if (n) {
+        DB.teacherAttendance[tid][d] = { checkIn: DB.teacherAttendance[tid][d]?.checkIn || nowHHMM(), status: n, source: 'manual' };
+      } else {
+        delete DB.teacherAttendance[tid][d];
+      }
+      const el = document.getElementById(`tac-${tid}-${d}`);
+      if (el) { 
+        const sn = n==='Present'?'P':n==='Absent'?'A':n==='Late'?'L':n==='Leave'?'V':'';
+        el.className = `ac ${sn === 'P' ? 'acP' : sn === 'A' ? 'acA' : sn === 'L' ? 'acLa' : sn === 'V' ? 'acV' : 'ac0'}`; el.textContent = sn || '-'; 
+      }
+    }
+    function markAllT(status) {
+      const d = today();
+      DB.users.filter(u => u.role === 'teacher' || u.role === 'scanner').forEach(t => {
+        if (!DB.teacherAttendance[t.id]) DB.teacherAttendance[t.id] = {};
+        DB.teacherAttendance[t.id][d] = { checkIn: nowHHMM(), status, source: 'manual' };
+        const el = document.getElementById(`tac-${t.id}-${d}`);
+        if (el) { el.className = `ac acP`; el.textContent = 'P'; }
+      });
+    }
+
+    function openLateThreshModal() {
+      openModal(`
+  <h3>? Late Arrival Threshold</h3>
+  <div class="ibox">Teachers who check in after this time will be marked <b>Late</b> instead of Present.</div>
+  <div class="fg"><label class="fl">Late After (Time)</label><input class="fi" type="time" id="lt-time" value="${DB.lateAfter || '08:00'}"/></div>
+  <div class="m-btns"><button class="btn btn-p" onclick="saveLateThresh()"> Save</button><button class="btn btn-gh" onclick="closeModal()">Cancel</button></div>`);
+    }
+    function saveLateThresh() { DB.lateAfter = document.getElementById('lt-time')?.value || '08:00'; saveDB(); closeModal(); showToast(`? Late threshold set to ${DB.lateAfter}`, 'ts'); goPage('teacheratt'); }
+
+    /* ------------------------------- GRADES ------------------------------- */
+    function pgGrades() {
+      const sts = clsStus(curCls); const cls = DB.classes.find(c => c.id === curCls);
+      return `
+<div class="ph ph-row fu">
+  <div><div class="ph-tag"> Grades</div><h1>Grade Book</h1><div class="ph-sub">${cls?.name || ''} - Enter marks out of 100</div></div>
+  <div class="ph-acts">
+    <select class="fi" style="width:140px;padding:5px;height:auto;font-weight:600;" onchange="curTerm=this.value;goPage('grades')">
+      ${DB.settings.terms.map(t => `<option value="${t.id}" ${curTerm===t.id?'selected':''}>${t.name}</option>`).join('')}
+    </select>
+    <button class="btn btn-gh btn-sm" onclick="clearGrades()">Clear</button><button class="btn btn-g btn-sm" onclick="saveGrades()"> Save Grades</button>
+  </div>
+</div>
+  ${clsBar('switchGrdCls')}
+  ${sts.length === 0 ? `<div class="card"><div class="empty"><div class="empty-ic"></div><div class="empty-t">No students</div></div></div>` : `
+<div class="card fu d2" style="padding:0;overflow:hidden;"><div class="tw"><table>
+  <thead><tr><th>Roll</th><th>Student</th>${DB.subjects.map(s => `<th style="text-align:center;">${s.icon}<br/><span style="font-weight:400;">${s.code}</span></th>`).join('')}<th>Avg</th><th>Grade</th></tr></thead>
+  <tbody>${sts.map(s => {
+        const tKey = curCls + '_' + curTerm;
+        if (!DB.grades[tKey]) DB.grades[tKey] = {};
+        if (!DB.grades[tKey][s.id]) DB.grades[tKey][s.id] = {};
+        const g = DB.grades[tKey][s.id];
+        const filled = DB.subjects.map(sub => g[sub.id] || 0).filter(v => v > 0);
+        const av = filled.length ? Math.round(filled.reduce((a, v) => a + v, 0) / filled.length) : 0;
+        return `<tr><td style="font-weight:700;font-size:.72rem;">${s.roll || '-'}</td>
+    <td style="font-weight:600;font-size:.8rem;white-space:nowrap;">${s.name}</td>
+      ${DB.subjects.map(sub => `<td style="text-align:center;padding:5px 4px;"><input class="si" type="number" min="0" max="100" value="${g[sub.id] || ''}" placeholder="-" style="width:50px;text-align:center;background:var(--card2);border:1.5px solid var(--border);border-radius:7px;padding:6px 4px;font-size:.84rem;font-weight:700;color:var(--ink);outline:none;font-family:var(--font);" oninput="setGrade('${s.id}','${sub.id}',this.value,this)" onfocus="this.style.borderColor='var(--p)';this.style.background='#fff'" onblur="this.style.borderColor='';this.style.background='';"/></td>`).join('')}
+    <td id="av-${s.id}" style="font-weight:800;font-size:.82rem;text-align:center;color:${sCol(av)};">${av || '-'}</td>
+    <td id="gr-${s.id}" style="text-align:center;"><span class="badge ${gCls(av)}">${lGrade(av)}</span></td></tr>`;
+      }).join('')}
+  </tbody></table></div></div>`}`;
+    }
+    function setGrade(sid, subId, val, inp) {
+      const tKey = curCls + '_' + curTerm;
+      if (!DB.grades[tKey]) DB.grades[tKey] = {};
+      if (!DB.grades[tKey][sid]) DB.grades[tKey][sid] = {};
+      const v = Math.min(100, Math.max(0, parseInt(val) || 0));
+      DB.grades[tKey][sid][subId] = v;
+      const vals = Object.values(DB.grades[tKey][sid]).filter(x => x > 0);
+      const av = vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : 0;
+      const ae = document.getElementById(`av-${sid}`); const ge = document.getElementById(`gr-${sid}`);
+      if (ae) { ae.textContent = av || '-'; ae.style.color = sCol(av); }
+      if (ge) ge.innerHTML = `<span class="badge ${gCls(av)}">${lGrade(av)}</span>`;
+    }
+    function saveGrades() { saveDB(); showToast('? Grades saved', 'ts'); }
+    function clearGrades() { if (!confirm('Clear all grades for this class in this term?')) return; delete DB.grades[curCls + '_' + curTerm]; saveDB(); goPage('grades'); }
+    function switchGrdCls(cid) { curCls = cid; updatePill(); goPage('grades'); }
+
+    /* ------------------------------- FEES ------------------------------- */
+    function studentFeeSummary(sid) {
+      const payments = DB.fees.payments[sid] || {};
+      const stu = allStus().find(x => x.id === sid);
+      const itemAmount = f => (f.id === 'f1' && (stu && stu.customFee !== undefined && stu.customFee !== '')) ? num(stu.customFee) : num(f.amount);
+      const mandatory = DB.fees.items.filter(f => f.mandatory);
+      const allItems = DB.fees.items || [];
+      const arrAmt = num(stu?.arrears || 0);
+      const arrPaid = payments['arrears']?.paid;
+      const paidAmount = allItems.reduce((sum, f) => sum + (f.id === 'f1' ? monthlyFeePaidTotal(sid) : (payments[f.id]?.paid ? num(payments[f.id].amount || itemAmount(f)) : 0)), 0) + (arrPaid ? arrAmt : 0);
+      const dueAmount = allItems.reduce((sum, f) => sum + (f.id === 'f1' ? monthlyFeeDue(sid) : (f.mandatory && !payments[f.id]?.paid ? itemAmount(f) : 0)), 0) + (arrPaid ? 0 : arrAmt);
+      const mandatoryPaid = mandatory.filter(f => payments[f.id]?.paid).length;
+      return { payments, mandatory, mandatoryPaid, paidAmount, dueAmount, totalAmount: paidAmount + dueAmount };
+    }
+
+    function pgFees() {
+      const all = allStus();
+      const summaries = all.map(s => studentFeeSummary(s.id));
+      const collected = summaries.reduce((sum, x) => sum + x.paidAmount, 0);
+      const pending = summaries.reduce((sum, x) => sum + x.dueAmount, 0);
+      const fullyPaid = summaries.filter(x => x.mandatory.length && x.mandatoryPaid === x.mandatory.length).length;
+      const totalAnnual = DB.fees.items.filter(f => f.mandatory).reduce((a, f) => a + Number(f.amount || 0), 0);
+      return `
+<div class="ph ph-row fu">
+  <div><div class="ph-tag"> Fees</div><h1>Fee Management</h1><div class="ph-sub">Year ${DB.settings?.schoolYear || ''} - all fee items per student</div></div>
+  <div class="ph-acts">
+    <button class="btn btn-gh btn-sm" onclick="openFeeStructModal()">? Structure</button>
+    <button class="btn btn-gh btn-sm" onclick="openFeeReminderModal()"> Manual Reminder</button>
+    <button class="btn btn-wa btn-sm" onclick="sendBulkFeeReminder()"> Bulk Reminder</button>
+  </div>
+</div>
+<div class="fee-hero fu">
+  <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+    <div><div style="font-size:.7rem;opacity:.65;">Total Collection</div><div style="font-family:var(--head);font-size:1.7rem;font-weight:700;margin:4px 0;">${fmtMoney(collected)}</div><div style="font-size:.7rem;opacity:.6;">${fullyPaid} fully paid - ${all.length - fullyPaid} pending</div></div>
+    <div style="text-align:right;"><div style="font-size:.7rem;opacity:.65;">Pending Balance</div><div style="font-family:var(--head);font-size:1.1rem;font-weight:700;margin-top:3px;">${fmtMoney(pending)}</div><div style="font-size:.68rem;opacity:.62;">Base Mandatory ${fmtMoney(totalAnnual)}</div></div>
+  </div>
+  <div class="fh-bar"><div class="fh-fill" style="width:${collected + pending ? Math.round(collected / (collected + pending) * 100) : 0}%;"></div></div>
+  <div style="display:flex;justify-content:space-between;font-size:.68rem;opacity:.6;margin-top:4px;"><span>${collected + pending ? Math.round(collected / (collected + pending) * 100) : 0}% collected</span><span>${fmtMoney(pending)} pending</span></div>
+</div>
+<div class="g2">
+  <div class="card fu d2">
+    <div class="ch"><div class="ct"> Fee Structure</div><button class="btn btn-gh btn-sm" onclick="openFeeStructModal()">Edit</button></div>
+      ${DB.fees.items.map(f => `<div style="display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid var(--border);">
+      <div style="flex:1;"><div style="font-weight:700;font-size:.8rem;">${f.name}</div><div style="font-size:.68rem;color:var(--ink3);">Due: ${f.due} - ${f.mandatory ? 'Mandatory' : 'Optional'}</div></div>
+      <div style="font-weight:800;color:var(--p);font-size:.88rem;">${fmtMoney(f.amount)}</div>
+    </div>`).join('')}
+    <div style="padding-top:9px;font-weight:800;font-size:.83rem;display:flex;justify-content:space-between;border-top:1px solid var(--border);margin-top:4px;"><span>Mandatory Total</span><span style="color:var(--p);">${fmtMoney(totalAnnual)}</span></div>
+  </div>
+  <div class="card fu d3" style="padding:0;overflow:hidden;">
+    <div class="ch" style="padding:13px 14px 9px;"><div class="ct"> Student Fee Status</div></div>
+    <div class="tw" style="border:none;"><table>
+      <thead><tr><th>Student</th><th>Class</th><th>Mandatory</th><th>Balance</th><th>Action</th></tr></thead>
+      <tbody>${all.map(s => {
+        const sum = studentFeeSummary(s.id);
+        const complete = sum.mandatory.length && sum.mandatoryPaid === sum.mandatory.length;
+        const cls = DB.classes.find(c => c.id === s.classId);
+        return `<tr><td><div style="font-weight:700;font-size:.78rem;">${s.name}</div><div style="font-size:.63rem;color:var(--ink4);">Roll ${s.roll}</div></td><td style="font-size:.72rem;">${cls?.name || '-'}</td><td><span class="badge ${complete ? 'bg2' : 'br2'}">${sum.mandatoryPaid}/${sum.mandatory.length} paid</span></td><td><b style="color:${sum.dueAmount ? 'var(--r)' : 'var(--g)'};">${fmtMoney(sum.dueAmount)}</b></td>
+        <td><div style="display:flex;gap:3px;flex-wrap:wrap;">
+          <button class="btn btn-xs btn-p" onclick="openStudentFeeModal('${s.id}')">Manage</button>
+            ${s.whatsapp && sum.dueAmount ? `<button class="btn btn-xs btn-wa" onclick="openFeeReminderModal('${s.id}')">WA</button>` : ''}
+        </div></td></tr>`;
+      }).join('')}
+      </tbody></table></div>
+  </div>
+</div>`;
+    }
+
+    function toggleFee(sid, fid, stayOpen = false, targetMonth = null) {
+      if (!DB.fees.payments[sid]) DB.fees.payments[sid] = {};
+      const fee = DB.fees.items.find(f => f.id === fid) || { amount: 0 };
+      const month = targetMonth || monthKey();
+      if (fid === 'f1') {
+        if (!DB.fees.monthlyLedger) DB.fees.monthlyLedger = {};
+        if (!DB.fees.monthlyLedger[sid]) DB.fees.monthlyLedger[sid] = {};
+        const row = DB.fees.monthlyLedger[sid][month];
+        if (row && row.paid) {
+          row.paid = false; delete row.date;
+        } else {
+          DB.fees.monthlyLedger[sid][month] = { month, paid: true, date: today(), amount: row ? num(row.amount) : monthlyFeeAmount(allStus().find(s => s.id === sid)) };
+        }
+        DB.fees.payments[sid]['f1'] = { paid: monthlyFeeDue(sid) === 0, date: today(), amount: monthlyFeePaidTotal(sid), month: monthKey() };
+      } else if (fid === 'arrears') {
+        const cur = DB.fees.payments[sid][fid];
+        const s = allStus().find(x => x.id === sid);
+        DB.fees.payments[sid][fid] = { paid: !cur?.paid, date: today(), amount: num(s?.arrears || 0) };
+      } else {
+        const cur = DB.fees.payments[sid][fid];
+        DB.fees.payments[sid][fid] = { paid: !cur?.paid, date: today(), amount: num(fee.amount) };
+      }
+      saveDB();
+      if (stayOpen) openStudentFeeModal(sid, month); else goPage('fees');
+      showToast('Fee status updated');
+    }
+    function openStudentFeeModal(sid, targetMonth = null) {
+      const s = allStus().find(x => x.id === sid); if (!s) return;
+      const cls = DB.classes.find(c => c.id === s.classId);
+      const sum = studentFeeSummary(sid);
+      const month = targetMonth || monthKey();
+      const mRow = DB.fees.monthlyLedger?.[sid]?.[month];
+      const f1Paid = mRow ? mRow.paid : false;
+      const f1Amount = mRow ? num(mRow.amount) : monthlyFeeAmount(s);
+      
+      openModal(`
+  <h3> ${escHtml(s.name)} Fees</h3>
+  <div class="ibox" style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+    <div>${escHtml(cls?.name || '')} - Roll ${escHtml(s.roll || '-')} - Balance <b style="color:${sum.dueAmount ? 'var(--r)' : 'var(--g)'};">${fmtMoney(sum.dueAmount)}</b></div>
+    <div><input type="month" value="${month}" onchange="openStudentFeeModal('${sid}', this.value)" style="padding:4px 8px;border-radius:6px;border:1px solid var(--border);outline:none;font-family:inherit;"></div>
+  </div>
+  <div style="display:grid;gap:8px;">
+  ${num(s.arrears) > 0 ? (() => {
+      const paid = sum.payments['arrears']?.paid;
+      return `<div style="display:flex;align-items:center;gap:10px;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px;"><div style="flex:1;"><div style="font-weight:800;font-size:.82rem;color:var(--o);">Previous Arrears</div><div style="font-size:.68rem;color:var(--ink4);">Carried over balance ${paid ? ' - Paid ' + fmtDate(sum.payments['arrears']?.date) : ''}</div></div><div style="text-align:right;"><div style="font-weight:900;color:${paid ? 'var(--g)' : 'var(--r)'};">${fmtMoney(num(s.arrears))}</div><button class="btn btn-xs ${paid ? 'btn-gh' : 'btn-g'}" onclick="toggleFee('${sid}','arrears',true,'${month}')">${paid ? 'Unmark' : 'Mark Paid'}</button></div></div>`;
+  })() : ''}
+  ${DB.fees.items.map(f => { 
+      let paid = false, amount = f.amount, date = '';
+      if (f.id === 'f1') {
+          paid = f1Paid; amount = f1Amount; date = mRow?.date || '';
+      } else {
+          paid = sum.payments[f.id]?.paid; date = sum.payments[f.id]?.date || '';
+      }
+      return `<div style="display:flex;align-items:center;gap:10px;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px;"><div style="flex:1;"><div style="font-weight:800;font-size:.82rem;">${escHtml(f.name)} ${f.id === 'f1' ? `(${month})` : ''}</div><div style="font-size:.68rem;color:var(--ink4);">Due ${escHtml(f.due || '-')} - ${f.mandatory ? 'Mandatory' : 'Optional'}${paid ? ' - Paid ' + fmtDate(date) : ''}</div></div><div style="text-align:right;"><div style="font-weight:900;color:${paid ? 'var(--g)' : 'var(--r)'};">${fmtMoney(amount)}</div><button class="btn btn-xs ${paid ? 'btn-gh' : 'btn-g'}" onclick="toggleFee('${sid}','${f.id}',true,'${month}')">${paid ? 'Unmark' : 'Mark Paid'}</button></div></div>`; 
+  }).join('')}</div>
+  <div class="m-btns" style="flex-wrap:wrap;">
+      <button class="btn btn-g btn-sm" onclick="printFeeReceipt('${sid}', '${month}')">Print Receipt</button>
+      ${s.whatsapp ? `<button class="btn btn-wa btn-sm" onclick="sendFeeWA('${sid}','${(DB.fees.items.find(f => !sum.payments[f.id]?.paid) || DB.fees.items[0] || {}).id || 'f1'}')"> WhatsApp</button>` : ''}
+    <button class="btn btn-gh btn-sm" onclick="closeModal();goPage('fees')">Close</button>
+  </div>`);
+    }
+
+    function printFeeReceipt(sid, month) {
+      const s = allStus().find(x => x.id === sid); if (!s) return;
+      const cls = DB.classes.find(c => c.id === s.classId);
+      const sum = studentFeeSummary(sid);
+      
+      const printWindow = window.open('', '', 'width=800,height=600');
+      let html = `<html><head><title>Fee Receipt - ${escHtml(s.name)}</title>
+      <style>
+        body { font-family: sans-serif; padding: 20px; color: #111; max-width: 600px; margin: 0 auto; }
+        .header { text-align: center; border-bottom: 2px solid #ddd; padding-bottom: 15px; margin-bottom: 20px; }
+        .title { font-size: 24px; font-weight: bold; }
+        .sub { color: #555; }
+        .details { margin-bottom: 20px; display: flex; justify-content: space-between; }
+        .table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .table th, .table td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        .table th { background: #f9f9f9; }
+        .totals { text-align: right; font-size: 18px; font-weight: bold; }
+        .footer { text-align: center; font-size: 12px; color: #777; margin-top: 40px; border-top: 1px solid #eee; padding-top: 10px; }
+      </style></head><body>
+      <div class="header">
+        <div class="title">${escHtml(DB.settings?.name || 'School')}</div>
+        <div class="sub">${escHtml(DB.settings?.address || '')} | ${escHtml(DB.settings?.phone || '')}</div>
+        <h2 style="margin:10px 0 0 0;">Fee Receipt</h2>
+      </div>
+      <div class="details">
+        <div>
+          <b>Student:</b> ${escHtml(s.name)}<br>
+          <b>Class:</b> ${escHtml(cls?.name || '')} (Roll: ${escHtml(s.roll || '-')})
+        </div>
+        <div style="text-align:right;">
+          <b>Date:</b> ${fmtDate(today())}<br>
+          <b>Billing Month:</b> ${month}
+        </div>
+      </div>
+      <table class="table">
+        <tr><th>Fee Description</th><th>Status</th><th>Amount</th></tr>`;
+        
+      let totalPaid = 0;
+      let totalPending = 0;
+      
+      if (num(s.arrears) > 0) {
+        const paid = sum.payments['arrears']?.paid;
+        html += `<tr><td>Previous Arrears</td><td>${paid ? 'Paid' : 'Pending'}</td><td>${fmtMoney(num(s.arrears))}</td></tr>`;
+        if (paid) totalPaid += num(s.arrears); else totalPending += num(s.arrears);
+      }
+      
+      DB.fees.items.forEach(f => {
+        let paid = false, amount = f.amount;
+        if (f.id === 'f1') {
+            const mRow = DB.fees.monthlyLedger?.[sid]?.[month];
+            paid = mRow ? mRow.paid : false;
+            amount = mRow ? num(mRow.amount) : monthlyFeeAmount(s);
+            if (!mRow && !paid) return; // Don't show ungenerated tuition months in receipt
+            html += `<tr><td>${escHtml(f.name)} (${month})</td><td>${paid ? 'Paid' : 'Pending'}</td><td>${fmtMoney(amount)}</td></tr>`;
+            if (paid) totalPaid += amount; else totalPending += amount;
+        } else {
+            paid = sum.payments[f.id]?.paid;
+            if (!paid && !f.mandatory) return; // Hide unpaid optional fees
+            html += `<tr><td>${escHtml(f.name)}</td><td>${paid ? 'Paid' : 'Pending'}</td><td>${fmtMoney(amount)}</td></tr>`;
+            if (paid) totalPaid += num(amount); else totalPending += num(amount);
+        }
+      });
+      
+      html += `</table>
+      <div class="totals">
+        Total Paid: ${fmtMoney(totalPaid)}<br>
+        <span style="color:var(--r);font-size:14px;">Total Pending: ${fmtMoney(totalPending)}</span>
+      </div>
+      <div class="footer">Thank you for your prompt payment! Generated by Oxford Portal.</div>
+      <script>
+        window.onload = function() { 
+            setTimeout(() => { window.print(); window.close(); }, 250);
+        };
+      </scr` + `ipt>
+      </body></html>`;
+      
+      printWindow.document.write(html);
+      printWindow.document.close();
+    }
+
+    function feeReminderText(sid, fid, dueDate, note = '') {
+      const s = allStus().find(x => x.id === sid); if (!s) return '';
+      const fee = DB.fees.items.find(f => f.id === fid) || DB.fees.items[0] || { name: 'School Fee', amount: 0, due: DB.settings?.defaultFeeDueDay || '5th of month' };
+      const cls = DB.classes.find(c => c.id === s.classId);
+      const amount = (fid === 'f1' && (s && s.customFee !== undefined && s.customFee !== '')) ? num(s.customFee) : num(fee.amount);
+      const balance = (DB.fees.payments[s.id] || {})[fid]?.paid ? 0 : amount;
+      return `Dear Parent of ${s.name},\n\nThis is a friendly fee reminder from ${DB.school.name}.\nStudent: ${s.name}\nClass: ${cls?.name || ''}\nRoll No: ${s.roll || ''}\nFee Item: ${fee.name}\nAmount Due: ${fmtMoney(balance || amount)}\nDue Date: ${dueDate || fee.due || DB.settings?.defaultFeeDueDay || '5th of month'}\n${note ? `\nNote: ${note}\n` : ''}\nPlease share payment once deposited.\n\nThank you.\n${DB.school.name}`;
+    }
+    function sendFeeWA(sid, fid = 'f1', dueDate, note = '') {
+      const s = allStus().find(x => x.id === sid); if (!s?.whatsapp) { showToast('No WhatsApp number', 'te'); return false; }
+      const phone = normalizePhone(s.whatsapp); if (!phone || phone.length < 11) { showToast('Invalid WhatsApp number. Use 923XXXXXXXXX or 03XXXXXXXXX.', 'te', 5200); return false; }
+      const ok = openWhatsAppMessage(phone, feeReminderText(sid, fid, dueDate, note));
+      if (ok) showToast('WhatsApp opened with message. Tap Send in WhatsApp.', 'ts', 4200);
+      return ok;
+    }
+    function openFeeReminderModal(sid = '') {
+      const students = allStus().filter(s => s.whatsapp);
+      if (!students.length) { showToast('No students with WhatsApp numbers found', 'te'); return; }
+      const selected = sid ? students.find(s => s.id === sid) : students.find(s => !(DB.fees.payments[s.id] || {})['f1']?.paid) || students[0];
+      openModal(`
+  <h3> Manual WhatsApp Fee Reminder</h3>
+  <div class="ibox">Choose the parent, fee item, due date, and optional custom note. WhatsApp opens with the message ready to send.</div>
+  <div class="fg"><label class="fl">Student / Parent</label><select class="fi" id="wa-student">${students.map(s => `<option value="${s.id}" ${s.id === selected?.id ? 'selected' : ''}>${s.name} - ${DB.classes.find(c => c.id === s.classId)?.name || ''} - ${s.whatsapp}</option>`).join('')}</select></div>
+  <div class="fg2"><div class="fg"><label class="fl">Fee Item</label><select class="fi" id="wa-fee">${DB.fees.items.map(f => `<option value="${f.id}">${f.name} - ${fmtMoney(f.amount)}</option>`).join('')}</select></div><div class="fg"><label class="fl">Due Date</label><input class="fi" id="wa-due" value="${DB.settings?.defaultFeeDueDay || DB.fees.items[0]?.due || '5th of month'}"/></div></div>
+  <div class="fg"><label class="fl">Custom Note</label><textarea class="fi" id="wa-note" style="min-height:80px;" placeholder="Optional note for the parent"></textarea></div>
+  <div class="m-btns"><button class="btn btn-wa" onclick="sendManualFeeReminder()">Open WhatsApp</button><button class="btn btn-gh" onclick="closeModal()">Cancel</button></div>`);
+    }
+    function sendManualFeeReminder() {
+      const sid = document.getElementById('wa-student')?.value;
+      const fid = document.getElementById('wa-fee')?.value || 'f1';
+      const due = document.getElementById('wa-due')?.value || DB.settings?.defaultFeeDueDay || '5th of month';
+      const note = document.getElementById('wa-note')?.value?.trim() || '';
+      const ok = sendFeeWA(sid, fid, due, note);
+      if (ok) closeModal();
+    }
+    let feeReminderQueue = [];
+    function pendingFeeReminderRows() {
+      return allStus().map(s => {
+        const payments = DB.fees.payments[s.id] || {};
+        const unpaid = (DB.fees.items || []).filter(f => !payments[f.id]?.paid);
+        return { student: s, unpaid, firstFee: unpaid[0] };
+      }).filter(row => row.student.whatsapp && row.firstFee);
+    }
+    function openBulkFeeReminderQueue() {
+      const current = feeReminderQueue[0];
+      openModal(`
+  <h3>WhatsApp Fee Reminder Queue</h3>
+  <div class="ibox">Open one parent at a time, then tap Send in WhatsApp. This avoids blocked tabs and keeps the message text filled correctly.</div>
+  <div style="background:var(--card2);border:1px solid var(--border);border-radius:9px;padding:12px;margin:10px 0;">
+    <div style="font-size:.7rem;color:var(--ink4);">Remaining</div>
+    <div style="font-family:var(--head);font-size:1.5rem;font-weight:800;">${feeReminderQueue.length}</div>
+      ${current ? `<div style="font-size:.82rem;font-weight:700;margin-top:6px;">Next: ${escHtml(current.student.name)}</div><div style="font-size:.72rem;color:var(--ink3);">${escHtml(current.firstFee.name)} - ${fmtMoney(current.firstFee.amount)} - ${normalizePhone(current.student.whatsapp)}</div>` : '<div class="muted">All reminders opened.</div>'}
+  </div>
+  <div class="m-btns" style="flex-wrap:wrap;">
+      ${current ? `<button class="btn btn-wa" onclick="openNextBulkFeeReminder()">Manual WA Send</button>
+      <button class="btn btn-p" style="background:#0ea5e9;color:#fff;" onclick="automateBulkFeeReminders()" id="btn-auto-wa">? Automate All via API</button>` : ''}
+    <button class="btn btn-gh" onclick="closeModal()">Close</button>
+  </div>`);
+    }
+    async function automateBulkFeeReminders() {
+      if (!feeReminderQueue.length) { showToast('Queue is empty'); return; }
+      if (!_sb) { showToast('Database connection missing for API.', 'te'); return; }
+      if (!confirm('This will send a WhatsApp message to all ' + feeReminderQueue.length + ' parents automatically via the Meta API. Make sure your Meta credentials and "fee_reminder" template are approved. Proceed?')) return;
+      
+      const btn = document.getElementById('btn-auto-wa');
+      if (btn) { btn.innerHTML = 'Sending...'; btn.disabled = true; }
+      
+      showToast(`Automating ${feeReminderQueue.length} messages via API...`, 'ts');
+      
+      let sent = 0;
+      let failed = 0;
+
+      for (let i = 0; i < feeReminderQueue.length; i++) {
+        const row = feeReminderQueue[i];
+        const phone = normalizePhone(row.student.whatsapp);
+        const amount = fmtMoney(row.sum.dueAmount);
+        
+        try {
+          const { data, error } = await _sb.functions.invoke('send-whatsapp', {
+            body: {
+              phone: phone,
+              templateName: 'fee_reminder',
+              languageCode: 'en_US',
+              components: [
+                {
+                  type: 'body',
+                  parameters: [
+                    { type: 'text', text: String(row.student.name) },
+                    { type: 'text', text: String(amount) }
+                  ]
+                }
+              ]
+            }
+          });
+          if (error) throw error;
+          if (data && data.success) {
+            sent++;
+          } else {
+            failed++;
+          }
+        } catch(e) {
+          console.error('WhatsApp API Error:', e);
+          failed++;
+        }
+      }
+      
+      feeReminderQueue = [];
+      showToast(`Automated batch complete. Sent: ${sent}, Failed: ${failed}`, sent > 0 ? 'ts' : 'te', 5000);
+      openBulkFeeReminderQueue();
+    }
+    function openNextBulkFeeReminder() {
+      const row = feeReminderQueue.shift();
+      if (!row) { openBulkFeeReminderQueue(); return; }
+      sendFeeWA(row.student.id, row.firstFee.id, row.firstFee.due || DB.settings?.defaultFeeDueDay || '5th of month');
+      setTimeout(openBulkFeeReminderQueue, 250);
+    }
+    function sendBulkFeeReminder() {
+      feeReminderQueue = pendingFeeReminderRows();
+      if (!feeReminderQueue.length) { showToast('No pending students with WhatsApp', 'tw2'); return; }
+      openBulkFeeReminderQueue();
+    }
+    function openFeeStructModal() {
+      openModal(`
+  <h3>? Fee Structure</h3>
+  <div id="fee-list">${DB.fees.items.map((f, i) => `<div style="background:var(--card2);border:1px solid var(--border);border-radius:9px;padding:11px;margin-bottom:8px;"><div class="fg2"><div class="fg"><label class="fl">Fee Name</label><input class="fi" value="${f.name}" onchange="DB.fees.items[${i}].name=this.value" style="font-size:.82rem;"/></div><div class="fg"><label class="fl">Amount (${DB.settings?.currency || 'PKR'})</label><input class="fi" type="number" value="${f.amount}" onchange="DB.fees.items[${i}].amount=Number(this.value)" style="font-size:.82rem;"/></div></div><div class="fg2"><div class="fg"><label class="fl">Due Date</label><input class="fi" value="${f.due}" onchange="DB.fees.items[${i}].due=this.value" style="font-size:.82rem;"/></div><div class="fg" style="display:flex;align-items:flex-end;gap:8px;"><label style="display:flex;align-items:center;gap:5px;font-size:.76rem;font-weight:600;cursor:pointer;padding-bottom:2px;"><input type="checkbox" ${f.mandatory ? 'checked' : ''} onchange="DB.fees.items[${i}].mandatory=this.checked"/> Mandatory</label>${f.id === 'f1' ? '<div style="font-size:.65rem;color:var(--ink4);margin-bottom:5px;">System Item</div>' : `<button class="btn btn-xs" style="background:var(--rl);color:var(--r);margin-bottom:0;" onclick="delFeeItem(${i})">Remove</button>`}</div></div></div>`).join('')}</div>
+  <button class="btn btn-gh btn-sm" style="width:100%;justify-content:center;margin-top:4px;" onclick="addFeeItem()">+ Add Fee Item</button>
+  <div class="m-btns" style="margin-top:10px;"><button class="btn btn-p" onclick="saveFeeStruct()"> Save</button><button class="btn btn-gh" onclick="closeModal()">Close</button></div>`);
+    }
+    function addFeeItem() { DB.fees.items.push({ id: uid(), name: 'New Fee', amount: 1000, due: '5th', mandatory: false, type: 'monthly' }); openFeeStructModal(); }
+    function delFeeItem(i) { DB.fees.items.splice(i, 1); openFeeStructModal(); }
+    function saveFeeStruct() { saveDB(); closeModal(); showToast('? Fee structure saved', 'ts'); goPage('fees'); }
+
+    /* ------------------------------- CLASSES ------------------------------- */
+    function pgClasses() {
+      return `
+<div class="ph ph-row fu"><div><div class="ph-tag"> Classes</div><h1>Class Management</h1></div><button class="btn btn-p" onclick="openAddClsModal()">+ Add Class</button></div>
+<div class="g3 fu d1">${DB.classes.map(c => { const sts = clsStus(c.id); const avg = sts.length ? Math.round(sts.reduce((a, s) => a + avgStu(c.id, s.id), 0) / sts.length) : 0; return `<div class="card" style="cursor:pointer;padding:13px;transition:all .17s;" onclick="switchCls('${c.id}');goPage('students')" onmouseover="this.style.transform='translateY(-2px)';this.style.borderColor='var(--p2)'" onmouseout="this.style.transform='';this.style.borderColor=''"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><div style="width:28px;height:28px;border-radius:7px;background:${gc(c.name)};display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;color:#fff;">${c.name.charAt(0)}</div><div style="display:flex;gap:4px;"><button class="btn btn-xs btn-gh" onclick="event.stopPropagation();openPromoteModal('${c.id}')">Promote</button> <button class="btn btn-xs btn-gh" onclick="event.stopPropagation();openAddClsModal('${c.id}')">Edit</button> <button class="btn btn-xs btn-wa" onclick="event.stopPropagation();broadcastClass('${c.id}')">Broadcast</button></div></div><div style="font-weight:700;font-size:.85rem;">${escHtml(c.name)}${c.section ? ' ' + escHtml(c.section) : ''}</div><div style="font-size:.68rem;color:var(--ink3);margin:2px 0 8px;">${sts.length} students - ${c.level === 'primary' ? 'Primary' : 'Secondary'}</div><div class="pb" style="height:4px;"><div class="pf" style="width:${avg}%;background:${sCol(avg)};height:4px;"></div></div><div style="display:flex;justify-content:space-between;margin-top:4px;font-size:.66rem;font-weight:700;"><span style="color:${sCol(avg)};">${avg}% avg</span><span style="color:var(--p);">View</span></div></div>`; }).join('')}<div class="card" style="display:flex;align-items:center;justify-content:center;border:2px dashed var(--border2);background:transparent;cursor:pointer;min-height:120px;" onclick="openAddClsModal()"><div style="text-align:center;color:var(--ink4);"><div style="font-size:1.3rem;">+</div><div style="font-size:.74rem;font-weight:600;margin-top:3px;">Add Class</div></div></div></div>`;
+    }
+    function openAddClsModal(eid) {
+      const c = eid ? DB.classes.find(x => x.id === eid) : null;
+      openModal(`
+  <h3>${c ? ' Edit Class' : '? Add Class'}</h3>
+  <div class="fg2"><div class="fg"><label class="fl">Class Name <span class="req">*</span></label><input class="fi" id="mc-name" value="${c?.name || ''}" placeholder="Class 9"/></div><div class="fg"><label class="fl">Section</label><input class="fi" id="mc-sec" value="${c?.section || ''}" placeholder="A"/></div></div>
+  <div class="fg2"><div class="fg"><label class="fl">Level</label><select class="fi" id="mc-lev"><option value="primary" ${c?.level === 'primary' ? 'selected' : ''}>Primary (1-8)</option><option value="secondary" ${c?.level !== 'primary' ? 'selected' : ''}>Secondary (9-10)</option></select></div><div class="fg"><label class="fl">Capacity</label><input class="fi" type="number" id="mc-cap" value="${c?.capacity || 35}"/></div></div>
+  <div class="fg"><label class="fl">Class Teacher</label><input class="fi" id="mc-teach" value="${c?.teacher || ''}" placeholder="Ms. Fatima Khan"/></div>
+  <div class="m-btns"><button class="btn btn-p" onclick="saveCls('${eid || ''}')"> ${c ? 'Update' : 'Add'}</button>${c ? `<button class="btn btn-xs" style="background:var(--rl);color:var(--r);" onclick="delCls('${c.id}')">Delete</button>` : ''}<button class="btn btn-gh" onclick="closeModal()">Cancel</button></div>`);
+    }
+    function saveCls(eid) { const name = (document.getElementById('mc-name')?.value || '').trim(); if (!name) { showToast('Name required', 'te'); return; } const obj = { name, section: document.getElementById('mc-sec').value.trim(), level: document.getElementById('mc-lev').value, capacity: document.getElementById('mc-cap').value, teacher: document.getElementById('mc-teach').value.trim() }; if (eid) { const c = DB.classes.find(x => x.id === eid); if (c) Object.assign(c, obj); } else DB.classes.push({ id: uid(), ...obj }); saveDB(); closeModal(); showToast('? Saved', 'ts'); goPage('classes'); }
+    function delCls(id) { if (!confirm('Delete class and all students?')) return; DB.classes = DB.classes.filter(c => c.id !== id); delete DB.students[id]; DB.settings.terms.forEach(t => delete DB.grades[id + '_' + t.id]); delete DB.attendance[id]; saveDB(); closeModal(); showToast('Deleted'); goPage('classes'); }
+
+    function openPromoteModal(cid) {
+      const cls = DB.classes.find(c => c.id === cid);
+      if (!cls) return;
+      const students = clsStus(cid);
+      
+      openModal(`
+      <h3> Promote Students</h3>
+      <div class="ibox">Move all <b>${students.length}</b> students from <b>${escHtml(cls.name)}${cls.section ? ' ' + escHtml(cls.section) : ''}</b> to another class for the new academic year.</div>
+      <div class="fg">
+        <label class="fl">Promote to Class</label>
+        <select class="fi" id="promote-target">
+          <option value="graduate">Graduate / De-enroll (Remove from active classes)</option>
+          ${DB.classes.filter(c => c.id !== cid).map(c => `<option value="${c.id}">${escHtml(c.name)}${c.section ? ' ' + escHtml(c.section) : ''}</option>`).join('')}
+        </select>
+      </div>
+      <div class="m-btns">
+        <button class="btn btn-wa" onclick="executePromotion('${cid}')">Confirm Promotion</button>
+        <button class="btn btn-gh" onclick="closeModal()">Cancel</button>
+      </div>`);
+    }
+
+    function executePromotion(sourceCid) {
+      const targetCid = document.getElementById('promote-target').value;
+      if (!confirm('Are you sure you want to move all students? This cannot be easily undone.')) return;
+      
+      const studentsToMove = [...(DB.students[sourceCid] || [])];
+      
+      if (targetCid === 'graduate') {
+        if (!DB.alumni) DB.alumni = [];
+        studentsToMove.forEach(s => { s.classId = 'graduate'; DB.alumni.push(s); });
+        DB.students[sourceCid] = [];
+      } else {
+        if (!DB.students[targetCid]) DB.students[targetCid] = [];
+        studentsToMove.forEach(s => {
+          s.classId = targetCid;
+          DB.students[targetCid].push(s);
+        });
+        DB.students[sourceCid] = [];
+      }
+      
+      // Update the classId in DB.users
+      studentsToMove.forEach(s => {
+        const u = DB.users.find(x => x.studentId === s.id);
+        if (u) u.classId = targetCid;
+      });
+
+      saveDB();
+      closeModal();
+      showToast('Class Promoted Successfully!');
+      goPage('classes');
+    }
+
+    function broadcastClass(cid) {
+      const cls = DB.classes.find(c => c.id === cid);
+      if (!cls) return;
+      const sts = clsStus(cid);
+      const phones = sts.map(s => s.whatsapp || (s.familyId && DB.families[s.familyId] ? DB.families[s.familyId].phone : '')).filter(p => p).map(p => p.replace(/\D/g, ''));
+      const uniquePhones = [...new Set(phones)].filter(p => p.length >= 10);
+      
+      if (uniquePhones.length === 0) return showToast('No valid WhatsApp numbers found for students in this class', 'te');
+      
+      openModal(`
+      <h3> WhatsApp Broadcast</h3>
+      <div class="ibox">Prepare a message to send to <b>${uniquePhones.length}</b> parents in <b>${escHtml(cls.name)}${cls.section ? ' ' + escHtml(cls.section) : ''}</b>.</div>
+      <div class="fg">
+        <label class="fl">Message</label>
+        <textarea class="fi" id="bc-msg" rows="4" placeholder="Dear Parents, tomorrow is a school holiday..."></textarea>
+      </div>
+      <div class="ibox" style="font-size:0.75rem;">Due to WhatsApp Web restrictions, you cannot natively send to a bulk list via URL. You can open a WhatsApp group if you have one, or copy the comma-separated list of numbers below to paste into a bulk-sending tool.</div>
+      <div class="m-btns">
+        <button class="btn btn-wa" onclick="window.open('https://wa.me/?text=' + encodeURIComponent(document.getElementById('bc-msg').value), '_blank')">Open WhatsApp Web</button>
+        <button class="btn btn-gh" onclick="navigator.clipboard.writeText('${uniquePhones.join(',')}');showToast('Numbers copied to clipboard');">Copy Numbers</button>
+        <button class="btn btn-gh" onclick="closeModal()">Close</button>
+      </div>`);
+    }
+
+    /* ------------------------------- EXAMS ------------------------------- */
+    function pgExams() {
+      return `
+<div class="ph ph-row fu"><div><div class="ph-tag"> Exams</div><h1>Exam Schedule</h1></div><button class="btn btn-p" onclick="openExamModal()">+ Add Exam</button></div>
+  ${DB.exams.length === 0 ? `<div class="card"><div class="empty"><div class="empty-ic"></div><div class="empty-t">No exams scheduled</div><button class="btn btn-p btn-sm" style="margin-top:10px;" onclick="openExamModal()">Schedule Exam</button></div></div>` : `
+<div class="card fu d1" style="padding:0;overflow:hidden;"><div class="tw"><table>
+  <thead><tr><th>Date</th><th>Subject</th><th>Type</th><th>Time</th><th>Room</th><th>Classes</th><th></th></tr></thead>
+  <tbody>${DB.exams.sort((a, b) => new Date(a.date) - new Date(b.date)).map(e => `<tr><td><b>${fmtDate(e.date)}</b></td><td>${e.subject}</td><td><span class="badge bp2">${e.type}</span></td><td>${e.time || '-'}</td><td>${e.room || '-'}</td><td style="font-size:.72rem;">${e.classes || 'All'}</td><td><div style="display:flex;gap:3px;"><button class="btn btn-xs btn-gh" onclick="openExamModal('${e.id}')">Edit</button><button class="btn btn-xs" style="background:var(--rl);color:var(--r);" onclick="DB.exams=DB.exams.filter(x=>x.id!=='${e.id}');saveDB();goPage('exams')">?</button></div></td></tr>`).join('')}
+  </tbody></table></div></div>`}`;
+    }
+    function openExamModal(eid) {
+      const e = eid ? DB.exams.find(x => x.id === eid) : null;
+      openModal(`
+  <h3>${e ? ' Edit Exam' : ' Schedule Exam'}</h3>
+  <div class="fg2"><div class="fg"><label class="fl">Subject <span class="req">*</span></label><select class="fi" id="me-sub"><option value="">Select</option>${DB.subjects.map(s => `<option value="${s.name}" ${e?.subject === s.name ? 'selected' : ''}>${s.name}</option>`).join('')}</select></div><div class="fg"><label class="fl">Exam Type</label><select class="fi" id="me-type">${['Unit Test', 'Mid-Term', 'Final', 'Annual', 'Practical', 'Quiz'].map(t => `<option ${e?.type === t ? 'selected' : ''}>${t}</option>`).join('')}</select></div></div>
+  <div class="fg2"><div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="me-date" value="${e?.date || ''}"/></div><div class="fg"><label class="fl">Time</label><input class="fi" id="me-time" placeholder="9:00 AM" value="${e?.time || ''}"/></div></div>
+  <div class="fg2"><div class="fg"><label class="fl">Room / Hall</label><input class="fi" id="me-room" placeholder="Hall A" value="${e?.room || ''}"/></div><div class="fg"><label class="fl">For Classes</label><input class="fi" id="me-cls" placeholder="All / Class 9A" value="${e?.classes || ''}"/></div></div>
+  <div class="m-btns"><button class="btn btn-p" onclick="saveExam('${eid || ''}')"> ${e ? 'Update' : 'Schedule'}</button><button class="btn btn-gh" onclick="closeModal()">Cancel</button></div>`);
+    }
+    function saveExam(eid) { const sub = (document.getElementById('me-sub')?.value || '').trim(); if (!sub) { showToast('Subject required', 'te'); return; } const obj = { subject: sub, type: document.getElementById('me-type').value, date: document.getElementById('me-date').value, time: document.getElementById('me-time').value.trim(), room: document.getElementById('me-room').value.trim(), classes: document.getElementById('me-cls').value.trim() }; if (eid) { const e = DB.exams.find(x => x.id === eid); if (e) Object.assign(e, obj); } else DB.exams.push({ id: uid(), ...obj }); saveDB(); closeModal(); showToast('? Exam saved', 'ts'); goPage('exams'); }
+
+    /* ------------------------------- NOTICES ------------------------------- */
+    function pgNotices() {
+      return `
+<div class="ph ph-row fu"><div><div class="ph-tag"> Notices</div><h1>Notice Board</h1></div>${curRole === 'admin' || curRole === 'teacher' ? `<button class="btn btn-p" onclick="openAddNoticeModal()">+ Post Notice</button>` : ''}</div>
+  ${DB.notices.slice().reverse().map(n => `<div class="card fu" style="border-left:3px solid var(--p);padding:14px;margin-bottom:10px;"><div style="display:flex;justify-content:space-between;gap:9px;flex-wrap:wrap;"><div style="flex:1;"><div style="font-weight:700;font-size:.88rem;margin-bottom:4px;">${n.title}</div><div style="font-size:.79rem;color:var(--ink3);line-height:1.55;">${n.body || ''}</div><div style="display:flex;gap:7px;margin-top:7px;flex-wrap:wrap;"><span class="badge bp2">${n.target || 'All'}</span><span style="font-size:.66rem;color:var(--ink4);">${fmtDate(n.date)}</span></div></div>${curRole === 'admin' ? `<div style="display:flex;gap:4px;flex-shrink:0;"><button class="btn btn-xs btn-gh" onclick="openAddNoticeModal('${n.id}')">Edit</button><button class="btn btn-xs" style="background:var(--rl);color:var(--r);" onclick="DB.notices=DB.notices.filter(x=>x.id!=='${n.id}');saveDB();goPage('notices')">?</button></div>` : ''}</div></div>`).join('') || '<div class="card"><div class="empty"><div class="empty-ic"></div><div class="empty-t">No notices yet</div></div></div>'}`;
+    }
+    function openAddNoticeModal(eid) {
+      const n = eid ? DB.notices.find(x => x.id === eid) : null;
+      openModal(`
+  <h3>${n ? ' Edit Notice' : ' Post Notice'}</h3>
+  <div class="fg"><label class="fl">Title <span class="req">*</span></label><input class="fi" id="mn-title" value="${n?.title || ''}" placeholder="e.g. Annual Prize Distribution"/></div>
+  <div class="fg"><label class="fl">Message</label><textarea class="fi" id="mn-body" style="min-height:90px;">${n?.body || ''}</textarea></div>
+  <div class="fg2"><div class="fg"><label class="fl">Target Audience</label><select class="fi" id="mn-target"><option>All</option><option>Students</option><option>Teachers</option><option>Parents</option></select></div><div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="mn-date" value="${n?.date || today()}"/></div></div>
+  <div class="m-btns"><button class="btn btn-p" onclick="saveNotice('${eid || ''}')"> ${n ? 'Update' : 'Post'}</button><button class="btn btn-gh" onclick="closeModal()">Cancel</button></div>`);
+    }
+    function saveNotice(eid) { const title = (document.getElementById('mn-title')?.value || '').trim(); if (!title) { showToast('Title required', 'te'); return; } const obj = { title, body: document.getElementById('mn-body')?.value?.trim() || '', target: document.getElementById('mn-target')?.value || 'All', date: document.getElementById('mn-date')?.value || today() }; if (eid) { const n = DB.notices.find(x => x.id === eid); if (n) Object.assign(n, obj); } else DB.notices.push({ id: uid(), ...obj }); saveDB(); closeModal(); showToast('? Notice posted', 'ts'); goPage('notices'); buildNotifPanel(); }
+
+    /* ------------------------------- TIMETABLE ------------------------------- */
+    const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+    const PERIODS = ['Period 1', 'Period 2', 'Period 3', 'Break', 'Period 4', 'Period 5', 'Period 6'];
+    function pgTimetable() {
+      const cls = DB.classes.find(c => c.id === curCls);
+      if (!DB.timetable[curCls]) DB.timetable[curCls] = {};
+      const tt = DB.timetable[curCls]; DAYS.forEach(d => { if (!tt[d]) tt[d] = Array(PERIODS.length).fill(''); });
+      return `
+<div class="ph ph-row fu"><div><div class="ph-tag"> Timetable</div><h1>Weekly Schedule</h1><div class="ph-sub">${cls?.name || ''} - Click cells to edit</div></div><button class="btn btn-g btn-sm" onclick="saveTT()"> Save</button></div>
+  ${clsBar('switchTTCls')}
+<div class="card fu d2" style="padding:0;overflow:hidden;"><div class="tw"><table style="min-width:480px;">
+  <thead><tr><th style="min-width:80px;">Period</th>${DAYS.map(d => `<th style="min-width:100px;text-align:center;">${d}</th>`).join('')}</tr></thead>
+  <tbody>${PERIODS.map((p, pi) => `<tr><td style="font-weight:700;font-size:.72rem;background:var(--card2);color:var(--ink3);white-space:nowrap;">${p}</td>${p === 'Break' ? `<td colspan="${DAYS.length}" style="background:var(--card3);text-align:center;font-size:.72rem;font-weight:700;color:var(--ink4);">? Break</td>` : DAYS.map(d => { const v = tt[d]?.[pi] || ''; return `<td style="padding:4px;"><select class="fi" style="font-size:.7rem;padding:5px 8px;min-width:90px;" onchange="setTT('${d}',${pi},this.value)"><option value="">-</option>${DB.subjects.map(s => `<option value="${s.name}" ${v === s.name ? 'selected' : ''}>${s.icon} ${s.name}</option>`).join('')}</select></td>`; }).join('')}</tr>`).join('')}
+  </tbody></table></div></div>`;
+    }
+    function setTT(day, pi, val) { if (!DB.timetable[curCls]) DB.timetable[curCls] = {}; if (!DB.timetable[curCls][day]) DB.timetable[curCls][day] = Array(PERIODS.length).fill(''); DB.timetable[curCls][day][pi] = val; }
+    function saveTT() { saveDB(); showToast('? Timetable saved', 'ts'); }
+    function switchTTCls(cid) { curCls = cid; updatePill(); goPage('timetable'); }
+
+    /* ------------------------------- TEACHERS ------------------------------- */
+    function pgTeachers() {
+      const teachers = DB.users.filter(u => u.role === 'teacher' || u.role === 'scanner');
+      return `
+<div class="ph ph-row fu"><div><div class="ph-tag"> Staff</div><h1>Staff & Teachers</h1></div><button class="btn btn-p" onclick="openTeachModal()">+ Add Staff</button></div>
+  ${teachers.length === 0 ? `<div class="card"><div class="empty"><div class="empty-ic"></div><div class="empty-t">No teachers added</div><button class="btn btn-p btn-sm" style="margin-top:10px;" onclick="openTeachModal()">Add First Teacher</button></div></div>` : `
+<div class="card fu d1" style="padding:0;overflow:hidden;"><div class="tw"><table>
+  <thead><tr><th>Photo</th><th>Role & Name</th><th>Subject</th><th>Contact</th><th>Net Salary</th><th>Status</th><th>Actions</th></tr></thead>
+  <tbody>${teachers.map(t => `<tr><td><div class="ava" style="width:30px;height:30px;border-radius:7px;background:${gc(t.name)};font-size:.54rem;">${t.photo ? `<img src="${t.photo}"/>` : ini(t.name)}</div></td><td><div style="font-size:.66rem;color:var(--ink4);text-transform:uppercase;font-weight:700;">${t.role === 'scanner' ? 'Scanner' : 'Teacher'}</div><div style="font-weight:700;font-size:.8rem;">${t.name}</div><div style="font-size:.66rem;color:var(--ink4);">${(t.classIds || []).map(id => DB.classes.find(x => x.id === id)?.name).filter(Boolean).join(', ') || (t.role==='scanner'?'Gate Access':'No class')}</div></td><td>${t.subject || '-'}</td><td style="font-size:.74rem;">${t.email}<div style="color:var(--ink4);">${t.phone || 'No phone'}</div></td><td><b style="color:var(--p);">${fmtMoney(teacherNetSalary(t))}</b><div style="font-size:.64rem;color:var(--ink4);">Base ${fmtMoney(t.salary)}</div></td><td><span class="badge ${t.payrollStatus === 'paid' ? 'bg2' : 'bo2'}">${t.payrollStatus === 'paid' ? 'Paid ' + (t.payrollMonth || monthKey()) : 'Pending'}</span></td><td><div style="display:flex;gap:3px;flex-wrap:wrap;"><button class="btn btn-xs btn-gh" onclick="openTeachModal('${t.id}')">Edit</button><button class="btn btn-xs btn-p" onclick="goPage('payroll');setTimeout(()=>payTeacherSalary('${t.id}'),120)">Pay</button><button class="btn btn-xs" style="background:var(--rl);color:var(--r);" onclick="DB.users=DB.users.filter(x=>x.id!=='${t.id}');saveDB();showToast('Deleted');goPage('teachers')">Delete</button></div></td></tr>`).join('')}
+  </tbody></table></div></div>`}`;
+    }
+    function openTeachModal(eid) {
+      const t = eid ? DB.users.find(x => x.id === eid) : null;
+      openModal(`
+  <h3>${t ? ' Edit Staff' : '? Add Staff'}</h3>
+  <div class="fg2"><div class="fg"><label class="fl">Full Name <span class="req">*</span></label><input class="fi" id="mt-name" value="${t?.name || ''}" placeholder="Ms. Fatima Khan"/></div><div class="fg"><label class="fl">Login Email <span class="req">*</span></label><input class="fi" type="email" id="mt-email" value="${t?.email || ''}" placeholder="teacher@school.edu"/></div></div>
+  <div class="fg pw-field"><label class="fl">Login Password</label><input class="fi" type="password" id="mt-pass" placeholder="Enter password (for new logins or resets)" autocomplete="new-password"/><button type="button" class="pw-toggle" onclick="togglePassword(\'mt-pass\',this)">Show</button></div>
+  ${t?.email ? `<div style="margin-top:-8px;margin-bottom:10px;text-align:right;"><button type="button" class="btn btn-gh btn-xs" style="color:var(--r);border-color:var(--rl);" onclick="adminResetPassword(document.getElementById('mt-email').value, document.getElementById('mt-pass').value, this)">Force Reset Password</button></div>` : ''}
+  <div class="fg2"><div class="fg"><label class="fl">Role <span class="req">*</span></label><select class="fi" id="mt-role"><option value="teacher" ${t?.role !== 'scanner' ? 'selected' : ''}>Teacher</option><option value="scanner" ${t?.role === 'scanner' ? 'selected' : ''}>Gate Scanner</option></select></div><div class="fg"><label class="fl">Main Subject (Teachers)</label><select class="fi" id="mt-sub"><option value="">Select</option>${DB.subjects.map(s => `<option value="${s.name}" ${t?.subject === s.name ? 'selected' : ''}>${s.name}</option>`).join('')}</select></div></div>
+  <div class="fg2"><div class="fg"><label class="fl">Phone</label><input class="fi" id="mt-phone" value="${t?.phone || ''}" placeholder="03XXXXXXXXX"/></div><div class="fg"><label class="fl">Joining Date</label><input class="fi" type="date" id="mt-join" value="${t?.joinDate || ''}"/></div></div>
+  <div class="fg2"><div class="fg"><label class="fl">Base Salary (Per Month)</label><input class="fi" type="number" id="mt-salary" value="${num(t?.salary || 40000)}" placeholder="45000"/></div><div class="fg"><label class="fl">Notes</label><input class="fi" id="mt-notes" value="${t?.notes || ''}" placeholder="Optional notes"/></div></div>
+  <div class="fg"><label class="fl">Assigned Classes</label><div style="display:flex;flex-wrap:wrap;gap:7px;padding:10px;background:var(--card2);border:1.5px solid var(--border);border-radius:8px;">${DB.classes.map(c => `<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:.78px;font-weight:600;font-size:.76rem;"><input type="checkbox" value="${c.id}" ${(t?.classIds || []).includes(c.id) ? 'checked' : ''}/> ${c.name}${c.section ? ' ' + c.section : ''}</label>`).join('')}</div></div>
+  <div class="m-btns"><button class="btn btn-p" onclick="saveTeach('${eid || ''}')"> ${t ? 'Update' : 'Add'}</button><button class="btn btn-gh" onclick="closeModal()">Cancel</button></div>`);
+    }
+    async function saveTeach(eid) { const name = (document.getElementById('mt-name')?.value || '').trim(); const email = (document.getElementById('mt-email')?.value || '').trim().toLowerCase(); if (!name || !email) { showToast('Name & email required', 'te'); return; } const role = document.getElementById('mt-role')?.value || 'teacher'; const classIds = [...document.querySelectorAll('#modal-body input[type=checkbox]:checked')].map(x => x.value); const loginPass = (document.getElementById('mt-pass')?.value || '').trim();
+    if (!eid && loginPass && _sb) {
+      const btn = document.querySelector('.m-btns .btn-p'); if (btn) btn.textContent = 'Creating Login...';
+      try {
+        const { data, error } = await _sb.functions.invoke('create-auth-user', {
+          body: { email, password: loginPass, role: role }
+        });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        showToast(`Staff added & Auth Login created!`, 'ts');
+      } catch (err) {
+        showToast(err.message, 'te');
+        const btn2 = document.querySelector('.m-btns .btn-p'); if (btn2) btn2.textContent = 'Save';
+        return;
+      }
+    }
+    const obj = { name, email, subject: document.getElementById('mt-sub')?.value || '', classIds, role: role, phone: document.getElementById('mt-phone')?.value?.trim() || '', joinDate: document.getElementById('mt-join')?.value || '', salary: num(document.getElementById('mt-salary')?.value || 0), notes: document.getElementById('mt-notes')?.value?.trim() || '' }; if (eid) { const t = DB.users.find(x => x.id === eid); if (t) Object.assign(t, obj); } else DB.users.push({ id: uid(), ...obj, photo: '', lastPaid: '', payrollHistory: [] }); saveDB(); pushCloudDB(); closeModal(); showToast('Staff saved', 'ts'); goPage('teachers'); }
+
+    function pgPayroll() {
+      window.payrollMonth = window.payrollMonth || monthKey();
+      const teachers = DB.users.filter(u => u.role === 'teacher');
+      const total = teachers.reduce((sum, t) => sum + calcPayrollData(t, window.payrollMonth).expectedNet, 0);
+      const paidTeachers = teachers.filter(t => (t.payrollHistory || []).some(h => h.month === window.payrollMonth));
+      const paid = paidTeachers.length;
+      return `
+<div class="ph ph-row fu"><div><div class="ph-tag"> Payroll</div><h1>Teacher Salary System</h1><div class="ph-sub">Manage salary, bonus, deductions, and payment status</div></div><div style="display:flex;gap:10px;align-items:center;"><input type="month" value="${window.payrollMonth}" onchange="window.payrollMonth=this.value; goPage('payroll')" style="padding:8px 12px; border-radius:8px; border:1px solid var(--border); font-size:0.9rem; font-weight:700; background:var(--card); color:var(--ink); cursor:pointer;" /><button class="btn btn-p" onclick="openTeachModal()">+ Add Teacher</button></div></div>
+<div class="sg fu d1">
+  <div class="sc sp"><div class="sc-ic"></div><div class="sc-val" style="color:var(--p);">${fmtMoney(total)}</div><div class="sc-lbl">Payroll for ${window.payrollMonth}</div></div>
+  <div class="sc sg2"><div class="sc-ic"></div><div class="sc-val" style="color:var(--g);">${paid}</div><div class="sc-lbl">Paid Teachers</div></div>
+  <div class="sc so"><div class="sc-ic"></div><div class="sc-val" style="color:var(--o);">${teachers.length - paid}</div><div class="sc-lbl">Pending Teachers</div></div>
+  <div class="sc sv"><div class="sc-ic"></div><div class="sc-val" style="color:var(--v);">${teachers.length}</div><div class="sc-lbl">Total Staff</div></div>
+</div>
+  ${teachers.length === 0 ? `<div class="card"><div class="empty"><div class="empty-ic"></div><div class="empty-t">No teacher payroll records yet</div><button class="btn btn-p btn-sm" style="margin-top:10px;" onclick="openTeachModal()">Add Teacher</button></div></div>` :
+          `<div class="g2">${teachers.map(t => { 
+            const pd = calcPayrollData(t, window.payrollMonth); 
+            const hasPaid = (t.payrollHistory || []).some(h => h.month === window.payrollMonth);
+            const paidRec = hasPaid ? (t.payrollHistory || []).find(h => h.month === window.payrollMonth) : null;
+            return `<div class="card fu"><div class="ch"><div class="ct"> ${escHtml(t.name)}</div><span class="badge ${hasPaid ? 'bg2' : 'bo2'}">${hasPaid ? 'Paid' : 'Pending'}</span></div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px;"><div style="background:var(--card2);padding:10px;border-radius:12px;"><div style="font-size:.66rem;color:var(--ink4);">Base Salary</div><div style="font-weight:900;color:var(--ink);">${fmtMoney(pd.base)}</div></div><div style="background:var(--card2);padding:10px;border-radius:12px;"><div style="font-size:.66rem;color:var(--ink4);">${hasPaid ? 'Paid Net' : 'Expected Net'}</div><div style="font-weight:900;color:var(--p);">${fmtMoney(hasPaid ? paidRec.amount : pd.expectedNet)}</div></div><div style="background:var(--card2);padding:10px;border-radius:12px;"><div style="font-size:.66rem;color:var(--ink4);">Att. Deduction (-${pd.deductionDays}d)</div><div style="font-weight:900;color:var(--o);">${pd.attDeduction > 0 ? '-' + fmtMoney(pd.attDeduction) : '0'}</div></div><div style="background:var(--card2);padding:10px;border-radius:12px;"><div style="font-size:.66rem;color:var(--ink4);">Other Deductions</div><div style="font-weight:900;color:var(--r);">${hasPaid && paidRec.otherDeductions ? '-' + fmtMoney(paidRec.otherDeductions) : '0'}</div></div></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;"><span class="badge bp2">Present ${pd.stats.present}</span><span class="badge by2">Late ${pd.stats.late}</span><span class="badge br2">Absent ${pd.stats.absent}</span>${t.lastPaid ? `<span class="badge bg2">Last Paid ${fmtDate(t.lastPaid)}</span>` : ''}</div><div style="font-size:.74rem;color:var(--ink3);line-height:1.6;">${t.notes || 'No payroll notes added yet.'}</div>${(t.payrollHistory || []).length ? `<div style="margin-top:9px;font-size:.7rem;color:var(--ink4);"><b>Recent payments:</b> ${(t.payrollHistory || []).slice(-3).reverse().map(h => `<span>${h.month}: ${fmtMoney(h.amount)} <a href="#" onclick="printPaySlip('${t.id}', '${h.id}'); return false;" style="color:var(--p);text-decoration:none;">(Print)</a></span>`).join(' &bull; ')}</div>` : ''}<div class="m-btns" style="margin-top:12px;">${hasPaid ? `<button class="btn btn-gh btn-sm" onclick="unmarkTeacherSalary('${t.id}', '${window.payrollMonth}')">Unmark Paid</button><button class="btn btn-p btn-sm" onclick="printPaySlip('${t.id}', '${paidRec.id}')">Print Pay Slip</button>` : `<button class="btn btn-p btn-sm" onclick="openTeacherSalaryModal('${t.id}', '${window.payrollMonth}')">Mark Salary Paid</button>`}</div></div>`; }).join('')}</div>`}`;
+    }
+    function unmarkTeacherSalary(id, month) {
+      const t = DB.users.find(u => u.id === id && u.role === 'teacher'); if (!t) return;
+      if (!confirm(`Unmark salary as paid for ${t.name} for ${month}?`)) return;
+      t.payrollHistory = (t.payrollHistory || []).filter(h => h.month !== month);
+      saveDB();
+      showToast(`Salary unmarked for ${t.name}`, 'ts');
+      goPage('payroll');
+    }
+
+    function openTeacherSalaryModal(id, month) {
+      const t = DB.users.find(u => u.id === id && u.role === 'teacher'); if (!t) return;
+      const pd = calcPayrollData(t, month);
+      openModal(`
+        <h3>Mark Salary Paid: ${escHtml(t.name)}</h3>
+        <div style="background:var(--card2);padding:14px;border-radius:12px;margin-bottom:15px;font-size:0.85rem;display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;justify-content:space-between;"><span>Base Salary:</span> <b>${fmtMoney(pd.base)}</b></div>
+          <div style="display:flex;justify-content:space-between;color:var(--o);"><span>Att. Deduction (-${pd.deductionDays}d):</span> <b>-${fmtMoney(pd.attDeduction)}</b></div>
+          <hr style="border:0;border-top:1px dashed var(--border);margin:4px 0;" />
+          <div style="display:flex;justify-content:space-between;color:var(--p);"><span>Expected Net Pay:</span> <b>${fmtMoney(pd.expectedNet)}</b></div>
+        </div>
+        <div class="fg">
+          <label class="fl">Other/Manual Deductions (e.g. Loan Installment, Advance)</label>
+          <input class="fi" type="number" id="ms-other-deduct" value="0" oninput="updateSalaryModalNet(${pd.expectedNet})" />
+        </div>
+        <div style="margin-bottom:15px;text-align:right;font-size:1.1rem;font-weight:800;color:var(--p);">
+          Final Net Pay: <span id="ms-final-net">${fmtMoney(pd.expectedNet)}</span>
+        </div>
+        <div class="m-btns">
+          <button class="btn btn-p" onclick="confirmTeacherSalary('${id}', '${month}', ${pd.base}, ${pd.attDeduction}, ${pd.expectedNet})">Mark Paid & Print Pay Slip</button>
+          <button class="btn btn-gh" onclick="closeModal()">Cancel</button>
+        </div>
+      `);
+    }
+
+    function updateSalaryModalNet(expectedNet) {
+      const other = num(document.getElementById('ms-other-deduct')?.value || 0);
+      const final = Math.max(0, expectedNet - other);
+      document.getElementById('ms-final-net').textContent = fmtMoney(final);
+    }
+
+    function confirmTeacherSalary(id, month, base, attDeduction, expectedNet) {
+      const t = DB.users.find(u => u.id === id && u.role === 'teacher'); if (!t) return;
+      const otherDeductions = num(document.getElementById('ms-other-deduct')?.value || 0);
+      const amount = Math.max(0, expectedNet - otherDeductions);
+      
+      t.payrollHistory = t.payrollHistory || [];
+      const historyId = uid();
+      t.payrollHistory.push({ 
+        id: historyId, 
+        month: month, 
+        paidOn: today(), 
+        amount: amount, 
+        base: base, 
+        attDeduction: attDeduction, 
+        otherDeductions: otherDeductions 
+      });
+      t.lastPaid = today();
+      saveDB();
+      closeModal();
+      showToast(`Salary marked paid for ${t.name}`, 'ts');
+      goPage('payroll');
+      printPaySlip(t.id, historyId);
+    }
+
+    function printPaySlip(tId, historyId) {
+      const t = DB.users.find(u => u.id === tId); if (!t) return;
+      const h = (t.payrollHistory || []).find(x => x.id === historyId); if (!h) return;
+      const school = DB.school || {};
+      
+      const pw = window.open('', '', 'width=600,height=800');
+      const html = `<!DOCTYPE html><html><head><title>Pay Slip - ${escHtml(t.name)}</title>
+      <style>
+        @page { margin: 0; size: A5; }
+        body { font-family: sans-serif; padding: 30px; font-size: 14px; line-height: 1.5; color:#111; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        h1 { margin:0 0 5px 0; font-size: 20px; text-align:center; }
+        h2 { margin:0 0 20px 0; font-size: 14px; text-align:center; color:#555; border-bottom:1px solid #ddd; padding-bottom:15px; }
+        .row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .row.bold { font-weight: bold; }
+        .row.total { border-top: 2px solid #111; padding-top: 10px; margin-top: 10px; font-size: 16px; }
+      </style></head><body>
+        <h1>${escHtml(school.name || 'School')}</h1>
+        <h2>Pay Slip: ${h.month}</h2>
+        <div style="margin-bottom:20px;">
+          <div class="row"><span>Staff Name:</span> <b>${escHtml(t.name)}</b></div>
+          <div class="row"><span>Paid On:</span> <b>${fmtDate(h.paidOn)}</b></div>
+        </div>
+        <div style="border:1px solid #ddd; padding: 15px;">
+          <div class="row"><span>Base Salary (Per Month):</span> <span>${fmtMoney(h.base)}</span></div>
+          <div class="row" style="color:#d32f2f;"><span>Attendance Deduction:</span> <span>-\${fmtMoney(h.attDeduction)}</span></div>
+          <div class="row" style="color:#d32f2f;"><span>Other Deductions:</span> <span>-\${fmtMoney(h.otherDeductions)}</span></div>
+          <div class="row total"><span>Net Paid Amount:</span> <span><b>${fmtMoney(h.amount)}</b></span></div>
+        </div>
+        <div style="margin-top:50px; text-align:right;">
+          <div style="border-top:1px solid #111; width:200px; display:inline-block; text-align:center; padding-top:5px;">Authorized Signature</div>
+        </div>
+        <scr`+`ipt>window.onload=function(){setTimeout(function(){window.print();},500);};</scr`+`ipt>
+      </body></html>`;
+      pw.document.write(html);
+      pw.document.close();
+    }
+
+    /* ------------------------------- SUBJECTS ------------------------------- */
+    function pgSubjects() {
+      return `
+<div class="ph ph-row fu"><div><div class="ph-tag"> Subjects</div><h1>Subjects</h1></div><button class="btn btn-p" onclick="openSubjModal()">+ Add Subject</button></div>
+<div class="g3">${DB.subjects.map(s => `<div class="card fu" style="padding:12px;display:flex;align-items:center;gap:10px;"><div style="width:36px;height:36px;border-radius:8px;background:${s.color}18;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;border:1px solid ${s.color}30;flex-shrink:0;overflow:hidden;letter-spacing:-0.2px;text-align:center;">${cleanIcon(s.icon, s.code || 'SUB')}</div><div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:.83rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.name}</div><div style="font-size:.66rem;color:var(--ink4);">${s.code}</div></div><div style="display:flex;flex-direction:column;gap:3px;"><button class="btn btn-xs btn-gh" onclick="openSubjModal('${s.id}')">Edit</button><button class="btn btn-xs" style="background:var(--rl);color:var(--r);" onclick="DB.subjects=DB.subjects.filter(x=>x.id!=='${s.id}');saveDB();showToast('Deleted');goPage('subjects')">Delete</button></div></div>`).join('')}<div class="card fu" style="display:flex;align-items:center;justify-content:center;border:2px dashed var(--border2);background:transparent;cursor:pointer;min-height:72px;" onclick="openSubjModal()"><div style="text-align:center;color:var(--ink4);"><div style="font-size:1.1rem;">+</div><div style="font-size:.7rem;font-weight:600;">Add Subject</div></div></div></div>`;
+    }
+    function openSubjModal(eid) { const s = eid ? DB.subjects.find(x => x.id === eid) : null; openModal(`<h3>${s ? 'Edit Subject' : 'Add Subject'}</h3><div class="fg2"><div class="fg"><label class="fl">Name <span class="req">*</span></label><input class="fi" id="ms-name" value="${s?.name || ''}" placeholder="Mathematics"/></div><div class="fg"><label class="fl">Code</label><input class="fi" id="ms-code" value="${s?.code || ''}" placeholder="MATH"/></div></div><div class="fg2"><div class="fg"><label class="fl">Icon Text</label><input class="fi" id="ms-icon" value="${cleanIcon(s?.icon, '')}" placeholder="MATH"/></div><div class="fg"><label class="fl">Color</label><input class="fi" type="color" id="ms-color" value="${s?.color || '#2563eb'}" style="height:44px;cursor:pointer;padding:6px;"/></div></div><div class="m-btns"><button class="btn btn-p" onclick="saveSubj('${eid || ''}')"> ${s ? 'Update' : 'Add'}</button><button class="btn btn-gh" onclick="closeModal()">Cancel</button></div>`); }
+    function saveSubj(eid) { const name = (document.getElementById('ms-name')?.value || '').trim(); if (!name) { showToast('Name required', 'te'); return; } const code = (document.getElementById('ms-code')?.value || '').toUpperCase(); const obj = { name, code, icon: cleanIcon(document.getElementById('ms-icon')?.value || '', code || 'SUB'), color: document.getElementById('ms-color')?.value || '#2563eb' }; if (eid) { const s = DB.subjects.find(x => x.id === eid); if (s) Object.assign(s, obj); } else DB.subjects.push({ id: uid(), ...obj }); saveDB(); closeModal(); showToast('Saved', 'ts'); goPage('subjects'); }
+
+    /* ------------------------------- REPORT CARDS ------------------------------- */
+    function pgReportCards() {
+      const sts = clsStus(curCls);
+      return `
+<div class="ph ph-row fu"><div><div class="ph-tag"> Report Cards</div><h1>Print Report Cards</h1><div class="ph-sub">Select a student to generate & print</div></div>
+  <div style="display:flex;gap:10px;align-items:center;">
+    <select class="fi" style="width:140px;padding:5px;height:auto;font-weight:600;" onchange="curTerm=this.value;goPage('reportcards')">
+      ${DB.settings.terms.map(t => `<option value="${t.id}" ${curTerm===t.id?'selected':''}>${t.name}</option>`).join('')}
+    </select>
+    <button class="btn btn-gh btn-sm no-print" onclick="window.print()"> Print</button>
+  </div></div>
+  ${clsBar('switchRCCls')}
+  ${sts.length === 0 ? `<div class="card"><div class="empty"><div class="empty-ic"></div><div class="empty-t">No students in this class</div></div></div>` : `
+<div class="card fu d1"><div class="ch"><div class="ct">Select Student</div></div><div style="display:flex;flex-wrap:wrap;gap:7px;">${sts.map(s => `<button class="btn btn-gh btn-sm" onclick="openReportCard('${s.id}','${curCls}')" style="display:flex;align-items:center;gap:7px;"><div class="ava" style="width:22px;height:22px;border-radius:5px;background:${gc(s.name)};font-size:.46rem;flex-shrink:0;">${s.photo ? `<img src="${s.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:5px;"/>` : ini(s.name)}</div>${s.name}</button>`).join('')}</div></div>`}`;
+    }
+    function switchRCCls(cid) { curCls = cid; updatePill(); goPage('reportcards'); }
+    function openReportCard(sid, cid) {
+      const s = clsStus(cid).find(x => x.id === sid); if (!s) return;
+      const cls = DB.classes.find(c => c.id === cid);
+      const grades = DB.grades[cid + '_' + curTerm]?.[sid] || {};
+      const ap = attPct(cid, sid);
+      const rows = DB.subjects.map(sub => { const v = grades[sub.id] || 0; return { sub, v }; });
+      const filled = rows.filter(r => r.v > 0);
+      const total = filled.reduce((a, r) => a + r.v, 0);
+      const av = filled.length ? Math.round(total / filled.length) : 0;
+      openModal(`
+  <div class="rc">
+    <div class="rc-head">
+      <div class="rc-hl">${DB.school.logo ? `<img src="${DB.school.logo}"/>` : ''}</div>
+      <div><div class="rc-hn">${DB.school.name}</div><div class="rc-hs">${DB.school.tagline || ''}</div></div>
+    </div>
+    <div class="rc-body">
+      <div style="text-align:center;background:var(--card2);border-radius:9px;padding:9px;margin-bottom:14px;"><div style="font-weight:700;font-size:.86rem;color:var(--ink2);letter-spacing:.4px;text-transform:uppercase;">Progress Report Card</div><div style="font-size:.72rem;color:var(--ink4);">Academic Year ${DB.settings?.schoolYear || ''}</div></div>
+      <div style="display:flex;gap:12px;margin-bottom:14px;">
+        <div class="ava" style="width:56px;height:56px;border-radius:11px;background:${gc(s.name)};font-size:.98rem;flex-shrink:0;">${s.photo ? `<img src="${s.photo}"/>` : ini(s.name)}</div>
+        <div><div style="font-weight:700;font-size:.95rem;">${s.name}</div><div style="font-size:.72rem;color:var(--ink3);margin-top:2px;">Class: <b>${cls?.name || ''}${cls?.section ? ' ' + cls.section : ''}</b> - Roll: <b>${s.roll || '-'}</b></div><div style="font-size:.7rem;color:var(--ink3);">Father: ${s.father || '-'} - Attendance: <b style="color:${ap >= 90 ? 'var(--g)' : ap >= 75 ? 'var(--o)' : 'var(--r)'};">${ap}%</b></div></div>
+      </div>
+      <table style="margin-bottom:11px;">
+        <thead><tr><th>Subject</th><th style="text-align:center;">Marks</th><th style="text-align:center;">%</th><th style="text-align:center;">Grade</th></tr></thead>
+        <tbody>${rows.map(({ sub, v }) => `<tr><td>${sub.icon} <b>${sub.name}</b></td><td style="text-align:center;font-weight:700;">${v || '-'}</td><td style="text-align:center;"><div class="pb" style="width:56px;display:inline-block;vertical-align:middle;margin-right:5px;"><div class="pf" style="width:${v}%;background:${sub.color};"></div></div>${v}%</td><td style="text-align:center;"><span class="badge ${gCls(v)}">${lGrade(v)}</span></td></tr>`).join('')}
+        <tr style="background:var(--card2);"><td><b>Overall</b></td><td style="text-align:center;font-weight:800;">${total}</td><td style="text-align:center;font-weight:800;color:${sCol(av)};">${av}%</td><td style="text-align:center;"><span class="badge ${gCls(av)}" style="font-size:.74rem;">${lGrade(av)}</span></td></tr></tbody>
+      </table>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+        <div style="background:${av >= 40 ? 'var(--gl)' : 'var(--rl)'};border-radius:8px;padding:9px;text-align:center;"><div style="font-size:.64rem;color:var(--ink4);">Result</div><div style="font-weight:800;font-size:1.05rem;color:${av >= 40 ? 'var(--g)' : 'var(--r)'};">${av >= 40 ? 'PASS ?' : 'FAIL ?'}</div></div>
+        <div style="background:var(--card2);border-radius:8px;padding:9px;text-align:center;"><div style="font-size:.64rem;color:var(--ink4);">Overall Grade</div><div style="font-weight:800;font-size:1.05rem;color:${sCol(av)};">${lGrade(av)}</div></div>
+      </div>
+      <div style="font-size:.66rem;color:var(--ink5);text-align:center;border-top:1px solid var(--border);padding-top:8px;">${DB.school.name} - ${DB.school.city || ''} - Printed: ${fmtDate(today())}</div>
+    </div>
+  </div>
+  <div class="m-btns no-print" style="margin-top:11px;"><button class="btn btn-p" onclick="window.print()"> Print</button><button class="btn btn-gh" onclick="closeModal()">Close</button></div>`);
+    }
+
+    /* ------------------------------- FAMILIES ------------------------------- */
+    function pgFamilies() {
+      const fams = Object.entries(DB.families);
+      return `
+<div class="ph ph-row fu"><div><div class="ph-tag"> Families</div><h1>Family Management</h1><div class="ph-sub">Link siblings under one parent login</div></div><button class="btn btn-p" onclick="openFamModal()">+ Add Family</button></div>
+  ${fams.length === 0 ? `<div class="card"><div class="empty"><div class="empty-ic"></div><div class="empty-t">No families added yet</div><div style="font-size:.78rem;color:var(--ink3);margin-top:4px;">Families allow parents to view all their children's data with a single login</div></div></div>` : ''}
+  ${fams.map(([fid, f]) => {
+        const sibs = (f.studentIds || []).map(id => allStus().find(s => s.id === id)).filter(Boolean);
+        return `<div class="card fu" style="padding:14px;margin-bottom:10px;">
+    <div style="display:flex;align-items:center;gap:11px;margin-bottom:11px;flex-wrap:wrap;">
+      <div style="font-size:1.4rem;"></div>
+      <div style="flex:1;"><div style="font-weight:700;font-size:.88rem;">${f.parentName}</div><div style="font-size:.72rem;color:var(--ink3);">${f.phone || ''} - ${f.whatsapp ? ` ${f.whatsapp}` : 'No WhatsApp'}</div></div>
+      <div style="display:flex;gap:5px;"><button class="btn btn-xs btn-gh" onclick="openFamModal('${fid}')">Edit</button><button class="btn btn-xs" style="background:var(--rl);color:var(--r);" onclick="delFam('${fid}')">?</button></div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:7px;">
+        ${sibs.map(s => { const cls = DB.classes.find(c => c.id === s.classId); return `<div style="background:var(--vl);border:1px solid rgba(124,58,237,.15);border-radius:8px;padding:6px 10px;display:flex;align-items:center;gap:7px;"><div class="ava" style="width:24px;height:24px;border-radius:5px;background:${gc(s.name)};font-size:.5rem;">${s.photo ? `<img src="${s.photo}"/>` : ini(s.name)}</div><div><div style="font-size:.76rem;font-weight:700;color:var(--v);">${s.name}</div><div style="font-size:.62rem;color:var(--ink4);">${cls?.name || '?'} - Roll ${s.roll || '?'}</div></div></div>`; }).join('')}
+        ${sibs.length === 0 ? `<div style="font-size:.76rem;color:var(--ink4);">No children linked yet</div>` : ''}
+    </div>
+      ${f.whatsapp ? `<button class="btn btn-wa btn-xs" style="margin-top:9px;" onclick="waMsg('${f.whatsapp}','Dear ${f.parentName}, this is a message from ${DB.school.name}.')"> WhatsApp Parent</button>` : ''}
+  </div>`;
+      }).join('')}`;
+    }
+    function openFamModal(eid) {
+      const f = eid ? DB.families[eid] : null;
+      openModal(`
+  <h3>${f ? ' Edit Family' : '? Add Family'}</h3>
+  <div class="fg2"><div class="fg"><label class="fl">Parent Name <span class="req">*</span></label><input class="fi" id="mf-name" value="${f?.parentName || ''}" placeholder="Mr. & Mrs. Khan"/></div><div class="fg"><label class="fl">Phone</label><input class="fi" id="mf-phone" value="${f?.phone || ''}" placeholder="03XX-XXXXXXX"/></div></div>
+  <div class="fg2"><div class="fg"><label class="fl">WhatsApp (with country code)</label><input class="fi" id="mf-wa" value="${f?.whatsapp || ''}" placeholder="923001234567"/></div><div class="fg"><label class="fl">Parent Login Email</label><input class="fi" type="email" id="mf-email" value="${f?.email || ''}" placeholder="parent@email.com"/></div></div>
+  <div class="fg pw-field"><label class="fl">Login Password</label><input class="fi" type="password" id="mf-pass" placeholder="Enter password (for new logins or resets)" autocomplete="new-password"/><button type="button" class="pw-toggle" onclick="togglePassword(\'mf-pass\',this)">Show</button></div>
+  ${f?.email ? `<div style="margin-top:-8px;margin-bottom:10px;text-align:right;"><button type="button" class="btn btn-gh btn-xs" style="color:var(--r);border-color:var(--rl);" onclick="adminResetPassword(document.getElementById('mf-email').value, document.getElementById('mf-pass').value, this)">Force Reset Password</button></div>` : ''}
+  <div class="fg"><label class="fl">Link Children</label><div style="display:flex;flex-wrap:wrap;gap:7px;padding:10px;background:var(--card2);border:1.5px solid var(--border);border-radius:8px;max-height:160px;overflow-y:auto;">${allStus().map(s => { const cls = DB.classes.find(c => c.id === s.classId); return `<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:.75rem;font-weight:600;"><input type="checkbox" value="${s.id}" ${(f?.studentIds || []).includes(s.id) ? 'checked' : ''}/> ${s.name} <span style="color:var(--ink4);">(${cls?.name || '?'})</span></label>`; }).join('')}${allStus().length === 0 ? '<span style="color:var(--ink4);font-size:.76rem;">Add students first</span>' : ''}</div></div>
+  <div class="m-btns"><button class="btn btn-p" onclick="saveFam('${eid || ''}')"> ${f ? 'Update' : 'Create'}</button><button class="btn btn-gh" onclick="closeModal()">Cancel</button></div>`);
+    }
+    async function saveFam(eid) {
+      const name = (document.getElementById('mf-name')?.value || '').trim(); if (!name) { showToast('Parent name required', 'te'); return; }
+      const studentIds = [...document.querySelectorAll('#modal-body input[type=checkbox]:checked')].map(x => x.value);
+      const email = (document.getElementById('mf-email')?.value || '').trim().toLowerCase();
+      const fid = eid || uid();
+      const loginPass = (document.getElementById('mf-pass')?.value || '').trim();
+      if (!eid && email && loginPass && _sb) {
+        const btn = document.querySelector('.m-btns .btn-p'); if (btn) btn.textContent = 'Creating Login...';
+        try {
+          const { data, error } = await _sb.functions.invoke('create-auth-user', {
+            body: { email, password: loginPass, role: 'parent' }
+          });
+          if (error) throw error;
+          if (data?.error) throw new Error(data.error);
+          showToast(`Family added & Auth Login created!`, 'ts');
+        } catch (err) {
+          showToast(err.message, 'te');
+          const btn2 = document.querySelector('.m-btns .btn-p'); if (btn2) btn2.textContent = 'Save';
+          return;
+        }
+      }
+      const obj = { id: fid, parentName: name, phone: document.getElementById('mf-phone')?.value || '', whatsapp: document.getElementById('mf-wa')?.value || '', email, studentIds };
+      DB.families[fid] = eid ? { ...DB.families[fid], ...obj } : obj;
+      if (email) { let pu = DB.users.find(x => x.role === 'parent' && x.familyId === fid); if (pu) { pu.email = email; pu.name = name; } else DB.users.push({ id: uid(), name, email, role: 'parent', photo: '', familyId: fid }); }
+      studentIds.forEach(sid => { const s = allStus().find(x => x.id === sid); if (s) s.familyId = fid; });
+      saveDB(); closeModal(); showToast('? Family saved', 'ts'); goPage('families');
+    }
+    function delFam(id) { if (!confirm('Delete this family?')) return; allStus().forEach(s => { if (s.familyId === id) s.familyId = null; }); delete DB.families[id]; DB.users = DB.users.filter(u => !(u.role === 'parent' && u.familyId === id)); saveDB(); showToast('Deleted'); goPage('families'); }
+
+    /* ------------------------------- SETTINGS ------------------------------- */
+    function pgSettings() {
+      const s = DB.school;
+      return `
+<div class="ph fu"><div class="ph-tag">? Settings</div><h1>School Settings</h1><div class="ph-sub">Customize everything from here - no coding required</div></div>
+<div class="card fu d1">
+  <div class="ch"><div class="ct"> School Branding</div></div>
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:15px;flex-wrap:wrap;">
+    <div class="se-logo" onclick="document.getElementById('logo-up2').click()" title="Click to change logo">
+        ${s.logo ? `<img src="${s.logo}" style="width:100%;height:100%;object-fit:contain;"/>` : ''}
+    </div>
+    <input type="file" id="logo-up2" accept="image/*" style="display:none;" onchange="uploadLogo(this)"/>
+    <div><div style="font-weight:700;font-size:.84rem;margin-bottom:2px;">School Logo</div><div style="font-size:.72rem;color:var(--ink4);">Click to upload - PNG or JPG</div>${s.logo ? `<button class="btn btn-xs btn-gh" style="margin-top:5px;" onclick="DB.school.logo='';saveDB();pushPublicSite();applyBranding();showToast('Logo removed and published');goPage('settings');">Remove</button>` : '<button class="btn btn-xs btn-gh" style="margin-top:5px;" onclick="document.getElementById(\'logo-up2\').click()">Upload Logo</button>'}</div>
+  </div>
+  <div class="fg2">
+    <div class="fg"><label class="fl">School Name <span class="req">*</span></label><input class="fi" id="ss-name" value="${s.name || ''}" placeholder="My School" oninput="DB.school.name=this.value;applyBranding();"/></div>
+    <div class="fg"><label class="fl">Tagline</label><input class="fi" id="ss-tag" value="${s.tagline || ''}" placeholder="Excellence in Education" oninput="DB.school.tagline=this.value;applyBranding();"/></div>
+  </div>
+  <div class="fg2">
+    <div class="fg"><label class="fl">Principal Name</label><input class="fi" id="ss-prin" value="${s.principal || ''}" placeholder="Mr. / Ms. ..." oninput="DB.school.principal=this.value;"/></div>
+    <div class="fg"><label class="fl">City</label><input class="fi" id="ss-city" value="${s.city || ''}" placeholder="Karachi" oninput="DB.school.city=this.value;"/></div>
+  </div>
+  <div class="fg2">
+    <div class="fg"><label class="fl">Phone</label><input class="fi" id="ss-phone" value="${s.phone || ''}" placeholder="021-XXXXXXXX" oninput="DB.school.phone=this.value;"/></div>
+    <div class="fg"><label class="fl">WhatsApp</label><input class="fi" id="ss-whatsapp" value="${s.whatsapp || ''}" placeholder="923001234567 or 03001234567" inputmode="tel" oninput="DB.school.whatsapp=this.value;"/></div>
+  </div>
+  <div class="fg2"><div class="fg"><label class="fl">Email</label><input class="fi" type="email" id="ss-email" value="${s.email || ''}" placeholder="info@school.edu" oninput="DB.school.email=this.value;"/></div><div class="fg"><label class="fl">Website</label><input class="fi" id="ss-web" value="${s.website || ''}" placeholder="https://school.edu" oninput="DB.school.website=this.value;"/></div></div>
+  <div class="fg"><label class="fl">Address</label><textarea class="fi" id="ss-addr" style="min-height:50px;" oninput="DB.school.address=this.value;">${s.address || ''}</textarea></div>
+  <div class="fg"><label class="fl">Theme Color</label>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        ${['#2563eb', '#0891b2', '#059669', '#7c3aed', '#dc2626', '#b45309', '#0f172a', '#1e3a5f'].map(c => `<div style="width:28px;height:28px;border-radius:7px;background:${c};cursor:pointer;transition:transform .15s;border:2px solid ${c === s.primaryColor ? '#fff' : 'transparent'};box-shadow:${c === s.primaryColor ? '0 0 0 2px ' + c : 'none'};" onclick="DB.school.primaryColor='${c}';document.documentElement.style.setProperty('--p','${c}');applyBranding();saveDB();showToast('Color updated');goPage('settings');" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform=''"></div>`).join('')}
+      <input type="color" value="${s.primaryColor || '#2563eb'}" style="width:28px;height:28px;border-radius:7px;cursor:pointer;border:1px solid var(--border);padding:1px;" onchange="DB.school.primaryColor=this.value;document.documentElement.style.setProperty('--p',this.value);applyBranding();saveDB();"/>
+    </div>
+  </div>
+</div>
+
+<div class="card fu">
+  <div class="ch"><div class="ct"> Academic Terms</div></div>
+  <div class="ibox" style="margin-bottom:10px;">Configure grading terms. Selecting an active term sets the default for grade entry and report cards.</div>
+  <div style="display:flex;gap:10px;margin-bottom:10px;align-items:center;">
+    <div style="font-weight:600;font-size:.8rem;width:120px;">Active Term</div>
+    <select class="fi" style="flex:1;padding:5px;" onchange="DB.settings.activeTerm=this.value;saveDB();showToast('Active term updated','ts');">
+      ${DB.settings.terms.map(t => `<option value="${t.id}" ${DB.settings.activeTerm===t.id?'selected':''}>${t.name}</option>`).join('')}
+    </select>
+  </div>
+  <div style="font-size:.8rem;font-weight:600;margin-bottom:5px;">Manage Terms</div>
+  ${DB.settings.terms.map((t,i) => `
+    <div style="display:flex;gap:10px;margin-bottom:5px;">
+      <input class="fi" style="flex:1;" value="${t.name}" placeholder="Term Name" onchange="DB.settings.terms[${i}].name=this.value;saveDB();"/>
+      <button class="btn btn-gh btn-sm" onclick="if(confirm('Delete term? Grades for this term will be orphaned.')) { DB.settings.terms = DB.settings.terms.filter(x => x.id !== '${t.id}'); if(DB.settings.activeTerm==='${t.id}') DB.settings.activeTerm = DB.settings.terms[0]?.id; saveDB(); goPage('settings'); }">Delete</button>
+    </div>
+  `).join('')}
+  <button class="btn btn-gh btn-sm" style="margin-top:5px;" onclick="const tname=prompt('New Term Name:');if(tname){DB.settings.terms.push({id:'t'+Date.now(), name:tname});saveDB();goPage('settings');}">+ Add Term</button>
+</div>
+<div class="card fu d2">
+  <div class="ch"><div class="ct"> Landing Page Slides</div></div>
+  <div class="ibox" style="margin-bottom:10px;">Paste public image URLs or base64 image data. Leave image blank to use a clean color background.</div>
+    ${(DB.school.slides || defaultSlides()).slice(0,4).map((sl, i) => '<div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:11px;margin-bottom:10px;"><div style="font-weight:800;font-size:.78rem;color:var(--ink3);margin-bottom:8px;">Slide ' + (i + 1) + '</div><div class="fg2"><div class="fg"><label class="fl">Tag</label><input class="fi" value="' + escAttr(sl.tag) + '" oninput="DB.school.slides[' + i + '].tag=this.value;applyBranding();"/></div><div class="fg"><label class="fl">Icon</label><input class="fi" value="' + escAttr(sl.icon) + '" oninput="DB.school.slides[' + i + '].icon=this.value;applyBranding();"/></div></div><div class="fg"><label class="fl">Title</label><input class="fi" value="' + escAttr(sl.title) + '" oninput="DB.school.slides[' + i + '].title=this.value;applyBranding();"/></div><div class="fg"><label class="fl">Text</label><textarea class="fi" style="min-height:54px;" oninput="DB.school.slides[' + i + '].text=this.value;applyBranding();">' + (sl.text || '') + '</textarea></div><div class="fg2"><div class="fg"><label class="fl">Image URL</label><input class="fi" value="' + escAttr(sl.image) + '" placeholder="https://.../campus.jpg" oninput="DB.school.slides[' + i + '].image=this.value;applyBranding();"/></div><div class="fg"><label class="fl">Accent Color</label><input class="fi" type="color" value="' + (sl.accent || '#1e3a5f') + '" style="height:44px;" oninput="DB.school.slides[' + i + '].accent=this.value;applyBranding();"/></div></div></div>').join('')}
+</div>
+
+<div class="card fu d3">
+  <div class="ch"><div class="ct"> Academic Settings</div></div>
+  <div class="fg2">
+    <div class="fg"><label class="fl">Academic Year</label><input class="fi" id="ss-yr" value="${DB.settings?.schoolYear || ''}" placeholder="2025-26" oninput="DB.settings.schoolYear=this.value;"/></div>
+    <div class="fg"><label class="fl">Currency</label><select class="fi" onchange="DB.settings.currency=this.value;"><option ${DB.settings?.currency === 'PKR' ? 'selected' : ''}>PKR</option><option ${DB.settings?.currency === 'USD' ? 'selected' : ''}>USD</option><option ${DB.settings?.currency === 'SAR' ? 'selected' : ''}>SAR</option><option ${DB.settings?.currency === 'AED' ? 'selected' : ''}>AED</option></select></div>
+  </div>
+  <div class="fg"><label class="fl">Teacher Late-Arrival Threshold</label><div style="display:flex;align-items:center;gap:10px;"><input class="fi" type="time" value="${DB.lateAfter || '08:00'}" style="max-width:140px;" oninput="DB.lateAfter=this.value;"/><span style="font-size:.78rem;color:var(--ink3);">Teachers arriving after this time are marked <span class="badge by2">Late</span></span></div></div>
+</div>
+<div class="card fu d4">
+  <div class="ch"><div class="ct"> Authentication</div></div>
+  <div class="ibox">Passwords are handled by Supabase Auth. Use the Profile page to change your own password, and Supabase Dashboard ? Authentication ? Users to invite or reset other users.</div>
+</div>
+<div class="card fu d5">
+  <div class="ch"><div class="ct"> Supabase Cloud Database</div></div>
+  <div id="sb-status-card" style="padding:10px 0;">
+      ${_sb ? `<div class="badge bg2" style="margin-bottom:8px;">? Connected</div>
+    <div style="font-size:.75rem;color:var(--ink3);margin-bottom:10px;">Database: <b>owojgzrzstigmumsehdw.supabase.co</b></div>
+    <button class="btn btn-p btn-sm" onclick="pushCloudDB().then(()=>showToast('? Force synced to Supabase','ts'))"> Force Sync Now</button>` 
+      : `<div class="badge br2" style="margin-bottom:8px;"> Not Connected</div>
+    <div style="font-size:.74rem;color:var(--ink3);margin-bottom:8px;">Open this file in a code editor and replace <code>PASTE_YOUR_ANON_KEY_HERE</code> on line 1 with your Supabase anon key.<br/>Find it at: <b>Supabase Dashboard ? Project Settings ? API ? anon/public</b></div>`}
+  </div>
+</div>
+<div class="card fu d6">
+  <div class="ch"><div class="ct"> Data Management</div></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <button class="btn btn-p btn-sm" onclick="saveAllSettings()"> Save All Settings</button>
+    <button class="btn btn-gh btn-sm" onclick="exportData()"> Export Backup (JSON)</button>
+    <button class="btn btn-gh btn-sm" onclick="document.getElementById('imp-file').click()"> Import Data</button>
+    <input type="file" id="imp-file" accept=".json" style="display:none;" onchange="importData(this)"/>
+    <button class="btn btn-xs" style="background:var(--rl);color:var(--r);" onclick="resetAll()"> Reset All</button>
+  </div>
+  <div class="ibox" style="margin-top:10px;"> Data is saved to Supabase cloud + local browser cache.  </div>
+</div>`;
+    }
+
+    function renderAdminCharts() {
+      if (typeof Chart === 'undefined') return;
+      const fCtx = document.getElementById('feeChart');
+      const aCtx = document.getElementById('attChart');
+      
+      if (fCtx) {
+        const labels = []; const data = [];
+        for (let i=5; i>=0; i--) {
+          const d = new Date(); d.setMonth(d.getMonth() - i);
+          const mk = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+          labels.push(d.toLocaleString('en', {month:'short'}));
+          let mTotal = 0;
+          Object.values(DB.fees.payments || {}).forEach(pf => {
+            Object.values(pf).forEach(pmt => {
+              if (pmt.paid && pmt.month === mk) mTotal += num(pmt.amount);
+            });
+          });
+          data.push(mTotal);
+        }
+        
+        new Chart(fCtx, {
+          type: 'bar',
+          data: { labels, datasets: [{ label: 'Revenue', data, backgroundColor: DB.school?.primaryColor || '#2563eb', borderRadius: 4 }] },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { font: {size: 10} } }, x: { grid: { display: false }, ticks: { font: {size: 10} } } } }
+        });
+      }
+      
+      if (aCtx) {
+        const tKey = today();
+        let p=0, a=0, l=0;
+        Object.values(DB.attendance || {}).forEach(cObj => {
+          Object.values(cObj).forEach(stuAtt => {
+            const v = stuAtt[tKey];
+            if (v === 'P') p++; else if (v === 'A') a++; else if (v === 'L') l++;
+          });
+        });
+        if (p+a+l === 0) { p=85; a=10; l=5; } // Fallback sample if no attendance taken today
+        
+        new Chart(aCtx, {
+          type: 'doughnut',
+          data: { labels: ['Present', 'Absent', 'Late'], datasets: [{ data: [p, a, l], backgroundColor: ['#22c55e', '#ef4444', '#f59e0b'], borderWidth: 0 }] },
+          options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { position: 'right', labels: { usePointStyle: true, boxWidth: 8, font: {size: 11} } } } }
+        });
+      }
+    }
+
+    function saveAllSettings() { saveDB(); pushPublicSite(); applyBranding(); showToast('Settings saved and published', 'ts'); }
+    function exportData() { const blob = new Blob([JSON.stringify(DB, null, 2)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `oxford-backup-${today()}.json`; a.click(); showToast('? Exported', 'ts'); }
+    function importData(inp) { const f = inp.files[0]; if (!f) return; const r = new FileReader(); r.onload = e => { try { DB = JSON.parse(e.target.result); saveDB(); applyBranding(); buildShell(); goPage('dashboard'); showToast('? Data imported', 'ts'); } catch { showToast('? Invalid file', 'te'); } }; r.readAsText(f); }
+    async function resetAll() { if (!confirm(' Delete ALL data permanently?')) return; const v = prompt('Type RESET to confirm:'); if (v !== 'RESET') { showToast('Cancelled'); return; } localStorage.removeItem(SK); if (_sb) { try { await _sb.from('db_snapshot').delete().eq('id', 1); } catch(e) {} } location.reload(); }
+
+    /* ------------------------------- STUDENT PAGES ------------------------------- */
+    function getStu() { const sid = window._viewSibId || curUser?.studentId; return allStus().find(s => s.id === sid) || clsStus(curCls)[0] || { id: '', name: curUser?.name, classId: curCls }; }
+
+    function pgMyGrades() {
+      const stu = getStu(); const cid = stu.classId || curCls;
+      const grades = DB.grades[cid + '_' + curTerm]?.[stu.id] || {}; const av = avgStu(cid, stu.id, curTerm);
+      return `
+<div class="ph ph-row fu"><div><div class="ph-tag"> My Grades</div><h1>${stu.name || curUser?.name}</h1><div class="ph-sub">${(DB.classes.find(c => c.id === cid) || {}).name || ''} - Roll ${stu.roll || '-'}</div></div>
+<select class="fi" style="width:140px;padding:5px;height:auto;font-weight:600;" onchange="curTerm=this.value;goPage('mygrades')">
+  ${DB.settings.terms.map(t => `<option value="${t.id}" ${curTerm===t.id?'selected':''}>${t.name}</option>`).join('')}
+</select></div>
+<div style="display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap;">
+  <div class="card" style="flex:1;min-width:100px;text-align:center;padding:14px;"><div style="font-family:var(--head);font-size:1.9rem;font-weight:700;color:${sCol(av)};">${av}%</div><div style="font-size:.7rem;color:var(--ink3);">Overall Average</div></div>
+  <div class="card" style="flex:1;min-width:100px;text-align:center;padding:14px;"><div style="font-family:var(--head);font-size:1.7rem;font-weight:700;color:${sCol(av)};">${lGrade(av)}</div><div style="font-size:.7rem;color:var(--ink3);">Grade</div></div>
+  <div class="card" style="flex:1;min-width:100px;text-align:center;padding:14px;"><div style="font-family:var(--head);font-size:1.4rem;font-weight:700;color:${av >= 40 ? 'var(--g)' : 'var(--r)'};">${av >= 40 ? 'PASS' : 'FAIL'}</div><div style="font-size:.7rem;color:var(--ink3);">Result</div></div>
+</div>
+<div class="card fu d2">
+  <div class="ch"><div class="ct"> Subject Marks</div><button class="btn btn-p btn-sm" onclick="switchCls(getStu().classId||curCls);goPage('reportcards');setTimeout(()=>openReportCard(getStu().id,getStu().classId||curCls),200)"> Report Card</button></div>
+    ${DB.subjects.map(sub => {
+        const v = grades[sub.id] || 0; const l = lGrade(v); return `<div style="display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--border);">
+    <div style="width:32px;height:32px;border-radius:8px;background:${sub.color}18;display:flex;align-items:center;justify-content:center;font-size:.88rem;flex-shrink:0;border:1px solid ${sub.color}28;">${sub.icon}</div>
+    <div style="flex:1;"><div style="font-weight:700;font-size:.82rem;">${sub.name}</div><div class="pb" style="margin-top:5px;"><div class="pf" style="width:${v}%;background:${sub.color};"></div></div></div>
+    <div style="text-align:right;flex-shrink:0;"><div style="font-weight:800;font-size:.95rem;color:${sub.color};">${v || '-'}</div><div style="font-size:.62rem;color:var(--ink4);">${l}</div></div>
+  </div>`;
+      }).join('')}
+</div>`;
+    }
+
+    function pgMyAttend() {
+      const stu = getStu(); const cid = stu.classId || curCls;
+      const att = DB.attendance[cid]?.[stu.id] || {};
+      const entries = Object.entries(att).sort((a, b) => b[0].localeCompare(a[0]));
+      const P = entries.filter(([, v]) => v === 'P').length; const A = entries.filter(([, v]) => v === 'A').length; const L = entries.filter(([, v]) => v === 'L').length;
+      const pct = entries.length ? Math.round(P / entries.length * 100) : (stu.attendance || 0);
+      return `
+<div class="ph fu"><div class="ph-tag">? Attendance</div><h1>My Attendance</h1><div class="ph-sub">${stu.name || ''} - ${(DB.classes.find(c => c.id === cid) || {}).name || ''}</div></div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:15px;">
+  <div class="card" style="text-align:center;padding:13px;"><div style="font-family:var(--head);font-size:1.7rem;font-weight:700;color:var(--g);">${P}</div><div style="font-size:.68rem;color:var(--ink3);">Present</div></div>
+  <div class="card" style="text-align:center;padding:13px;"><div style="font-family:var(--head);font-size:1.7rem;font-weight:700;color:var(--r);">${A}</div><div style="font-size:.68rem;color:var(--ink3);">Absent</div></div>
+  <div class="card" style="text-align:center;padding:13px;"><div style="font-family:var(--head);font-size:1.7rem;font-weight:700;color:${pct >= 90 ? 'var(--g)' : pct >= 75 ? 'var(--o)' : 'var(--r)'};">${pct}%</div><div style="font-size:.68rem;color:var(--ink3);">Att%</div></div>
+</div>
+<div class="card fu d2"><div class="ch"><div class="ct">Attendance Log</div></div>
+    ${entries.length === 0 ? `<div style="text-align:center;padding:20px;color:var(--ink4);">No records yet</div>` :
+          entries.map(([d, v]) => `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);"><div style="font-size:.8rem;color:var(--ink3);min-width:90px;">${fmtDate(d)}</div><span class="ac ${v === 'P' ? 'acP' : v === 'A' ? 'acA' : 'acL'}" style="cursor:default;">${v}</span><span style="font-size:.76rem;color:var(--ink3);">${v === 'P' ? 'Present' : v === 'A' ? 'Absent' : 'Leave'}</span></div>`).join('')}
+</div>`;
+    }
+
+    function studentAttendancePayload(stu) {
+      return JSON.stringify({ id: stu?.id || '' });
+    }
+
+    function switchIdCardClass(cid) {
+      curCls = cid;
+      updatePill();
+      goPage('idcards');
+    }
+
+    function printClassIdCards() {
+      document.body.classList.add('printing-idcards');
+      setTimeout(() => window.print(), 80);
+      setTimeout(() => document.body.classList.remove('printing-idcards'), 900);
+    }
+
+    function classIdCardHtml(stu) {
+      const cls = DB.classes.find(c => c.id === stu.classId) || {};
+      const grade = ((cls.name || '') + (cls.section ? ' ' + cls.section : '')).trim() || '-';
+      const idNo = (stu.roll || stu.id || '').toString();
+      const yr = DB.settings?.schoolYear || '2025 - 2026';
+      return `<div class="vid-card">
+        <div class="vid-top-deco"></div>
+        <div class="vid-header">
+          <div class="vid-logo-circle">${DB.school.logo ? `<img src="${DB.school.logo}"/>` : `<i class="fas fa-graduation-cap"></i>`}</div>
+          <div class="vid-school-name">${DB.school.name || 'SCHOOL'}</div>
+          <div class="vid-tagline">LEARN &bull; GROW &bull; EXCEL</div>
+        </div>
+        <div class="vid-body">
+          <div class="vid-photo-col">
+            <div class="vid-photo-wrap">${stu.photo ? `<img src="${stu.photo}"/>` : ini(stu.name || '?')}</div>
+            <div class="vid-qr idp-qr" data-student-id="${stu.id}"></div>
+          </div>
+          <div class="vid-info-col">
+            <div class="vid-name">${stu.name || 'Student'}</div>
+            <div class="vid-role">STUDENT</div>
+            <div class="vid-table">
+              <div class="vid-row"><i class="fas fa-id-badge"></i> <div><span>ID NUMBER</span><b>${idNo || '-'}</b></div></div>
+              <div class="vid-row"><i class="fas fa-graduation-cap"></i> <div><span>GRADE</span><b>${grade}</b></div></div>
+              <div class="vid-row"><i class="fas fa-calendar-alt"></i> <div><span>SESSION</span><b>${yr}</b></div></div>
+              <div class="vid-row"><i class="fas fa-map-marker-alt"></i> <div><span>CAMPUS</span><b>${DB.school.city || 'Karachi'}</b></div></div>
+            </div>
+            <div class="vid-sign">
+               <div style="height:.22in;"></div>
+               <span>PRINCIPAL</span>
+            </div>
+          </div>
+        </div>
+        <div class="vid-footer">
+           <div class="vid-foot-text">
+              <span>SAFE TODAY</span>
+              <i class="fas fa-shield-alt" style="color:#b48e4b; font-size:1.4em; margin:0 5px;"></i>
+              <span>STRONG TOMORROW</span>
+           </div>
+        </div>
+      </div>`;
+    }
+
+    function staffIdCardHtml(staff) {
+      const yr = DB.settings?.schoolYear || '2025 - 2026';
+      const isScanner = staff.role === 'scanner';
+      return `<div class="vid-card">
+        <div class="vid-top-deco"></div>
+        <div class="vid-header">
+          <div class="vid-logo-circle">${DB.school.logo ? `<img src="${DB.school.logo}"/>` : `<i class="fas fa-graduation-cap"></i>`}</div>
+          <div class="vid-school-name">${DB.school.name || 'SCHOOL'}</div>
+          <div class="vid-tagline">LEARN &bull; GROW &bull; EXCEL</div>
+        </div>
+        <div class="vid-body">
+          <div class="vid-photo-col">
+            <div class="vid-photo-wrap">${staff.photo ? `<img src="${staff.photo}"/>` : ini(staff.name || '?')}</div>
+            <div class="vid-qr idp-qr-staff" data-staff-id="${staff.id}"></div>
+          </div>
+          <div class="vid-info-col">
+            <div class="vid-name">${staff.name || 'Staff Member'}</div>
+            <div class="vid-role">${isScanner ? 'GATE SCANNER' : 'TEACHING STAFF'}</div>
+            <div class="vid-table">
+              <div class="vid-row"><i class="fas fa-id-badge"></i> <div><span>STAFF ID</span><b>${staff.id.substring(0,6).toUpperCase()}</b></div></div>
+              <div class="vid-row"><i class="fas fa-book"></i> <div><span>SUBJECT</span><b>${staff.subject || (isScanner ? 'Gate Access' : '-')}</b></div></div>
+              <div class="vid-row"><i class="fas fa-phone"></i> <div><span>CONTACT</span><b>${staff.phone || '-'}</b></div></div>
+              <div class="vid-row"><i class="fas fa-map-marker-alt"></i> <div><span>CAMPUS</span><b>${DB.school.city || 'Karachi'}</b></div></div>
+            </div>
+            <div class="vid-sign">
+               <div style="height:.22in;"></div>
+               <span>PRINCIPAL</span>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    function pgClassIdCards() {
+      if (curRole !== 'admin' && curRole !== 'teacher') return '<div class="empty">ID card printing is available for staff only.</div>';
+      
+      const isStaff = curCls === 'staff';
+      const cls = isStaff ? null : (DB.classes.find(c => c.id === curCls) || DB.classes[0]);
+      if (!isStaff && cls && cls.id !== curCls) curCls = cls.id;
+      
+      const entities = isStaff ? DB.users.filter(u => u.role === 'teacher' || u.role === 'scanner') : (cls ? clsStus(cls.id) : []);
+      const perPage = 9;
+      const sheets = [];
+      for (let i = 0; i < entities.length; i += perPage) sheets.push(entities.slice(i, i + perPage));
+      
+      const optHtml = `<option value="staff" ${curCls === 'staff' ? 'selected' : ''}>? Staff & Teachers</option>` + DB.classes.map(c => `<option value="${c.id}" ${c.id === curCls ? 'selected' : ''}>${c.name}${c.section ? ' ' + c.section : ''}</option>`).join('');
+
+      return `
+<div class="ph ph-row fu no-print"><div><div class="ph-tag">ID Cards</div><h1>${isStaff ? 'Staff ID Cards' : 'Class ID Cards'}</h1><div class="ph-sub">Print ${entities.length} attendance QR cards for ${isStaff ? 'Staff & Teachers' : (cls?.name || 'selected class')} on A4 sheets.</div></div>
+  <div class="ph-acts"><select class="fi" style="width:auto;min-width:180px;" onchange="switchIdCardClass(this.value)">${optHtml}</select><button class="btn btn-p btn-sm" onclick="printClassIdCards()">Print A4 Cards</button></div></div>
+<div class="id-print-toolbar no-print"><div class="ibox" style="margin:0;flex:1;">Each card is 2.125in x 3.375in and includes the attendance QR used by the scanner.</div></div>
+<div class="id-print-area">
+  ${sheets.length ? sheets.map(group => `<section class="id-a4-sheet">${group.map(e => isStaff ? staffIdCardHtml(e) : classIdCardHtml(e)).join('')}</section>`).join('') : '<div class="empty">No records found.</div>'}
+</div>`;
+    }
+
+    function buildClassIdCardQrs() {
+      if (typeof QRCode === 'undefined') { showToast('QR library not loaded. Connect internet and refresh.', 'te', 4200); return; }
+      document.querySelectorAll('.idp-qr[data-student-id]').forEach(el => {
+        const sid = el.dataset.studentId;
+        const stu = allStus().find(s => s.id === sid);
+        if (!stu) return;
+        el.innerHTML = '';
+        try { new QRCode(el, { text: studentAttendancePayload(stu), width: 200, height: 200, colorDark: '#111827', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.L }); } catch { }
+      });
+      document.querySelectorAll('.idp-qr-staff[data-staff-id]').forEach(el => {
+        const tid = el.dataset.staffId;
+        const staff = DB.users.find(u => u.id === tid);
+        if (!staff) return;
+        el.innerHTML = '';
+        try { new QRCode(el, { text: JSON.stringify({ kind: 'school-teacher-attendance-v1', id: staff.id }), width: 200, height: 200, colorDark: '#111827', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.L }); } catch { }
+      });
+    }
+    function pgQRCard() {
+      const isTeacherCard = curRole === 'teacher';
+      const stu = isTeacherCard ? null : getStu();
+      const cid = stu?.classId || curCls;
+      const cls = DB.classes.find(c => c.id === cid);
+      const personName = isTeacherCard ? (curUser?.name || 'Teacher') : (stu?.name || curUser?.name || 'Student');
+      const personPhoto = isTeacherCard ? curUser?.photo : stu?.photo;
+      const chip = isTeacherCard ? (curUser?.subject || 'Teacher') : ((cls?.name || '') + ' ' + (cls?.section || '')).trim();
+      return `
+<div class="ph fu"><div class="ph-tag"> ${isTeacherCard ? 'Teacher Gate QR' : 'Student ID Card'}</div><h1>${isTeacherCard ? 'My Gate QR' : 'My ID Card'}</h1><div class="ph-sub">Show this card at the school gate for attendance scanning</div></div>
+<div class="id-card-wrap fu d1" style="display:flex; justify-content:center; padding: 20px 0;">
+      <div class="vid-card" style="transform: scale(1.3); transform-origin: top center; margin-bottom: 1in;">
+        <div class="vid-top-deco"></div>
+        <div class="vid-header">
+          <div class="vid-logo-circle">${DB.school.logo ? `<img src="${DB.school.logo}"/>` : `<i class="fas fa-graduation-cap"></i>`}</div>
+          <div class="vid-school-name">${DB.school.name || 'SCHOOL'}</div>
+          <div class="vid-tagline">LEARN &bull; GROW &bull; EXCEL</div>
+        </div>
+        <div class="vid-body">
+          <div class="vid-photo-col">
+            <div class="vid-photo-wrap">${personPhoto ? `<img src="${personPhoto}"/>` : ini(personName || '?')}</div>
+            <div class="vid-qr" id="qr-canvas-wrap"></div>
+          </div>
+          <div class="vid-info-col">
+            <div class="vid-name">${personName || 'Student'}</div>
+            <div class="vid-role">${isTeacherCard ? 'STAFF' : 'STUDENT'}</div>
+            <div class="vid-table">
+              <div class="vid-row"><i class="fas fa-id-badge"></i> <div><span>ID NUMBER</span><b>${isTeacherCard ? 'STAFF' : (stu?.roll || stu?.id || '').toString().slice(-6).toUpperCase()}</b></div></div>
+              <div class="vid-row"><i class="fas fa-graduation-cap"></i> <div><span>${isTeacherCard ? 'SUBJECT' : 'GRADE'}</span><b>${chip}</b></div></div>
+              <div class="vid-row"><i class="fas fa-calendar-alt"></i> <div><span>SESSION</span><b>${DB.settings?.schoolYear || '2025 - 2026'}</b></div></div>
+              <div class="vid-row"><i class="fas fa-map-marker-alt"></i> <div><span>CAMPUS</span><b>${DB.school.city || 'Karachi'}</b></div></div>
+            </div>
+            <div class="vid-sign">
+               <div style="height:.22in;"></div>
+               <span>PRINCIPAL</span>
+            </div>
+          </div>
+        </div>
+        <div class="vid-footer">
+           <div class="vid-foot-text">
+              <span>SAFE TODAY</span>
+              <i class="fas fa-shield-alt" style="color:#b48e4b; font-size:1.4em; margin:0 5px;"></i>
+              <span>STRONG TOMORROW</span>
+           </div>
+        </div>
+      </div>
+</div>
+<div style="display:flex;gap:8px;justify-content:center;margin-top:16px;">
+  <button class="btn btn-p btn-sm no-print" onclick="window.print()"> Print Card</button>
+  <button class="btn btn-gh btn-sm no-print" onclick="showToast('Long-press QR to save as image')"> Save</button>
+</div>
+<div class="ibox" style="margin-top:12px;"> Gate operator scans this QR code to mark attendance instantly</div>`;
+    }
+
+    function buildQRCard() {
+      const el = document.getElementById('qr-canvas-wrap');
+      if (!el || typeof QRCode === 'undefined') return;
+      el.innerHTML = '';
+      let data;
+      if (curRole === 'teacher') {
+        data = JSON.stringify({ kind: 'school-teacher-attendance-v1', id: curUser?.id || '', name: curUser?.name || 'Teacher', role: 'teacher', subject: curUser?.subject || '', school: DB.school.name });
+      } else {
+        const stu = getStu(); const cid = stu.classId || curCls; const cls = DB.classes.find(c => c.id === cid);
+        data = studentAttendancePayload(stu);
+      }
+      try { new QRCode(el, { text: data, width: 130, height: 130, colorDark: '#0f172a', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M }); } catch (e) { }
+    }
+
+    function pgMyFees() {
+      const stu = getStu(); const paid = DB.fees.payments[stu.id] || {}; const mand = DB.fees.items.filter(f => f.mandatory); const paidC = mand.filter(f => paid[f.id]?.paid).length;
+      return `
+<div class="ph fu"><div class="ph-tag"> My Fees</div><h1>Fee Status</h1><div class="ph-sub">${stu.name || ''}</div></div>
+<div class="fee-hero fu">
+  <div style="font-size:.7rem;opacity:.65;">Mandatory Fees</div>
+  <div style="font-family:var(--head);font-size:1.5rem;font-weight:700;margin:4px 0;">${paidC} of ${mand.length} paid</div>
+  <div class="fh-bar"><div class="fh-fill" style="width:${mand.length ? Math.round(paidC / mand.length * 100) : 0}%;"></div></div>
+</div>
+<div class="card fu d2">${DB.fees.items.map(f => { const isPaid = paid[f.id]?.paid; return `<div style="display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--border);"><div style="font-size:1.1rem;">${isPaid ? '?' : '?'}</div><div style="flex:1;"><div style="font-weight:700;font-size:.82rem;">${f.name}</div><div style="font-size:.7rem;color:var(--ink3);">Due: ${f.due} - ${f.mandatory ? 'Mandatory' : 'Optional'}</div>${isPaid ? `<div style="font-size:.65rem;color:var(--g);margin-top:1px;">Paid on ${fmtDate(paid[f.id]?.date)}</div>` : ''}</div><div style="text-align:right;flex-shrink:0;"><div style="font-weight:800;color:${isPaid ? 'var(--g)' : 'var(--r)'};">${DB.settings?.currency || 'PKR'} ${Number(f.amount || 0).toLocaleString()}</div><span class="badge ${isPaid ? 'bg2' : 'br2'}">${isPaid ? 'Paid' : 'Pending'}</span></div></div>`; }).join('')}</div>`;
+    }
+
+    function pgProfile() {
+      return `
+<div class="ph fu"><div class="ph-tag"> Profile</div><h1>${curUser?.name || 'User'}</h1><div class="ph-sub">${curUser?.role} - ${curUser?.email}</div></div>
+<div class="card fu d1">
+  <div style="display:flex;align-items:center;gap:13px;margin-bottom:15px;">
+    <div class="ava" style="width:58px;height:58px;border-radius:13px;background:${gc(curUser?.name || '?')};font-size:1.1rem;">${curUser?.photo ? `<img src="${curUser.photo}"/>` : ini(curUser?.name || '?')}</div>
+    <div><div style="font-weight:700;font-size:.95rem;">${curUser?.name || ''}</div><div style="font-size:.74rem;color:var(--ink3);margin-top:2px;">${curUser?.email || ''} - <span class="badge bp2">${curUser?.role}</span></div></div>
+  </div>
+  <div class="fg"><label class="fl">Upload Profile Photo</label><input type="file" accept="image/*" onchange="updateProfilePhoto(this)"/></div>
+  <div class="div"></div>
+  <div style="font-weight:700;font-size:.78rem;color:var(--ink3);margin-bottom:8px;">Change Supabase Auth Password</div>
+  <div class="fg2"><div class="fg pw-field"><label class="fl">New Password</label><input class="fi" id="pp-n" type="password" placeholder="New password"/><button type="button" class="pw-toggle" onclick="togglePassword('pp-n',this)">Show</button></div><div class="fg pw-field"><label class="fl">Confirm</label><input class="fi" id="pp-c" type="password" placeholder="Confirm"/><button type="button" class="pw-toggle" onclick="togglePassword('pp-c',this)">Show</button></div></div>
+  <button class="btn btn-p btn-sm" onclick="changeMyPass()">Update Password</button>
+  <div class="div"></div>
+  <button class="btn btn-gh" onclick="logout()" style="width:100%;justify-content:center;">Sign Out</button>
+</div>`;
+    }
+    async function updateProfilePhoto(inp) { const f = inp.files[0]; if (!f) return; try { showToast('Uploading photo...', 'ts'); const url = await uploadToStorage(f); curUser.photo = url; const u = DB.users.find(x => x.id === curUser.id); if (u) u.photo = url; saveDB(); buildShell(); showToast('? Photo updated', 'ts'); } catch(e) { showToast(e.message, 'te'); } }
+    async function changeMyPass() { const np = (document.getElementById('pp-n')?.value || '').trim(); const cp = (document.getElementById('pp-c')?.value || '').trim(); if (!np || np !== cp) { showToast('Passwords do not match', 'te'); return; } if (np.length < 8) { showToast('Min 8 chars', 'te'); return; } if (!_sb) { showToast('Supabase Auth is not configured', 'te'); return; } const { error } = await _sb.auth.updateUser({ password: np }); if (error) { showToast(error.message || 'Password update failed', 'te'); return; } showToast('Password updated in Supabase Auth', 'ts'); }
+
+    /* ------------------------------- QR SCANNER ------------------------------- */
+    function openScanner() {
+      document.getElementById('scan-ov').classList.add('open');
+      const fb = document.getElementById('scan-fb'); const lb = document.getElementById('scan-log-box');
+      if (fb) { fb.className = 'scan-fb'; fb.textContent = ''; } if (lb) { lb.className = 'scan-log'; lb.innerHTML = ''; }
+      if (typeof Html5Qrcode === 'undefined') { if (fb) { fb.className = 'scan-fb err show'; fb.textContent = ' Camera library not loaded. Requires internet connection.'; } return; }
+      _qrS = new Html5Qrcode('qr-reader');
+      Html5Qrcode.getCameras().then(cams => {
+        if (!cams?.length) { if (fb) { fb.className = 'scan-fb err show'; fb.textContent = '? No camera found'; } return; }
+        const cam = cams[cams.length - 1];
+        _qrS.start(cam.id, { fps: 10, qrbox: { width: 200, height: 200 } }, onQRScan, () => { }).catch(err => { if (fb) { fb.className = 'scan-fb err show'; fb.textContent = '? Camera access denied. Please allow camera permission.'; } });
+      }).catch(() => { if (fb) { fb.className = 'scan-fb err show'; fb.textContent = '? Cannot access camera.'; } });
+    }
+    function playBeep(t){try{const x=new(window.AudioContext||window.webkitAudioContext)();const o=x.createOscillator();const g=x.createGain();o.connect(g);g.connect(x.destination);if(t==='ok'){o.type='sine';o.frequency.value=1500;g.gain.setValueAtTime(0.5,x.currentTime);g.gain.exponentialRampToValueAtTime(0.001,x.currentTime+0.1);o.start();o.stop(x.currentTime+0.1);}else{o.type='square';o.frequency.value=250;g.gain.setValueAtTime(0.2,x.currentTime);g.gain.exponentialRampToValueAtTime(0.001,x.currentTime+0.3);o.start();o.stop(x.currentTime+0.3);}}catch(e){}}
+
+    function onQRScan(raw) {
+      const fb = document.getElementById('scan-fb');
+      try {
+        const data = JSON.parse(raw);
+        const d = today();
+
+        if (data.kind === 'school-teacher-attendance-v1' || data.role === 'teacher') {
+          if (curRole !== 'admin' && curRole !== 'scanner') throw new Error('Only gate/admin users can mark teacher attendance');
+          const tid = String(data.id || '').trim();
+          const teacher = DB.users.find(u => u.id === tid && u.role === 'teacher');
+          if (!teacher) throw new Error('Teacher not found');
+          if (DB.teacherAttendance[teacher.id] && DB.teacherAttendance[teacher.id][d]) {
+            throw new Error(`Already scanned today at ${DB.teacherAttendance[teacher.id][d].checkIn}`);
+          }
+          const t = nowHHMM();
+          const finalStatus = isLate(t) ? 'Late' : 'Present';
+          if (!DB.teacherAttendance[teacher.id]) DB.teacherAttendance[teacher.id] = {};
+          DB.teacherAttendance[teacher.id][d] = { checkIn: t, status: finalStatus, source: 'gate-qr' };
+          saveDB();
+          playBeep('ok');
+          if (fb) { fb.className = 'scan-fb show'; fb.innerHTML = `Marked <b>${teacher.name}</b> - Staff - ${finalStatus}<br/><span style="font-size:.7rem;opacity:.75;">Gate check-in at ${t}</span>`; }
+          const lb = document.getElementById('scan-log-box');
+          if (lb) { lb.className = 'scan-log show'; lb.innerHTML = `<div class="sl-it"><span class="sl-ok">OK</span><span class="sl-nm">${teacher.name}</span><span class="sl-cl">Staff ${finalStatus}</span><span class="sl-t">${t}</span></div>` + lb.innerHTML; }
+          if (_qrS) { try { _qrS.pause(true); setTimeout(() => { try { _qrS?.resume(); } catch { } }, 1600); } catch { } }
+          return;
+        }
+
+        const sid = String(data.id || '').trim();
+        if (!sid) throw new Error('Missing student id');
+
+        const stu = allStus().find(s => s.id === sid);
+        if (!stu) throw new Error('Student not found');
+
+        const scanClassId = data.classId || stu.classId || curCls;
+        const cls = DB.classes.find(c => c.id === scanClassId);
+        if (!cls || !DB.students[scanClassId]?.some(s => s.id === sid)) throw new Error('Student/class mismatch');
+        if (curRole === 'teacher' && !(curUser?.classIds || []).includes(scanClassId)) throw new Error('Class not assigned to this teacher');
+
+        if (DB.attendance[scanClassId] && DB.attendance[scanClassId][sid] && DB.attendance[scanClassId][sid][d]) {
+          throw new Error('Already scanned today');
+        }
+
+        if (!DB.attendance[scanClassId]) DB.attendance[scanClassId] = {};
+        if (!DB.attendance[scanClassId][sid]) DB.attendance[scanClassId][sid] = {};
+        DB.attendance[scanClassId][sid][d] = 'P';
+        saveDB();
+        playBeep('ok');
+        const el = document.getElementById(`ac-${sid}-${d}`);
+        if (el) { el.className = 'ac acP'; el.textContent = 'P'; }
+
+        if (fb) { fb.className = 'scan-fb show'; fb.innerHTML = `Marked <b>${stu.name}</b> - ${cls.name}${cls.section ? ' ' + cls.section : ''} - Roll ${stu.roll || data.roll || '?'}<br/><span style="font-size:.7rem;opacity:.75;">Marked Present for ${fmtDate(d)}</span>`; }
+        const lb = document.getElementById('scan-log-box');
+        if (lb) { lb.className = 'scan-log show'; const t = new Date().toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' }); lb.innerHTML = `<div class="sl-it"><span class="sl-ok">OK</span><span class="sl-nm">${stu.name}</span><span class="sl-cl">${cls.name}${cls.section ? ' ' + cls.section : ''}</span><span class="sl-t">${t}</span></div>` + lb.innerHTML; }
+        if (_qrS) { try { _qrS.pause(true); setTimeout(() => { try { _qrS?.resume(); } catch { } }, 1800); } catch { } }
+      } catch (err) {
+        playBeep('err');
+        if (fb) { fb.className = 'scan-fb err show'; fb.textContent = ` ${err?.message || 'Invalid QR. Please show a valid student or teacher QR card.'}`; }
+      }
+    }
+    function stopScanner() {
+      document.getElementById('scan-ov').classList.remove('open');
+      if (_qrS) { try { _qrS.stop(); } catch { } finally { _qrS = null; } }
+      document.getElementById('qr-reader').innerHTML = '';
+    }
+
+    function printIDCards(cid) {
+      const cls = DB.classes.find(c => c.id === cid);
+      if (!cls) return;
+      const sts = clsStus(cid);
+      if (sts.length === 0) return showToast('No students to print');
+
+      const printWindow = window.open('', '', 'width=900,height=1200');
+      const schoolName  = DB.school?.name     || 'Oxford Excellence Academy';
+      const schoolTag   = DB.school?.tagline  || 'LEARN • GROW • EXCEL';
+      const schoolCity  = DB.school?.city     || 'Main Campus';
+      const schoolYear  = DB.settings?.schoolYear || (new Date().getFullYear() + ' – ' + (new Date().getFullYear()+1));
+      const logoSrc     = DB.school?.logo     || 'oxford_logo.svg';
+      const navy        = DB.school?.primaryColor || '#0d1e3d';
+      const gold        = '#c9a84c';
+
+      let cards = '';
+      sts.forEach(s => {
+        const qrUrl   = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(s.id)}&color=0d1e3d&bgcolor=ffffff&margin=4`;
+        const rollNum = String(s.roll || '001').padStart(3,'0');
+        const grade   = escHtml(cls.name) + (cls.section ? ' ' + escHtml(cls.section) : '');
+        const photo   = s.photo
+          ? `<img src="${s.photo}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid ${gold};display:block;"/>`
+          : `<div style="width:80px;height:80px;border-radius:50%;border:3px solid ${gold};background:${navy};display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:white;">${ini(s.name)}</div>`;
+        const nameParts = s.name.trim().split(' ');
+        const ln = nameParts.length > 1 ? nameParts.pop() : '';
+        const fn = nameParts.join(' ');
+
+        cards += `
+        <div style="width:85.6mm;min-height:135mm;background:#fff;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 4px 20px rgba(0,0,0,.18);page-break-inside:avoid;">
+
+          <!-- HEADER -->
+          <div style="background:${navy};padding:14px 12px 16px;text-align:center;">
+            <img src="${logoSrc}" onerror="this.style.display='none'" style="width:46px;height:46px;object-fit:contain;border-radius:50%;background:rgba(255,255,255,.15);padding:3px;margin-bottom:5px;display:block;margin-left:auto;margin-right:auto;"/>
+            <div style="color:${gold};font-size:12px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;line-height:1.15;">${escHtml(schoolName)}</div>
+            <div style="color:rgba(255,255,255,.6);font-size:7px;letter-spacing:2px;margin-top:2px;">${escHtml(schoolTag)}</div>
+          </div>
+
+          <!-- BODY: two columns -->
+          <div style="flex:1;padding:14px 14px 10px;display:flex;gap:12px;align-items:flex-start;">
+
+            <!-- LEFT: photo -->
+            <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:8px;">
+              ${photo}
+            </div>
+
+            <!-- RIGHT: name + rows -->
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:15px;font-weight:800;color:${navy};text-transform:uppercase;line-height:1.1;margin-bottom:1px;">${escHtml(fn)}<br>${escHtml(ln)}</div>
+              <div style="font-size:8px;font-weight:700;color:${gold};letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">STUDENT</div>
+
+              <!-- detail rows -->
+              <div style="display:flex;flex-direction:column;gap:5px;">
+                <div style="display:flex;align-items:center;gap:6px;font-size:8px;border-bottom:1px solid #eee;padding-bottom:4px;">
+                  <div style="width:18px;height:18px;border-radius:50%;background:${navy};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;">🪪</div>
+                  <span style="color:#999;font-weight:500;letter-spacing:.5px;text-transform:uppercase;flex:1;">ID NUMBER</span>
+                  <span style="font-weight:700;color:${navy};">${rollNum}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;font-size:8px;border-bottom:1px solid #eee;padding-bottom:4px;">
+                  <div style="width:18px;height:18px;border-radius:50%;background:${navy};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;">🎓</div>
+                  <span style="color:#999;font-weight:500;letter-spacing:.5px;text-transform:uppercase;flex:1;">GRADE</span>
+                  <span style="font-weight:700;color:${navy};">${grade}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;font-size:8px;border-bottom:1px solid #eee;padding-bottom:4px;">
+                  <div style="width:18px;height:18px;border-radius:50%;background:${navy};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;">📅</div>
+                  <span style="color:#999;font-weight:500;letter-spacing:.5px;text-transform:uppercase;flex:1;">SESSION</span>
+                  <span style="font-weight:700;color:${navy};">${escHtml(schoolYear)}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;font-size:8px;">
+                  <div style="width:18px;height:18px;border-radius:50%;background:${navy};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;">📍</div>
+                  <span style="color:#999;font-weight:500;letter-spacing:.5px;text-transform:uppercase;flex:1;">CAMPUS</span>
+                  <span style="font-weight:700;color:${navy};">${escHtml(schoolCity)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- BOTTOM: QR left, signature right -->
+          <div style="padding:6px 14px 10px;display:flex;align-items:flex-end;justify-content:space-between;border-top:1px solid #f0f0f0;">
+            <img src="${qrUrl}" style="width:52px;height:52px;" alt="QR"/>
+            <div style="text-align:center;flex:1;padding-left:10px;">
+              <div style="border-bottom:1px solid #aaa;height:24px;width:80%;margin:0 auto 3px;"></div>
+              <div style="font-size:6.5px;color:#888;letter-spacing:1.5px;font-weight:600;text-transform:uppercase;">PRINCIPAL</div>
+            </div>
+          </div>
+
+          <!-- FOOTER -->
+          <div style="background:${navy};padding:5px 10px;display:flex;align-items:center;justify-content:center;gap:8px;">
+            <span style="color:rgba(255,255,255,.6);font-size:6.5px;letter-spacing:2px;">— SAFE TODAY</span>
+            <span style="color:${gold};font-size:11px;">🛡</span>
+            <span style="color:rgba(255,255,255,.6);font-size:6.5px;letter-spacing:2px;">STRONG TOMORROW —</span>
+          </div>
+
+        </div>`;
+      });
+
+      const html = `<html><head><title>ID Cards – ${escHtml(cls.name)}</title>
+      <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+      <style>
+        @page { margin:8mm; size:A4; }
+        *{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'Poppins',sans-serif;background:#e8e8e8;padding:10px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+        .sheet{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;justify-items:center;}
+        @media print{body{background:#e8e8e8;}}
+      </style></head><body>
+      <div class="sheet">${cards}</div>
+      <scr`+`ipt>window.onload=function(){setTimeout(function(){window.print();},900);};</scr`+`ipt>
+      </body></html>`;
+
+      printWindow.document.write(html);
+      printWindow.document.close();
+    }
+
+    /* ------------------------------- ADMISSION FORM PRINT ------------------------------- */
+    function printAdmissionForm(sid, cid) {
+      const s = (DB.students[cid] || []).find(x => x.id === sid);
+      if (!s) return showToast('Student not found', 'te');
+      const cls = DB.classes.find(c => c.id === cid);
+      const school = DB.school || {};
+      const settings = DB.settings || {};
+      const printDate = new Date().toLocaleDateString('en-PK', { day:'2-digit', month:'long', year:'numeric' });
+      const logoSrc = school.logo || 'oxford_logo.svg';
+      const navy = school.primaryColor || '#0d1e3d';
+      const gold = '#c9a84c';
+
+      const pw = window.open('', '', 'width=900,height=1200');
+      const html = `<!DOCTYPE html><html><head><title>Admission Form - ${escHtml(s.name)}</title>
+      <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+      <style>
+        @page { margin: 0; size: A4; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Poppins', sans-serif; background: #fff; color: #111; font-size: 11px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .page { max-width: 700px; margin: 0 auto; padding: 10mm; }
+
+        /* Header */
+        .hdr { display: flex; align-items: center; gap: 16px; padding: 15px 20px; background: ${navy}; color: white; border-radius: 8px 8px 0 0; }
+        .hdr-logo { width: 60px; height: 60px; object-fit: contain; background: rgba(255,255,255,.15); border-radius: 50%; padding: 4px; flex-shrink: 0; }
+        .hdr-info { flex: 1; }
+        .hdr-name { font-size: 18px; font-weight: 800; color: ${gold}; letter-spacing: 1px; }
+        .hdr-tag { font-size: 10px; color: rgba(255,255,255,.7); letter-spacing: 1.5px; margin-top: 2px; }
+        .hdr-contact { font-size: 9px; color: rgba(255,255,255,.6); margin-top: 4px; }
+        .hdr-right { text-align: right; }
+        .hdr-right .label { font-size: 8px; color: rgba(255,255,255,.5); letter-spacing: 1px; text-transform: uppercase; }
+        .hdr-right .form-no { font-size: 20px; font-weight: 800; color: ${gold}; }
+
+        /* Title bar */
+        .title-bar { background: ${gold}; color: ${navy}; text-align: center; padding: 6px; font-size: 12px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; }
+
+        /* Body */
+        .body { border: 2px solid ${navy}; border-top: none; padding: 15px 20px; }
+
+        /* Photo box */
+        .top-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; gap: 20px; }
+        .photo-box { width: 90px; height: 110px; border: 2px dashed ${navy}; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; font-size: 8px; color: #aaa; text-align: center; }
+        .photo-box img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Section */
+        .section { margin-bottom: 12px; }
+        .section-title { font-size: 10px; font-weight: 800; color: white; background: ${navy}; padding: 4px 10px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+
+        /* Grid of fields */
+        .fg2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+        .fg3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; }
+        .field { border: 1px solid #ddd; padding: 5px 10px; }
+        .field:not(:last-child) { border-right: none; }
+        .fg2 .field:nth-child(2) { border-right: 1px solid #ddd; }
+        .fg3 .field:nth-child(3) { border-right: 1px solid #ddd; }
+        .field-label { font-size: 8px; color: #888; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+        .field-val { font-size: 11px; font-weight: 700; color: ${navy}; min-height: 14px; border-bottom: 1px solid #ccc; padding-bottom: 2px; }
+        .full { grid-column: 1 / -1; border-right: 1px solid #ddd !important; }
+
+        /* Declaration */
+        .decl { margin-top: 12px; border: 1px solid #ddd; border-radius: 6px; padding: 10px; background: #fafafa; font-size: 9.5px; color: #444; line-height: 1.6; }
+
+        /* Signatures */
+        .sigs { display: flex; justify-content: space-between; margin-top: 25px; gap: 20px; }
+        .sig { flex: 1; text-align: center; }
+        .sig-line { border-bottom: 1px solid #333; height: 25px; margin-bottom: 5px; }
+        .sig-label { font-size: 9px; color: #555; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+
+        /* Office use */
+        .office { margin-top: 15px; border: 2px dashed #ccc; border-radius: 6px; padding: 10px; }
+        .office-title { font-size: 9px; font-weight: 800; color: #aaa; text-transform: uppercase; letter-spacing: 2px; text-align: center; margin-bottom: 6px; }
+        .office-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+        .office-field { border-bottom: 1px solid #ccc; padding-bottom: 4px; }
+        .office-label { font-size: 8px; color: #aaa; text-transform: uppercase; }
+        .office-val { font-size: 11px; min-height: 14px; }
+
+        /* Footer */
+        .footer { margin-top: 12px; text-align: center; font-size: 8.5px; color: #777; border-top: 1px solid #eee; padding-top: 10px; }
+        .footer b { color: ${navy}; }
+
+        /* B&W Print Optimization */
+        @media print {
+          .hdr { background: #fff !important; color: #000 !important; border: 2px solid #000 !important; }
+          .hdr-name { color: #000 !important; }
+          .hdr-tag, .hdr-contact { color: #000 !important; }
+          .hdr-right .label, .hdr-right div { color: #000 !important; }
+          .hdr-right .form-no { color: #000 !important; }
+          .hdr-logo { background: transparent !important; }
+          .title-bar { background: #f5f5f5 !important; color: #000 !important; border: 2px solid #000 !important; border-top: none !important; }
+          .body { border: 2px solid #000 !important; border-top: none !important; }
+          .section-title { background: #f5f5f5 !important; color: #000 !important; border: 1px solid #000 !important; }
+          .field { border-color: #666 !important; }
+          .field-label { color: #333 !important; }
+          .field-val { color: #000 !important; border-bottom-color: #666 !important; }
+          .photo-box { border: 2px dashed #000 !important; color: #000 !important; }
+          .decl { border-color: #666 !important; color: #000 !important; background: #fff !important; }
+          .sig-line { border-bottom-color: #000 !important; }
+          .sig-label { color: #000 !important; }
+          .office { border-color: #000 !important; }
+          .office-title, .office-label { color: #000 !important; }
+          .office-field { border-bottom-color: #666 !important; }
+          .footer, .footer b { color: #000 !important; border-top-color: #000 !important; }
+        }
+      </style></head><body>
+      <div class="page">
+
+        <!-- HEADER -->
+        <div class="hdr">
+          <img class="hdr-logo" src="${logoSrc}" onerror="this.style.display='none'"/>
+          <div class="hdr-info">
+            <div class="hdr-name">${escHtml(school.name || 'Oxford Excellence Academy')}</div>
+            <div class="hdr-tag">${escHtml(school.tagline || 'LEARN • GROW • EXCEL')}</div>
+            <div class="hdr-contact">
+              ${school.address ? escHtml(school.address) + ' &nbsp;|&nbsp; ' : ''}${school.phone ? escHtml(school.phone) : ''}
+            </div>
+          </div>
+          <div class="hdr-right">
+            <div class="label">Form No.</div>
+            <div class="form-no">${escHtml(s.formNo || 'ADM-' + new Date().getFullYear() + '-' + String(s.roll||'001').padStart(4,'0'))}</div>
+            <div class="label" style="margin-top:6px;">Date</div>
+            <div style="font-size:10px;color:rgba(255,255,255,.8);font-weight:600;">${printDate}</div>
+          </div>
+        </div>
+
+        <!-- TITLE -->
+        <div class="title-bar">Student Admission Form</div>
+
+        <div class="body">
+
+          <!-- Top row: fields + photo -->
+          <div class="top-row">
+            <div style="flex:1;">
+              <!-- STUDENT INFO -->
+              <div class="section">
+                <div class="section-title">Student Information</div>
+                <div class="fg3" style="border: 1px solid #ddd;">
+                  <div class="field"><div class="field-label">Full Name</div><div class="field-val">${escHtml(s.name)}</div></div>
+                  <div class="field"><div class="field-label">Roll No.</div><div class="field-val">${escHtml(s.roll||'-')}</div></div>
+                  <div class="field"><div class="field-label">B-Form No. (NADRA)</div><div class="field-val">${escHtml(s.bform||'')}</div></div>
+                </div>
+                <div class="fg3" style="border: 1px solid #ddd; border-top: none;">
+                  <div class="field"><div class="field-label">Date of Birth</div><div class="field-val">${s.dob ? fmtDate(s.dob) : ''}</div></div>
+                  <div class="field"><div class="field-label">Gender</div><div class="field-val">${escHtml(s.gender||'')}</div></div>
+                  <div class="field"><div class="field-label">Blood Group</div><div class="field-val">${escHtml(s.blood||'')}</div></div>
+                </div>
+                <div class="fg2" style="border: 1px solid #ddd; border-top: none;">
+                  <div class="field"><div class="field-label">Religion</div><div class="field-val">${escHtml(s.religion||'')}</div></div>
+                  <div class="field"><div class="field-label">Nationality</div><div class="field-val">${escHtml(s.nationality||'Pakistani')}</div></div>
+                </div>
+                <div class="fg2" style="border: 1px solid #ddd; border-top: none;">
+                  <div class="field"><div class="field-label">Class Admitted</div><div class="field-val">${escHtml(cls?.name||'')}${cls?.section?' '+escHtml(cls.section):''}</div></div>
+                  <div class="field"><div class="field-label">Academic Year</div><div class="field-val">${escHtml(settings.schoolYear||new Date().getFullYear())}</div></div>
+                </div>
+              </div>
+            </div>
+            <!-- Photo Box -->
+            <div class="photo-box">
+              ${s.photo ? `<img src="${s.photo}"/>` : '<div>Paste<br>Photo<br>Here</div>'}
+            </div>
+          </div>
+
+          <!-- PARENT / GUARDIAN INFO -->
+          <div class="section">
+            <div class="section-title">Parent / Guardian Information</div>
+            <div class="fg2" style="border: 1px solid #ddd;">
+              <div class="field"><div class="field-label">Father's Name</div><div class="field-val">${escHtml(s.father||'')}</div></div>
+              <div class="field"><div class="field-label">Mother's Name</div><div class="field-val">${escHtml(s.mother||'')}</div></div>
+            </div>
+            <div class="fg3" style="border: 1px solid #ddd; border-top: none;">
+              <div class="field"><div class="field-label">Phone / WhatsApp</div><div class="field-val">${escHtml(s.whatsapp||s.fphone||'')}</div></div>
+              <div class="field"><div class="field-label">Father's CNIC</div><div class="field-val">${escHtml(s.cnic||'')}</div></div>
+              <div class="field"><div class="field-label">Occupation</div><div class="field-val">${escHtml(s.occupation||'')}</div></div>
+            </div>
+            <div style="border: 1px solid #ddd; border-top: none;">
+              <div class="field"><div class="field-label">Home Address</div><div class="field-val" style="min-height:20px;">${escHtml(s.address||'')}</div></div>
+            </div>
+          </div>
+
+          <!-- PREVIOUS SCHOOL -->
+          <div class="section">
+            <div class="section-title">Previous School (if any)</div>
+            <div class="fg2" style="border: 1px solid #ddd;">
+              <div class="field"><div class="field-label">School Name</div><div class="field-val">${escHtml(s.prevSchool||'')}</div></div>
+              <div class="field"><div class="field-label">Last Class Passed</div><div class="field-val"></div></div>
+            </div>
+          </div>
+
+          <!-- DECLARATION -->
+          <div class="decl">
+            <b>Declaration:</b> I/We hereby declare that the information provided above is true and correct to the best of my/our knowledge. I/We agree to abide by all the rules and regulations of the institution and understand that any false information may result in cancellation of admission.
+          </div>
+
+          <!-- SIGNATURES -->
+          <div class="sigs">
+            <div class="sig"><div class="sig-line"></div><div class="sig-label">Parent / Guardian Signature</div></div>
+            <div class="sig"><div class="sig-line"></div><div class="sig-label">Admitting Teacher</div></div>
+            <div class="sig"><div class="sig-line"></div><div class="sig-label">Principal Signature & Stamp</div></div>
+          </div>
+
+          <!-- OFFICE USE ONLY -->
+          <div class="office">
+            <div class="office-title">— For Office Use Only —</div>
+            <div class="office-row">
+              <div class="office-field"><div class="office-label">Fee Structure</div><div class="office-val"></div></div>
+              <div class="office-field"><div class="office-label">Admission Fee Paid</div><div class="office-val"></div></div>
+              <div class="office-field"><div class="office-label">Student ID Issued</div><div class="office-val">${escHtml(s.roll||'')}</div></div>
+            </div>
+          </div>
+
+        </div><!-- /body -->
+
+        <div class="footer">
+          <b>${escHtml(school.name||'Oxford Excellence Academy')}</b> &nbsp;•&nbsp; Admission Form &nbsp;•&nbsp; Generated: ${printDate} &nbsp;•&nbsp; This is an official school document
+        </div>
+      </div>
+      <scr`+`ipt>window.onload=function(){setTimeout(function(){window.print();},700);};</scr`+`ipt>
+      </body></html>`;
+
+      pw.document.write(html);
+      pw.document.close();
+    }
+
+    /* ------------------------------- MODAL / TOAST / NOTIF ------------------------------- */
+    function openModal(html) { const body = document.getElementById('modal-body'); body.innerHTML = html; document.getElementById('modal-bg').classList.add('open'); }
+    function closeModal() { document.getElementById('modal-bg').classList.remove('open'); }
+
+    let _toastTimer = null;
+    function showToast(msg, type = '', dur = 2800) {
+      const t = document.getElementById('toast'); t.textContent = msg; t.className = 'toast show' + (type ? ' ' + type : '');
+      clearTimeout(_toastTimer); _toastTimer = setTimeout(() => t.className = 'toast', dur);
+    }
+
+    function buildNotifPanel() {
+      const notifs = [
+        ...(curRole === 'admin' ? (DB.admissions || []).filter(a => (a.status || 'new') === 'new').slice(0, 3).map(a => ({ ic: '', tx: `New admission: ${a.studentName}`, tm: fmtDate(a.createdAt), bg: 'var(--pl)' })) : []),
+        ...DB.notices.slice(-3).map(n => ({ ic: '', tx: n.title, tm: fmtDate(n.date), bg: 'var(--pl)' })),
+        ...allStus().filter(s => !(DB.fees.payments[s.id] || {})['f1']?.paid).slice(0, 2).map(s => ({ ic: '', tx: `Fee pending: ${s.name}`, tm: '', bg: 'var(--rl)' })),
+      ];
+      const np = document.getElementById('np-list');
+      if (np) np.innerHTML = notifs.map(n => `<div class="np-it"><div class="np-ic" style="background:${n.bg};">${n.ic}</div><div><div class="np-tx">${n.tx}</div><div class="np-tm">${n.tm}</div></div></div>`).join('') || '<div style="padding:14px;text-align:center;font-size:.78rem;color:var(--ink4);">All clear ?</div>';
+      const cnt = document.getElementById('np-cnt'); if (cnt) cnt.textContent = notifs.length ? `? ${notifs.length} new` : '';
+      const dot = document.getElementById('ndot'); if (dot) dot.style.display = notifs.length ? 'block' : 'none';
+    }
+    function toggleNotif() { document.getElementById('np').classList.toggle('open'); }
+    function closeNotif() { document.getElementById('np').classList.remove('open'); }
+    document.addEventListener('click', e => { const np = document.getElementById('np'); if (np?.classList.contains('open') && !np.contains(e.target) && !e.target.closest('.ic-btn')) closeNotif(); });
+    function waMsg(wa, msg) { openWhatsAppMessage(wa, msg); }
+    /* INIT handled after initDB() resolves above */
+
+
+
+    function initScrollReveals() {
+      const items = document.querySelectorAll('.reveal');
+      if (!items.length) return;
+      if (!('IntersectionObserver' in window)) { items.forEach(el => el.classList.add('in-view')); return; }
+      const io = new IntersectionObserver(entries => {
+        entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('in-view'); io.unobserve(entry.target); } });
+      }, { threshold: .16 });
+      items.forEach(el => io.observe(el));
+    }
+    window.addEventListener('load', initScrollReveals);
+    /* -- HERO SLIDESHOW -- */
+    let _hsIdx = 0;
+    let _hsTimer = null;
+
+    function goSlide(n) {
+      const slides = document.querySelectorAll('.hs-slide');
+      const dots = document.querySelectorAll('.hs-dot');
+      if (!slides.length) return;
+      slides[_hsIdx]?.classList.remove('active');
+      dots[_hsIdx]?.classList.remove('active');
+      _hsIdx = (n + slides.length) % slides.length;
+      slides[_hsIdx]?.classList.add('active');
+      dots[_hsIdx]?.classList.add('active');
+    }
+
+    function changeSlide(dir) {
+      clearInterval(_hsTimer);
+      goSlide(_hsIdx + dir);
+      startHsTimer();
+    }
+
+    function startHsTimer() {
+      clearInterval(_hsTimer);
+      _hsTimer = setInterval(() => goSlide(_hsIdx + 1), 4500);
+    }
+
+    startHsTimer();
+
+    // Offline / Online listeners for robust offline scanning
+    window.addEventListener('offline', () => {
+      if (typeof showSyncBadge === 'function') showSyncBadge('Offline - Scans saved locally', '#f59e0b');
+      if (typeof showToast === 'function') showToast('You are offline! Scans will be saved to device memory securely.', 'tw2', 6000);
+    });
+    window.addEventListener('online', () => {
+      if (typeof showSyncBadge === 'function') showSyncBadge('Back online. Syncing...', '#3b82f6');
+      if (typeof showToast === 'function') showToast('Connection Restored! Syncing attendance to cloud...', 'ts', 4000);
+      if (typeof pushCloudDB === 'function') pushCloudDB();
+    });
+
