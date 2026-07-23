@@ -5106,8 +5106,17 @@
 <div class="ibox" id="admission-sync-note" style="margin-bottom:12px;">Online applications load from Supabase when Admin is signed in. Public visitors can submit through the landing page after running the SQL setup.</div>
 <div class="card fu">
   <div class="ch"><div class="ct">Applications</div><button class="btn btn-gh btn-sm" onclick="refreshAdmissionApplications()">Refresh Online</button></div>
-    ${apps.length ? `<div class="tbl-wrap"><table><thead><tr><th>Student</th><th>Class</th><th>Parent</th><th>Phone</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody>${apps.map(a => `<tr><td><b>${escHtml(a.studentName)}</b><div style="font-size:.68rem;color:var(--ink4);">${escHtml(a.gender || '')}${a.dob ? ' - DOB ' + fmtDate(a.dob) : ''}</div></td><td>${escHtml(a.className || '-')}</td><td>${escHtml(a.father || '-')}<div style="font-size:.68rem;color:var(--ink4);">${escHtml(a.email || '')}</div></td><td>${escHtml(a.phone || '-')}</td><td>${fmtDate(a.createdAt)}</td><td><span class="badge ${admissionStatusClass(a.status)}">${escHtml(a.status || 'new')}</span></td><td><div style="display:flex;gap:6px;flex-wrap:wrap;"><button class="btn btn-gh btn-xs" onclick="openAdmissionDetail('${a.id}')">View</button><a href="mailto:${a.email}?subject=Regarding Admission for ${a.studentName}" class="btn btn-gh btn-xs" onclick="contactAdmission('${a.id}')">Email</a><button class="btn btn-g btn-xs" onclick="approveAdmission('${a.id}')">Approve</button></div></td></tr>`).join('')}</tbody></table></div>` : '<div style="text-align:center;color:var(--ink4);padding:24px;">No admission applications yet.</div>'}
+    ${apps.length ? `<div class="tbl-wrap"><table><thead><tr><th>Student</th><th>Class</th><th>Parent</th><th>Phone</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody>${apps.map(a => `<tr><td><b>${escHtml(a.studentName)}</b><div style="font-size:.68rem;color:var(--ink4);">${escHtml(a.gender || '')}${a.dob ? ' - DOB ' + fmtDate(a.dob) : ''}</div></td><td>${escHtml(a.className || '-')}</td><td>${escHtml(a.father || '-')}<div style="font-size:.68rem;color:var(--ink4);">${escHtml(a.email || '')}</div></td><td>${escHtml(a.phone || '-')}</td><td>${fmtDate(a.createdAt)}</td><td><span class="badge ${admissionStatusClass(a.status)}">${escHtml(a.status || 'new')}</span></td><td><div style="display:flex;gap:6px;flex-wrap:wrap;"><button class="btn btn-gh btn-xs" onclick="openAdmissionDetail('${a.id}')">View</button><a href="mailto:${a.email}?subject=Regarding Admission for ${a.studentName}" class="btn btn-gh btn-xs" onclick="contactAdmission('${a.id}')">Email</a><button class="btn btn-g btn-xs" onclick="approveAdmission('${a.id}')">Approve</button><button class="btn btn-r btn-xs" onclick="deleteAdmission('${a.id}')">Delete</button></div></td></tr>`).join('')}</tbody></table></div>` : '<div style="text-align:center;color:var(--ink4);padding:24px;">No admission applications yet.</div>'}
 </div>`;
+    }
+
+    async function deleteAdmission(id) {
+      if (!confirm('Delete this admission application?')) return;
+      DB.admissions = (DB.admissions || []).filter(a => a.id !== id);
+      saveDB();
+      if (_sb) { try { await _sb.from('admission_applications').delete().eq('id', id); } catch (e) {} }
+      goPage('admissions');
+      showToast('Application deleted', 'ts');
     }
 
     async function refreshAdmissionApplications(silent = false) {
