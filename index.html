@@ -5498,7 +5498,11 @@
       };
 
       const norm = s => String(s || '').replace(/\s+/g, '').toLowerCase();
-      const existingStudent = allStus().find(s => (s.roll && String(s.roll).trim() === String(roll).trim()) || (s.name && norm(s.name) === norm(name)));
+      const existingStudent = allStus().find(s => {
+        if (s.roll && roll && String(s.roll).trim() === String(roll).trim()) return true;
+        if (s.name && norm(s.name) === norm(name) && s.classId === classId) return true;
+        return false;
+      });
       let newId;
       if (existingStudent) {
         newId = existingStudent.id;
