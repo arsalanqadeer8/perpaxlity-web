@@ -5592,11 +5592,10 @@
         const rawA = row.previous_arrears || row.previous_arrear || row.arrears || row.arrear || row.previous_arrears_balance || row.arrear_balance || row.prev_arrears || '';
         const parsed = num(rawA);
         csvArrearsTotal += parsed;
-        console.log(`[Import] Row ${i+1} "${row.name}": raw arrears="${rawA}" → parsed=${parsed}`);
         if (addBulkStudent(row, fallbackClassId, i)) added++;
       });
       const dbArrearsTotal = allStus().reduce((s, x) => s + num(x.arrears || 0), 0);
-      console.log(`[Import] CSV arrears total: ${csvArrearsTotal} | DB arrears total after import: ${dbArrearsTotal}`);
+      alert(`Import Complete!\n\nStudents updated/added: ${added}\nTotal Arrears Found in CSV: PKR ${csvArrearsTotal.toLocaleString()}\n\nIf the arrears sum is lower than you expect, please check your CSV file to ensure all values are entered correctly.`);
       saveDB();
       closeModal();
       showToast(`✅ ${added} students imported. CSV Arrears: PKR ${csvArrearsTotal.toLocaleString()} | DB Arrears: PKR ${dbArrearsTotal.toLocaleString()}`, 'ts');
