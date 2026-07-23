@@ -4382,6 +4382,22 @@
       DB.school.slides = (DB.school.slides && DB.school.slides.length ? DB.school.slides : defaultSlides()).slice(0, 4);
       DB.admissions = DB.admissions || [];
       while (DB.school.slides.length < 4) DB.school.slides.push(defaultSlides()[DB.school.slides.length]);
+      
+      // Cleanup orphaned students (e.g. from test admissions with invalid class IDs)
+      const validClassIds = new Set((DB.classes || []).map(c => c.id));
+      if (DB.students) {
+        Object.keys(DB.students).forEach(cid => {
+          if (!validClassIds.has(cid)) {
+            // Remove from DB.users as well
+            const orphanedIds = DB.students[cid].map(s => s.id);
+            if (DB.users && orphanedIds.length) {
+              DB.users = DB.users.filter(u => !(u.role === 'student' && orphanedIds.includes(u.studentId)));
+            }
+            delete DB.students[cid];
+          }
+        });
+      }
+
       repairPortalProfilesAndIcons();
       DB.settings = DB.settings || {};
       DB.settings.currency = DB.settings.currency || 'PKR';
