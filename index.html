@@ -5497,7 +5497,8 @@
         attendance: 0
       };
 
-      const existingStudent = allStus().find(s => (s.roll && String(s.roll).trim() === String(roll).trim()) || (s.name && s.name.trim().toLowerCase() === name.trim().toLowerCase()));
+      const norm = s => String(s || '').replace(/\s+/g, '').toLowerCase();
+      const existingStudent = allStus().find(s => (s.roll && String(s.roll).trim() === String(roll).trim()) || (s.name && norm(s.name) === norm(name)));
       let newId;
       if (existingStudent) {
         newId = existingStudent.id;
@@ -5567,6 +5568,22 @@
     function importBulkRows(rows) {
       if (!rows.length) { showToast('CSV has no student rows', 'te'); return; }
       const fallbackClassId = document.getElementById('bi-cls')?.value || curCls || DB.classes[0]?.id;
+      
+      let dedupCount = 0;
+      Object.keys(DB.students).forEach(cid => {
+         const list = DB.students[cid];
+         if (!Array.isArray(list)) return;
+         const unique = [];
+         const seen = new Set();
+         for (let i = list.length - 1; i >= 0; i--) {
+            const nm = String(list[i].name || '').replace(/\s+/g, '').toLowerCase();
+            if (!seen.has(nm)) { seen.add(nm); unique.unshift(list[i]); }
+            else { dedupCount++; }
+         }
+         DB.students[cid] = unique;
+      });
+      if (dedupCount > 0) console.log(`Cleaned up ${dedupCount} duplicate students.`);
+
       let added = 0;
       // Debug: log each row's arrears parsing
       const studentRows = rows.filter(r => !r.role || String(r.role).toLowerCase() === 'student');
