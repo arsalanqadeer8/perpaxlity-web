@@ -3436,27 +3436,26 @@
             </div>
         </div>
     </section>
-
-    <!-- Student of the Month -->
-    <section class="ox-events" id="student-month">
-        <div class="ox-sec-head gs-scroll-up">
-            <span class="ox-sec-badge" style="color:#ffffff;">Excellence Recognized</span>
-            <h2>Student of the Month</h2>
-            <p>Celebrating outstanding academic achievement and character.</p>
-        </div>
-        <div class="ox-event-list gs-scale-in" style="max-width: 700px;">
-            <div class="ox-event-row" style="flex-direction: column; text-align: center; padding: 50px 30px;">
-                <div style="width: 140px; height: 140px; border-radius: 50%; overflow: hidden; margin: 0 auto 20px; border: 4px solid #d4af37;">
-                    <img src="https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Student of the month" style="width:100%;height:100%;object-fit:cover;"/>
-                </div>
-                <div class="ox-event-details" style="flex: 1 1 auto; text-align: center;">
-                    <h3 style="font-size: 1.8rem; margin-bottom: 5px;">Aisha Rahman</h3>
-                    <div style="color: #d4af37; font-weight: 700; margin-bottom: 15px; font-size: 1.1rem;">Grade 10</div>
-                    <p style="color: #94a3b8; line-height: 1.7;">Aisha has shown exceptional dedication to her studies, particularly in the sciences. Her leadership in the STEM Innovation Fair and her willingness to tutor younger students exemplify the core values of Oxford Excellence Academy.</p>
-                </div>
-            </div>
-        </div>
-    </section>
+  <!-- Student of the Month -->
+  <section class="ox-events" id="student-month">
+      <div class="ox-sec-head gs-scroll-up">
+          <span class="ox-sec-badge" style="color:#ffffff;">Excellence Recognized</span>
+          <h2>Student of the Month</h2>
+          <p>Celebrating outstanding academic achievement and character.</p>
+      </div>
+      <div class="ox-event-list gs-scale-in" style="max-width: 700px;">
+          <div class="ox-event-row" style="flex-direction: column; text-align: center; padding: 50px 30px;">
+              <div style="width: 140px; height: 140px; border-radius: 50%; overflow: hidden; margin: 0 auto 20px; border: 4px solid #d4af37;">
+                  <img id="som-img" src="https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Student of the month" style="width:100%;height:100%;object-fit:cover;"/>
+              </div>
+              <div class="ox-event-details" style="flex: 1 1 auto; text-align: center;">
+                  <h3 id="som-name" style="font-size: 1.8rem; margin-bottom: 5px;">Aisha Rahman</h3>
+                  <div id="som-grade" style="color: #d4af37; font-weight: 700; margin-bottom: 15px; font-size: 1.1rem;">Grade 10</div>
+                  <p id="som-desc" style="color: #94a3b8; line-height: 1.7;">Aisha has shown exceptional dedication to her studies, particularly in the sciences. Her leadership in the STEM Innovation Fair and her willingness to tutor younger students exemplify the core values of Oxford Excellence Academy.</p>
+              </div>
+          </div>
+      </div>
+  </section>
 
     <!-- Testimonials -->
     <section class="ox-testimonials">
@@ -3990,6 +3989,7 @@
       const publicData = await loadPublicSite();
       if (publicData) mergePublicSite(publicData);
       stripStoredPasswords();
+      updateSOM();
       saveLocalDB();
     }
 
@@ -4262,6 +4262,33 @@
     function attPct(cid, sid) { const a = (DB.attendance[cid] || {})[sid] || {}; const arr = Object.values(a); if (!arr.length) return clsStus(cid).find(s => s.id === sid)?.attendance || 0; return Math.round(arr.filter(x => x === 'P').length / arr.length * 100); }
     function nextRoll(cid) { const s = clsStus(cid); return String(s.length + 1).padStart(3, '0'); }
     function nowHHMM() { const n = new Date(); return `${String(n.getHours()).padStart(2, '0')}:${String(n.getMinutes()).padStart(2, '0')}`; }
+    function updateSOM() {
+      const som = DB?.settings?.studentOfTheMonth;
+      if (som) {
+        const nameEl = document.getElementById('som-name');
+        const gradeEl = document.getElementById('som-grade');
+        const descEl = document.getElementById('som-desc');
+        const imgEl = document.getElementById('som-img');
+        if (nameEl) nameEl.textContent = som.name;
+        if (gradeEl) gradeEl.textContent = som.grade;
+        if (descEl) descEl.textContent = som.description;
+        if (som.photo && imgEl) imgEl.src = som.photo;
+      }
+    }
+    function makeStudentOfMonth(sid, cid) {
+      const s = clsStus(cid).find(x => x.id === sid);
+      const cls = DB.classes.find(c => c.id === cid);
+      if (!s || !cls) return;
+      const desc = prompt(`Why is ${s.name} the Student of the Month?`, `Has shown exceptional dedication and outstanding academic achievement.`);
+      if (desc === null) return;
+      if (!DB.settings) DB.settings = {};
+      DB.settings.studentOfTheMonth = { name: s.name, grade: cls.name, description: desc, photo: s.photo || '' };
+      saveDB();
+      updateSOM();
+      showToast(`${s.name} is now Student of the Month!`, 'ts');
+      closeModal();
+    }
+
     function filterTable(input, tableId) {
       const q = input.value.toLowerCase().trim();
       const tbody = tableId ? document.getElementById(tableId) : input.closest('.card')?.querySelector('tbody');
@@ -5443,6 +5470,7 @@
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><div style="font-size:.76rem;font-weight:700;color:var(--ink2);">Subject Scores</div><select class="fi" style="width:100px;padding:2px 5px;font-size:.7rem;height:auto;" onchange="curTerm=this.value;closeModal();openStuDetail('${sid}','${cid}')">${DB.settings.terms.map(t => `<option value="${t.id}" ${curTerm===t.id?'selected':''}>${t.name}</option>`).join('')}</select></div>
   <div class="score-mini">${getClsSubjects(cid).map(sub => { const v = (DB.grades[cid + '_' + curTerm]?.[sid] || {})[sub.id] || 0; return `<div class="sm-row"><div class="sm-lbl">${sub.icon} ${sub.name}</div><div class="sm-bar"><div class="sm-fill" style="width:${v}%;background:${sub.color};"></div></div><div class="sm-val" style="color:${sub.color};">${v || '-'}</div></div>`; }).join('')}</div>
   <div class="m-btns" style="margin-top:13px;flex-wrap:wrap;">
+    ${curRole === 'admin' ? `<button class="btn btn-gh btn-sm" style="color:#d4af37;font-weight:700;" onclick="makeStudentOfMonth('${sid}','${cid}')">⭐ Set Student of Month</button>` : ''}
     ${curRole !== 'teacher' ? `<button class="btn btn-p btn-sm" onclick="closeModal();openAddStudentModal('${sid}')"> Edit</button>` : ''}
       ${s.whatsapp ? `<button class="btn btn-wa btn-sm" onclick="waMsg('${s.whatsapp}','Dear parent of ${s.name}, greetings from ${DB.school.name}.')"> WhatsApp</button>` : ''}
     <button class="btn btn-gh btn-sm" onclick="closeModal();switchCls('${cid}');goPage('reportcards');setTimeout(()=>openReportCard('${sid}','${cid}'),200)"> Report Card</button>
@@ -6886,7 +6914,7 @@
 
     function saveAllSettings() { saveDB(); pushPublicSite(); applyBranding(); showToast('Settings saved and published', 'ts'); }
     function exportData() { const blob = new Blob([JSON.stringify(DB, null, 2)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `oxford-backup-${today()}.json`; a.click(); showToast('? Exported', 'ts'); }
-    function importData(inp) { const f = inp.files[0]; if (!f) return; const r = new FileReader(); r.onload = e => { try { DB = JSON.parse(e.target.result); saveDB(); applyBranding(); buildShell(); goPage('dashboard'); showToast('? Data imported', 'ts'); } catch { showToast('? Invalid file', 'te'); } }; r.readAsText(f); }
+    function importData(inp) { const f = inp.files[0]; if (!f) return; const r = new FileReader(); r.onload = e => { try { DB = JSON.parse(e.target.result); saveDB(); applyBranding(); buildShell(); updateSOM(); goPage('dashboard'); showToast('? Data imported', 'ts'); } catch { showToast('? Invalid file', 'te'); } }; r.readAsText(f); }
     async function resetAll() { if (!confirm(' Delete ALL data permanently?')) return; const v = prompt('Type RESET to confirm:'); if (v !== 'RESET') { showToast('Cancelled'); return; } localStorage.removeItem(SK); if (_sb) { try { await _sb.from('db_snapshot').delete().eq('id', 1); } catch(e) {} } location.reload(); }
 
     /* ------------------------------- STUDENT PAGES ------------------------------- */
