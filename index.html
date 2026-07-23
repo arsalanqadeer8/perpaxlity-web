@@ -4262,6 +4262,15 @@
     function attPct(cid, sid) { const a = (DB.attendance[cid] || {})[sid] || {}; const arr = Object.values(a); if (!arr.length) return clsStus(cid).find(s => s.id === sid)?.attendance || 0; return Math.round(arr.filter(x => x === 'P').length / arr.length * 100); }
     function nextRoll(cid) { const s = clsStus(cid); return String(s.length + 1).padStart(3, '0'); }
     function nowHHMM() { const n = new Date(); return `${String(n.getHours()).padStart(2, '0')}:${String(n.getMinutes()).padStart(2, '0')}`; }
+    function filterTable(input, tableId) {
+      const q = input.value.toLowerCase().trim();
+      const tbody = tableId ? document.getElementById(tableId) : input.closest('.card')?.querySelector('tbody');
+      if (!tbody) return;
+      tbody.querySelectorAll('tr').forEach(tr => {
+        const text = tr.textContent.toLowerCase();
+        tr.style.display = text.includes(q) ? '' : 'none';
+      });
+    }
     function num(v) {
       if (typeof v === 'number') return isNaN(v) ? 0 : v;
       let str = String(v || '').replace(/,/g, '');
@@ -5039,6 +5048,7 @@
 <div class="ph ph-row fu">
   <div><div class="ph-tag"> Students</div><h1>Student Roster</h1><div class="ph-sub">${cls?.name || ''} ${cls?.section || ''} - ${sts.length} enrolled</div></div>
 <div class="ph-acts">
+    <input type="text" class="fi" placeholder="Search student or roll..." onkeyup="filterTable(this, 'students-tbody')" style="width:200px; padding:6px 10px; margin-right:4px;"/>
     <button class="btn btn-gh btn-sm" onclick="switchIdCardClass('${curCls}')">Print IDs</button>
     ${curRole !== 'teacher' ? `<button class="btn btn-gh btn-sm" onclick="openBulkModal()"> Bulk Import</button>
     <button class="btn btn-p" onclick="openAddStudentModal()">+ Add Student</button>` : ''}
@@ -5055,7 +5065,7 @@
   <div class="tw">
     <table>
       <thead><tr><th>#</th><th>Photo</th><th>Name</th><th>Roll No.</th><th>Gender</th><th>Avg</th><th>Att%</th><th>Fees</th><th>Login</th><th>Actions</th></tr></thead>
-      <tbody>
+      <tbody id="students-tbody">
           ${sts.length === 0 ? `<tr><td colspan="10" style="text-align:center;padding:28px;"><div style="color:var(--ink4);margin-bottom:10px;">No students yet</div>${curRole !== 'teacher' ? `<button class="btn btn-p btn-sm" onclick="openAddStudentModal()">+ Add First Student</button>` : ''}</td></tr>` : ''}
           ${sts.map((s, i) => {
         const av = avgStu(curCls, s.id); const ap = attPct(curCls, s.id); const fam = s.familyId ? DB.families[s.familyId] : null; return `<tr>
@@ -5105,8 +5115,12 @@
 </div>
 <div class="ibox" id="admission-sync-note" style="margin-bottom:12px;">Online applications load from Supabase when Admin is signed in. Public visitors can submit through the landing page after running the SQL setup.</div>
 <div class="card fu">
-  <div class="ch"><div class="ct">Applications</div><button class="btn btn-gh btn-sm" onclick="refreshAdmissionApplications()">Refresh Online</button></div>
-    ${apps.length ? `<div class="tbl-wrap"><table><thead><tr><th>Student</th><th>Class</th><th>Parent</th><th>Phone</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody>${apps.map(a => `<tr><td><b>${escHtml(a.studentName)}</b><div style="font-size:.68rem;color:var(--ink4);">${escHtml(a.gender || '')}${a.dob ? ' - DOB ' + fmtDate(a.dob) : ''}</div></td><td>${escHtml(a.className || '-')}</td><td>${escHtml(a.father || '-')}<div style="font-size:.68rem;color:var(--ink4);">${escHtml(a.email || '')}</div></td><td>${escHtml(a.phone || '-')}</td><td>${fmtDate(a.createdAt)}</td><td><span class="badge ${admissionStatusClass(a.status)}">${escHtml(a.status || 'new')}</span></td><td><div style="display:flex;gap:6px;flex-wrap:wrap;"><button class="btn btn-gh btn-xs" onclick="openAdmissionDetail('${a.id}')">View</button><a href="mailto:${a.email}?subject=Regarding Admission for ${a.studentName}" class="btn btn-gh btn-xs" onclick="contactAdmission('${a.id}')">Email</a><button class="btn btn-g btn-xs" onclick="approveAdmission('${a.id}')">Approve</button><button class="btn btn-r btn-xs" onclick="deleteAdmission('${a.id}')">Delete</button></div></td></tr>`).join('')}</tbody></table></div>` : '<div style="text-align:center;color:var(--ink4);padding:24px;">No admission applications yet.</div>'}
+  <div class="ch">
+    <div class="ct">Applications</div>
+    <input type="text" class="fi" placeholder="Search applicant..." onkeyup="filterTable(this, 'admissions-tbody')" style="width:200px; padding:6px 10px; margin-left:auto; margin-right:8px;"/>
+    <button class="btn btn-gh btn-sm" onclick="refreshAdmissionApplications()">Refresh Online</button>
+  </div>
+    ${apps.length ? `<div class="tbl-wrap"><table><thead><tr><th>Student</th><th>Class</th><th>Parent</th><th>Phone</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody id="admissions-tbody">${apps.map(a => `<tr><td><b>${escHtml(a.studentName)}</b><div style="font-size:.68rem;color:var(--ink4);">${escHtml(a.gender || '')}${a.dob ? ' - DOB ' + fmtDate(a.dob) : ''}</div></td><td>${escHtml(a.className || '-')}</td><td>${escHtml(a.father || '-')}<div style="font-size:.68rem;color:var(--ink4);">${escHtml(a.email || '')}</div></td><td>${escHtml(a.phone || '-')}</td><td>${fmtDate(a.createdAt)}</td><td><span class="badge ${admissionStatusClass(a.status)}">${escHtml(a.status || 'new')}</span></td><td><div style="display:flex;gap:6px;flex-wrap:wrap;"><button class="btn btn-gh btn-xs" onclick="openAdmissionDetail('${a.id}')">View</button><a href="mailto:${a.email}?subject=Regarding Admission for ${a.studentName}" class="btn btn-gh btn-xs" onclick="contactAdmission('${a.id}')">Email</a><button class="btn btn-g btn-xs" onclick="approveAdmission('${a.id}')">Approve</button><button class="btn btn-r btn-xs" onclick="deleteAdmission('${a.id}')">Delete</button></div></td></tr>`).join('')}</tbody></table></div>` : '<div style="text-align:center;color:var(--ink4);padding:24px;">No admission applications yet.</div>'}
 </div>`;
     }
 
@@ -5489,6 +5503,7 @@
         familyId = existing?.id || uid();
         if (!DB.families[familyId]) DB.families[familyId] = { id: familyId, parentName: familyName || parentEmail || (name + ' Family'), phone: row.parent_phone || row.father_phone || row.phone || row.contact || '', email: parentEmail, address: row.address || '', whatsapp: row.whatsapp || '', studentIds: [] };
       }
+      function num(v) { return Number(String(v || 0).replace(/[^0-9.-]+/g, '')) || 0; }
       const rawFeeStatus = row.fee_status || row.feestatus || (row.fees && isNaN(Number(String(row.fees).replace(/,/g,''))) ? row.fees : '');
       const fees = (rawFeeStatus && String(rawFeeStatus).toLowerCase() === 'paid') ? 'Paid' : 'Pending';
       const rawCustomFee = row.monthly_fee || row.monthlyfee || row.monthly || row.custom_fee || row.customfee || row.fee_amount || row.fee || row.tuition_fee || row.tuitionfee || row.tuition || row.fees_amount || row.monthly_dues || (row.fees && !isNaN(Number(String(row.fees).replace(/,/g,''))) ? row.fees : '');
@@ -5950,10 +5965,13 @@
     <div style="padding-top:9px;font-weight:800;font-size:.83rem;display:flex;justify-content:space-between;border-top:1px solid var(--border);margin-top:4px;"><span>Mandatory Total</span><span style="color:var(--p);">${fmtMoney(totalAnnual)}</span></div>
   </div>
   <div class="card fu d3" style="padding:0;overflow:hidden;">
-    <div class="ch" style="padding:13px 14px 9px;"><div class="ct"> Student Fee Status</div></div>
+    <div class="ch" style="padding:13px 14px 9px;">
+      <div class="ct"> Student Fee Status</div>
+      <input type="text" class="fi" placeholder="Search student or roll..." onkeyup="filterTable(this, 'fees-tbody')" style="width:200px; padding:6px 10px; margin-left:auto;"/>
+    </div>
     <div class="tw" style="border:none;"><table>
       <thead><tr><th>Student</th><th>Class</th><th>Mandatory</th><th>Balance</th><th>Action</th></tr></thead>
-      <tbody>${all.map(s => {
+      <tbody id="fees-tbody">${all.map(s => {
         const sum = studentFeeSummary(s.id);
         const complete = sum.mandatory.length && sum.mandatoryPaid === sum.mandatory.length;
         const cls = DB.classes.find(c => c.id === s.classId);
