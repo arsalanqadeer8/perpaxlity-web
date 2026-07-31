@@ -1,5 +1,5 @@
 const fs = require('fs');
-const html = fs.readFileSync('H:/web/index.html', 'utf8');
+const html = fs.readFileSync('index.html', 'utf8');
 const scriptRegex = /<script>([\s\S]*?)<\/script>/g;
 let match;
 let i = 0;
