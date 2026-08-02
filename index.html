@@ -4830,7 +4830,7 @@
         { p: 'grades', i: '', l: 'Grades', s: 'Grades' },
         { p: 'students', i: '', l: 'My Students', s: 'Class' },
         { p: 'notices', i: '', l: 'Notices & Assignments', s: 'News' },
-        { p: 'timetable', i: '', l: 'Timetable', s: 'Sched' },
+        { p: 'mytimetable', i: '', l: 'My Timetable', s: 'Sched' },
         { p: 'mypayroll', i: '', l: 'My Payslips', s: 'Payslip' },
       ];
       return [
@@ -4885,7 +4885,8 @@
         fees: pgFees, exams: pgExams, notices: pgNotices, timetable: pgTimetable,
         teachers: pgTeachers, payroll: pgPayroll, teacheratt: pgTeacherAtt, subjects: pgSubjects,
         reportcards: pgReportCards, idcards: pgClassIdCards, families: pgFamilies, settings: pgSettings,
-        mygrades: pgMyGrades, myattend: pgMyAttend, qrcard: pgQRCard, myfees: pgMyFees, profile: pgProfile, mypayroll: pgMyPayroll
+        mygrades: pgMyGrades, myattend: pgMyAttend, qrcard: pgQRCard, myfees: pgMyFees, profile: pgProfile, mypayroll: pgMyPayroll,
+        mytimetable: pgMyTimetable
       };
       return (map[p] || pgAdminDash)();
     }
@@ -6562,23 +6563,101 @@
     function saveNotice(eid) { const title = (document.getElementById('mn-title')?.value || '').trim(); if (!title) { showToast('Title required', 'te'); return; } const obj = { title, body: document.getElementById('mn-body')?.value?.trim() || '', target: document.getElementById('mn-target')?.value || 'All', date: document.getElementById('mn-date')?.value || today() }; if (eid) { const n = DB.notices.find(x => x.id === eid); if (n) Object.assign(n, obj); } else DB.notices.push({ id: uid(), ...obj }); saveDB(); closeModal(); showToast('? Notice posted', 'ts'); goPage('notices'); buildNotifPanel(); }
 
     /* ------------------------------- TIMETABLE ------------------------------- */
-    const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
-    const PERIODS = ['Period 1', 'Period 2', 'Period 3', 'Break', 'Period 4', 'Period 5', 'Period 6'];
+    
+    function ensurePeriods() {
+      if (!DB.periods || !DB.periods.length) {
+        DB.periods = [
+          {name: 'Period 1', time: '08:00 - 08:45'},
+          {name: 'Period 2', time: '08:45 - 09:30'},
+          {name: 'Period 3', time: '09:30 - 10:15'},
+          {name: 'Break', time: '10:15 - 10:45'},
+          {name: 'Period 4', time: '10:45 - 11:30'},
+          {name: 'Period 5', time: '11:30 - 12:15'},
+          {name: 'Period 6', time: '12:15 - 13:00'}
+        ];
+      }
+    }
+
     function pgTimetable() {
+      ensurePeriods();
       const cls = DB.classes.find(c => c.id === curCls);
       if (!DB.timetable[curCls]) DB.timetable[curCls] = {};
-      const tt = DB.timetable[curCls]; DAYS.forEach(d => { if (!tt[d]) tt[d] = Array(PERIODS.length).fill(''); });
+      const tt = DB.timetable[curCls]; 
+      DAYS.forEach(d => { if (!tt[d]) tt[d] = Array(DB.periods.length).fill(''); });
+      
+      const teachers = DB.users.filter(u => u.role === 'teacher');
+      
       return `
-<div class="ph ph-row fu"><div><div class="ph-tag"> Timetable</div><h1>Weekly Schedule</h1><div class="ph-sub">${cls?.name || ''} - Click cells to edit</div></div><button class="btn btn-g btn-sm" onclick="saveTT()"> Save</button></div>
+<div class="ph ph-row fu"><div><div class="ph-tag"> Timetable</div><h1>Weekly Schedule</h1><div class="ph-sub">${cls?.name || ''} - Edit times in headers, assign subjects and teachers</div></div><button class="btn btn-g btn-sm" onclick="saveTT()"> Save</button></div>
   ${clsBar('switchTTCls')}
-<div class="card fu d2" style="padding:0;overflow:hidden;"><div class="tw"><table style="min-width:480px;">
-  <thead><tr><th style="min-width:80px;">Period</th>${DAYS.map(d => `<th style="min-width:100px;text-align:center;">${d}</th>`).join('')}</tr></thead>
-  <tbody>${PERIODS.map((p, pi) => `<tr><td style="font-weight:700;font-size:.72rem;background:var(--card2);color:var(--ink3);white-space:nowrap;">${p}</td>${p === 'Break' ? `<td colspan="${DAYS.length}" style="background:var(--card3);text-align:center;font-size:.72rem;font-weight:700;color:var(--ink4);">? Break</td>` : DAYS.map(d => { const v = tt[d]?.[pi] || ''; return `<td style="padding:4px;"><select class="fi" style="font-size:.7rem;padding:5px 8px;min-width:90px;" onchange="setTT('${d}',${pi},this.value)"><option value="">-</option>${DB.subjects.map(s => `<option value="${s.name}" ${v === s.name ? 'selected' : ''}>${s.icon} ${s.name}</option>`).join('')}</select></td>`; }).join('')}</tr>`).join('')}
+<div class="card fu d2" style="padding:0;overflow:hidden;"><div class="tw"><table style="min-width:680px;">
+  <thead><tr><th style="min-width:140px;">Period</th>${DAYS.map(d => `<th style="min-width:140px;text-align:center;">${d}</th>`).join('')}</tr></thead>
+  <tbody>${DB.periods.map((p, pi) => `<tr>
+    <td style="background:var(--card2);white-space:nowrap;padding:8px;">
+      <div style="font-weight:700;font-size:.78rem;color:var(--ink3);">${p.name}</div>
+      <input type="text" class="fi" value="${p.time}" onchange="updatePeriodTime(${pi}, this.value)" placeholder="HH:MM - HH:MM" style="font-size:.65rem;padding:3px;margin-top:4px;width:100px;"/>
+    </td>
+    ${p.name === 'Break' ? `<td colspan="${DAYS.length}" style="background:var(--card3);text-align:center;font-size:.75rem;font-weight:700;color:var(--ink4);letter-spacing:1px;">☕ Break</td>` : DAYS.map(d => { 
+        let cell = tt[d]?.[pi];
+        if (typeof cell === 'string') cell = { subject: cell, teacherId: '' };
+        if (!cell) cell = { subject: '', teacherId: '' };
+        return `<td style="padding:6px;vertical-align:top;background:var(--card);">
+          <select class="fi" style="font-size:.7rem;padding:5px 8px;width:100%;margin-bottom:4px;font-weight:600;" onchange="setTT('${d}',${pi},'subject',this.value)">
+            <option value="">- Subject -</option>
+            ${DB.subjects.map(s => `<option value="${s.name}" ${cell.subject === s.name ? 'selected' : ''}>${s.icon} ${s.name}</option>`).join('')}
+          </select>
+          <select class="fi" style="font-size:.68rem;padding:4px 8px;width:100%;" onchange="setTT('${d}',${pi},'teacher',this.value)">
+            <option value="">- Teacher -</option>
+            ${teachers.map(t => `<option value="${t.id}" ${cell.teacherId === t.id ? 'selected' : ''}>${t.name}</option>`).join('')}
+          </select>
+        </td>`; 
+    }).join('')}
+  </tr>`).join('')}
   </tbody></table></div></div>`;
     }
-    function setTT(day, pi, val) { if (!DB.timetable[curCls]) DB.timetable[curCls] = {}; if (!DB.timetable[curCls][day]) DB.timetable[curCls][day] = Array(PERIODS.length).fill(''); DB.timetable[curCls][day][pi] = val; }
-    function saveTT() { saveDB(); showToast('? Timetable saved', 'ts'); }
+    
+    function updatePeriodTime(pi, val) { DB.periods[pi].time = val; saveDB(); }
+    
+    function setTT(day, pi, field, val) { 
+        if (!DB.timetable[curCls]) DB.timetable[curCls] = {}; 
+        if (!DB.timetable[curCls][day]) DB.timetable[curCls][day] = Array(DB.periods.length).fill(''); 
+        let cell = DB.timetable[curCls][day][pi];
+        if (typeof cell === 'string') cell = { subject: cell, teacherId: '' };
+        if (!cell) cell = { subject: '', teacherId: '' };
+        cell[field] = val;
+        DB.timetable[curCls][day][pi] = cell; 
+    }
+    
+    function saveTT() { saveDB(); showToast('💾 Timetable saved', 'ts'); }
     function switchTTCls(cid) { curCls = cid; updatePill(); goPage('timetable'); }
+
+    function pgMyTimetable() {
+      ensurePeriods();
+      return `
+<div class="ph ph-row fu"><div><div class="ph-tag"> Timetable</div><h1>My Weekly Schedule</h1><div class="ph-sub">Your classes and subjects</div></div></div>
+<div class="card fu d2" style="padding:0;overflow:hidden;"><div class="tw"><table style="min-width:600px;">
+  <thead><tr><th style="min-width:140px;">Period</th>${DAYS.map(d => `<th style="min-width:120px;text-align:center;">${d}</th>`).join('')}</tr></thead>
+  <tbody>${DB.periods.map((p, pi) => `<tr>
+    <td style="background:var(--card2);white-space:nowrap;padding:8px;">
+      <div style="font-weight:700;font-size:.78rem;color:var(--ink3);">${p.name}</div>
+      <div style="font-size:.65rem;color:var(--ink4);margin-top:2px;">${p.time}</div>
+    </td>
+    ${p.name === 'Break' ? `<td colspan="${DAYS.length}" style="background:var(--card3);text-align:center;font-size:.75rem;font-weight:700;color:var(--ink4);letter-spacing:1px;">☕ Break</td>` : DAYS.map(d => { 
+        // Find if this teacher is assigned to any class at this day and period
+        let assignments = [];
+        DB.classes.forEach(c => {
+          let cell = DB.timetable[c.id]?.[d]?.[pi];
+          if (typeof cell === 'string') cell = { subject: cell, teacherId: '' };
+          if (cell && cell.teacherId === curUser.id) {
+            assignments.push({ class: c.name + (c.section ? ' '+c.section : ''), subject: cell.subject });
+          }
+        });
+        if (assignments.length === 0) return `<td style="padding:6px;text-align:center;color:var(--ink4);font-size:.7rem;background:var(--card);">Free</td>`;
+        return `<td style="padding:6px;vertical-align:top;background:var(--card);">${assignments.map(a => `<div style="background:var(--card2);padding:6px;border-radius:6px;margin-bottom:4px;border-left:3px solid var(--p);"><div style="font-weight:700;font-size:.72rem;">${a.class}</div><div style="font-size:.68rem;color:var(--ink3);">${a.subject}</div></div>`).join('')}</td>`;
+    }).join('')}
+  </tr>`).join('')}
+  </tbody></table></div></div>`;
+    }tePill(); goPage('timetable'); }
 
     /* ------------------------------- TEACHERS ------------------------------- */
     function pgTeachers() {
@@ -7843,6 +7922,34 @@
       if (typeof showToast === 'function') showToast('Connection Restored! Syncing attendance to cloud...', 'ts', 4000);
       if (typeof pushCloudDB === 'function') pushCloudDB();
     });
+
+    // Automated Period Notifications for Teachers
+    setInterval(() => {
+        if (typeof curRole !== 'undefined' && curRole === 'teacher' && typeof DB !== 'undefined' && DB.periods && DB.timetable) {
+            const now = new Date();
+            const currentMins = now.getHours() * 60 + now.getMinutes();
+            const daysMap = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const dayName = daysMap[now.getDay()];
+            
+            DB.periods.forEach((p, pi) => {
+                if (!p.time || !p.time.includes('-')) return;
+                const startTimeStr = p.time.split('-')[0].trim();
+                if (!startTimeStr.includes(':')) return;
+                const [h, m] = startTimeStr.split(':').map(Number);
+                const periodStartMins = h * 60 + m;
+                
+                // If period starts in exactly 5 minutes
+                if (periodStartMins - currentMins === 5) {
+                    DB.classes.forEach(c => {
+                        let cell = DB.timetable[c.id]?.[dayName]?.[pi];
+                        if (cell && cell.teacherId === curUser.id) {
+                            showToast(`⏳ Reminder: Your ${cell.subject} class in ${c.name}${c.section?' '+c.section:''} starts in 5 minutes!`, 'ts', 15000);
+                        }
+                    });
+                }
+            });
+        }
+    }, 60000);
 </script>
 </body>
 
