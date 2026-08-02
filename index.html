@@ -5323,6 +5323,13 @@
     <div class="fg"><label class="fl">Previous Arrears</label><input class="fi" type="number" id="m-arrears" value="${s?.arrears || ''}" placeholder="0"/></div>
     <div class="fg"><label class="fl">Address</label><textarea class="fi" id="m-addr" style="min-height:44px;">${s?.address || ''}</textarea></div>
   </div>
+  <div class="div"></div>
+  <div style="font-weight:700;font-size:.78rem;color:var(--o);margin-bottom:9px;"> One-Time Admission Fees</div>
+  <div class="fg2">
+    <div class="fg"><label class="fl">Admission Fee</label><input class="fi" type="number" id="m-admfee" value="${s?.admissionFee || ''}" placeholder="0"/></div>
+    <div class="fg"><label class="fl">Annual Fund</label><input class="fi" type="number" id="m-annfund" value="${s?.annualFund || ''}" placeholder="0"/></div>
+    <div class="fg"><label class="fl">Paid at Admission</label><input class="fi" type="number" id="m-admpaid" value="${s?.paidOnAdmission || ''}" placeholder="0"/></div>
+  </div>
   <div class="fg2">
     <div class="fg"><label class="fl"> Admission Form No. <span style="color:var(--g);font-size:.62rem;font-weight:700;"> AUTO</span></label><input class="fi" id="m-formno" value="${s?.formNo || ('ADM-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random()*9000)+1000))}" placeholder="ADM-2025-0001"/></div>
     <div class="fg"><label class="fl">Previous School</label><input class="fi" id="m-prevschool" value="${s?.prevSchool || ''}" placeholder="Al-Noor Academy"/></div>
@@ -5386,8 +5393,18 @@
 
       const cfVal = document.getElementById('m-customfee')?.value;
       const vfVal = document.getElementById('m-vanfee')?.value;
-      const arrVal = document.getElementById('m-arrears')?.value;
-      const data = { name, roll, classId, gender: document.getElementById('m-gender')?.value || '', dob: document.getElementById('m-dob')?.value || '', blood: document.getElementById('m-blood')?.value || '', religion: (document.getElementById('m-religion')?.value || '').trim(), nationality: (document.getElementById('m-nationality')?.value || '').trim(), bform: (document.getElementById('m-bform')?.value || '').trim(), fees: document.getElementById('m-fees')?.value || 'Pending', father: (document.getElementById('m-father')?.value || '').trim(), fphone: (document.getElementById('m-fphone')?.value || '').trim(), cnic: (document.getElementById('m-cnic')?.value || '').trim(), occupation: (document.getElementById('m-occupation')?.value || '').trim(), formNo: (document.getElementById('m-formno')?.value || '').trim(), prevSchool: (document.getElementById('m-prevschool')?.value || '').trim(), mother: (document.getElementById('m-mother')?.value || '').trim(), address: (document.getElementById('m-addr')?.value || '').trim(), whatsapp: wa, photo, familyId, loginEmail, customFee: cfVal === '' ? '' : num(cfVal), vanFee: vfVal === '' ? '' : num(vfVal), arrears: arrVal === '' ? '' : num(arrVal) };
+      let arrVal = document.getElementById('m-arrears')?.value;
+
+      const admF = num(document.getElementById('m-admfee')?.value);
+      const annF = num(document.getElementById('m-annfund')?.value);
+      const admP = num(document.getElementById('m-admpaid')?.value);
+
+      if (!editId) {
+        const unpaidAdm = admF + annF - admP;
+        if (unpaidAdm > 0) arrVal = String(num(arrVal) + unpaidAdm);
+      }
+
+      const data = { name, roll, classId, gender: document.getElementById('m-gender')?.value || '', dob: document.getElementById('m-dob')?.value || '', blood: document.getElementById('m-blood')?.value || '', religion: (document.getElementById('m-religion')?.value || '').trim(), nationality: (document.getElementById('m-nationality')?.value || '').trim(), bform: (document.getElementById('m-bform')?.value || '').trim(), fees: document.getElementById('m-fees')?.value || 'Pending', father: (document.getElementById('m-father')?.value || '').trim(), fphone: (document.getElementById('m-fphone')?.value || '').trim(), cnic: (document.getElementById('m-cnic')?.value || '').trim(), occupation: (document.getElementById('m-occupation')?.value || '').trim(), formNo: (document.getElementById('m-formno')?.value || '').trim(), prevSchool: (document.getElementById('m-prevschool')?.value || '').trim(), mother: (document.getElementById('m-mother')?.value || '').trim(), address: (document.getElementById('m-addr')?.value || '').trim(), whatsapp: wa, photo, familyId, loginEmail, customFee: cfVal === '' ? '' : num(cfVal), vanFee: vfVal === '' ? '' : num(vfVal), arrears: arrVal === '' ? '' : num(arrVal), admissionFee: admF, annualFund: annF, paidOnAdmission: admP };
 
       if (editId) {
         const old = allStus().find(x => x.id === editId); if (!old) { showToast('Not found', 'te'); return; }
@@ -7828,11 +7845,16 @@
 
           <!-- OFFICE USE ONLY -->
           <div class="office">
-            <div class="office-title">— For Office Use Only —</div>
+            <div class="office-title"> For Office Use Only </div>
             <div class="office-row">
-              <div class="office-field"><div class="office-label">Fee Structure</div><div class="office-val"></div></div>
-              <div class="office-field"><div class="office-label">Admission Fee Paid</div><div class="office-val"></div></div>
-              <div class="office-field"><div class="office-label">Student ID Issued</div><div class="office-val">${escHtml(s.roll||'')}</div></div>
+              <div class="office-field"><div class="office-label">Admission Fee</div><div class="office-val">${s.admissionFee || ''}</div></div>
+              <div class="office-field"><div class="office-label">Annual Fund</div><div class="office-val">${s.annualFund || ''}</div></div>
+              <div class="office-field"><div class="office-label">Amount Paid</div><div class="office-val">${s.paidOnAdmission || ''}</div></div>
+            </div>
+            <div class="office-row" style="margin-top:10px;">
+              <div class="office-field"><div class="office-label">Monthly Fee (Tuition)</div><div class="office-val">${monthlyFeeAmount(s) || ''}</div></div>
+              <div class="office-field"><div class="office-label">Remaining Balance</div><div class="office-val">${(num(s.admissionFee)+num(s.annualFund)-num(s.paidOnAdmission)) > 0 ? (num(s.admissionFee)+num(s.annualFund)-num(s.paidOnAdmission)) : '0'}</div></div>
+              <div class="office-field"><div class="office-label">Student ID</div><div class="office-val">${escHtml(s.roll||'')}</div></div>
             </div>
           </div>
 
