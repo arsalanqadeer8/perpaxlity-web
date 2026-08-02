@@ -5923,6 +5923,59 @@
     function switchGrdCls(cid) { curCls = cid; updatePill(); goPage('grades'); }
 
     /* ------------------------------- FEES ------------------------------- */
+    function getNextMonth(m) {
+        let [yy, mm] = m.split('-').map(Number);
+        mm++;
+        if (mm > 12) { mm = 1; yy++; }
+        return `${yy}-${String(mm).padStart(2, '0')}`;
+    }
+
+    function getTrueInitialArrears(sid) {
+        const s = allStus().find(x => x.id === sid);
+        if (!s) return 0;
+        let earliestMonth = null;
+        let earliestSnapshot = null;
+        if (DB.fees.monthlyLedger && DB.fees.monthlyLedger[sid]) {
+            for (let m in DB.fees.monthlyLedger[sid]) {
+                let row = DB.fees.monthlyLedger[sid][m];
+                if (row.paid && row.arrearsSnapshot !== undefined) {
+                    if (!earliestMonth || m < earliestMonth) {
+                        earliestMonth = m;
+                        earliestSnapshot = num(row.arrearsSnapshot);
+                    }
+                }
+            }
+        }
+        if (earliestMonth) return earliestSnapshot;
+        return num(s.arrears || 0);
+    }
+
+    function getLedgerArrears(sid, upToMonth) {
+        const s = allStus().find(x => x.id === sid);
+        if (!s) return 0;
+        let balance = getTrueInitialArrears(sid);
+        let m = '2026-08';
+        while (m < upToMonth) {
+            let tuition = monthlyFeeAmount(s);
+            let van = num(s.vanFee || 0);
+            let itemsTotal = 0;
+            const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            const mIndex = parseInt(m.split('-')[1], 10) - 1;
+            const monthName = mNames[mIndex];
+            DB.fees.items.forEach(f => {
+                if (f.id === 'f1') return;
+                if (f.applyMonth && f.applyMonth !== 'All' && f.applyMonth !== monthName) return;
+                itemsTotal += num(f.amount);
+            });
+            balance += (tuition + van + itemsTotal);
+            if (DB.fees.monthlyLedger && DB.fees.monthlyLedger[sid] && DB.fees.monthlyLedger[sid][m] && DB.fees.monthlyLedger[sid][m].paid) {
+                balance -= num(DB.fees.monthlyLedger[sid][m].amountPaid || 0);
+            }
+            m = getNextMonth(m);
+        }
+        return balance;
+    }
+
     function studentFeeSummary(sid) {
       const stu = allStus().find(x => x.id === sid);
       const allItems = DB.fees.items || [];
@@ -5932,12 +5985,12 @@
 
       let paidAmount = 0;
       if (DB.fees.monthlyLedger && DB.fees.monthlyLedger[sid]) {
-        Object.values(DB.fees.monthlyLedger[sid]).forEach(m => paidAmount += num(m.amountPaid));
+        Object.values(DB.fees.monthlyLedger[sid]).forEach(m => {
+           if (m.paid) paidAmount += num(m.amountPaid);
+        });
       }
 
-      // For July and before: balance = previous_arrears only (monthly fee starts August)
-      // For August+: balance = arrears + current month tuition + van + items
-      const arrears = num(stu?.arrears || 0);
+      const arrears = isBeforeAugust ? num(stu?.arrears || 0) : getLedgerArrears(sid, cm);
       let totalDue = arrears;
       if (!isBeforeAugust) {
         const currentBill = typeof calcStudentFeeBill === 'function' ? calcStudentFeeBill(sid, cm) : null;
@@ -6032,12 +6085,12 @@
       
       const tuition = monthlyFeeAmount(s);
       const van = num(s.vanFee || 0);
-      const arrears = mRow ? num(mRow.arrearsSnapshot || 0) : num(s.arrears || 0);
+      const arrears = getLedgerArrears(sid, month);
       
       let itemsTotal = 0;
       let breakdownHtml = `<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span>Monthly Tuition:</span> <b>${fmtMoney(tuition)}</b></div>`;
       if (van > 0) breakdownHtml += `<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span>Van Transport Fee:</span> <b>${fmtMoney(van)}</b></div>`;
-      if (arrears > 0) breakdownHtml += `<div style="display:flex;justify-content:space-between;margin-bottom:4px;color:var(--o);"><span>Previous Arrears:</span> <b>${fmtMoney(arrears)}</b></div>`;
+      if (arrears !== 0) breakdownHtml += `<div style="display:flex;justify-content:space-between;margin-bottom:4px;color:${arrears > 0 ? 'var(--o)' : 'var(--g)'};"><span>${arrears > 0 ? 'Previous Arrears' : 'Advance Credit'}:</span> <b>${fmtMoney(Math.abs(arrears))}</b></div>`;
 
       let applicableItems = [];
       DB.fees.items.forEach(f => {
@@ -6048,7 +6101,7 @@
         breakdownHtml += `<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span>${escHtml(f.name)}:</span> <b>${fmtMoney(f.amount)}</b></div>`;
       });
 
-      const totalDue = tuition + van + arrears + itemsTotal;
+      const totalDue = Math.max(0, tuition + van + arrears + itemsTotal);
       
       return { tuition, van, arrears, itemsTotal, applicableItems, totalDue, isPaid, amountPaid, mRow, breakdownHtml };
     }
@@ -6102,7 +6155,12 @@
       if (!DB.fees.monthlyLedger) DB.fees.monthlyLedger = {};
       if (!DB.fees.monthlyLedger[sid]) DB.fees.monthlyLedger[sid] = {};
       
-      const remaining = Math.max(0, totalDue - amountPaid);
+      let saveSnapshot = snapshotArrears;
+      if (Object.keys(DB.fees.monthlyLedger[sid]).filter(m => DB.fees.monthlyLedger[sid][m].paid).length === 0) {
+          saveSnapshot = num(s.arrears || 0);
+      } else {
+          saveSnapshot = num(s.arrears || 0);
+      }
       
       DB.fees.monthlyLedger[sid][month] = { 
          month, 
@@ -6110,12 +6168,10 @@
          paidOn: today(), 
          totalDue: totalDue, 
          amountPaid: amountPaid, 
-         arrearsRolledOver: remaining,
-         arrearsSnapshot: snapshotArrears
+         arrearsSnapshot: saveSnapshot
       };
       
-      s.arrears = remaining;
-      s.fees = remaining === 0 ? 'Paid' : 'Pending';
+      s.fees = getLedgerArrears(sid, getNextMonth(month)) <= 0 ? 'Paid' : 'Pending';
       
       saveDB();
       showToast('Payment received & ledger updated');
@@ -6125,10 +6181,9 @@
     
     function unmarkStudentPayment(sid, month) {
        const s = allStus().find(x => x.id === sid); if (!s) return;
-       if(!confirm('Undo payment? This will revert the student arrears balance.')) return;
+       if(!confirm('Undo payment? The ledger will automatically recalculate balances.')) return;
        const mRow = DB.fees.monthlyLedger[sid][month];
        if(mRow) {
-          s.arrears = mRow.arrearsSnapshot || 0;
           delete DB.fees.monthlyLedger[sid][month];
           saveDB();
           showToast('Payment undone');
