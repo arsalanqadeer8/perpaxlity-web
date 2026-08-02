@@ -7504,21 +7504,45 @@
         if (!cls || !DB.students[scanClassId]?.some(s => s.id === sid)) throw new Error('Student/class mismatch');
         if (curRole === 'teacher' && !(curUser?.classIds || []).includes(scanClassId)) throw new Error('Class not assigned to this teacher');
 
-        if (DB.attendance[scanClassId] && DB.attendance[scanClassId][sid] && DB.attendance[scanClassId][sid][d]) {
-          throw new Error('Already scanned today');
+        if (!DB.studentLogs) DB.studentLogs = {};
+        if (!DB.studentLogs[scanClassId]) DB.studentLogs[scanClassId] = {};
+        if (!DB.studentLogs[scanClassId][sid]) DB.studentLogs[scanClassId][sid] = {};
+        
+        const log = DB.studentLogs[scanClassId][sid][d] || {};
+        const t = nowHHMM();
+        const tObj = new Date();
+        const tStr = tObj.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' });
+        
+        let action = '';
+        
+        if (!log.in) {
+          log.in = t;
+          action = 'Check-In';
+          if (!DB.attendance[scanClassId]) DB.attendance[scanClassId] = {};
+          if (!DB.attendance[scanClassId][sid]) DB.attendance[scanClassId][sid] = {};
+          if (!DB.attendance[scanClassId][sid][d]) DB.attendance[scanClassId][sid][d] = 'P';
+          const el = document.getElementById(`ac-${sid}-${d}`);
+          if (el) { el.className = 'ac acP'; el.textContent = 'P'; }
+        } else if (!log.out) {
+          const inParts = log.in.split(':');
+          const inMins = parseInt(inParts[0]) * 60 + parseInt(inParts[1]);
+          const outMins = tObj.getHours() * 60 + tObj.getMinutes();
+          if (outMins - inMins < 10) {
+            throw new Error(`Scanned too soon after Check-In (${log.in})`);
+          }
+          log.out = t;
+          action = 'Check-Out';
+        } else {
+          throw new Error(`Already checked out at ${log.out}`);
         }
-
-        if (!DB.attendance[scanClassId]) DB.attendance[scanClassId] = {};
-        if (!DB.attendance[scanClassId][sid]) DB.attendance[scanClassId][sid] = {};
-        DB.attendance[scanClassId][sid][d] = 'P';
+        
+        DB.studentLogs[scanClassId][sid][d] = log;
         saveDB();
         playBeep('ok');
-        const el = document.getElementById(`ac-${sid}-${d}`);
-        if (el) { el.className = 'ac acP'; el.textContent = 'P'; }
 
-        if (fb) { fb.className = 'scan-fb show'; fb.innerHTML = `Marked <b>${stu.name}</b> - ${cls.name}${cls.section ? ' ' + cls.section : ''} - Roll ${stu.roll || data.roll || '?'}<br/><span style="font-size:.7rem;opacity:.75;">Marked Present for ${fmtDate(d)}</span>`; }
+        if (fb) { fb.className = 'scan-fb show'; fb.innerHTML = `<b>${action}</b>: <b>${stu.name}</b> - ${cls.name}${cls.section ? ' ' + cls.section : ''}<br/><span style="font-size:.7rem;opacity:.75;">${action} at ${tStr}</span>`; }
         const lb = document.getElementById('scan-log-box');
-        if (lb) { lb.className = 'scan-log show'; const t = new Date().toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' }); lb.innerHTML = `<div class="sl-it"><span class="sl-ok">OK</span><span class="sl-nm">${stu.name}</span><span class="sl-cl">${cls.name}${cls.section ? ' ' + cls.section : ''}</span><span class="sl-t">${t}</span></div>` + lb.innerHTML; }
+        if (lb) { lb.className = 'scan-log show'; lb.innerHTML = `<div class="sl-it"><span class="sl-ok">OK</span><span class="sl-nm">${stu.name}</span><span class="sl-cl">${action}</span><span class="sl-t">${tStr}</span></div>` + lb.innerHTML; }
         if (_qrS) { try { _qrS.pause(true); setTimeout(() => { try { _qrS?.resume(); } catch { } }, 1800); } catch { } }
       } catch (err) {
         playBeep('err');
@@ -7895,10 +7919,33 @@
     }
 
     function buildNotifPanel() {
+      let trackingNotifs = [];
+      if (curRole === 'parent' || curRole === 'student') {
+        const sids = curRole === 'parent' ? (curUser.studentIds || []) : [curUser.id];
+        const logs = DB.studentLogs || {};
+        sids.forEach(sid => {
+           const stu = allStus().find(s => String(s.id) === String(sid));
+           if (!stu) return;
+           const clsLogs = logs[stu.classId] || {};
+           const stuLog = clsLogs[sid] || {};
+           Object.keys(stuLog).sort().slice(-3).forEach(d => {
+             const l = stuLog[d];
+             if (l.out) {
+               trackingNotifs.push({ ic: '?', tx: `[Out] ${stu.name} checked out at ${l.out}`, tm: fmtDate(d), bg: 'var(--rl)' });
+             }
+             if (l.in) {
+               trackingNotifs.push({ ic: '?', tx: `[In] ${stu.name} checked in at ${l.in}`, tm: fmtDate(d), bg: 'var(--gl)' });
+             }
+           });
+        });
+        trackingNotifs = trackingNotifs.reverse().slice(0, 5); // Show latest 5
+      }
+
       const notifs = [
+        ...trackingNotifs,
         ...(curRole === 'admin' ? (DB.admissions || []).filter(a => (a.status || 'new') === 'new').slice(0, 3).map(a => ({ ic: '', tx: `New admission: ${a.studentName}`, tm: fmtDate(a.createdAt), bg: 'var(--pl)' })) : []),
         ...DB.notices.slice(-3).map(n => ({ ic: '', tx: n.title, tm: fmtDate(n.date), bg: 'var(--pl)' })),
-        ...allStus().filter(s => !(DB.fees.payments[s.id] || {})['f1']?.paid).slice(0, 2).map(s => ({ ic: '', tx: `Fee pending: ${s.name}`, tm: '', bg: 'var(--rl)' })),
+        ...(curRole === 'admin' || curRole === 'teacher' ? allStus().filter(s => !(DB.fees.payments[s.id] || {})['f1']?.paid).slice(0, 2).map(s => ({ ic: '', tx: `Fee pending: ${s.name}`, tm: '', bg: 'var(--rl)' })) : []),
       ];
       const np = document.getElementById('np-list');
       if (np) np.innerHTML = notifs.map(n => `<div class="np-it"><div class="np-ic" style="background:${n.bg};">${n.ic}</div><div><div class="np-tx">${n.tx}</div><div class="np-tm">${n.tm}</div></div></div>`).join('') || '<div style="padding:14px;text-align:center;font-size:.78rem;color:var(--ink4);">All clear ?</div>';
