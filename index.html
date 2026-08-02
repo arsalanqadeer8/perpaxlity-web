@@ -7548,7 +7548,7 @@
         const fn = nameParts.join(' ');
 
         cards += `
-        <div style="width:85.6mm;min-height:135mm;background:#fff;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 4px 20px rgba(0,0,0,.18);page-break-inside:avoid;">
+        <div class="card" style="width:85.6mm;min-height:135mm;background:#fff;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 4px 20px rgba(0,0,0,.18);">
 
           <!-- HEADER -->
           <div style="background:${navy};padding:14px 12px 16px;text-align:center;">
@@ -7622,8 +7622,10 @@
         @page { margin:8mm; size:A4; }
         *{box-sizing:border-box;margin:0;padding:0;}
         body{font-family:'Poppins',sans-serif;background:#e8e8e8;padding:10px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-        .sheet{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;justify-items:center;}
-        @media print{body{background:#e8e8e8;}}
+        .sheet{text-align:center;}
+        .card{display:inline-block; margin:8px; text-align:left; vertical-align:top; break-inside:avoid; page-break-inside:avoid; -webkit-column-break-inside:avoid;}
+        .idp-qr canvas { width: 100% !important; height: auto !important; display: block; }
+        @media print{body{background:#e8e8e8;} .card{box-shadow:none;border:1px solid #ccc;}}
       </style></head><body>
       <div class="sheet">${cards}</div>
       <scr`+`ipt>
