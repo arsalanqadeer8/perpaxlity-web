@@ -6016,6 +6016,20 @@
       return { payments: DB.fees.payments[sid] || {}, mandatory, mandatoryPaid: 0, paidAmount, dueAmount: totalDue, arrears, pendingArrears, pendingMonthly, totalAmount: paidAmount + totalDue };
     }
 
+    function filterFeeTable() {
+        const classQ = document.getElementById('fee-class-filter')?.value.toLowerCase() || '';
+        const textQ = document.getElementById('fee-search-filter')?.value.toLowerCase().trim() || '';
+        const tbody = document.getElementById('fees-tbody');
+        if (!tbody) return;
+        tbody.querySelectorAll('tr').forEach(tr => {
+            const rowText = tr.textContent.toLowerCase();
+            const classCellText = tr.children[1] ? tr.children[1].textContent.toLowerCase().trim() : '';
+            const matchesClass = !classQ || classCellText === classQ;
+            const matchesText = !textQ || rowText.includes(textQ);
+            tr.style.display = (matchesClass && matchesText) ? '' : 'none';
+        });
+    }
+
     function pgFees() {
       ensureMonthlyFeeLedger();
       const all = allStus();
@@ -6072,7 +6086,13 @@
   <div class="card fu d3" style="padding:0;overflow:hidden;">
     <div class="ch" style="padding:13px 14px 9px;">
       <div class="ct"> Student Fee Status</div>
-      <input type="text" class="fi" placeholder="Search student or roll..." onkeyup="filterTable(this, 'fees-tbody')" style="width:200px; padding:6px 10px; margin-left:auto;"/>
+      <div style="margin-left:auto; display:flex; gap:10px; align-items:center;">
+        <select id="fee-class-filter" class="fi" onchange="filterFeeTable()" style="padding:6px 10px; width:160px;">
+          <option value="">All Classes</option>
+          ${DB.classes.map(c => `<option value="${escHtml(c.name)}">${escHtml(c.name)}</option>`).join('')}
+        </select>
+        <input type="text" id="fee-search-filter" class="fi" placeholder="Search student or roll..." onkeyup="filterFeeTable()" style="width:200px; padding:6px 10px;"/>
+      </div>
     </div>
     <div class="tw" style="border:none;"><table>
       <thead><tr><th>Student</th><th>Class</th><th>Mandatory</th><th>Balance</th><th>Action</th></tr></thead>
