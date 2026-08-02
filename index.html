@@ -5977,7 +5977,7 @@
     }
 
     function studentFeeSummary(sid) {
-      const stu = allStus().find(x => x.id === sid);
+      const s = allStus().find(x => x.id === sid);
       const allItems = DB.fees.items || [];
       const mandatory = allItems.filter(f => f.mandatory);
       const cm = monthKey();
@@ -5990,14 +5990,30 @@
         });
       }
 
-      const arrears = isBeforeAugust ? num(stu?.arrears || 0) : getLedgerArrears(sid, cm);
-      let totalDue = arrears;
+      const arrears = isBeforeAugust ? num(s?.arrears || 0) : getLedgerArrears(sid, cm);
+      let totalDue = isBeforeAugust ? arrears : getLedgerArrears(sid, getNextMonth(cm));
+      
+      let currentMonthBill = 0;
       if (!isBeforeAugust) {
-        const currentBill = typeof calcStudentFeeBill === 'function' ? calcStudentFeeBill(sid, cm) : null;
-        if (currentBill && !currentBill.isPaid) totalDue = currentBill.totalDue;
+          let tuition = monthlyFeeAmount(s);
+          let van = num(s.vanFee || 0);
+          let itemsTotal = 0;
+          const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+          const mIndex = parseInt(cm.split('-')[1], 10) - 1;
+          const monthName = mNames[mIndex];
+          DB.fees.items.forEach(f => {
+              if (f.id === 'f1') return;
+              if (f.applyMonth && f.applyMonth !== 'All' && f.applyMonth !== monthName) return;
+              itemsTotal += num(f.amount);
+          });
+          currentMonthBill = tuition + van + itemsTotal;
       }
 
-      return { payments: DB.fees.payments[sid] || {}, mandatory, mandatoryPaid: 0, paidAmount, dueAmount: totalDue, arrears, totalAmount: paidAmount + totalDue };
+      let truePendingTotal = Math.max(0, totalDue);
+      let pendingArrears = Math.max(0, truePendingTotal - currentMonthBill);
+      let pendingMonthly = truePendingTotal - pendingArrears;
+
+      return { payments: DB.fees.payments[sid] || {}, mandatory, mandatoryPaid: 0, paidAmount, dueAmount: totalDue, arrears, pendingArrears, pendingMonthly, totalAmount: paidAmount + totalDue };
     }
 
     function pgFees() {
@@ -6005,7 +6021,9 @@
       const all = allStus();
       const summaries = all.map(s => studentFeeSummary(s.id));
       const collected = summaries.reduce((sum, x) => sum + x.paidAmount, 0);
-      const pending = summaries.reduce((sum, x) => sum + x.dueAmount, 0);
+      const pending = summaries.reduce((sum, x) => sum + Math.max(0, x.dueAmount), 0);
+      const pendingArrears = summaries.reduce((sum, x) => sum + (x.pendingArrears || 0), 0);
+      const pendingMonthly = summaries.reduce((sum, x) => sum + (x.pendingMonthly || 0), 0);
       const totalArrears = all.reduce((sum, s) => sum + num(s.arrears || 0), 0);
       const fullyPaid = summaries.filter(x => x.mandatory.length && x.mandatoryPaid === x.mandatory.length).length;
       const totalAnnual = DB.fees.items.filter(f => f.mandatory).reduce((a, f) => a + Number(f.amount || 0), 0);
@@ -6028,9 +6046,15 @@
       <div style="font-size:.7rem;opacity:.6;">${fullyPaid} fully paid - ${all.length - fullyPaid} pending</div>
     </div>
     <div style="text-align:right;">
-      <div style="font-size:.7rem;opacity:.65;">${isBeforeAugust ? 'Total Prev. Arrears' : 'Pending Balance'}</div>
+      <div style="font-size:.7rem;opacity:.65;">${isBeforeAugust ? 'Total Prev. Arrears' : 'Total Pending Balance'}</div>
       <div style="font-family:var(--head);font-size:1.1rem;font-weight:700;margin-top:3px;color:var(--o);">${fmtMoney(isBeforeAugust ? totalArrears : pending)}</div>
-      <div style="font-size:.68rem;opacity:.62;">${isBeforeAugust ? 'Monthly fee starts Aug 2026' : 'Base Mandatory ' + fmtMoney(totalAnnual)}</div>
+      ${isBeforeAugust ? 
+          `<div style="font-size:.68rem;opacity:.62;">Monthly fee starts Aug 2026</div>` : 
+          `<div style="font-size:.72rem;opacity:.8;display:flex;gap:10px;justify-content:flex-end;margin-top:2px;">
+             <span>Monthly <b style="color:var(--o);">${fmtMoney(pendingMonthly)}</b></span>
+             <span>Arrears <b style="color:var(--r);">${fmtMoney(pendingArrears)}</b></span>
+           </div>`
+      }
     </div>
   </div>
   <div class="fh-bar"><div class="fh-fill" style="width:${collected + pending ? Math.round(collected / (collected + pending) * 100) : 0}%;"></div></div>
