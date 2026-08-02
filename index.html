@@ -1834,14 +1834,15 @@
 
     /* QR Code */
     .ox-qr-wrap {
-      position: absolute; bottom: 30px; left: 40px; z-index: 5;
-      width: 250px; height: 250px; background: #fff; border-radius: 15px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;
+      position: absolute; bottom: 8px; left: 8px; z-index: 5;
+      width: 52px; height: 52px; background: #fff; border-radius: 4px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;
+      padding: 2px; box-sizing: border-box;
     }
-    .ox-card-qr { width: 220px; height: 220px; position: relative; }
+    .ox-card-qr { width: 100%; height: 100%; position: relative; }
     .ox-card-qr > canvas, .ox-card-qr > img, .ox-card-qr > table {
       position: absolute !important; top: 0 !important; left: 0 !important;
-      width: 220px !important; height: 220px !important; display: block !important;
+      width: 100% !important; height: 100% !important; display: block !important;
     }
 
     /* Teacher/Staff Card Color Override (Premium Deep Burgundy) */
@@ -2556,13 +2557,11 @@
       }
 
       body.printing-idcards .id-a4-sheet {
-        width: 8.27in !important;
-        min-height: 11.69in !important;
-        padding: .25in !important;
+        width: auto !important;
+        min-height: 0 !important;
+        padding: 0 !important;
         box-shadow: none !important;
         border: none !important;
-        page-break-after: always;
-        break-after: page;
       }
 
       body.printing-idcards .vid-card {
@@ -7182,7 +7181,7 @@
       const grade = ((cls.name || '') + (cls.section ? ' ' + cls.section : '')).trim() || '-';
       const idNo = (stu.roll || stu.id || '').toString();
       const yr = DB.settings?.schoolYear || '2025 - 2026';
-      return `<div class="vid-card-wrap" style="display:inline-block; margin:10px;">
+      return `<div class="vid-card-wrap" style="display:inline-block; margin:5px;">
         <div class="vid-card">
           <div class="vid-card-inner">
             <div class="ox-header-bg"></div>
@@ -7216,9 +7215,8 @@
             </div>
             
             <div class="ox-footer-bg"></div>
-            
-            <div class="ox-qr-wrap"><div class="ox-card-qr" data-student-id="${stu.id}"></div></div>
           </div>
+          <div class="ox-qr-wrap"><div class="ox-card-qr" data-student-id="${stu.id}"></div></div>
         </div>
       </div>`;
     }
@@ -7226,7 +7224,7 @@
     function staffIdCardHtml(staff) {
       const yr = DB.settings?.schoolYear || '2025 - 2026';
       const isScanner = staff.role === 'scanner';
-      return `<div class="vid-card-wrap" style="display:inline-block; margin:10px;">
+      return `<div class="vid-card-wrap" style="display:inline-block; margin:5px;">
         <div class="vid-card">
           <div class="vid-card-inner ox-staff">
             <div class="ox-header-bg"></div>
@@ -7260,9 +7258,8 @@
             </div>
             
             <div class="ox-footer-bg"></div>
-            
-            <div class="ox-qr-wrap"><div class="ox-card-qr" data-staff-id="${staff.id}"></div></div>
           </div>
+          <div class="ox-qr-wrap"><div class="ox-card-qr" data-staff-id="${staff.id}"></div></div>
         </div>
       </div>`;
     }
