@@ -6112,7 +6112,7 @@
       const arrears = getLedgerArrears(sid, month);
       
       let itemsTotal = 0;
-      let breakdownHtml = `<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span>Monthly Tuition:</span> <b>${fmtMoney(tuition)}</b></div>`;
+      let breakdownHtml = `<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span>Monthly Fee:</span> <b>${fmtMoney(tuition)}</b></div>`;
       if (van > 0) breakdownHtml += `<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span>Van Transport Fee:</span> <b>${fmtMoney(van)}</b></div>`;
       if (arrears !== 0) breakdownHtml += `<div style="display:flex;justify-content:space-between;margin-bottom:4px;color:${arrears > 0 ? 'var(--o)' : 'var(--g)'};"><span>${arrears > 0 ? 'Previous Arrears' : 'Advance Credit'}:</span> <b>${fmtMoney(Math.abs(arrears))}</b></div>`;
 
