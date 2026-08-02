@@ -6564,6 +6564,8 @@
 
     /* ------------------------------- TIMETABLE ------------------------------- */
     
+    const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+
     function ensurePeriods() {
       if (!DB.periods || !DB.periods.length) {
         DB.periods = [
