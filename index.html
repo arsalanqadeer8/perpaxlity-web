@@ -4342,11 +4342,15 @@
       return `https://api.whatsapp.com/send?phone=${clean}&text=${encodeURIComponent(message || '')}`;
     }
     async function sendWhatsAppAPI(phone, message) {
-      if (!DB.settings?.waAuto || !DB.settings?.waApiUrl) return false;
+      const isAuto = DB.settings?.waAuto !== false; // Default to true if undefined
+      const apiUrl = DB.settings?.waApiUrl || 'http://localhost:2785/api/sessions/admin/messages/send-text';
+      const token = DB.settings?.waApiToken || 'owa_k1_77a96ca09691b3d446b63789fe1f675bc51bed4859bef5dcd7418f856b725cc3';
+      
+      if (!isAuto) return false;
+      
       const cleanPhone = String(phone).replace(/\D/g, '');
-      const token = DB.settings.waApiToken || '';
       try {
-        await fetch(DB.settings.waApiUrl, {
+        await fetch(apiUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -4369,7 +4373,8 @@
     function openWhatsAppMessage(phone, message) {
       if (!phone) return false;
       
-      if (DB.settings?.waAuto && DB.settings?.waApiUrl) {
+      const isAuto = DB.settings?.waAuto !== false;
+      if (isAuto) {
         sendWhatsAppAPI(phone, message);
         return true;
       }
@@ -6428,7 +6433,10 @@
     }
     async function automateBulkFeeReminders() {
       if (!feeReminderQueue.length) { showToast('Queue is empty'); return; }
-      if (!DB.settings?.waAuto || !DB.settings?.waApiUrl) { showToast('WhatsApp Automation API is not configured in Settings.', 'te'); return; }
+      
+      const isAuto = DB.settings?.waAuto !== false;
+      if (!isAuto) { showToast('WhatsApp Automation is turned off in Settings.', 'te'); return; }
+      
       if (!confirm('This will send a WhatsApp message to all ' + feeReminderQueue.length + ' parents automatically via your configured API. Proceed?')) return;
       
       const btn = document.getElementById('btn-auto-wa');
@@ -6612,10 +6620,12 @@
   <div class="m-btns"><button class="btn btn-p" onclick="saveNotice('${eid || ''}')"> ${n ? 'Update' : 'Post'}</button><button class="btn btn-gh" onclick="closeModal()">Cancel</button></div>`);
     }
     function saveNotice(eid) { const title = (document.getElementById('mn-title')?.value || '').trim(); if (!title) { showToast('Title required', 'te'); return; } const obj = { title, body: document.getElementById('mn-body')?.value?.trim() || '', target: document.getElementById('mn-target')?.value || 'All', date: document.getElementById('mn-date')?.value || today() }; if (eid) { const n = DB.notices.find(x => x.id === eid); if (n) Object.assign(n, obj); } else DB.notices.push({ id: uid(), ...obj }); saveDB(); closeModal(); showToast('? Notice posted', 'ts'); goPage('notices'); buildNotifPanel(); 
-        if (!eid && DB.settings?.waAuto && confirm('Would you like to broadcast this notice to all students via WhatsApp automatically?')) { broadcastNoticeAPI(obj); }
+        const isAuto = DB.settings?.waAuto !== false;
+        if (!eid && isAuto && confirm('Would you like to broadcast this notice to all students via WhatsApp automatically?')) { broadcastNoticeAPI(obj); }
     }
     async function broadcastNoticeAPI(obj) {
-      if (!DB.settings?.waAuto || !DB.settings?.waApiUrl) return;
+      const isAuto = DB.settings?.waAuto !== false;
+      if (!isAuto) return;
       const stus = allStus().filter(s => s.whatsapp && (obj.target === 'All' || s.classId === obj.target));
       if (!stus.length) return showToast('No students with WhatsApp found for this target.', 'tw2');
       showToast(`Broadcasting to ${stus.length} students...`, 'ts');
