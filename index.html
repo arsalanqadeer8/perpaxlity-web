@@ -4341,23 +4341,37 @@
       if (!clean) return '';
       return `https://api.whatsapp.com/send?phone=${clean}&text=${encodeURIComponent(message || '')}`;
     }
+    async function sendWhatsAppAPI(phone, message) {
+      if (!DB.settings?.waAuto || !DB.settings?.waApiUrl) return false;
+      const cleanPhone = String(phone).replace(/\D/g, '');
+      const token = DB.settings.waApiToken || '';
+      try {
+        await fetch(DB.settings.waApiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': token, 'X-API-Key': token } : {})
+          },
+          body: JSON.stringify({ 
+             phone: cleanPhone, 
+             message: message, 
+             chatId: cleanPhone + '@c.us', 
+             text: message 
+          })
+        });
+        return true;
+      } catch (e) {
+        console.error('WA API Error', e);
+        return false;
+      }
+    }
+
     function openWhatsAppMessage(phone, message) {
       if (!phone) return false;
       
       if (DB.settings?.waAuto && DB.settings?.waApiUrl) {
-        try {
-          fetch(DB.settings.waApiUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              ...(DB.settings.waApiToken ? { 'Authorization': DB.settings.waApiToken } : {})
-            },
-            body: JSON.stringify({ phone: String(phone).replace(/\D/g, ''), message: message })
-          }).then(r => {
-            if (!r.ok) console.error('WA API Error', r);
-          }).catch(e => console.error('WA API Catch', e));
-          return true;
-        } catch(e) { console.error('WA API Fail', e); }
+        sendWhatsAppAPI(phone, message);
+        return true;
       }
 
       const url = whatsappLink(phone, message);
@@ -6432,14 +6446,7 @@
         try {
           const msg = `Dear Parent of ${row.student.name},\n\nThis is a friendly fee reminder from ${DB.school.name}.\nStudent: ${row.student.name}\nAmount Due: ${amount}\n\nPlease share payment once deposited.\n\nThank you.\n${DB.school.name}`;
           
-          fetch(DB.settings.waApiUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              ...(DB.settings.waApiToken ? { 'Authorization': DB.settings.waApiToken } : {})
-            },
-            body: JSON.stringify({ phone: String(phone).replace(/\D/g, ''), message: msg })
-          }).catch(e => console.error(e));
+          await sendWhatsAppAPI(phone, msg);
           
           sent++;
           await new Promise(r => setTimeout(r, 800)); // Sleep briefly between sends to avoid API rate limits
@@ -6616,11 +6623,7 @@
       let sent = 0;
       for (const s of stus) {
         try {
-          fetch(DB.settings.waApiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', ...(DB.settings.waApiToken ? { 'Authorization': DB.settings.waApiToken } : {}) },
-            body: JSON.stringify({ phone: String(s.whatsapp).replace(/\D/g, ''), message: msg })
-          }).catch(e => console.error(e));
+          await sendWhatsAppAPI(s.whatsapp, msg);
           sent++;
           await new Promise(r => setTimeout(r, 800));
         } catch(e){}
