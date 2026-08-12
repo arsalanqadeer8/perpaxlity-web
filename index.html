@@ -4342,6 +4342,24 @@
       return `https://api.whatsapp.com/send?phone=${clean}&text=${encodeURIComponent(message || '')}`;
     }
     function openWhatsAppMessage(phone, message) {
+      if (!phone) return false;
+      
+      if (DB.settings?.waAuto && DB.settings?.waApiUrl) {
+        try {
+          fetch(DB.settings.waApiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(DB.settings.waApiToken ? { 'Authorization': DB.settings.waApiToken } : {})
+            },
+            body: JSON.stringify({ phone: String(phone).replace(/\D/g, ''), message: message })
+          }).then(r => {
+            if (!r.ok) console.error('WA API Error', r);
+          }).catch(e => console.error('WA API Catch', e));
+          return true;
+        } catch(e) { console.error('WA API Fail', e); }
+      }
+
       const url = whatsappLink(phone, message);
       if (!url) return false;
       const win = window.open(url, '_blank', 'noopener');
@@ -6250,6 +6268,12 @@
       s.fees = getLedgerArrears(sid, getNextMonth(month)) <= 0 ? 'Paid' : 'Pending';
       
       saveDB();
+      
+      if (s.whatsapp && DB.settings?.waAuto) {
+        const msg = `Dear Parent of ${s.name},\n\nWe have successfully received the payment of ${fmtMoney(amountPaid)} for the month of ${formatMonthFriendly(month)}.\n\nThank you.\n${DB.school.name}`;
+        openWhatsAppMessage(s.whatsapp, msg);
+      }
+
       showToast('Payment received & ledger updated');
       goPage('fees');
       printFeeReceipt(sid, month);
@@ -6390,8 +6414,8 @@
     }
     async function automateBulkFeeReminders() {
       if (!feeReminderQueue.length) { showToast('Queue is empty'); return; }
-      if (!_sb) { showToast('Database connection missing for API.', 'te'); return; }
-      if (!confirm('This will send a WhatsApp message to all ' + feeReminderQueue.length + ' parents automatically via the Meta API. Make sure your Meta credentials and "fee_reminder" template are approved. Proceed?')) return;
+      if (!DB.settings?.waAuto || !DB.settings?.waApiUrl) { showToast('WhatsApp Automation API is not configured in Settings.', 'te'); return; }
+      if (!confirm('This will send a WhatsApp message to all ' + feeReminderQueue.length + ' parents automatically via your configured API. Proceed?')) return;
       
       const btn = document.getElementById('btn-auto-wa');
       if (btn) { btn.innerHTML = 'Sending...'; btn.disabled = true; }
@@ -6399,45 +6423,34 @@
       showToast(`Automating ${feeReminderQueue.length} messages via API...`, 'ts');
       
       let sent = 0;
-      let failed = 0;
 
       for (let i = 0; i < feeReminderQueue.length; i++) {
         const row = feeReminderQueue[i];
         const phone = normalizePhone(row.student.whatsapp);
-        const amount = fmtMoney(row.sum.dueAmount);
+        const amount = fmtMoney(row.firstFee.amount);
         
         try {
-          const { data, error } = await _sb.functions.invoke('send-whatsapp', {
-            body: {
-              phone: phone,
-              templateName: 'fee_reminder',
-              languageCode: 'en_US',
-              components: [
-                {
-                  type: 'body',
-                  parameters: [
-                    { type: 'text', text: String(row.student.name) },
-                    { type: 'text', text: String(amount) }
-                  ]
-                }
-              ]
-            }
-          });
-          if (error) throw error;
-          if (data && data.success) {
-            sent++;
-          } else {
-            failed++;
-          }
-        } catch(e) {
-          console.error('WhatsApp API Error:', e);
-          failed++;
+          const msg = `Dear Parent of ${row.student.name},\n\nThis is a friendly fee reminder from ${DB.school.name}.\nStudent: ${row.student.name}\nAmount Due: ${amount}\n\nPlease share payment once deposited.\n\nThank you.\n${DB.school.name}`;
+          
+          fetch(DB.settings.waApiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(DB.settings.waApiToken ? { 'Authorization': DB.settings.waApiToken } : {})
+            },
+            body: JSON.stringify({ phone: String(phone).replace(/\D/g, ''), message: msg })
+          }).catch(e => console.error(e));
+          
+          sent++;
+          await new Promise(r => setTimeout(r, 800)); // Sleep briefly between sends to avoid API rate limits
+        } catch (err) {
+          console.error(err);
         }
       }
       
       feeReminderQueue = [];
-      showToast(`Automated batch complete. Sent: ${sent}, Failed: ${failed}`, sent > 0 ? 'ts' : 'te', 5000);
-      openBulkFeeReminderQueue();
+      closeModal();
+      showToast(`Finished: Sent ${sent} messages automatically.`, 'ts', 5000);
     }
     function openNextBulkFeeReminder() {
       const row = feeReminderQueue.shift();
@@ -6591,7 +6604,29 @@
   <div class="fg2"><div class="fg"><label class="fl">Target Audience</label><select class="fi" id="mn-target"><option>All</option><option>Students</option><option>Teachers</option><option>Parents</option></select></div><div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="mn-date" value="${n?.date || today()}"/></div></div>
   <div class="m-btns"><button class="btn btn-p" onclick="saveNotice('${eid || ''}')"> ${n ? 'Update' : 'Post'}</button><button class="btn btn-gh" onclick="closeModal()">Cancel</button></div>`);
     }
-    function saveNotice(eid) { const title = (document.getElementById('mn-title')?.value || '').trim(); if (!title) { showToast('Title required', 'te'); return; } const obj = { title, body: document.getElementById('mn-body')?.value?.trim() || '', target: document.getElementById('mn-target')?.value || 'All', date: document.getElementById('mn-date')?.value || today() }; if (eid) { const n = DB.notices.find(x => x.id === eid); if (n) Object.assign(n, obj); } else DB.notices.push({ id: uid(), ...obj }); saveDB(); closeModal(); showToast('? Notice posted', 'ts'); goPage('notices'); buildNotifPanel(); }
+    function saveNotice(eid) { const title = (document.getElementById('mn-title')?.value || '').trim(); if (!title) { showToast('Title required', 'te'); return; } const obj = { title, body: document.getElementById('mn-body')?.value?.trim() || '', target: document.getElementById('mn-target')?.value || 'All', date: document.getElementById('mn-date')?.value || today() }; if (eid) { const n = DB.notices.find(x => x.id === eid); if (n) Object.assign(n, obj); } else DB.notices.push({ id: uid(), ...obj }); saveDB(); closeModal(); showToast('? Notice posted', 'ts'); goPage('notices'); buildNotifPanel(); 
+        if (!eid && DB.settings?.waAuto && confirm('Would you like to broadcast this notice to all students via WhatsApp automatically?')) { broadcastNoticeAPI(obj); }
+    }
+    async function broadcastNoticeAPI(obj) {
+      if (!DB.settings?.waAuto || !DB.settings?.waApiUrl) return;
+      const stus = allStus().filter(s => s.whatsapp && (obj.target === 'All' || s.classId === obj.target));
+      if (!stus.length) return showToast('No students with WhatsApp found for this target.', 'tw2');
+      showToast(`Broadcasting to ${stus.length} students...`, 'ts');
+      const msg = `📢 *${obj.title}*\n\n${obj.body}\n\n${DB.school.name}`;
+      let sent = 0;
+      for (const s of stus) {
+        try {
+          fetch(DB.settings.waApiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...(DB.settings.waApiToken ? { 'Authorization': DB.settings.waApiToken } : {}) },
+            body: JSON.stringify({ phone: String(s.whatsapp).replace(/\D/g, ''), message: msg })
+          }).catch(e => console.error(e));
+          sent++;
+          await new Promise(r => setTimeout(r, 800));
+        } catch(e){}
+      }
+      showToast(`Broadcast Complete: Sent to ${sent} students.`, 'ts', 5000);
+    }
 
     /* ------------------------------- TIMETABLE ------------------------------- */
     
@@ -7053,6 +7088,21 @@
   <div class="fg"><label class="fl">Teacher Late-Arrival Threshold</label><div style="display:flex;align-items:center;gap:10px;"><input class="fi" type="time" value="${DB.lateAfter || '08:00'}" style="max-width:140px;" oninput="DB.lateAfter=this.value;"/><span style="font-size:.78rem;color:var(--ink3);">Teachers arriving after this time are marked <span class="badge by2">Late</span></span></div></div>
 </div>
 <div class="card fu d4">
+  <div class="ch"><div class="ct"> WhatsApp API Automation</div></div>
+  <div class="ibox">Connect a WhatsApp API (e.g. openwhatsapp, wwebjs, UltraMsg, GreenAPI) to send messages automatically in the background instead of opening popups.</div>
+  <div class="fg">
+    <label class="fl">Enable Background Automation</label>
+    <select class="fi" onchange="DB.settings.waAuto = (this.value === 'true'); saveDB();">
+      <option value="false" ${!DB.settings?.waAuto ? 'selected' : ''}>Off (Manual Popups)</option>
+      <option value="true" ${DB.settings?.waAuto ? 'selected' : ''}>On (Automatic API)</option>
+    </select>
+  </div>
+  <div class="fg2">
+    <div class="fg"><label class="fl">API Endpoint URL</label><input class="fi" placeholder="http://localhost:3000/api/sendText" value="${DB.settings?.waApiUrl || ''}" oninput="DB.settings.waApiUrl=this.value; saveDB();"/></div>
+    <div class="fg"><label class="fl">API Token / Secret (Optional)</label><input class="fi" type="password" placeholder="Bearer token..." value="${DB.settings?.waApiToken || ''}" oninput="DB.settings.waApiToken=this.value; saveDB();"/></div>
+  </div>
+</div>
+<div class="card fu d5">
   <div class="ch"><div class="ct"> Authentication</div></div>
   <div class="ibox">Passwords are handled by Supabase Auth. Use the Profile page to change your own password, and Supabase Dashboard ? Authentication ? Users to invite or reset other users.</div>
 </div>
@@ -7539,6 +7589,12 @@
         
         DB.studentLogs[scanClassId][sid][d] = log;
         saveDB();
+        
+        if (stu.whatsapp && DB.settings?.waAuto) {
+          const msg = `Dear Parent,\n\n${stu.name} has just been marked as ${action} at ${tStr} today (${fmtDate(d)}).\n\n${DB.school.name}`;
+          openWhatsAppMessage(stu.whatsapp, msg);
+        }
+
         playBeep('ok');
 
         if (fb) { fb.className = 'scan-fb show'; fb.innerHTML = `<b>${action}</b>: <b>${stu.name}</b> - ${cls.name}${cls.section ? ' ' + cls.section : ''}<br/><span style="font-size:.7rem;opacity:.75;">${action} at ${tStr}</span>`; }
