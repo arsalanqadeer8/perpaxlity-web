@@ -4342,11 +4342,11 @@
       return `https://api.whatsapp.com/send?phone=${clean}&text=${encodeURIComponent(message || '')}`;
     }
     async function sendWhatsAppAPI(phone, message) {
-      const isAuto = DB.settings?.waAuto !== false; // Default to true if undefined
-      const apiUrl = DB.settings?.waApiUrl || 'http://localhost:2785/api/sessions/admin/messages/send-text';
-      const token = DB.settings?.waApiToken || 'owa_k1_77a96ca09691b3d446b63789fe1f675bc51bed4859bef5dcd7418f856b725cc3';
+      const isAuto = DB.settings?.waAuto !== false;
+      const apiUrl = DB.settings?.waApiUrl;
+      const token = DB.settings?.waApiToken;
       
-      if (!isAuto) return false;
+      if (!isAuto || !apiUrl) return false;
       
       const cleanPhone = String(phone).replace(/\D/g, '');
       try {
