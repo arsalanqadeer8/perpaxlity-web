@@ -6654,7 +6654,7 @@
     }
     function openFeeStructModal() {
         openModal(`
-    <h3>? Fee Structure & Global Funds</h3>
+    <h3>&#128176; Fee Structure & Global Funds</h3>
     <div id="fee-list">${DB.fees.items.map((f, i) => `<div style="background:var(--card2);border:1px solid var(--border);border-radius:9px;padding:11px;margin-bottom:8px;"><div class="fg2"><div class="fg"><label class="fl">Fee Name</label><input class="fi" value="${f.name}" onchange="DB.fees.items[${i}].name=this.value" style="font-size:.82rem;"/></div><div class="fg"><label class="fl">Amount (${DB.settings?.currency || 'PKR'})</label><input class="fi" type="number" value="${f.amount}" onchange="DB.fees.items[${i}].amount=Number(this.value)" style="font-size:.82rem;"/></div></div><div class="fg2"><div class="fg"><label class="fl">Due Date</label><input class="fi" value="${f.due}" onchange="DB.fees.items[${i}].due=this.value" style="font-size:.82rem;"/></div><div class="fg"><label class="fl">Apply Month</label><select class="fi" onchange="DB.fees.items[${i}].applyMonth=this.value" style="font-size:.82rem;"><option value="All" ${f.applyMonth !== 'March' && f.applyMonth !== 'December' ? 'selected' : ''}>Every Month</option><option value="March" ${f.applyMonth === 'March' ? 'selected' : ''}>March</option><option value="December" ${f.applyMonth === 'December' ? 'selected' : ''}>December</option><option value="August" ${f.applyMonth === 'August' ? 'selected' : ''}>August</option><option value="September" ${f.applyMonth === 'September' ? 'selected' : ''}>September</option><option value="October" ${f.applyMonth === 'October' ? 'selected' : ''}>October</option></select></div></div><div class="fg2"><div class="fg" style="display:flex;align-items:flex-end;gap:8px;"><label style="display:flex;align-items:center;gap:5px;font-size:.76rem;font-weight:600;cursor:pointer;padding-bottom:2px;"><input type="checkbox" ${f.mandatory ? 'checked' : ''} onchange="DB.fees.items[${i}].mandatory=this.checked"/> Mandatory</label>${f.id === 'f1' ? '<div style="font-size:.65rem;color:var(--ink4);margin-bottom:5px;">System Tuition</div>' : `<button class="btn btn-xs" style="background:var(--rl);color:var(--r);margin-bottom:0;" onclick="delFeeItem(${i})">Remove</button>`}</div></div></div>`).join('')}</div>
     <div style="display:flex; gap:10px; margin-top:4px;">
       <button class="btn btn-gh btn-sm" style="flex:1;justify-content:center;" onclick="addFeeItem()">+ Add Recurring Fee</button>
@@ -6665,7 +6665,7 @@
     function addFeeItem() { DB.fees.items.push({ id: uid(), name: 'New Fee', amount: 1000, due: '5th', mandatory: false, type: 'monthly', applyMonth: 'All' }); openFeeStructModal(); }
     function addGlobalFund() { DB.fees.items.push({ id: uid(), name: 'New Global Fund (e.g. Exam/Sports)', amount: 1500, due: '10th', mandatory: true, type: 'monthly', applyMonth: 'September' }); openFeeStructModal(); }
     function delFeeItem(i) { DB.fees.items.splice(i, 1); openFeeStructModal(); }
-    function saveFeeStruct() { saveDB(); closeModal(); showToast('? Fee structure saved', 'ts'); goPage('fees'); }
+    function saveFeeStruct() { saveDB(); closeModal(); showToast('&#9989; Fee structure saved', 'ts'); goPage('fees'); }
 
     /* ------------------------------- CLASSES ------------------------------- */
     function pgClasses() {
@@ -7696,7 +7696,7 @@
   <button class="btn btn-gh" onclick="logout()" style="width:100%;justify-content:center;">Sign Out</button>
 </div>`;
     }
-    async function updateProfilePhoto(inp) { const f = inp.files[0]; if (!f) return; try { showToast('Uploading photo...', 'ts'); const url = await uploadToStorage(f); curUser.photo = url; const u = DB.users.find(x => x.id === curUser.id); if (u) u.photo = url; saveDB(); buildShell(); showToast('? Photo updated', 'ts'); } catch(e) { showToast(e.message, 'te'); } }
+    async function updateProfilePhoto(inp) { const f = inp.files[0]; if (!f) return; try { showToast('Uploading photo...', 'ts'); const url = await uploadToStorage(f); curUser.photo = url; const u = DB.users.find(x => x.id === curUser.id); if (u) u.photo = url; saveDB(); buildShell(); showToast('&#9989; Photo updated', 'ts'); } catch(e) { showToast(e.message, 'te'); } }
     async function changeMyPass() { const np = (document.getElementById('pp-n')?.value || '').trim(); const cp = (document.getElementById('pp-c')?.value || '').trim(); if (!np || np !== cp) { showToast('Passwords do not match', 'te'); return; } if (np.length < 8) { showToast('Min 8 chars', 'te'); return; } if (!_sb) { showToast('Supabase Auth is not configured', 'te'); return; } const { error } = await _sb.auth.updateUser({ password: np }); if (error) { showToast(error.message || 'Password update failed', 'te'); return; } showToast('Password updated in Supabase Auth', 'ts'); }
 
     /* ------------------------------- QR SCANNER ------------------------------- */
@@ -7707,10 +7707,10 @@
       if (typeof Html5Qrcode === 'undefined') { if (fb) { fb.className = 'scan-fb err show'; fb.textContent = ' Camera library not loaded. Requires internet connection.'; } return; }
       _qrS = new Html5Qrcode('qr-reader');
       Html5Qrcode.getCameras().then(cams => {
-        if (!cams?.length) { if (fb) { fb.className = 'scan-fb err show'; fb.textContent = '? No camera found'; } return; }
+        if (!cams?.length) { if (fb) { fb.className = 'scan-fb err show'; fb.textContent = '&#10060; No camera found'; } return; }
         const cam = cams[cams.length - 1];
-        _qrS.start(cam.id, { fps: 10, qrbox: { width: 200, height: 200 } }, onQRScan, () => { }).catch(err => { if (fb) { fb.className = 'scan-fb err show'; fb.textContent = '? Camera access denied. Please allow camera permission.'; } });
-      }).catch(() => { if (fb) { fb.className = 'scan-fb err show'; fb.textContent = '? Cannot access camera.'; } });
+        _qrS.start(cam.id, { fps: 10, qrbox: { width: 200, height: 200 } }, onQRScan, () => { }).catch(err => { if (fb) { fb.className = 'scan-fb err show'; fb.textContent = '&#10060; Camera access denied. Please allow camera permission.'; } });
+      }).catch(() => { if (fb) { fb.className = 'scan-fb err show'; fb.textContent = '&#10060; Cannot access camera.'; } });
     }
     function playBeep(t){try{const x=new(window.AudioContext||window.webkitAudioContext)();const o=x.createOscillator();const g=x.createGain();o.connect(g);g.connect(x.destination);if(t==='ok'){o.type='sine';o.frequency.value=1500;g.gain.setValueAtTime(0.5,x.currentTime);g.gain.exponentialRampToValueAtTime(0.001,x.currentTime+0.1);o.start();o.stop(x.currentTime+0.1);}else{o.type='square';o.frequency.value=250;g.gain.setValueAtTime(0.2,x.currentTime);g.gain.exponentialRampToValueAtTime(0.001,x.currentTime+0.3);o.start();o.stop(x.currentTime+0.3);}}catch(e){}}
 
@@ -8185,10 +8185,10 @@
            Object.keys(stuLog).sort().slice(-3).forEach(d => {
              const l = stuLog[d];
              if (l.out) {
-               trackingNotifs.push({ ic: '?', tx: `[Out] ${stu.name} checked out at ${l.out}`, tm: fmtDate(d), bg: 'var(--rl)' });
+               trackingNotifs.push({ ic: '&#9679;', tx: `[Out] ${stu.name} checked out at ${l.out}`, tm: fmtDate(d), bg: 'var(--rl)' });
              }
              if (l.in) {
-               trackingNotifs.push({ ic: '?', tx: `[In] ${stu.name} checked in at ${l.in}`, tm: fmtDate(d), bg: 'var(--gl)' });
+               trackingNotifs.push({ ic: '&#9679;', tx: `[In] ${stu.name} checked in at ${l.in}`, tm: fmtDate(d), bg: 'var(--gl)' });
              }
            });
         });
@@ -8202,7 +8202,7 @@
         ...(curRole === 'admin' || curRole === 'teacher' ? allStus().filter(s => !(DB.fees.payments[s.id] || {})['f1']?.paid).slice(0, 2).map(s => ({ ic: '', tx: `Fee pending: ${s.name}`, tm: '', bg: 'var(--rl)' })) : []),
       ];
       const np = document.getElementById('np-list');
-      if (np) np.innerHTML = notifs.map(n => `<div class="np-it"><div class="np-ic" style="background:${n.bg};">${n.ic}</div><div><div class="np-tx">${n.tx}</div><div class="np-tm">${n.tm}</div></div></div>`).join('') || '<div style="padding:14px;text-align:center;font-size:.78rem;color:var(--ink4);">All clear ?</div>';
+      if (np) np.innerHTML = notifs.map(n => `<div class="np-it"><div class="np-ic" style="background:${n.bg};">${n.ic}</div><div><div class="np-tx">${n.tx}</div><div class="np-tm">${n.tm}</div></div></div>`).join('') || '<div style="padding:14px;text-align:center;font-size:.78rem;color:var(--ink4);">All clear &#10024;</div>';
       const cnt = document.getElementById('np-cnt'); if (cnt) cnt.textContent = notifs.length ? `? ${notifs.length} new` : '';
       const dot = document.getElementById('ndot'); if (dot) dot.style.display = notifs.length ? 'block' : 'none';
     }
