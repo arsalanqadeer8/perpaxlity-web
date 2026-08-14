@@ -5436,7 +5436,7 @@
            showToast('Uploading photo...', 'ts');
            const r = await fetch(photo);
            const blob = await r.blob();
-           const file = new File([blob], \`stu_\${Date.now()}.png\`, { type: blob.type });
+           const file = new File([blob], `stu_${Date.now()}.png`, { type: blob.type });
            photo = await uploadToStorage(file);
          } catch(e) { 
            showToast('Photo upload failed: ' + e.message, 'te'); 
