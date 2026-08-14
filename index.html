@@ -4354,6 +4354,36 @@
       const cleanPhone = String(phone).replace(/\D/g, '');
       if (!cleanPhone) return false;
 
+      // 1. If Local API is configured, hit it directly!
+      const apiUrl = DB.settings?.waApiUrl;
+      const apiToken = DB.settings?.waApiToken;
+      
+      if (apiUrl) {
+        try {
+          const payload = {
+            chatId: `${cleanPhone}@c.us`,
+            text: message,
+            session: 'oxford'
+          };
+          
+          const headers = { 'Content-Type': 'application/json' };
+          if (apiToken) headers['x-api-key'] = apiToken; // Common OpenWA auth header
+
+          const res = await fetch(apiUrl, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(payload)
+          });
+          
+          if (!res.ok) console.error('Local WA API Error:', res.statusText);
+          return res.ok;
+        } catch(e) {
+          console.error('Failed to hit Local WA API:', e);
+          // Fall through to Supabase outbox as backup if local fetch fails
+        }
+      }
+
+      // 2. Backup / Cloud Queue (Supabase)
       try {
         if (!window.supabase) {
           console.warn('Supabase not initialized, cannot queue WhatsApp message.');
