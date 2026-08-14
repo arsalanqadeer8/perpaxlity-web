@@ -4343,29 +4343,32 @@
     }
     async function sendWhatsAppAPI(phone, message) {
       const isAuto = DB.settings?.waAuto !== false;
-      const apiUrl = DB.settings?.waApiUrl;
-      const token = DB.settings?.waApiToken;
-      
-      if (!isAuto || !apiUrl) return false;
+      if (!isAuto) return false;
       
       const cleanPhone = String(phone).replace(/\D/g, '');
+      if (!cleanPhone) return false;
+
       try {
-        await fetch(apiUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(token ? { 'Authorization': token, 'X-API-Key': token } : {})
-          },
-          body: JSON.stringify({ 
-             phone: cleanPhone, 
-             message: message, 
-             chatId: cleanPhone + '@c.us', 
-             text: message 
-          })
-        });
+        if (!window.supabase) {
+          console.warn('Supabase not initialized, cannot queue WhatsApp message.');
+          return false;
+        }
+        
+        const { error } = await supabase
+          .from('whatsapp_outbox')
+          .insert([{ 
+            recipient_phone: cleanPhone, 
+            message_body: message, 
+            status: 'pending' 
+          }]);
+        
+        if (error) {
+          console.error('Supabase Outbox Error:', error);
+          return false;
+        }
         return true;
       } catch (e) {
-        console.error('WA API Error', e);
+        console.error('WA Outbox Insert Error', e);
         return false;
       }
     }
@@ -6019,10 +6022,20 @@
         return num(s.arrears || 0);
     }
 
-    function getLedgerArrears(sid, upToMonth) {
+    function getDetailedLedgerArrears(sid, upToMonth) {
         const s = allStus().find(x => x.id === sid);
-        if (!s) return 0;
-        let balance = getTrueInitialArrears(sid);
+        if (!s) return { total: 0, breakdown: [] };
+        
+        let initial = getTrueInitialArrears(sid);
+        let breakdown = [];
+        let balance = initial;
+        
+        if (initial > 0) {
+            breakdown.push({ label: 'Balance Brought Forward', amount: initial, month: 'initial' });
+        } else if (initial < 0) {
+            breakdown.push({ label: 'Advance Credit', amount: initial, month: 'initial' });
+        }
+
         let m = '2026-08';
         while (m < upToMonth) {
             let tuition = monthlyFeeAmount(s);
@@ -6031,18 +6044,51 @@
             const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
             const mIndex = parseInt(m.split('-')[1], 10) - 1;
             const monthName = mNames[mIndex];
+            
             DB.fees.items.forEach(f => {
                 if (f.id === 'f1') return;
                 if (f.applyMonth && f.applyMonth !== 'All' && f.applyMonth !== monthName) return;
                 itemsTotal += num(f.amount);
             });
-            balance += (tuition + van + itemsTotal);
+            
+            let monthDue = tuition + van + itemsTotal;
+            let monthPaid = 0;
+            
             if (DB.fees.monthlyLedger && DB.fees.monthlyLedger[sid] && DB.fees.monthlyLedger[sid][m] && DB.fees.monthlyLedger[sid][m].paid) {
-                balance -= num(DB.fees.monthlyLedger[sid][m].amountPaid || 0);
+                monthPaid = num(DB.fees.monthlyLedger[sid][m].amountPaid || 0);
             }
+            
+            let monthBalance = monthDue - monthPaid;
+            balance += monthBalance;
+            
+            if (monthBalance > 0) {
+                let partialText = monthPaid > 0 ? ' (Partial Paid)' : '';
+                breakdown.push({ label: `${monthName} Fee${partialText}`, amount: monthBalance, month: m });
+            } else if (monthBalance < 0) {
+                breakdown.push({ label: `${monthName} Overpaid`, amount: monthBalance, month: m });
+            }
+            
             m = getNextMonth(m);
         }
-        return balance;
+        
+        // Consolidate breakdown if total balance is negative or zero (meaning everything is paid or in advance)
+        if (balance <= 0) {
+            breakdown = [];
+            if (balance < 0) {
+                breakdown.push({ label: 'Advance Credit', amount: balance, month: 'advance' });
+            }
+        } else {
+             // If there's a positive balance, but advance credits exist, the logic above naturally sums it into the total balance.
+             // We want the breakdown to visually match the total balance.
+             let breakdownSum = breakdown.reduce((acc, b) => acc + b.amount, 0);
+             // It already matches perfectly because we just track month by month.
+        }
+
+        return { total: balance, breakdown };
+    }
+
+    function getLedgerArrears(sid, upToMonth) {
+        return getDetailedLedgerArrears(sid, upToMonth).total;
     }
 
     function studentFeeSummary(sid) {
@@ -6182,41 +6228,48 @@
     }
 
     function calcStudentFeeBill(sid, month) {
-      const s = allStus().find(x => x.id === sid);
-      if (!s) return null;
-      
-      const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-      const dateParts = month ? month.split('-') : [];
-      const monthIndex = dateParts.length === 2 ? parseInt(dateParts[1], 10) - 1 : new Date().getMonth();
-      const monthName = mNames[monthIndex];
-
-      if (!DB.fees.monthlyLedger) DB.fees.monthlyLedger = {};
-      if (!DB.fees.monthlyLedger[sid]) DB.fees.monthlyLedger[sid] = {};
-      const mRow = DB.fees.monthlyLedger[sid][month];
-      const isPaid = mRow ? mRow.paid : false;
-      const amountPaid = mRow ? num(mRow.amountPaid) : 0;
-      
-      const tuition = monthlyFeeAmount(s);
-      const van = num(s.vanFee || 0);
-      const arrears = getLedgerArrears(sid, month);
-      
-      let itemsTotal = 0;
-      let breakdownHtml = `<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span>Monthly Fee:</span> <b>${fmtMoney(tuition)}</b></div>`;
-      if (van > 0) breakdownHtml += `<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span>Van Transport Fee:</span> <b>${fmtMoney(van)}</b></div>`;
-      if (arrears !== 0) breakdownHtml += `<div style="display:flex;justify-content:space-between;margin-bottom:4px;color:${arrears > 0 ? 'var(--o)' : 'var(--g)'};"><span>${arrears > 0 ? 'Previous Arrears' : 'Advance Credit'}:</span> <b>${fmtMoney(Math.abs(arrears))}</b></div>`;
-
-      let applicableItems = [];
-      DB.fees.items.forEach(f => {
-        if (f.id === 'f1') return; // Handled as tuition above
-        if (f.applyMonth && f.applyMonth !== 'All' && f.applyMonth !== monthName) return;
-        applicableItems.push(f);
-        itemsTotal += num(f.amount);
-        breakdownHtml += `<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span>${escHtml(f.name)}:</span> <b>${fmtMoney(f.amount)}</b></div>`;
-      });
-
-      const totalDue = Math.max(0, tuition + van + arrears + itemsTotal);
-      
-      return { tuition, van, arrears, itemsTotal, applicableItems, totalDue, isPaid, amountPaid, mRow, breakdownHtml };
+        const s = allStus().find(x => x.id === sid);
+        if (!s) return null;
+        
+        const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const dateParts = month ? month.split('-') : [];
+        const monthIndex = dateParts.length === 2 ? parseInt(dateParts[1], 10) - 1 : new Date().getMonth();
+        const monthName = mNames[monthIndex];
+  
+        if (!DB.fees.monthlyLedger) DB.fees.monthlyLedger = {};
+        if (!DB.fees.monthlyLedger[sid]) DB.fees.monthlyLedger[sid] = {};
+        const mRow = DB.fees.monthlyLedger[sid][month];
+        const isPaid = mRow ? mRow.paid : false;
+        const amountPaid = mRow ? num(mRow.amountPaid) : 0;
+        
+        const tuition = monthlyFeeAmount(s);
+        const van = num(s.vanFee || 0);
+        
+        const arrearsDetail = getDetailedLedgerArrears(sid, month);
+        const arrears = arrearsDetail.total;
+        
+        let itemsTotal = 0;
+        let breakdownHtml = `<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span>Monthly Fee:</span> <b>${fmtMoney(tuition)}</b></div>`;
+        if (van > 0) breakdownHtml += `<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span>Van Transport Fee:</span> <b>${fmtMoney(van)}</b></div>`;
+        
+        if (arrearsDetail.breakdown.length > 0) {
+             arrearsDetail.breakdown.forEach(b => {
+                 breakdownHtml += `<div style="display:flex;justify-content:space-between;margin-bottom:4px;color:${b.amount > 0 ? 'var(--o)' : 'var(--g)'};"><span>${escHtml(b.label)}:</span> <b>${fmtMoney(Math.abs(b.amount))}</b></div>`;
+             });
+        }
+  
+        let applicableItems = [];
+        DB.fees.items.forEach(f => {
+          if (f.id === 'f1') return; // Handled as tuition above
+          if (f.applyMonth && f.applyMonth !== 'All' && f.applyMonth !== monthName) return;
+          applicableItems.push(f);
+          itemsTotal += num(f.amount);
+          breakdownHtml += `<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span>${escHtml(f.name)}:</span> <b>${fmtMoney(f.amount)}</b></div>`;
+        });
+  
+        const totalDue = Math.max(0, tuition + van + arrears + itemsTotal);
+        
+        return { tuition, van, arrears, arrearsDetail, itemsTotal, applicableItems, totalDue, isPaid, amountPaid, mRow, breakdownHtml };
     }
 
     function openStudentFeeModal(sid, targetMonth = null) {
@@ -6312,64 +6365,184 @@
     }
 
     function printFeeReceipt(sid, month) {
-      const s = allStus().find(x => x.id === sid); if (!s) return;
-      const cls = DB.classes.find(c => c.id === s.classId);
-      const bill = calcStudentFeeBill(sid, month);
-      const isPaid = bill.isPaid;
-      
-      const printWindow = window.open('', '', 'width=800,height=600');
-      let html = `<html><head><title>Fee Receipt - ${escHtml(s.name)}</title>
-      <style>
-        body { font-family: sans-serif; padding: 20px; color: #111; max-width: 600px; margin: 0 auto; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        .header { text-align: center; border-bottom: 2px solid #ddd; padding-bottom: 15px; margin-bottom: 20px; }
-        .title { font-size: 24px; font-weight: bold; }
-        .sub { color: #555; }
-        .details { margin-bottom: 20px; display: flex; justify-content: space-between; }
-        .table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        .table th, .table td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-        .table th { background: #f9f9f9; }
-        .totals { text-align: right; font-size: 16px; font-weight: bold; margin-bottom: 5px; }
-      </style></head><body>
-      <div class="header">
-        <div class="title">${escHtml(DB.settings?.name || 'School')}</div>
-        <div class="sub">${escHtml(DB.settings?.address || '')} | ${escHtml(DB.settings?.phone || '')}</div>
-        <h2 style="margin:10px 0 0 0;">Fee Receipt (${isPaid ? 'PAID' : 'PENDING'})</h2>
-      </div>
-      <div class="details">
-        <div>
-          <b>Student:</b> ${escHtml(s.name)}<br>
-          <b>Class:</b> ${escHtml(cls?.name || '')} (Roll: ${escHtml(s.roll || '-')})
-        </div>
-        <div style="text-align:right;">
-          <b>Date:</b> ${fmtDate(isPaid ? bill.mRow.paidOn : today())}<br>
-          <b>Billing Month:</b> ${month}
-        </div>
-      </div>
-      <table class="table">
-        <tr><th>Fee Description</th><th>Amount</th></tr>
-        <tr><td>Monthly Tuition</td><td>${fmtMoney(bill.tuition)}</td></tr>
-        ${bill.van > 0 ? `<tr><td>Van Transport Fee</td><td>${fmtMoney(bill.van)}</td></tr>` : ''}
-        ${bill.arrears > 0 ? `<tr><td style="color:#d32f2f;">Previous Arrears</td><td style="color:#d32f2f;">${fmtMoney(bill.arrears)}</td></tr>` : ''}
-        ${bill.applicableItems.map(f => `<tr><td>${escHtml(f.name)}</td><td>${fmtMoney(f.amount)}</td></tr>`).join('')}
-      </table>
-      <div class="totals">Total Billed: ${fmtMoney(bill.totalDue)}</div>
-      ${isPaid ? `<div class="totals" style="color:green;font-size:18px;">Amount Paid: ${fmtMoney(bill.amountPaid)}</div>
-                   <div class="totals" style="color:red;font-size:16px;">Remaining Arrears: ${fmtMoney(bill.mRow.arrearsRolledOver)}</div>` : 
-                   `<div class="totals" style="color:red;font-size:18px;">Balance Due: ${fmtMoney(bill.totalDue)}</div>`}
-      
-      <div style="margin-top:60px; text-align:right;">
-         <div style="border-top:1px solid #111; width:200px; display:inline-block; text-align:center; padding-top:5px;">Authorized Signature</div>
-      </div>
-      <div style="text-align: center; font-size: 12px; color: #777; margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px;">Thank you for your payment!</div>
-      <scr` + `ipt>
-        window.onload = function() { 
-            setTimeout(() => { window.print(); window.close(); }, 250);
-        };
-      </scr` + `ipt>
-      </body></html>`;
-      
-      printWindow.document.write(html);
-      printWindow.document.close();
+        const s = allStus().find(x => x.id === sid); if (!s) return;
+        const cls = DB.classes.find(c => c.id === s.classId);
+        const bill = calcStudentFeeBill(sid, month);
+        const isPaid = bill.isPaid;
+        const schoolName = escHtml(DB.school?.name || DB.settings?.name || 'Oxford Excellence Academy');
+        const phone = escHtml(DB.school?.phone || DB.settings?.phone || '');
+        
+        let printWindow = window.open('', '', 'width=1000,height=700');
+        
+        // Build table rows based on bill, ignoring 0 amounts
+        let rowsHtml = '';
+        if (bill.tuition > 0) rowsHtml += `<tr><td>Monthly Tuition Fee</td><td class="amt">${fmtMoney(bill.tuition)}</td></tr>`;
+        if (bill.van > 0) rowsHtml += `<tr><td>Van Transport Fee</td><td class="amt">${fmtMoney(bill.van)}</td></tr>`;
+        
+        bill.applicableItems.forEach(f => {
+            if (num(f.amount) > 0) {
+                rowsHtml += `<tr><td>${escHtml(f.name)}</td><td class="amt">${fmtMoney(f.amount)}</td></tr>`;
+            }
+        });
+
+        if (bill.arrearsDetail && bill.arrearsDetail.breakdown.length > 0) {
+            bill.arrearsDetail.breakdown.forEach(b => {
+                if (b.amount !== 0) {
+                     rowsHtml += `<tr class="arrears-row"><td>${escHtml(b.label)}</td><td class="amt">${fmtMoney(b.amount)}</td></tr>`;
+                }
+            });
+        }
+
+        const voucherHtml = (copyType) => `
+          <div class="voucher">
+            <div class="v-header">
+               <h2>${schoolName}</h2>
+               <div class="v-sub">${phone}</div>
+               <div class="v-title">FEE VOUCHER - ${copyType.toUpperCase()}</div>
+            </div>
+            
+            <div class="v-info">
+               <div class="info-row"><span>Student Name:</span> <b>${escHtml(s.name)}</b></div>
+               <div class="info-row"><span>Father Name:</span> <b>${escHtml(s.father || '-')}</b></div>
+               <div class="info-row"><span>Class:</span> <b>${escHtml(cls?.name || '')}</b></div>
+               <div class="info-row"><span>Roll / ID:</span> <b>${escHtml(s.roll || '-')}</b></div>
+               <div class="info-row"><span>Billing Month:</span> <b>${month}</b></div>
+               <div class="info-row"><span>Status:</span> <b style="color:${isPaid ? '#27ae60' : '#c0392b'};">${isPaid ? 'PAID' : 'PENDING'}</b></div>
+            </div>
+            
+            <table class="v-table">
+               <thead><tr><th>Description</th><th class="amt">Amount</th></tr></thead>
+               <tbody>
+                  ${rowsHtml}
+               </tbody>
+               <tfoot>
+                  <tr><td>Total Payable</td><td class="amt">${fmtMoney(bill.totalDue)}</td></tr>
+                  ${isPaid ? `<tr><td style="color:#27ae60;">Amount Paid</td><td class="amt" style="color:#27ae60;">${fmtMoney(bill.amountPaid)}</td></tr>` : ''}
+               </tfoot>
+            </table>
+            
+            <div class="v-footer">
+               <div class="signature">
+                  <div class="sig-line"></div>
+                  <div>Cashier Signature</div>
+               </div>
+               <div class="signature">
+                  <div class="sig-line"></div>
+                  <div>Principal / Admin</div>
+               </div>
+            </div>
+            <div style="text-align:center; margin-top: 15px; font-family: monospace; font-size: 10px; color: #555;">
+              ||| ||||||| ||| |||| ||||| ||| | |||<br>
+              ${sid.substring(0,8)}-${month}
+            </div>
+          </div>
+        `;
+
+        let html = `<html><head><title>Fee Voucher - ${escHtml(s.name)}</title>
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+          body { 
+              font-family: 'Inter', sans-serif; 
+              margin: 0; padding: 20px; 
+              background: #fff; 
+              color: #111; 
+              -webkit-print-color-adjust: exact; 
+              print-color-adjust: exact; 
+          }
+          .page-layout {
+              display: flex;
+              justify-content: space-between;
+              align-items: stretch;
+              gap: 20px;
+              max-width: 297mm; /* A4 Landscape */
+              margin: 0 auto;
+          }
+          .cut-line {
+              width: 1px;
+              background-image: linear-gradient(to bottom, #999 50%, rgba(255,255,255,0) 0%);
+              background-position: left;
+              background-size: 1px 15px;
+              background-repeat: repeat-y;
+              position: relative;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+          }
+          .cut-line::after {
+              content: "✂";
+              background: #fff;
+              color: #999;
+              padding: 10px 0;
+              position: absolute;
+              font-size: 18px;
+          }
+          .voucher {
+              flex: 1;
+              padding: 20px;
+              border: 1px solid #e0e0e0;
+              border-radius: 8px;
+              background: #fff;
+              position: relative;
+              overflow: hidden;
+          }
+          /* Watermark */
+          .voucher::before {
+              content: "";
+              position: absolute;
+              top: 50%; left: 50%;
+              transform: translate(-50%, -50%);
+              width: 200px; height: 200px;
+              background: url('oxford_logo.svg') no-repeat center center;
+              background-size: contain;
+              opacity: 0.03;
+              z-index: 0;
+              pointer-events: none;
+          }
+          .voucher > * { position: relative; z-index: 1; }
+          
+          .v-header { text-align: center; margin-bottom: 20px; }
+          .v-header h2 { margin: 0; color: #0d1e3d; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+          .v-sub { color: #555; font-size: 12px; margin-bottom: 8px; }
+          .v-title { 
+              background: #0d1e3d; color: #c9a84c; 
+              display: inline-block; padding: 5px 15px; 
+              border-radius: 4px; font-weight: 700; font-size: 13px; 
+          }
+          
+          .v-info { 
+              display: grid; grid-template-columns: 1fr 1fr; gap: 8px; 
+              margin-bottom: 20px; font-size: 12px; 
+              background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #eee;
+          }
+          .info-row span { color: #555; display: inline-block; width: 85px; }
+          
+          .v-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 30px; }
+          .v-table th { background: #0d1e3d; color: #fff; padding: 8px 10px; text-align: left; font-weight: 600; border: 1px solid #0d1e3d; }
+          .v-table td { padding: 8px 10px; border: 1px solid #e0e0e0; }
+          .v-table .amt { text-align: right; font-weight: 600; }
+          .arrears-row { color: #c0392b; }
+          .v-table tfoot td { font-weight: 800; font-size: 14px; background: #fdfaf2; border-top: 2px solid #c9a84c; border-bottom: 2px solid #c9a84c; }
+          
+          .v-footer { display: flex; justify-content: space-between; margin-top: 40px; padding: 0 10px; }
+          .signature { text-align: center; font-size: 11px; color: #555; }
+          .sig-line { width: 120px; border-top: 1px solid #000; margin-bottom: 5px; }
+          
+          @media print {
+              body { padding: 0; }
+              .page-layout { gap: 15px; }
+              .voucher { border: 1px solid #ccc; }
+          }
+        </style></head><body>
+          <div class="page-layout">
+             ${voucherHtml('School Copy')}
+             <div class="cut-line"></div>
+             ${voucherHtml('Student Copy')}
+          </div>
+          <scr`+`ipt>window.onload=function(){setTimeout(function(){window.print();},500);};</scr`+`ipt>
+        </body></html>`;
+        
+        printWindow.document.write(html);
+        printWindow.document.close();
     }
 
     function feeReminderText(sid, fid, dueDate, note = '') {
@@ -6479,13 +6652,17 @@
       openBulkFeeReminderQueue();
     }
     function openFeeStructModal() {
-      openModal(`
-  <h3>? Fee Structure</h3>
-  <div id="fee-list">${DB.fees.items.map((f, i) => `<div style="background:var(--card2);border:1px solid var(--border);border-radius:9px;padding:11px;margin-bottom:8px;"><div class="fg2"><div class="fg"><label class="fl">Fee Name</label><input class="fi" value="${f.name}" onchange="DB.fees.items[${i}].name=this.value" style="font-size:.82rem;"/></div><div class="fg"><label class="fl">Amount (${DB.settings?.currency || 'PKR'})</label><input class="fi" type="number" value="${f.amount}" onchange="DB.fees.items[${i}].amount=Number(this.value)" style="font-size:.82rem;"/></div></div><div class="fg2"><div class="fg"><label class="fl">Due Date</label><input class="fi" value="${f.due}" onchange="DB.fees.items[${i}].due=this.value" style="font-size:.82rem;"/></div><div class="fg"><label class="fl">Apply Month</label><select class="fi" onchange="DB.fees.items[${i}].applyMonth=this.value" style="font-size:.82rem;"><option value="All" ${f.applyMonth !== 'March' && f.applyMonth !== 'December' ? 'selected' : ''}>Every Month</option><option value="March" ${f.applyMonth === 'March' ? 'selected' : ''}>March</option><option value="December" ${f.applyMonth === 'December' ? 'selected' : ''}>December</option></select></div></div><div class="fg2"><div class="fg" style="display:flex;align-items:flex-end;gap:8px;"><label style="display:flex;align-items:center;gap:5px;font-size:.76rem;font-weight:600;cursor:pointer;padding-bottom:2px;"><input type="checkbox" ${f.mandatory ? 'checked' : ''} onchange="DB.fees.items[${i}].mandatory=this.checked"/> Mandatory</label>${f.id === 'f1' ? '<div style="font-size:.65rem;color:var(--ink4);margin-bottom:5px;">System Item</div>' : `<button class="btn btn-xs" style="background:var(--rl);color:var(--r);margin-bottom:0;" onclick="delFeeItem(${i})">Remove</button>`}</div></div></div>`).join('')}</div>
-  <button class="btn btn-gh btn-sm" style="width:100%;justify-content:center;margin-top:4px;" onclick="addFeeItem()">+ Add Fee Item</button>
-  <div class="m-btns" style="margin-top:10px;"><button class="btn btn-p" onclick="saveFeeStruct()"> Save</button><button class="btn btn-gh" onclick="closeModal()">Close</button></div>`);
-    }
+        openModal(`
+    <h3>? Fee Structure & Global Funds</h3>
+    <div id="fee-list">${DB.fees.items.map((f, i) => `<div style="background:var(--card2);border:1px solid var(--border);border-radius:9px;padding:11px;margin-bottom:8px;"><div class="fg2"><div class="fg"><label class="fl">Fee Name</label><input class="fi" value="${f.name}" onchange="DB.fees.items[${i}].name=this.value" style="font-size:.82rem;"/></div><div class="fg"><label class="fl">Amount (${DB.settings?.currency || 'PKR'})</label><input class="fi" type="number" value="${f.amount}" onchange="DB.fees.items[${i}].amount=Number(this.value)" style="font-size:.82rem;"/></div></div><div class="fg2"><div class="fg"><label class="fl">Due Date</label><input class="fi" value="${f.due}" onchange="DB.fees.items[${i}].due=this.value" style="font-size:.82rem;"/></div><div class="fg"><label class="fl">Apply Month</label><select class="fi" onchange="DB.fees.items[${i}].applyMonth=this.value" style="font-size:.82rem;"><option value="All" ${f.applyMonth !== 'March' && f.applyMonth !== 'December' ? 'selected' : ''}>Every Month</option><option value="March" ${f.applyMonth === 'March' ? 'selected' : ''}>March</option><option value="December" ${f.applyMonth === 'December' ? 'selected' : ''}>December</option><option value="August" ${f.applyMonth === 'August' ? 'selected' : ''}>August</option><option value="September" ${f.applyMonth === 'September' ? 'selected' : ''}>September</option><option value="October" ${f.applyMonth === 'October' ? 'selected' : ''}>October</option></select></div></div><div class="fg2"><div class="fg" style="display:flex;align-items:flex-end;gap:8px;"><label style="display:flex;align-items:center;gap:5px;font-size:.76rem;font-weight:600;cursor:pointer;padding-bottom:2px;"><input type="checkbox" ${f.mandatory ? 'checked' : ''} onchange="DB.fees.items[${i}].mandatory=this.checked"/> Mandatory</label>${f.id === 'f1' ? '<div style="font-size:.65rem;color:var(--ink4);margin-bottom:5px;">System Tuition</div>' : `<button class="btn btn-xs" style="background:var(--rl);color:var(--r);margin-bottom:0;" onclick="delFeeItem(${i})">Remove</button>`}</div></div></div>`).join('')}</div>
+    <div style="display:flex; gap:10px; margin-top:4px;">
+      <button class="btn btn-gh btn-sm" style="flex:1;justify-content:center;" onclick="addFeeItem()">+ Add Recurring Fee</button>
+      <button class="btn btn-p btn-sm" style="flex:1;justify-content:center;background:#0d1e3d;color:#fff;" onclick="addGlobalFund()">+ Add Global Fund (One-Time)</button>
+    </div>
+    <div class="m-btns" style="margin-top:10px;"><button class="btn btn-p" onclick="saveFeeStruct()"> Save</button><button class="btn btn-gh" onclick="closeModal()">Close</button></div>`);
+      }
     function addFeeItem() { DB.fees.items.push({ id: uid(), name: 'New Fee', amount: 1000, due: '5th', mandatory: false, type: 'monthly', applyMonth: 'All' }); openFeeStructModal(); }
+    function addGlobalFund() { DB.fees.items.push({ id: uid(), name: 'New Global Fund (e.g. Exam/Sports)', amount: 1500, due: '10th', mandatory: true, type: 'monthly', applyMonth: 'September' }); openFeeStructModal(); }
     function delFeeItem(i) { DB.fees.items.splice(i, 1); openFeeStructModal(); }
     function saveFeeStruct() { saveDB(); closeModal(); showToast('? Fee structure saved', 'ts'); goPage('fees'); }
 
@@ -6848,6 +7025,12 @@
       saveDB();
       closeModal();
       showToast(`Salary marked paid for ${t.name}`, 'ts');
+      
+      if ((t.whatsapp || t.phone) && DB.settings?.waAuto) {
+         const msg = `Dear ${t.name},\n\nYour salary of ${DB.settings?.currency || 'PKR'} ${amount} for the month of ${month} has been successfully disbursed.\n\nThank you for your hard work and dedication!\n\n${DB.school?.name || 'School Administration'}`;
+         sendWhatsAppAPI(t.whatsapp || t.phone, msg);
+      }
+
       goPage('payroll');
       printPaySlip(t.id, historyId);
     }
@@ -8110,6 +8293,7 @@
 </body>
 
 </html>
+
 
 
 
