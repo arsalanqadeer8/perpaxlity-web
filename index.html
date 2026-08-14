@@ -6348,7 +6348,8 @@
 
       showToast('Payment received & ledger updated');
       goPage('fees');
-      printFeeReceipt(sid, month);
+        openStudentFeeModal(sid, month);
+        printFeeReceipt(sid, month);
     }
     
     function unmarkStudentPayment(sid, month) {
@@ -8293,6 +8294,7 @@
 </body>
 
 </html>
+
 
 
 
