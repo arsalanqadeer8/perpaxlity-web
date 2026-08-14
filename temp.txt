@@ -1,0 +1,169 @@
+        playBeep('err');
+        if (fb) { fb.className = 'scan-fb err show'; fb.textContent = ` ${err?.message || 'Invalid QR. Please show a valid student or teacher QR card.'}`; }
+      }
+    }
+    function stopScanner() {
+      document.getElementById('scan-ov').classList.remove('open');
+      if (_qrS) { try { _qrS.stop(); } catch { } finally { _qrS = null; } }
+      document.getElementById('qr-reader').innerHTML = '';
+    }
+
+    function printIDCards(cid) {
+      const cls = DB.classes.find(c => c.id === cid);
+      if (!cls) return;
+      const sts = clsStus(cid);
+      if (sts.length === 0) return showToast('No students to print');
+
+      const printWindow = window.open('', '', 'width=900,height=1200');
+      const schoolName  = DB.school?.name     || 'Oxford Excellence Academy';
+      const schoolTag   = DB.school?.tagline  || 'LEARN • GROW • EXCEL';
+      const schoolCity  = DB.school?.city     || 'Main Campus';
+      const schoolYear  = DB.settings?.schoolYear || (new Date().getFullYear() + ' – ' + (new Date().getFullYear()+1));
+      const logoSrc     = DB.school?.logo     || 'oxford_logo.svg';
+      const navy        = DB.school?.primaryColor || '#0d1e3d';
+      const gold        = '#c9a84c';
+
+      let cards = '';
+      sts.forEach(s => {
+        const qrPayload = encodeURIComponent(studentAttendancePayload(s));
+        const rollNum = String(s.roll || '001').padStart(3,'0');
+        const grade   = escHtml(cls.name) + (cls.section ? ' ' + escHtml(cls.section) : '');
+        const photo   = s.photo
+          ? `<img src="${s.photo}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid ${gold};display:block;"/>`
+          : `<div style="width:80px;height:80px;border-radius:50%;border:3px solid ${gold};background:${navy};display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:white;">${ini(s.name)}</div>`;
+        const nameParts = s.name.trim().split(' ');
+        const ln = nameParts.length > 1 ? nameParts.pop() : '';
+        const fn = nameParts.join(' ');
+
+        cards += `
+        <div style="width:85.6mm;min-height:135mm;background:#fff;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 4px 20px rgba(0,0,0,.18);page-break-inside:avoid;">
+
+          <!-- HEADER -->
+          <div style="background:${navy};padding:14px 12px 16px;text-align:center;">
+            <img src="${logoSrc}" onerror="this.style.display='none'" style="width:46px;height:46px;object-fit:contain;border-radius:50%;background:rgba(255,255,255,.15);padding:3px;margin-bottom:5px;display:block;margin-left:auto;margin-right:auto;"/>
+            <div style="color:${gold};font-size:12px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;line-height:1.15;">${escHtml(schoolName)}</div>
+            <div style="color:rgba(255,255,255,.6);font-size:7px;letter-spacing:2px;margin-top:2px;">${escHtml(schoolTag)}</div>
+          </div>
+
+          <!-- BODY: two columns -->
+          <div style="flex:1;padding:14px 14px 10px;display:flex;gap:12px;align-items:flex-start;">
+
+            <!-- LEFT: photo -->
+            <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:8px;">
+              ${photo}
+            </div>
+
+            <!-- RIGHT: name + rows -->
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:15px;font-weight:800;color:${navy};text-transform:uppercase;line-height:1.1;margin-bottom:1px;">${escHtml(fn)}<br>${escHtml(ln)}</div>
+              <div style="font-size:8px;font-weight:700;color:${gold};letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">STUDENT</div>
+
+              <!-- detail rows -->
+              <div style="display:flex;flex-direction:column;gap:5px;">
+                <div style="display:flex;align-items:center;gap:6px;font-size:8px;border-bottom:1px solid #eee;padding-bottom:4px;">
+                  <div style="width:18px;height:18px;border-radius:50%;background:${navy};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;">🪪</div>
+                  <span style="color:#999;font-weight:500;letter-spacing:.5px;text-transform:uppercase;flex:1;">ID NUMBER</span>
+                  <span style="font-weight:700;color:${navy};">${rollNum}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;font-size:8px;border-bottom:1px solid #eee;padding-bottom:4px;">
+                  <div style="width:18px;height:18px;border-radius:50%;background:${navy};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;"><span class="material-symbols-outlined" style="font-size:inherit;vertical-align:-2px;">school</span></div>
+                  <span style="color:#999;font-weight:500;letter-spacing:.5px;text-transform:uppercase;flex:1;">GRADE</span>
+                  <span style="font-weight:700;color:${navy};">${grade}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;font-size:8px;border-bottom:1px solid #eee;padding-bottom:4px;">
+                  <div style="width:18px;height:18px;border-radius:50%;background:${navy};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;"><span class="material-symbols-outlined" style="font-size:inherit;vertical-align:-2px;">calendar_month</span></div>
+                  <span style="color:#999;font-weight:500;letter-spacing:.5px;text-transform:uppercase;flex:1;">SESSION</span>
+                  <span style="font-weight:700;color:${navy};">${escHtml(schoolYear)}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;font-size:8px;">
+                  <div style="width:18px;height:18px;border-radius:50%;background:${navy};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;"><span class="material-symbols-outlined" style="font-size:inherit;vertical-align:-2px;">location_on</span></div>
+                  <span style="color:#999;font-weight:500;letter-spacing:.5px;text-transform:uppercase;flex:1;">CAMPUS</span>
+                  <span style="font-weight:700;color:${navy};">${escHtml(schoolCity)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- BOTTOM: QR left, signature right -->
+          <div style="padding:6px 14px 10px;display:flex;align-items:flex-end;justify-content:space-between;border-top:1px solid #f0f0f0;">
+            <div class="idp-qr" data-student-id="${s.id}" data-qr-payload="${studentAttendancePayload(s)}" style="width:54px;height:54px;"></div>
+            <div style="text-align:center;flex:1;padding-left:6px;">
+              <img src="signature.jpg" style="width:75px;height:30px;object-fit:contain;display:block;margin:0 auto;" alt="Principal Signature"/>
+              <div style="border-top:1px solid #bbb;margin-top:2px;padding-top:2px;font-size:6.5px;color:#888;letter-spacing:1.5px;font-weight:600;text-transform:uppercase;">PRINCIPAL</div>
+            </div>
+          </div>
+
+          <!-- FOOTER -->
+          <div style="background:${navy};padding:5px 10px;display:flex;align-items:center;justify-content:center;gap:8px;">
+            <span style="color:rgba(255,255,255,.6);font-size:6.5px;letter-spacing:2px;">— SAFE TODAY</span>
+            <span style="color:${gold};font-size:11px;"><span class="material-symbols-outlined" style="font-size:inherit;vertical-align:-2px;">security</span></span>
+            <span style="color:rgba(255,255,255,.6);font-size:6.5px;letter-spacing:2px;">STRONG TOMORROW —</span>
+          </div>
+
+        </div>`;
+      });
+
+      const html = `<html><head><title>ID Cards – ${escHtml(cls.name)}</title>
+      <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+      <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"><\/script>
+      <style>
+        @page { margin:8mm; size:A4; }
+        *{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'Poppins',sans-serif;background:#e8e8e8;padding:10px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+        .sheet{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;justify-items:center;}
+        @media print{body{background:#e8e8e8;}}
+      </style></head><body>
+      <div class="sheet">${cards}</div>
+      <scr`+`ipt>
+        function genQRs() {
+          document.querySelectorAll('[data-qr-payload]').forEach(function(el) {
+            var canvas = document.createElement('canvas');
+            QRCode.toCanvas(canvas, el.getAttribute('data-qr-payload'), {width:108,margin:1,color:{dark:'#0d1e3d',light:'#ffffff'}}, function(){});
+            el.appendChild(canvas);
+          });
+        }
+        window.onload = function() {
+          if (typeof QRCode !== 'undefined') { genQRs(); setTimeout(function(){window.print();}, 1400); }
+          else { document.querySelector('script[src*="qrcode"]').onload = function(){ genQRs(); setTimeout(function(){window.print();}, 1400); }; }
+        };
+      <\/scr`+`ipt>
+      </body></html>`;
+
+      printWindow.document.write(html);
+      printWindow.document.close();
+    }
+
+    /* ------------------------------- ADMISSION FORM PRINT ------------------------------- */
+    function printAdmissionForm(sid, cid) {
+      const s = (DB.students[cid] || []).find(x => x.id === sid);
+      if (!s) return showToast('Student not found', 'te');
+      const cls = DB.classes.find(c => c.id === cid);
+      const school = DB.school || {};
+      const settings = DB.settings || {};
+      const printDate = new Date().toLocaleDateString('en-PK', { day:'2-digit', month:'long', year:'numeric' });
+      const logoSrc = school.logo || 'oxford_logo.svg';
+      const navy = school.primaryColor || '#0d1e3d';
+      const gold = '#c9a84c';
+
+      const pw = window.open('', '', 'width=900,height=1200');
+      const html = `<!DOCTYPE html><html><head><title>Admission Form - ${escHtml(s.name)}</title>
+      <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+      <style>
+        @page { margin: 0; size: A4; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Poppins', sans-serif; background: #fff; color: #111; font-size: 11px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .page { max-width: 700px; margin: 0 auto; padding: 10mm; }
+
+        /* Header */
+        .hdr { display: flex; align-items: center; gap: 16px; padding: 15px 20px; background: ${navy}; color: white; border-radius: 8px 8px 0 0; }
+        .hdr-logo { width: 60px; height: 60px; object-fit: contain; background: rgba(255,255,255,.15); border-radius: 50%; padding: 4px; flex-shrink: 0; }
+        .hdr-info { flex: 1; }
+        .hdr-name { font-size: 18px; font-weight: 800; color: ${gold}; letter-spacing: 1px; }
+        .hdr-tag { font-size: 10px; color: rgba(255,255,255,.7); letter-spacing: 1.5px; margin-top: 2px; }
+        .hdr-contact { font-size: 9px; color: rgba(255,255,255,.6); margin-top: 4px; }
+        .hdr-right { text-align: right; }
+        .hdr-right .label { font-size: 8px; color: rgba(255,255,255,.5); letter-spacing: 1px; text-transform: uppercase; }
+        .hdr-right .form-no { font-size: 20px; font-weight: 800; color: ${gold}; }
+
+        /* Title bar */
+        .title-bar { background: ${gold}; color: ${navy}; text-align: center; padding: 6px; font-size: 12px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; }

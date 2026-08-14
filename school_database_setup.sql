@@ -486,3 +486,28 @@ CREATE OR REPLACE VIEW fee_summary AS
 -- ═══════════════════════════════════════════════════════════════
 
 
+
+-- ============================================================================
+-- 10. WHATSAPP OUTBOX (QUEUE)
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.whatsapp_outbox (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    recipient_phone TEXT NOT NULL,
+    message_body TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    sent_at TIMESTAMP WITH TIME ZONE
+);
+
+ALTER TABLE public.whatsapp_outbox ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY ""whatsapp_outbox_allow_all"" ON public.whatsapp_outbox
+  FOR ALL
+  USING (true)
+  WITH CHECK (true);
+
+-- Enable Realtime replication
+BEGIN;
+  DROP PUBLICATION IF EXISTS supabase_realtime;
+  CREATE PUBLICATION supabase_realtime FOR ALL TABLES;
+COMMIT;
