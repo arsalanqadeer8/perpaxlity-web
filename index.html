@@ -4272,7 +4272,7 @@
     function sCol(v) { return v >= 80 ? 'var(--g)' : v >= 60 ? 'var(--o)' : 'var(--r)'; }
     function lGrade(v) { return v >= 90 ? 'A+' : v >= 80 ? 'A' : v >= 70 ? 'B+' : v >= 60 ? 'B' : v >= 50 ? 'C' : v > 0 ? 'F' : '-'; }
     function gCls(v) { const l = lGrade(v); return l.startsWith('A') ? 'bg2' : l.startsWith('B') ? 'bb2' : l === 'C' ? 'bo2' : l === 'F' ? 'br2' : ''; }
-    function today() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+    function today() { return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Karachi' }); }
     function monthKey(d = today()) { return String(d || today()).slice(0, 7); }
     function fmtDate(d) { if (!d) return '-'; try { return new Date(d).toLocaleDateString('en-GB'); } catch { return d; } }
     function allStus() { return Object.values(DB.students).flat(); }
@@ -4281,7 +4281,7 @@
     function avgStu(cid, sid, tid = curTerm) { const g = (DB.grades[cid + '_' + tid] || {})[sid] || {}; const v = Object.values(g).filter(x => x > 0); return v.length ? Math.round(v.reduce((a, b) => a + b, 0) / v.length) : 0; }
     function attPct(cid, sid) { const a = (DB.attendance[cid] || {})[sid] || {}; const arr = Object.values(a); if (!arr.length) return clsStus(cid).find(s => s.id === sid)?.attendance || 0; return Math.round(arr.filter(x => x === 'P').length / arr.length * 100); }
     function nextRoll(cid) { const s = clsStus(cid); return String(s.length + 1).padStart(3, '0'); }
-    function nowHHMM() { const n = new Date(); return `${String(n.getHours()).padStart(2, '0')}:${String(n.getMinutes()).padStart(2, '0')}`; }
+    function nowHHMM() { return new Date().toLocaleTimeString('en-US', { timeZone: 'Asia/Karachi', hourCycle: 'h23', hour: '2-digit', minute: '2-digit' }); }
     function updateSOM() {
       const som = DB?.settings?.studentOfTheMonth;
       if (som) {
