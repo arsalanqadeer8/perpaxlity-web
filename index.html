@@ -5426,10 +5426,23 @@
 
     async function saveStu(editId) {
       const name = (document.getElementById('m-name')?.value || '').trim();
-      if (!name) { showToast(' Name is required', 'te'); return; }
+      if (!name) { showToast('&#10060; Name is required', 'te'); return; }
       const classId = document.getElementById('m-class')?.value;
-      if (!classId) { showToast(' Class is required', 'te'); return; }
-      const photo = document.getElementById('m-pd')?.value || '';
+      if (!classId) { showToast('&#10060; Class is required', 'te'); return; }
+      let photo = document.getElementById('m-pd')?.value || '';
+      
+      if (photo && photo.startsWith('data:image/')) {
+         try {
+           showToast('Uploading photo...', 'ts');
+           const r = await fetch(photo);
+           const blob = await r.blob();
+           const file = new File([blob], \`stu_\${Date.now()}.png\`, { type: blob.type });
+           photo = await uploadToStorage(file);
+         } catch(e) { 
+           showToast('Photo upload failed: ' + e.message, 'te'); 
+         }
+      }
+
       const famSel = document.getElementById('m-fam')?.value || '';
       const famName = (document.getElementById('m-famname')?.value || '').trim();
       const wa = (document.getElementById('m-wa')?.value || '').replace(/\s/g, '');
