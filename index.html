@@ -6342,7 +6342,7 @@
       saveDB();
       
       if (s.whatsapp && DB.settings?.waAuto) {
-        const msg = `Dear Parent of ${s.name},\n\nWe have successfully received the payment of ${fmtMoney(amountPaid)} for the month of ${formatMonthFriendly(month)}.\n\nThank you.\n${DB.school.name}`;
+        const msg = `Dear Parent of ${s.name},\n\nWe have successfully received the payment of ${fmtMoney(amountPaid)} for the month of ${month}.\n\nThank you.\n${DB.school.name}`;
         openWhatsAppMessage(s.whatsapp, msg);
       }
 
@@ -8294,6 +8294,7 @@
 </body>
 
 </html>
+
 
 
 
