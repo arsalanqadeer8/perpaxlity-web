@@ -1935,6 +1935,12 @@
       border-color: rgba(217, 119, 6, .2);
     }
 
+    .acO {
+      background: var(--vl);
+      color: var(--v);
+      border-color: rgba(139, 92, 246, .2);
+    }
+
     .acLa {
       background: var(--yl);
       color: var(--y);
@@ -5790,15 +5796,17 @@
         const P = Object.values(att).filter(v => v === 'P').length; const tot = Object.values(att).length;
         const pct = tot ? Math.round(P / tot * 100) : (s.attendance || 0);
         return `<tr><td style="font-weight:700;font-size:.72rem;">${s.roll || '-'}</td><td><div style="display:flex;align-items:center;gap:6px;min-width:96px;"><div class="ava" style="width:24px;height:24px;border-radius:6px;background:${gc(s.name)};font-size:.48rem;flex-shrink:0;">${s.photo ? `<img src="${s.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:6px;"/>` : ini(s.name)}</div><span style="font-size:.78rem;font-weight:600;white-space:nowrap;">${s.name}</span></div></td>
-      ${dates.map(d => { const v = att[d] || ''; return `<td style="text-align:center;padding:5px;"><div class="ac ${v === 'P' ? 'acP' : v === 'A' ? 'acA' : v === 'L' ? 'acL' : 'ac0'}" id="ac-${s.id}-${d}" onclick="cycleAtt('${s.id}','${d}')">${v || '-'}</div></td>`; }).join('')}
+      ${dates.map(d => { const v = att[d] || ''; return `<td style="text-align:center;padding:5px;"><div class="ac ${v === 'P' ? 'acP' : v === 'O' ? 'acO' : v === 'A' ? 'acA' : v === 'L' ? 'acL' : 'ac0'}" id="ac-${s.id}-${d}" onclick="cycleAtt('${s.id}','${d}')">${v || '-'}</div></td>`; }).join('')}
     <td style="font-weight:700;font-size:.8rem;color:${pct >= 90 ? 'var(--g)' : pct >= 75 ? 'var(--o)' : 'var(--r)'};">${pct}%</td></tr>`;
       }).join('')}
   </tbody></table></div></div>
 <div style="display:flex;gap:9px;margin-top:9px;align-items:center;font-size:.72rem;flex-wrap:wrap;">
   <span style="color:var(--ink4);">Legend:</span>
   <span><span class="ac acP" style="width:22px;height:22px;font-size:.56rem;cursor:default;">P</span> Present</span>
+  <span><span class="ac acO" style="width:22px;height:22px;font-size:.56rem;cursor:default;">O</span> Out</span>
   <span><span class="ac acA" style="width:22px;height:22px;font-size:.56rem;cursor:default;">A</span> Absent</span>
   <span><span class="ac acL" style="width:22px;height:22px;font-size:.56rem;cursor:default;">L</span> Leave</span>
+  <span><span class="ac acO" style="width:22px;height:22px;font-size:.56rem;cursor:default;">O</span> Out</span>
   <button class="btn btn-wa btn-sm" style="margin-left:auto;" onclick="sendAbsentAlerts()"> Absent Alerts</button>
 </div>`}`;
     }
@@ -5806,10 +5814,37 @@
       if (!DB.attendance[curCls]) DB.attendance[curCls] = {};
       if (!DB.attendance[curCls][sid]) DB.attendance[curCls][sid] = {};
       const c = DB.attendance[curCls][sid][d] || '';
-      const n = c === '' ? 'P' : c === 'P' ? 'A' : c === 'A' ? 'L' : '';
+      const n = c === '' ? 'P' : c === 'P' ? 'O' : c === 'O' ? 'A' : c === 'A' ? 'L' : '';
       DB.attendance[curCls][sid][d] = n;
       const el = document.getElementById(`ac-${sid}-${d}`);
-      if (el) { el.className = `ac ${n === 'P' ? 'acP' : n === 'A' ? 'acA' : n === 'L' ? 'acL' : 'ac0'}`; el.textContent = n || '-'; }
+      if (el) { el.className = `ac ${n === 'P' ? 'acP' : n === 'O' ? 'acO' : n === 'A' ? 'acA' : n === 'L' ? 'acL' : 'ac0'}`; el.textContent = n || '-'; }
+      
+      if (d === today()) {
+         if (!DB.studentLogs) DB.studentLogs = {};
+         if (!DB.studentLogs[curCls]) DB.studentLogs[curCls] = {};
+         if (!DB.studentLogs[curCls][sid]) DB.studentLogs[curCls][sid] = {};
+         const log = DB.studentLogs[curCls][sid][d] || {};
+         const stu = allStus().find(s => s.id === sid);
+         const tStr = new Date().toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' });
+         
+         if (n === 'P' && !log.in) {
+            log.in = nowHHMM();
+            if (stu?.whatsapp && DB.settings?.waAuto) {
+                sendWhatsAppAPI(stu.whatsapp, `Dear Parent,\n\n${stu.name} has just been marked as Check-In at ${tStr} today (${fmtDate(d)}).\n\n${DB.school.name}`);
+            }
+         } else if (n === 'O') {
+            log.out = nowHHMM();
+            if (stu?.whatsapp && DB.settings?.waAuto) {
+                sendWhatsAppAPI(stu.whatsapp, `Dear Parent,\n\n${stu.name} has just been marked as Check-Out at ${tStr} today (${fmtDate(d)}).\n\n${DB.school.name}`);
+            }
+         } else if (n === 'A') {
+            if (stu?.whatsapp && DB.settings?.waAuto) {
+                sendWhatsAppAPI(stu.whatsapp, `Dear Parent,\n\n${stu.name} is marked Absent today (${fmtDate(d)}).\n\n${DB.school.name}`);
+            }
+         }
+         DB.studentLogs[curCls][sid][d] = log;
+         saveDB();
+      }
     }
     function markAll(v) { const d = today(); clsStus(curCls).forEach(s => { if (!DB.attendance[curCls]) DB.attendance[curCls] = {}; if (!DB.attendance[curCls][s.id]) DB.attendance[curCls][s.id] = {}; DB.attendance[curCls][s.id][d] = v; const el = document.getElementById(`ac-${s.id}-${d}`); if (el) { el.className = `ac ${v === 'P' ? 'acP' : 'acA'}`; el.textContent = v; } }); }
     function saveAtt() { saveDB(); showToast('Attendance saved', 'ts'); }
@@ -5819,8 +5854,8 @@
       const absent = clsStus(curCls).filter(s => (DB.attendance[curCls]?.[s.id] || {})[d] === 'A');
       if (!absent.length) { showToast('No absent students today', 'tw2'); return; }
       const cls = DB.classes.find(c => c.id === curCls);
-      absent.forEach(s => { if (s.whatsapp) openWhatsAppMessage(s.whatsapp, `Dear Parent, ${s.name} was ABSENT from ${DB.school.name} (${cls?.name || ''}) on ${fmtDate(d)}. Please ensure regular attendance.` + "\n\nThank you.\n" + `${DB.school.name}`); });
-      showToast(` WhatsApp opened for ${absent.length} absent students`, 'ts');
+      absent.forEach(s => { if (s.whatsapp) sendWhatsAppAPI(s.whatsapp, `Dear Parent, ${s.name} was ABSENT from ${DB.school.name} (${cls?.name || ''}) on ${fmtDate(d)}. Please ensure regular attendance.` + "\n\nThank you.\n" + `${DB.school.name}`); });
+      showToast(` WhatsApp queued for ${absent.length} absent students`, 'ts');
     }
 
     /* ------------------------------- TEACHER ATTENDANCE PAGE ------------------------------- */
@@ -5910,13 +5945,14 @@
         const tot = Object.values(att).filter(v => ['Present','Absent','Late','Leave'].includes(v.status)).length;
         const pct = tot ? Math.round((P + La) / tot * 100) : 0;
         return `<tr><td><div style="display:flex;align-items:center;gap:6px;min-width:120px;"><div class="ava" style="width:24px;height:24px;border-radius:6px;background:${gc(t.name)};font-size:.48rem;flex-shrink:0;">${t.photo ? `<img src="${t.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:6px;"/>` : ini(t.name)}</div><div><span style="font-size:.78rem;font-weight:600;white-space:nowrap;">${t.name}</span><div style="font-size:.6rem;color:var(--ink4);">${t.subject||(t.role==='scanner'?'Scanner':'Staff')}</div></div></div></td>
-      ${dates.map(d => { const v = att[d]?.status || ''; const sn = v==='Present'?'P':v==='Absent'?'A':v==='Late'?'L':v==='Leave'?'V':''; return `<td style="text-align:center;padding:5px;"><div class="ac ${sn === 'P' ? 'acP' : sn === 'A' ? 'acA' : sn === 'L' ? 'acLa' : sn === 'V' ? 'acV' : 'ac0'}" id="tac-${t.id}-${d}" onclick="cycleTAtt('${t.id}','${d}')">${sn || '-'}</div></td>`; }).join('')}
+      ${dates.map(d => { const v = att[d]?.status || ''; const sn = v==='Present'?'P':v==='Out'?'O':v==='Absent'?'A':v==='Late'?'L':v==='Leave'?'V':''; return `<td style="text-align:center;padding:5px;"><div class="ac ${sn === 'P' ? 'acP' : sn === 'O' ? 'acO' : sn === 'A' ? 'acA' : sn === 'L' ? 'acLa' : sn === 'V' ? 'acV' : 'ac0'}" id="tac-${t.id}-${d}" onclick="cycleTAtt('${t.id}','${d}')">${sn || '-'}</div></td>`; }).join('')}
     <td style="font-weight:700;font-size:.8rem;color:${pct >= 90 ? 'var(--g)' : pct >= 75 ? 'var(--o)' : 'var(--r)'};">${pct}%</td></tr>`;
       }).join('')}
   </tbody></table></div></div>
 <div style="display:flex;gap:9px;margin-top:9px;align-items:center;font-size:.72rem;flex-wrap:wrap;">
   <span style="color:var(--ink4);">Legend:</span>
   <span><span class="ac acP" style="width:22px;height:22px;font-size:.56rem;cursor:default;">P</span> Present</span>
+  <span><span class="ac acO" style="width:22px;height:22px;font-size:.56rem;cursor:default;">O</span> Out</span>
   <span><span class="ac acA" style="width:22px;height:22px;font-size:.56rem;cursor:default;">A</span> Absent</span>
   <span><span class="ac acLa" style="width:22px;height:22px;font-size:.56rem;cursor:default;">L</span> Late</span>
   <span><span class="ac acV" style="width:22px;height:22px;font-size:.56rem;cursor:default;">V</span> Leave</span>
@@ -5927,16 +5963,20 @@
     function cycleTAtt(tid, d) {
       if (!DB.teacherAttendance[tid]) DB.teacherAttendance[tid] = {};
       const c = DB.teacherAttendance[tid][d]?.status || '';
-      const n = c === '' ? 'Present' : c === 'Present' ? 'Absent' : c === 'Absent' ? 'Late' : c === 'Late' ? 'Leave' : '';
+      const n = c === '' ? 'Present' : c === 'Present' ? 'Out' : c === 'Out' ? 'Absent' : c === 'Absent' ? 'Late' : c === 'Late' ? 'Leave' : '';
       if (n) {
-        DB.teacherAttendance[tid][d] = { checkIn: DB.teacherAttendance[tid][d]?.checkIn || nowHHMM(), status: n, source: 'manual' };
+        const log = DB.teacherAttendance[tid][d] || { checkIn: nowHHMM() };
+        if (n === 'Out' && !log.checkOut) log.checkOut = nowHHMM();
+        log.status = n;
+        log.source = 'manual';
+        DB.teacherAttendance[tid][d] = log;
       } else {
         delete DB.teacherAttendance[tid][d];
       }
       const el = document.getElementById(`tac-${tid}-${d}`);
       if (el) { 
-        const sn = n==='Present'?'P':n==='Absent'?'A':n==='Late'?'L':n==='Leave'?'V':'';
-        el.className = `ac ${sn === 'P' ? 'acP' : sn === 'A' ? 'acA' : sn === 'L' ? 'acLa' : sn === 'V' ? 'acV' : 'ac0'}`; el.textContent = sn || '-'; 
+        const sn = n==='Present'?'P':n==='Out'?'O':n==='Absent'?'A':n==='Late'?'L':n==='Leave'?'V':'';
+        el.className = `ac ${sn === 'P' ? 'acP' : sn === 'O' ? 'acO' : sn === 'A' ? 'acA' : sn === 'L' ? 'acLa' : sn === 'V' ? 'acV' : 'ac0'}`; el.textContent = sn || '-'; 
       }
     }
     function markAllT(status) {
@@ -7738,18 +7778,39 @@
           const tid = String(data.id || '').trim();
           const teacher = DB.users.find(u => u.id === tid && u.role === 'teacher');
           if (!teacher) throw new Error('Teacher not found');
-          if (DB.teacherAttendance[teacher.id] && DB.teacherAttendance[teacher.id][d]) {
-            throw new Error(`Already scanned today at ${DB.teacherAttendance[teacher.id][d].checkIn}`);
-          }
-          const t = nowHHMM();
-          const finalStatus = isLate(t) ? 'Late' : 'Present';
+          
           if (!DB.teacherAttendance[teacher.id]) DB.teacherAttendance[teacher.id] = {};
-          DB.teacherAttendance[teacher.id][d] = { checkIn: t, status: finalStatus, source: 'gate-qr' };
+          const log = DB.teacherAttendance[teacher.id][d] || {};
+          
+          const t = nowHHMM();
+          const tObj = new Date();
+          const tStr = tObj.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' });
+          let action = '';
+
+          if (!log.checkIn) {
+            log.checkIn = t;
+            log.status = isLate(t) ? 'Late' : 'Present';
+            log.source = 'gate-qr';
+            action = 'Check-In';
+          } else if (!log.checkOut) {
+            const inParts = log.checkIn.split(':');
+            const inMins = parseInt(inParts[0]) * 60 + parseInt(inParts[1]);
+            const outMins = tObj.getHours() * 60 + tObj.getMinutes();
+            if (outMins - inMins < 30) {
+              throw new Error(`Scanned too soon after Check-In (${log.checkIn})`);
+            }
+            log.checkOut = t;
+            action = 'Check-Out';
+          } else {
+            throw new Error(`Already checked out at ${log.checkOut}`);
+          }
+
+          DB.teacherAttendance[teacher.id][d] = log;
           saveDB();
           playBeep('ok');
-          if (fb) { fb.className = 'scan-fb show'; fb.innerHTML = `Marked <b>${teacher.name}</b> - Staff - ${finalStatus}<br/><span style="font-size:.7rem;opacity:.75;">Gate check-in at ${t}</span>`; }
+          if (fb) { fb.className = 'scan-fb show'; fb.innerHTML = `<b>${action}</b>: <b>${teacher.name}</b> - Staff<br/><span style="font-size:.7rem;opacity:.75;">${action} at ${tStr}</span>`; }
           const lb = document.getElementById('scan-log-box');
-          if (lb) { lb.className = 'scan-log show'; lb.innerHTML = `<div class="sl-it"><span class="sl-ok">OK</span><span class="sl-nm">${teacher.name}</span><span class="sl-cl">Staff ${finalStatus}</span><span class="sl-t">${t}</span></div>` + lb.innerHTML; }
+          if (lb) { lb.className = 'scan-log show'; lb.innerHTML = `<div class="sl-it"><span class="sl-ok">OK</span><span class="sl-nm">${teacher.name}</span><span class="sl-cl">Staff ${action}</span><span class="sl-t">${t}</span></div>` + lb.innerHTML; }
           if (_qrS) { try { _qrS.pause(true); setTimeout(() => { try { _qrS?.resume(); } catch { } }, 1600); } catch { } }
           return;
         }
@@ -7788,11 +7849,16 @@
           const inParts = log.in.split(':');
           const inMins = parseInt(inParts[0]) * 60 + parseInt(inParts[1]);
           const outMins = tObj.getHours() * 60 + tObj.getMinutes();
-          if (outMins - inMins < 10) {
+          if (outMins - inMins < 30) {
             throw new Error(`Scanned too soon after Check-In (${log.in})`);
           }
           log.out = t;
           action = 'Check-Out';
+          if (DB.attendance[scanClassId] && DB.attendance[scanClassId][sid]) {
+             DB.attendance[scanClassId][sid][d] = 'O';
+             const el = document.getElementById(`ac-${sid}-${d}`);
+             if (el) { el.className = 'ac acO'; el.textContent = 'O'; }
+          }
         } else {
           throw new Error(`Already checked out at ${log.out}`);
         }
@@ -7802,18 +7868,20 @@
         
         if (stu.whatsapp && DB.settings?.waAuto) {
           const msg = `Dear Parent,\n\n${stu.name} has just been marked as ${action} at ${tStr} today (${fmtDate(d)}).\n\n${DB.school.name}`;
-          openWhatsAppMessage(stu.whatsapp, msg);
+          sendWhatsAppAPI(stu.whatsapp, msg);
         }
 
         playBeep('ok');
 
         if (fb) { fb.className = 'scan-fb show'; fb.innerHTML = `<b>${action}</b>: <b>${stu.name}</b> - ${cls.name}${cls.section ? ' ' + cls.section : ''}<br/><span style="font-size:.7rem;opacity:.75;">${action} at ${tStr}</span>`; }
         const lb = document.getElementById('scan-log-box');
-        if (lb) { lb.className = 'scan-log show'; lb.innerHTML = `<div class="sl-it"><span class="sl-ok">OK</span><span class="sl-nm">${stu.name}</span><span class="sl-cl">${action}</span><span class="sl-t">${tStr}</span></div>` + lb.innerHTML; }
-        if (_qrS) { try { _qrS.pause(true); setTimeout(() => { try { _qrS?.resume(); } catch { } }, 1800); } catch { } }
-      } catch (err) {
+        if (lb) { lb.className = 'scan-log show'; lb.innerHTML = `<div class="sl-it"><span class="sl-ok">OK</span><span class="sl-nm">${stu.name}</span><span class="sl-cl">${cls.name}</span><span class="sl-t">${t}</span></div>` + lb.innerHTML; }
+        if (_qrS) { try { _qrS.pause(true); setTimeout(() => { try { _qrS?.resume(); } catch { } }, 1600); } catch { } }
+
+      } catch (e) {
         playBeep('err');
-        if (fb) { fb.className = 'scan-fb err show'; fb.textContent = ` ${err?.message || 'Invalid QR. Please show a valid student or teacher QR card.'}`; }
+        if (fb) { fb.className = 'scan-fb err show'; fb.textContent = `&#10060; ${e.message}`; }
+        if (_qrS) { try { _qrS.pause(true); setTimeout(() => { try { _qrS?.resume(); } catch { } }, 2000); } catch { } }
       }
     }
     function stopScanner() {
@@ -8276,6 +8344,46 @@
       if (typeof pushCloudDB === 'function') pushCloudDB();
     });
 
+    // Automated Process for Absences after 8:45 AM
+    function processAutoAbsences() {
+      if (!DB || typeof DB.settings === 'undefined') return;
+      if (DB.settings.waAuto !== true) return;
+      const d = today();
+      if (nowHHMM() < '08:45') return;
+      if (!DB.autoAbsences) DB.autoAbsences = {};
+      if (DB.autoAbsences[d]) return; // already processed today
+      
+      let changed = false;
+      const stus = allStus();
+      
+      stus.forEach(stu => {
+        const cid = stu.classId;
+        if (!cid) return;
+        
+        if (!DB.attendance[cid]) DB.attendance[cid] = {};
+        if (!DB.attendance[cid][stu.id]) DB.attendance[cid][stu.id] = {};
+        const att = DB.attendance[cid][stu.id][d];
+        
+        if (!att || att === '') {
+          DB.attendance[cid][stu.id][d] = 'A'; // Auto-Absent
+          changed = true;
+          
+          if (stu.whatsapp) {
+            sendWhatsAppAPI(stu.whatsapp, `Dear Parent,\n\n${stu.name} is marked Absent today (${fmtDate(d)}).\n\n${DB.school.name}`);
+          }
+        }
+      });
+      
+      DB.autoAbsences[d] = true;
+      if (changed) saveDB();
+    }
+
+    setInterval(() => {
+        if (typeof curRole !== 'undefined' && curRole === 'admin') {
+            processAutoAbsences();
+        }
+    }, 60000); // Check every minute
+
     // Automated Period Notifications for Teachers
     setInterval(() => {
         if (typeof curRole !== 'undefined' && curRole === 'teacher' && typeof DB !== 'undefined' && DB.periods && DB.timetable) {
@@ -8307,6 +8415,7 @@
 </body>
 
 </html>
+
 
 
 
