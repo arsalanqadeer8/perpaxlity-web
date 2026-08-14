@@ -3614,6 +3614,23 @@
                     menuIcon.innerText = 'menu';
                 }
             }
+
+            function subscribeNewsletter() {
+                const input = document.getElementById('ox_nl_input');
+                if (!input) return;
+                const email = input.value.trim();
+                if (!email) {
+                    alert('Please enter your email address.');
+                    return;
+                }
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    alert('Please enter a valid email address.');
+                    return;
+                }
+                alert('Thank you for subscribing to our newsletter!');
+                input.value = '';
+            }
         </script>
     </section>
 
@@ -3652,8 +3669,8 @@
             <div class="ox-newsletter">
                 <h4>Newsletter</h4>
                 <p>Subscribe for the latest news and event updates.</p>
-                <input type="text" id="ox_nl_input" placeholder="Email" autocomplete="off" readonly onfocus="this.removeAttribute('readonly');" />
-                <button>Subscribe</button>
+                <input type="email" id="ox_nl_input" placeholder="Email" autocomplete="off" readonly onfocus="this.removeAttribute('readonly');" onkeydown="if(event.key==='Enter') subscribeNewsletter()" aria-label="Newsletter email address" />
+                <button onclick="subscribeNewsletter()" aria-label="Subscribe to newsletter">Subscribe</button>
             </div>
         </div>
         <div class="ox-footer-bottom">
