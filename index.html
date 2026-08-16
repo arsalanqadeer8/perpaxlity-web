@@ -3958,6 +3958,17 @@
         showSyncBadge('Local save only (No permission)', '#f59e0b');
         return;
       }
+      
+      // CRITICAL HOTFIX: Scrub any massive base64 strings that crash cloud sync (over 100kb limit)
+      if (DB.students) {
+        Object.keys(DB.students).forEach(k => {
+          if (DB.students[k].photo && DB.students[k].photo.startsWith('data:image/') && DB.students[k].photo.length > 50000) {
+            console.warn(`Scrubbing giant base64 photo for ${DB.students[k].name} before cloud push`);
+            DB.students[k].photo = '';
+          }
+        });
+      }
+
       try {
         _lastPushTime = new Date().toISOString();
         await _sb.from('db_snapshot').upsert({ id: 1, data: DB, updated_at: _lastPushTime });
@@ -4021,8 +4032,25 @@
       if (!email) return;
       const cloud = await loadCloudDB();
       if (cloud) DB = cloud;
+      
+      // CRITICAL HOTFIX: Scrub any massive base64 strings that might be stuck in local DB crashing the cloud sync
+      let needsRescueSync = false;
+      if (DB && DB.students) {
+        Object.keys(DB.students).forEach(k => {
+          if (DB.students[k].photo && DB.students[k].photo.startsWith('data:image/') && DB.students[k].photo.length > 50000) {
+            console.warn(`Scrubbing giant base64 photo for ${DB.students[k].name}`);
+            DB.students[k].photo = '';
+            needsRescueSync = true;
+          }
+        });
+      }
+      
       stripStoredPasswords();
       ensureEnhancements();
+      
+      if (needsRescueSync) {
+        saveDB(); // Push the scrubbed, safe DB up to the cloud!
+      }
       saveLocalDB();
       const u = findUserProfile(email);
       if (!u) return;
@@ -4444,8 +4472,8 @@
         if (!error && data && data.length > 0) {
           for (const msg of data) {
             try {
-              const url = (DB.settings?.waUrl || 'http://localhost:2886').replace(/\/+$/, '') + '/api/sessions/admin/messages/send-text';
-              const apiKey = DB.settings?.waApiKey || '';
+              const url = DB.settings?.waApiUrl || 'http://localhost:2785/api/sessions/admin/messages/send-text';
+              const apiKey = DB.settings?.waApiToken || '';
               
               const res = await fetch(url, {
                 method: 'POST',
