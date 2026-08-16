@@ -4428,6 +4428,43 @@
       }
       return true;
     }
+    
+    let isProcessingOutbox = false;
+    async function processWhatsAppOutbox() {
+      if (!window.supabase || isProcessingOutbox) return;
+      isProcessingOutbox = true;
+      try {
+        const { data, error } = await supabase
+          .from('whatsapp_outbox')
+          .select('*')
+          .eq('status', 'pending')
+          .order('created_at', { ascending: true })
+          .limit(10);
+          
+        if (!error && data && data.length > 0) {
+          for (const msg of data) {
+            try {
+              const url = (DB.settings?.waUrl || 'http://localhost:2886').replace(/\/+$/, '') + '/api/sessions/admin/messages/send-text';
+              const apiKey = DB.settings?.waApiKey || '';
+              
+              const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey },
+                body: JSON.stringify({ chatId: `${msg.recipient_phone}@c.us`, text: msg.message_body })
+              });
+              
+              if (res.ok) {
+                await supabase.from('whatsapp_outbox').update({ status: 'sent', updated_at: new Date().toISOString() }).eq('id', msg.id);
+              }
+            } catch (e) {
+              console.error('Outbox send fail:', e);
+            }
+          }
+        }
+      } catch(e) {}
+      isProcessingOutbox = false;
+    }
+    setInterval(processWhatsAppOutbox, 15000);
     function addMonthsKey(key, delta) {
       const [y, m] = String(key || monthKey()).split('-').map(Number);
       const d = new Date(y || new Date().getFullYear(), (m || 1) - 1 + delta, 1);
@@ -5247,6 +5284,7 @@
       DB.admissions = (DB.admissions || []).filter(a => a.id !== id);
       saveDB();
       if (_sb) { try { await _sb.from('admission_applications').delete().eq('id', id); } catch (e) {} }
+      closeModal();
       goPage('admissions');
       showToast('Application deleted', 'ts');
     }
@@ -5296,6 +5334,7 @@
     <button class="btn btn-g btn-sm" onclick="approveAdmission('${a.id}')">Approve & Add Student</button>
     <button class="btn btn-gh btn-sm" onclick="setAdmissionStatus('${a.id}','contacted')"> Mark Contacted</button>
     <button class="btn btn-xs" style="background:var(--rl);color:var(--r);" onclick="setAdmissionStatus('${a.id}','rejected')">Reject</button>
+    <button class="btn btn-xs" style="background:var(--rl);color:var(--r);" onclick="deleteAdmission('${a.id}')">Delete</button>
       ${(a.whatsapp || a.phone) ? `<button class="btn btn-wa btn-sm" onclick="waMsg('${normalizePhone(a.whatsapp || a.phone)}','Dear parent, your admission application for ${escAttr(a.studentName)} has been received by ${escAttr(DB.school.name)}.')">WhatsApp</button>` : ''}
     <button class="btn btn-gh btn-sm" onclick="closeModal()">Close</button>
   </div>`);
@@ -5475,7 +5514,9 @@
            const file = new File([blob], `stu_${Date.now()}.png`, { type: blob.type });
            photo = await uploadToStorage(file);
          } catch(e) { 
-           showToast('Photo upload failed: ' + e.message, 'te'); 
+           showToast('Photo upload failed: ' + e.message, 'te');
+           alert('Error: Photo upload to Supabase failed. Please fix Supabase Storage permissions (RLS) first. The student was NOT saved.');
+           return; // Prevent saving the massive base64 string!
          }
       }
 
