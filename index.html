@@ -4636,6 +4636,27 @@
       if (btn) btn.textContent = show ? 'Hide' : 'Show';
     }
 
+    async function adminResetPassword(email, newPass, btn, silent = false) {
+      if (!email || !newPass) { 
+        if (!silent) showToast('Email and new password required', 'te'); 
+        return; 
+      }
+      if (!silent && !confirm(`Are you sure you want to FORCE reset the password for ${email}?`)) return;
+      if (btn) btn.textContent = 'Resetting...';
+      try {
+        const { data, error } = await _sb.functions.invoke('admin-reset-password', {
+          body: { email, password: newPass }
+        });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        if (!silent) showToast(`Password for ${email} has been updated successfully!`, 'ts');
+      } catch (err) {
+        if (!silent) showToast(`Password reset failed: ${err.message}`, 'te');
+      } finally {
+        if (btn) btn.textContent = 'Force Reset Password';
+      }
+    }
+
     function setRole(r, el) {
       loginRole = r;
       document.querySelectorAll('.rtab').forEach(b => b.classList.remove('active'));
@@ -5588,6 +5609,11 @@
         } else Object.assign(old, data);
         if (familyId) { if (!DB.families[familyId]) DB.families[familyId] = { id: familyId, parentName: famName, studentIds: [] }; if (!(DB.families[familyId].studentIds || []).includes(editId)) { (DB.families[familyId].studentIds = DB.families[familyId].studentIds || []).push(editId); } }
         syncStudentLoginProfile({ ...data, name, photo, classId, loginEmail }, editId);
+        
+        if (loginPass && _sb) {
+          adminResetPassword(loginEmail, loginPass, null, true);
+        }
+
         showToast('Student updated!', 'ts');
       } else {
         const newId = uid();
@@ -7121,6 +7147,8 @@
           const btn2 = document.querySelector('.m-btns .btn-p'); if (btn2) btn2.textContent = 'Save';
           return;
         }
+      } else if (eid && email && loginPass && _sb) {
+        adminResetPassword(email, loginPass, null, true);
       }
 
       if (eid) { 
@@ -7399,6 +7427,8 @@
           const btn2 = document.querySelector('.m-btns .btn-p'); if (btn2) btn2.textContent = 'Save';
           return;
         }
+      } else if (eid && email && loginPass && _sb) {
+        adminResetPassword(email, loginPass, null, true);
       }
       const obj = { id: fid, parentName: name, phone: document.getElementById('mf-phone')?.value || '', whatsapp: document.getElementById('mf-wa')?.value || '', email, studentIds };
       DB.families[fid] = eid ? { ...DB.families[fid], ...obj } : obj;
