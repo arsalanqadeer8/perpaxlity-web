@@ -15,91 +15,241 @@
     rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js">
 async function broadcastLogins() {
-  if (!confirm('This will send a WhatsApp message to ALL students with their login email and default password. Proceed?')) return;
-  const stus = allStus();
+  if (!confirm('This will send a WhatsApp message to ALL students and teachers with their login email and default password. Proceed?')) return;
   let queued = 0;
+  
+  const stus = allStus();
   for (const s of stus) {
     if (s.whatsapp) {
-      const msg = `Dear Parent,\nHere are the login details for ${s.name} to access the Oxford Excellence Academy portal:\n\nEmail: ${s.loginEmail}\nPassword: Password123!\n\nPlease login at: oxford.vercel.app`;
+      const msg = `Dear Parent,
+Here are the login details for ${s.name} to access the Oxford Excellence Academy portal:
+
+Email: ${s.loginEmail}
+Password: oxford123
+
+Please login at: www.oxfordexcellenceacademy.com`;
       sendWhatsAppAPI(s.whatsapp, msg);
       queued++;
     }
   }
+
+  if (DB && DB.users) {
+    const teachers = DB.users.filter(u => u.role === 'teacher');
+    for (const t of teachers) {
+      if (t.phone) {
+        const msg = `Dear ${t.name},
+Here are your login details to access the Oxford Excellence Academy portal:
+
+Email: ${t.email}
+Password: oxford123
+
+Please login at: www.oxfordexcellenceacademy.com`;
+        sendWhatsAppAPI(t.phone, msg);
+        queued++;
+      }
+    }
+  }
+
   showToast(`Queued ${queued} login messages to WhatsApp!`, 'ts');
 }
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js">
 async function broadcastLogins() {
-  if (!confirm('This will send a WhatsApp message to ALL students with their login email and default password. Proceed?')) return;
-  const stus = allStus();
+  if (!confirm('This will send a WhatsApp message to ALL students and teachers with their login email and default password. Proceed?')) return;
   let queued = 0;
+  
+  const stus = allStus();
   for (const s of stus) {
     if (s.whatsapp) {
-      const msg = `Dear Parent,\nHere are the login details for ${s.name} to access the Oxford Excellence Academy portal:\n\nEmail: ${s.loginEmail}\nPassword: Password123!\n\nPlease login at: oxford.vercel.app`;
+      const msg = `Dear Parent,
+Here are the login details for ${s.name} to access the Oxford Excellence Academy portal:
+
+Email: ${s.loginEmail}
+Password: oxford123
+
+Please login at: www.oxfordexcellenceacademy.com`;
       sendWhatsAppAPI(s.whatsapp, msg);
       queued++;
     }
   }
+
+  if (DB && DB.users) {
+    const teachers = DB.users.filter(u => u.role === 'teacher');
+    for (const t of teachers) {
+      if (t.phone) {
+        const msg = `Dear ${t.name},
+Here are your login details to access the Oxford Excellence Academy portal:
+
+Email: ${t.email}
+Password: oxford123
+
+Please login at: www.oxfordexcellenceacademy.com`;
+        sendWhatsAppAPI(t.phone, msg);
+        queued++;
+      }
+    }
+  }
+
   showToast(`Queued ${queued} login messages to WhatsApp!`, 'ts');
 }
 </script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js">
 async function broadcastLogins() {
-  if (!confirm('This will send a WhatsApp message to ALL students with their login email and default password. Proceed?')) return;
-  const stus = allStus();
+  if (!confirm('This will send a WhatsApp message to ALL students and teachers with their login email and default password. Proceed?')) return;
   let queued = 0;
+  
+  const stus = allStus();
   for (const s of stus) {
     if (s.whatsapp) {
-      const msg = `Dear Parent,\nHere are the login details for ${s.name} to access the Oxford Excellence Academy portal:\n\nEmail: ${s.loginEmail}\nPassword: Password123!\n\nPlease login at: oxford.vercel.app`;
+      const msg = `Dear Parent,
+Here are the login details for ${s.name} to access the Oxford Excellence Academy portal:
+
+Email: ${s.loginEmail}
+Password: oxford123
+
+Please login at: www.oxfordexcellenceacademy.com`;
       sendWhatsAppAPI(s.whatsapp, msg);
       queued++;
     }
   }
+
+  if (DB && DB.users) {
+    const teachers = DB.users.filter(u => u.role === 'teacher');
+    for (const t of teachers) {
+      if (t.phone) {
+        const msg = `Dear ${t.name},
+Here are your login details to access the Oxford Excellence Academy portal:
+
+Email: ${t.email}
+Password: oxford123
+
+Please login at: www.oxfordexcellenceacademy.com`;
+        sendWhatsAppAPI(t.phone, msg);
+        queued++;
+      }
+    }
+  }
+
   showToast(`Queued ${queued} login messages to WhatsApp!`, 'ts');
 }
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
 async function broadcastLogins() {
-  if (!confirm('This will send a WhatsApp message to ALL students with their login email and default password. Proceed?')) return;
-  const stus = allStus();
+  if (!confirm('This will send a WhatsApp message to ALL students and teachers with their login email and default password. Proceed?')) return;
   let queued = 0;
+  
+  const stus = allStus();
   for (const s of stus) {
     if (s.whatsapp) {
-      const msg = `Dear Parent,\nHere are the login details for ${s.name} to access the Oxford Excellence Academy portal:\n\nEmail: ${s.loginEmail}\nPassword: Password123!\n\nPlease login at: oxford.vercel.app`;
+      const msg = `Dear Parent,
+Here are the login details for ${s.name} to access the Oxford Excellence Academy portal:
+
+Email: ${s.loginEmail}
+Password: oxford123
+
+Please login at: www.oxfordexcellenceacademy.com`;
       sendWhatsAppAPI(s.whatsapp, msg);
       queued++;
     }
   }
+
+  if (DB && DB.users) {
+    const teachers = DB.users.filter(u => u.role === 'teacher');
+    for (const t of teachers) {
+      if (t.phone) {
+        const msg = `Dear ${t.name},
+Here are your login details to access the Oxford Excellence Academy portal:
+
+Email: ${t.email}
+Password: oxford123
+
+Please login at: www.oxfordexcellenceacademy.com`;
+        sendWhatsAppAPI(t.phone, msg);
+        queued++;
+      }
+    }
+  }
+
   showToast(`Queued ${queued} login messages to WhatsApp!`, 'ts');
 }
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
 async function broadcastLogins() {
-  if (!confirm('This will send a WhatsApp message to ALL students with their login email and default password. Proceed?')) return;
-  const stus = allStus();
+  if (!confirm('This will send a WhatsApp message to ALL students and teachers with their login email and default password. Proceed?')) return;
   let queued = 0;
+  
+  const stus = allStus();
   for (const s of stus) {
     if (s.whatsapp) {
-      const msg = `Dear Parent,\nHere are the login details for ${s.name} to access the Oxford Excellence Academy portal:\n\nEmail: ${s.loginEmail}\nPassword: Password123!\n\nPlease login at: oxford.vercel.app`;
+      const msg = `Dear Parent,
+Here are the login details for ${s.name} to access the Oxford Excellence Academy portal:
+
+Email: ${s.loginEmail}
+Password: oxford123
+
+Please login at: www.oxfordexcellenceacademy.com`;
       sendWhatsAppAPI(s.whatsapp, msg);
       queued++;
     }
   }
+
+  if (DB && DB.users) {
+    const teachers = DB.users.filter(u => u.role === 'teacher');
+    for (const t of teachers) {
+      if (t.phone) {
+        const msg = `Dear ${t.name},
+Here are your login details to access the Oxford Excellence Academy portal:
+
+Email: ${t.email}
+Password: oxford123
+
+Please login at: www.oxfordexcellenceacademy.com`;
+        sendWhatsAppAPI(t.phone, msg);
+        queued++;
+      }
+    }
+  }
+
   showToast(`Queued ${queued} login messages to WhatsApp!`, 'ts');
 }
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
 async function broadcastLogins() {
-  if (!confirm('This will send a WhatsApp message to ALL students with their login email and default password. Proceed?')) return;
-  const stus = allStus();
+  if (!confirm('This will send a WhatsApp message to ALL students and teachers with their login email and default password. Proceed?')) return;
   let queued = 0;
+  
+  const stus = allStus();
   for (const s of stus) {
     if (s.whatsapp) {
-      const msg = `Dear Parent,\nHere are the login details for ${s.name} to access the Oxford Excellence Academy portal:\n\nEmail: ${s.loginEmail}\nPassword: Password123!\n\nPlease login at: oxford.vercel.app`;
+      const msg = `Dear Parent,
+Here are the login details for ${s.name} to access the Oxford Excellence Academy portal:
+
+Email: ${s.loginEmail}
+Password: oxford123
+
+Please login at: www.oxfordexcellenceacademy.com`;
       sendWhatsAppAPI(s.whatsapp, msg);
       queued++;
     }
   }
+
+  if (DB && DB.users) {
+    const teachers = DB.users.filter(u => u.role === 'teacher');
+    for (const t of teachers) {
+      if (t.phone) {
+        const msg = `Dear ${t.name},
+Here are your login details to access the Oxford Excellence Academy portal:
+
+Email: ${t.email}
+Password: oxford123
+
+Please login at: www.oxfordexcellenceacademy.com`;
+        sendWhatsAppAPI(t.phone, msg);
+        queued++;
+      }
+    }
+  }
+
   showToast(`Queued ${queued} login messages to WhatsApp!`, 'ts');
 }
 </script>
@@ -3424,16 +3574,41 @@ async function broadcastLogins() {
   }
 
 async function broadcastLogins() {
-  if (!confirm('This will send a WhatsApp message to ALL students with their login email and default password. Proceed?')) return;
-  const stus = allStus();
+  if (!confirm('This will send a WhatsApp message to ALL students and teachers with their login email and default password. Proceed?')) return;
   let queued = 0;
+  
+  const stus = allStus();
   for (const s of stus) {
     if (s.whatsapp) {
-      const msg = `Dear Parent,\nHere are the login details for ${s.name} to access the Oxford Excellence Academy portal:\n\nEmail: ${s.loginEmail}\nPassword: Password123!\n\nPlease login at: oxford.vercel.app`;
+      const msg = `Dear Parent,
+Here are the login details for ${s.name} to access the Oxford Excellence Academy portal:
+
+Email: ${s.loginEmail}
+Password: oxford123
+
+Please login at: www.oxfordexcellenceacademy.com`;
       sendWhatsAppAPI(s.whatsapp, msg);
       queued++;
     }
   }
+
+  if (DB && DB.users) {
+    const teachers = DB.users.filter(u => u.role === 'teacher');
+    for (const t of teachers) {
+      if (t.phone) {
+        const msg = `Dear ${t.name},
+Here are your login details to access the Oxford Excellence Academy portal:
+
+Email: ${t.email}
+Password: oxford123
+
+Please login at: www.oxfordexcellenceacademy.com`;
+        sendWhatsAppAPI(t.phone, msg);
+        queued++;
+      }
+    }
+  }
+
   showToast(`Queued ${queued} login messages to WhatsApp!`, 'ts');
 }
 </script>
@@ -3566,16 +3741,41 @@ async function broadcastLogins() {
             }, 5000);
         
 async function broadcastLogins() {
-  if (!confirm('This will send a WhatsApp message to ALL students with their login email and default password. Proceed?')) return;
-  const stus = allStus();
+  if (!confirm('This will send a WhatsApp message to ALL students and teachers with their login email and default password. Proceed?')) return;
   let queued = 0;
+  
+  const stus = allStus();
   for (const s of stus) {
     if (s.whatsapp) {
-      const msg = `Dear Parent,\nHere are the login details for ${s.name} to access the Oxford Excellence Academy portal:\n\nEmail: ${s.loginEmail}\nPassword: Password123!\n\nPlease login at: oxford.vercel.app`;
+      const msg = `Dear Parent,
+Here are the login details for ${s.name} to access the Oxford Excellence Academy portal:
+
+Email: ${s.loginEmail}
+Password: oxford123
+
+Please login at: www.oxfordexcellenceacademy.com`;
       sendWhatsAppAPI(s.whatsapp, msg);
       queued++;
     }
   }
+
+  if (DB && DB.users) {
+    const teachers = DB.users.filter(u => u.role === 'teacher');
+    for (const t of teachers) {
+      if (t.phone) {
+        const msg = `Dear ${t.name},
+Here are your login details to access the Oxford Excellence Academy portal:
+
+Email: ${t.email}
+Password: oxford123
+
+Please login at: www.oxfordexcellenceacademy.com`;
+        sendWhatsAppAPI(t.phone, msg);
+        queued++;
+      }
+    }
+  }
+
   showToast(`Queued ${queued} login messages to WhatsApp!`, 'ts');
 }
 </script>
@@ -3778,16 +3978,41 @@ async function broadcastLogins() {
             }
         
 async function broadcastLogins() {
-  if (!confirm('This will send a WhatsApp message to ALL students with their login email and default password. Proceed?')) return;
-  const stus = allStus();
+  if (!confirm('This will send a WhatsApp message to ALL students and teachers with their login email and default password. Proceed?')) return;
   let queued = 0;
+  
+  const stus = allStus();
   for (const s of stus) {
     if (s.whatsapp) {
-      const msg = `Dear Parent,\nHere are the login details for ${s.name} to access the Oxford Excellence Academy portal:\n\nEmail: ${s.loginEmail}\nPassword: Password123!\n\nPlease login at: oxford.vercel.app`;
+      const msg = `Dear Parent,
+Here are the login details for ${s.name} to access the Oxford Excellence Academy portal:
+
+Email: ${s.loginEmail}
+Password: oxford123
+
+Please login at: www.oxfordexcellenceacademy.com`;
       sendWhatsAppAPI(s.whatsapp, msg);
       queued++;
     }
   }
+
+  if (DB && DB.users) {
+    const teachers = DB.users.filter(u => u.role === 'teacher');
+    for (const t of teachers) {
+      if (t.phone) {
+        const msg = `Dear ${t.name},
+Here are your login details to access the Oxford Excellence Academy portal:
+
+Email: ${t.email}
+Password: oxford123
+
+Please login at: www.oxfordexcellenceacademy.com`;
+        sendWhatsAppAPI(t.phone, msg);
+        queued++;
+      }
+    }
+  }
+
   showToast(`Queued ${queued} login messages to WhatsApp!`, 'ts');
 }
 </script>
@@ -3906,31 +4131,81 @@ async function broadcastLogins() {
     <!-- GSAP Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js">
 async function broadcastLogins() {
-  if (!confirm('This will send a WhatsApp message to ALL students with their login email and default password. Proceed?')) return;
-  const stus = allStus();
+  if (!confirm('This will send a WhatsApp message to ALL students and teachers with their login email and default password. Proceed?')) return;
   let queued = 0;
+  
+  const stus = allStus();
   for (const s of stus) {
     if (s.whatsapp) {
-      const msg = `Dear Parent,\nHere are the login details for ${s.name} to access the Oxford Excellence Academy portal:\n\nEmail: ${s.loginEmail}\nPassword: Password123!\n\nPlease login at: oxford.vercel.app`;
+      const msg = `Dear Parent,
+Here are the login details for ${s.name} to access the Oxford Excellence Academy portal:
+
+Email: ${s.loginEmail}
+Password: oxford123
+
+Please login at: www.oxfordexcellenceacademy.com`;
       sendWhatsAppAPI(s.whatsapp, msg);
       queued++;
     }
   }
+
+  if (DB && DB.users) {
+    const teachers = DB.users.filter(u => u.role === 'teacher');
+    for (const t of teachers) {
+      if (t.phone) {
+        const msg = `Dear ${t.name},
+Here are your login details to access the Oxford Excellence Academy portal:
+
+Email: ${t.email}
+Password: oxford123
+
+Please login at: www.oxfordexcellenceacademy.com`;
+        sendWhatsAppAPI(t.phone, msg);
+        queued++;
+      }
+    }
+  }
+
   showToast(`Queued ${queued} login messages to WhatsApp!`, 'ts');
 }
 </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js">
 async function broadcastLogins() {
-  if (!confirm('This will send a WhatsApp message to ALL students with their login email and default password. Proceed?')) return;
-  const stus = allStus();
+  if (!confirm('This will send a WhatsApp message to ALL students and teachers with their login email and default password. Proceed?')) return;
   let queued = 0;
+  
+  const stus = allStus();
   for (const s of stus) {
     if (s.whatsapp) {
-      const msg = `Dear Parent,\nHere are the login details for ${s.name} to access the Oxford Excellence Academy portal:\n\nEmail: ${s.loginEmail}\nPassword: Password123!\n\nPlease login at: oxford.vercel.app`;
+      const msg = `Dear Parent,
+Here are the login details for ${s.name} to access the Oxford Excellence Academy portal:
+
+Email: ${s.loginEmail}
+Password: oxford123
+
+Please login at: www.oxfordexcellenceacademy.com`;
       sendWhatsAppAPI(s.whatsapp, msg);
       queued++;
     }
   }
+
+  if (DB && DB.users) {
+    const teachers = DB.users.filter(u => u.role === 'teacher');
+    for (const t of teachers) {
+      if (t.phone) {
+        const msg = `Dear ${t.name},
+Here are your login details to access the Oxford Excellence Academy portal:
+
+Email: ${t.email}
+Password: oxford123
+
+Please login at: www.oxfordexcellenceacademy.com`;
+        sendWhatsAppAPI(t.phone, msg);
+        queued++;
+      }
+    }
+  }
+
   showToast(`Queued ${queued} login messages to WhatsApp!`, 'ts');
 }
 </script>
@@ -3993,16 +4268,41 @@ async function broadcastLogins() {
         });
     
 async function broadcastLogins() {
-  if (!confirm('This will send a WhatsApp message to ALL students with their login email and default password. Proceed?')) return;
-  const stus = allStus();
+  if (!confirm('This will send a WhatsApp message to ALL students and teachers with their login email and default password. Proceed?')) return;
   let queued = 0;
+  
+  const stus = allStus();
   for (const s of stus) {
     if (s.whatsapp) {
-      const msg = `Dear Parent,\nHere are the login details for ${s.name} to access the Oxford Excellence Academy portal:\n\nEmail: ${s.loginEmail}\nPassword: Password123!\n\nPlease login at: oxford.vercel.app`;
+      const msg = `Dear Parent,
+Here are the login details for ${s.name} to access the Oxford Excellence Academy portal:
+
+Email: ${s.loginEmail}
+Password: oxford123
+
+Please login at: www.oxfordexcellenceacademy.com`;
       sendWhatsAppAPI(s.whatsapp, msg);
       queued++;
     }
   }
+
+  if (DB && DB.users) {
+    const teachers = DB.users.filter(u => u.role === 'teacher');
+    for (const t of teachers) {
+      if (t.phone) {
+        const msg = `Dear ${t.name},
+Here are your login details to access the Oxford Excellence Academy portal:
+
+Email: ${t.email}
+Password: oxford123
+
+Please login at: www.oxfordexcellenceacademy.com`;
+        sendWhatsAppAPI(t.phone, msg);
+        queued++;
+      }
+    }
+  }
+
   showToast(`Queued ${queued} login messages to WhatsApp!`, 'ts');
 }
 </script>
@@ -9359,16 +9659,41 @@ ${DB.school.name}`;
     /* INIT handled after initDB() resolves above */
 
 async function broadcastLogins() {
-  if (!confirm('This will send a WhatsApp message to ALL students with their login email and default password. Proceed?')) return;
-  const stus = allStus();
+  if (!confirm('This will send a WhatsApp message to ALL students and teachers with their login email and default password. Proceed?')) return;
   let queued = 0;
+  
+  const stus = allStus();
   for (const s of stus) {
     if (s.whatsapp) {
-      const msg = `Dear Parent,\nHere are the login details for ${s.name} to access the Oxford Excellence Academy portal:\n\nEmail: ${s.loginEmail}\nPassword: Password123!\n\nPlease login at: oxford.vercel.app`;
+      const msg = `Dear Parent,
+Here are the login details for ${s.name} to access the Oxford Excellence Academy portal:
+
+Email: ${s.loginEmail}
+Password: oxford123
+
+Please login at: www.oxfordexcellenceacademy.com`;
       sendWhatsAppAPI(s.whatsapp, msg);
       queued++;
     }
   }
+
+  if (DB && DB.users) {
+    const teachers = DB.users.filter(u => u.role === 'teacher');
+    for (const t of teachers) {
+      if (t.phone) {
+        const msg = `Dear ${t.name},
+Here are your login details to access the Oxford Excellence Academy portal:
+
+Email: ${t.email}
+Password: oxford123
+
+Please login at: www.oxfordexcellenceacademy.com`;
+        sendWhatsAppAPI(t.phone, msg);
+        queued++;
+      }
+    }
+  }
+
   showToast(`Queued ${queued} login messages to WhatsApp!`, 'ts');
 }
 </script>
@@ -9507,16 +9832,41 @@ ${DB.school.name}`);
     }, 60000);
 
 async function broadcastLogins() {
-  if (!confirm('This will send a WhatsApp message to ALL students with their login email and default password. Proceed?')) return;
-  const stus = allStus();
+  if (!confirm('This will send a WhatsApp message to ALL students and teachers with their login email and default password. Proceed?')) return;
   let queued = 0;
+  
+  const stus = allStus();
   for (const s of stus) {
     if (s.whatsapp) {
-      const msg = `Dear Parent,\nHere are the login details for ${s.name} to access the Oxford Excellence Academy portal:\n\nEmail: ${s.loginEmail}\nPassword: Password123!\n\nPlease login at: oxford.vercel.app`;
+      const msg = `Dear Parent,
+Here are the login details for ${s.name} to access the Oxford Excellence Academy portal:
+
+Email: ${s.loginEmail}
+Password: oxford123
+
+Please login at: www.oxfordexcellenceacademy.com`;
       sendWhatsAppAPI(s.whatsapp, msg);
       queued++;
     }
   }
+
+  if (DB && DB.users) {
+    const teachers = DB.users.filter(u => u.role === 'teacher');
+    for (const t of teachers) {
+      if (t.phone) {
+        const msg = `Dear ${t.name},
+Here are your login details to access the Oxford Excellence Academy portal:
+
+Email: ${t.email}
+Password: oxford123
+
+Please login at: www.oxfordexcellenceacademy.com`;
+        sendWhatsAppAPI(t.phone, msg);
+        queued++;
+      }
+    }
+  }
+
   showToast(`Queued ${queued} login messages to WhatsApp!`, 'ts');
 }
 </script>
@@ -9607,16 +9957,41 @@ async function broadcastLogins() {
     };
 
 async function broadcastLogins() {
-  if (!confirm('This will send a WhatsApp message to ALL students with their login email and default password. Proceed?')) return;
-  const stus = allStus();
+  if (!confirm('This will send a WhatsApp message to ALL students and teachers with their login email and default password. Proceed?')) return;
   let queued = 0;
+  
+  const stus = allStus();
   for (const s of stus) {
     if (s.whatsapp) {
-      const msg = `Dear Parent,\nHere are the login details for ${s.name} to access the Oxford Excellence Academy portal:\n\nEmail: ${s.loginEmail}\nPassword: Password123!\n\nPlease login at: oxford.vercel.app`;
+      const msg = `Dear Parent,
+Here are the login details for ${s.name} to access the Oxford Excellence Academy portal:
+
+Email: ${s.loginEmail}
+Password: oxford123
+
+Please login at: www.oxfordexcellenceacademy.com`;
       sendWhatsAppAPI(s.whatsapp, msg);
       queued++;
     }
   }
+
+  if (DB && DB.users) {
+    const teachers = DB.users.filter(u => u.role === 'teacher');
+    for (const t of teachers) {
+      if (t.phone) {
+        const msg = `Dear ${t.name},
+Here are your login details to access the Oxford Excellence Academy portal:
+
+Email: ${t.email}
+Password: oxford123
+
+Please login at: www.oxfordexcellenceacademy.com`;
+        sendWhatsAppAPI(t.phone, msg);
+        queued++;
+      }
+    }
+  }
+
   showToast(`Queued ${queued} login messages to WhatsApp!`, 'ts');
 }
 </script>
