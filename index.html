@@ -6,16 +6,103 @@
 <title>Oxford Excellence Academy - Learn • Grow • Excel</title>
 <meta name="description" content="Oxford Excellence Academy portal for students, parents, teachers, fees, attendance, results, notices, and reports." />
 <meta name="theme-color" content="#0a192f" />
+<link rel="manifest" href="manifest.json" />
 <link rel="icon" type="image/png" href="favicon.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link
     href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap"
     rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js">
+async function broadcastLogins() {
+  if (!confirm('This will send a WhatsApp message to ALL students with their login email and default password. Proceed?')) return;
+  const stus = allStus();
+  let queued = 0;
+  for (const s of stus) {
+    if (s.whatsapp) {
+      const msg = Dear Parent,\nHere are the login details for  to access the Oxford Excellence Academy portal:\n\nEmail: \nPassword: Password123!\n\nPlease login at: oxford.vercel.app;
+      sendWhatsAppAPI(s.whatsapp, msg);
+      queued++;
+    }
+  }
+  showToast(Queued  login messages to WhatsApp!, 'ts');
+}
+\n</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js">
+async function broadcastLogins() {
+  if (!confirm('This will send a WhatsApp message to ALL students with their login email and default password. Proceed?')) return;
+  const stus = allStus();
+  let queued = 0;
+  for (const s of stus) {
+    if (s.whatsapp) {
+      const msg = Dear Parent,\nHere are the login details for  to access the Oxford Excellence Academy portal:\n\nEmail: \nPassword: Password123!\n\nPlease login at: oxford.vercel.app;
+      sendWhatsAppAPI(s.whatsapp, msg);
+      queued++;
+    }
+  }
+  showToast(Queued  login messages to WhatsApp!, 'ts');
+}
+\n</script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js">
+async function broadcastLogins() {
+  if (!confirm('This will send a WhatsApp message to ALL students with their login email and default password. Proceed?')) return;
+  const stus = allStus();
+  let queued = 0;
+  for (const s of stus) {
+    if (s.whatsapp) {
+      const msg = Dear Parent,\nHere are the login details for  to access the Oxford Excellence Academy portal:\n\nEmail: \nPassword: Password123!\n\nPlease login at: oxford.vercel.app;
+      sendWhatsAppAPI(s.whatsapp, msg);
+      queued++;
+    }
+  }
+  showToast(Queued  login messages to WhatsApp!, 'ts');
+}
+\n</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+async function broadcastLogins() {
+  if (!confirm('This will send a WhatsApp message to ALL students with their login email and default password. Proceed?')) return;
+  const stus = allStus();
+  let queued = 0;
+  for (const s of stus) {
+    if (s.whatsapp) {
+      const msg = Dear Parent,\nHere are the login details for  to access the Oxford Excellence Academy portal:\n\nEmail: \nPassword: Password123!\n\nPlease login at: oxford.vercel.app;
+      sendWhatsAppAPI(s.whatsapp, msg);
+      queued++;
+    }
+  }
+  showToast(Queued  login messages to WhatsApp!, 'ts');
+}
+\n</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
+async function broadcastLogins() {
+  if (!confirm('This will send a WhatsApp message to ALL students with their login email and default password. Proceed?')) return;
+  const stus = allStus();
+  let queued = 0;
+  for (const s of stus) {
+    if (s.whatsapp) {
+      const msg = Dear Parent,\nHere are the login details for  to access the Oxford Excellence Academy portal:\n\nEmail: \nPassword: Password123!\n\nPlease login at: oxford.vercel.app;
+      sendWhatsAppAPI(s.whatsapp, msg);
+      queued++;
+    }
+  }
+  showToast(Queued  login messages to WhatsApp!, 'ts');
+}
+\n</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
+async function broadcastLogins() {
+  if (!confirm('This will send a WhatsApp message to ALL students with their login email and default password. Proceed?')) return;
+  const stus = allStus();
+  let queued = 0;
+  for (const s of stus) {
+    if (s.whatsapp) {
+      const msg = Dear Parent,\nHere are the login details for  to access the Oxford Excellence Academy portal:\n\nEmail: \nPassword: Password123!\n\nPlease login at: oxford.vercel.app;
+      sendWhatsAppAPI(s.whatsapp, msg);
+      queued++;
+    }
+  }
+  showToast(Queued  login messages to WhatsApp!, 'ts');
+}
+\n</script>
 <style>
     * {
       margin: 0;
@@ -218,6 +305,15 @@
       inset: 0;
       background-image: radial-gradient(rgba(255, 255, 255, .06) 1px, transparent 1px);
       background-size: 28px 28px;
+    }
+    .lp-doodles {
+      position: absolute;
+      inset: 0;
+      background-image: url('doodles.png');
+      background-size: 400px;
+      filter: invert(1);
+      opacity: 0.04;
+      pointer-events: none;
     }
 
     .lp-card {
@@ -975,7 +1071,8 @@
       box-shadow: var(--sh2);
     }
 
-    .sc-ic {
+    .sc-ic .material-symbols-outlined { font-size: 18px; }
+.sc-ic {
       width: 32px;
       height: 32px;
       border-radius: 8px;
@@ -1426,6 +1523,27 @@
       box-shadow: var(--sh3);
       animation: fadeUp .28s cubic-bezier(.22, 1, .36, 1);
       border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+      position: relative;
+    }
+    .m-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: transparent;
+      border: none;
+      color: var(--ink4);
+      cursor: pointer;
+      padding: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.2s;
+      z-index: 10;
+    }
+    .m-close:hover {
+      background: var(--bg);
+      color: var(--ink);
     }
     #modal-body {
       padding: 20px 16px;
@@ -1787,7 +1905,7 @@
       z-index: 0;
     }
     .ox-logo-box {
-      position: absolute; top: 60px; left: 50%; transform: translateX(-50%);
+      position: absolute; top: 60px; left: 0; right: 0; margin: 0 auto;
       width: 280px; height: 280px;
       background: #fff; border-radius: 50%; border: 8px solid #b48e4b;
       display: flex; align-items: center; justify-content: center; z-index: 2; padding: 15px;
@@ -1801,7 +1919,7 @@
 
     /* Photo */
     .ox-photo-wrap {
-      position: absolute; top: 460px; left: 50%; transform: translateX(-50%);
+      position: absolute; top: 460px; left: 0; right: 0; margin: 0 auto;
       width: 400px; height: 400px;
       border-radius: 50%; border: 12px solid #b48e4b; background: #fff;
       display: flex; align-items: center; justify-content: center; z-index: 3;
@@ -1812,10 +1930,11 @@
 
     /* Name & Role */
     .ox-name-wrap {
-      position: absolute; top: 860px; left: 0; width: 100%; text-align: center; z-index: 2;
+      position: absolute; top: 840px; left: 0; width: 100%; height: 210px;
+      display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 2;
     }
-    .ox-name { font-size: 60px; font-weight: 900; color: #0a192f; text-transform: uppercase; line-height: 1.1; margin-bottom: 15px; padding: 0 50px; }
-    .ox-role { font-size: 28px; font-weight: 800; color: #b48e4b; letter-spacing: 12px; text-transform: uppercase; }
+    .ox-name { font-size: 60px; font-weight: 900; color: #0a192f; text-transform: uppercase; line-height: 1.15; margin: 0 0 10px 0; padding: 0 50px; }
+    .ox-role { font-size: 28px; font-weight: 800; color: #b48e4b; letter-spacing: 12px; text-transform: uppercase; margin: 0; }
 
     /* Data Grid */
     .ox-grid {
@@ -1824,7 +1943,7 @@
     }
     .ox-data-item { border-left: 6px solid #b48e4b; padding-left: 20px; }
     .ox-lbl { font-size: 24px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 2px; }
-    .ox-val { font-size: 40px; font-weight: 900; color: #0a192f; }
+    .ox-val { font-size: 38px; font-weight: 900; color: #0a192f; line-height: 1.3; padding-bottom: 5px; word-break: break-word; }
 
     /* Footer */
     .ox-footer-bg {
@@ -1851,6 +1970,14 @@
     .ox-staff .ox-name { color: #4a0a14 !important; }
     .ox-staff .ox-val { color: #4a0a14 !important; }
     .ox-staff .ox-photo-wrap span { color: #4a0a14 !important; }
+
+    /* Parent Pickup Card Color Override (Forest Green) */
+    .ox-pickup .ox-header-bg { background: #1a4f2b !important; }
+    .ox-pickup .ox-footer-bg { background: #1a4f2b !important; }
+    .ox-pickup .ox-name { color: #1a4f2b !important; }
+    .ox-pickup .ox-val { color: #1a4f2b !important; }
+    .ox-pickup .ox-photo-wrap span { color: #1a4f2b !important; }
+    .ox-pickup .ox-role { color: #1a4f2b !important; font-size: 24px; letter-spacing: 8px; }
 
     .school-id-card {
       width: 3.375in;
@@ -3277,7 +3404,8 @@
         .ox-testi-card { padding: 20px; }
         #landing-admission-form { padding: 20px !important; }
     }
-    \n</style>
+    
+</style>
 
 
 
@@ -3294,7 +3422,21 @@
       break;
     }
   }
-</script>
+
+async function broadcastLogins() {
+  if (!confirm('This will send a WhatsApp message to ALL students with their login email and default password. Proceed?')) return;
+  const stus = allStus();
+  let queued = 0;
+  for (const s of stus) {
+    if (s.whatsapp) {
+      const msg = Dear Parent,\nHere are the login details for  to access the Oxford Excellence Academy portal:\n\nEmail: \nPassword: Password123!\n\nPlease login at: oxford.vercel.app;
+      sendWhatsAppAPI(s.whatsapp, msg);
+      queued++;
+    }
+  }
+  showToast(Queued  login messages to WhatsApp!, 'ts');
+}
+\n</script>
 </head>
 
 <body>
@@ -3422,7 +3564,21 @@
                     leadershipSlider.scrollBy({ left: width, behavior: 'smooth' });
                 }
             }, 5000);
-        </script>
+        
+async function broadcastLogins() {
+  if (!confirm('This will send a WhatsApp message to ALL students with their login email and default password. Proceed?')) return;
+  const stus = allStus();
+  let queued = 0;
+  for (const s of stus) {
+    if (s.whatsapp) {
+      const msg = Dear Parent,\nHere are the login details for  to access the Oxford Excellence Academy portal:\n\nEmail: \nPassword: Password123!\n\nPlease login at: oxford.vercel.app;
+      sendWhatsAppAPI(s.whatsapp, msg);
+      queued++;
+    }
+  }
+  showToast(Queued  login messages to WhatsApp!, 'ts');
+}
+\n</script>
     </section>
 
 
@@ -3620,7 +3776,21 @@
                     menuIcon.innerText = 'menu';
                 }
             }
-        </script>
+        
+async function broadcastLogins() {
+  if (!confirm('This will send a WhatsApp message to ALL students with their login email and default password. Proceed?')) return;
+  const stus = allStus();
+  let queued = 0;
+  for (const s of stus) {
+    if (s.whatsapp) {
+      const msg = Dear Parent,\nHere are the login details for  to access the Oxford Excellence Academy portal:\n\nEmail: \nPassword: Password123!\n\nPlease login at: oxford.vercel.app;
+      sendWhatsAppAPI(s.whatsapp, msg);
+      queued++;
+    }
+  }
+  showToast(Queued  login messages to WhatsApp!, 'ts');
+}
+\n</script>
     </section>
 
     <footer class="ox-footer" id="footer">
@@ -3734,8 +3904,36 @@
     </style>
 
     <!-- GSAP Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js">
+async function broadcastLogins() {
+  if (!confirm('This will send a WhatsApp message to ALL students with their login email and default password. Proceed?')) return;
+  const stus = allStus();
+  let queued = 0;
+  for (const s of stus) {
+    if (s.whatsapp) {
+      const msg = Dear Parent,\nHere are the login details for  to access the Oxford Excellence Academy portal:\n\nEmail: \nPassword: Password123!\n\nPlease login at: oxford.vercel.app;
+      sendWhatsAppAPI(s.whatsapp, msg);
+      queued++;
+    }
+  }
+  showToast(Queued  login messages to WhatsApp!, 'ts');
+}
+\n</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js">
+async function broadcastLogins() {
+  if (!confirm('This will send a WhatsApp message to ALL students with their login email and default password. Proceed?')) return;
+  const stus = allStus();
+  let queued = 0;
+  for (const s of stus) {
+    if (s.whatsapp) {
+      const msg = Dear Parent,\nHere are the login details for  to access the Oxford Excellence Academy portal:\n\nEmail: \nPassword: Password123!\n\nPlease login at: oxford.vercel.app;
+      sendWhatsAppAPI(s.whatsapp, msg);
+      queued++;
+    }
+  }
+  showToast(Queued  login messages to WhatsApp!, 'ts');
+}
+\n</script>
     <script>
         document.addEventListener("DOMContentLoaded", (event) => {
             if (typeof gsap !== 'undefined') {
@@ -3793,12 +3991,27 @@
                 });
             }
         });
-    </script>
+    
+async function broadcastLogins() {
+  if (!confirm('This will send a WhatsApp message to ALL students with their login email and default password. Proceed?')) return;
+  const stus = allStus();
+  let queued = 0;
+  for (const s of stus) {
+    if (s.whatsapp) {
+      const msg = Dear Parent,\nHere are the login details for  to access the Oxford Excellence Academy portal:\n\nEmail: \nPassword: Password123!\n\nPlease login at: oxford.vercel.app;
+      sendWhatsAppAPI(s.whatsapp, msg);
+      queued++;
+    }
+  }
+  showToast(Queued  login messages to WhatsApp!, 'ts');
+}
+\n</script>
 </div>
 <!-- LOGIN -->
 <div id="login-page" style="display:none;">
   <div class="lp-mesh"></div>
   <div class="lp-dots"></div>
+  <div class="lp-doodles"></div>
   <div class="lp-card">
     <div class="lp-brand" onclick="closeLogin()" style="cursor: pointer;">
       <div class="lp-logo" id="lp-logo"></div>
@@ -3819,8 +4032,8 @@
             onkeydown="if(event.key==='Enter')doLogin()" /><button type="button" class="pw-toggle" onclick="togglePassword('l-pass',this)">Show</button></div>
       <button class="login-btn" onclick="doLogin()">Portal Sign In</button>
       <div style="margin-top:15px; font-size:0.85rem; display:flex; justify-content:space-between; align-items:center;">
-        <a href="#" onclick="doForgotPass(); return false;" style="color:var(--ink3);text-decoration:none;">Forgot Password?</a>
-        <a href="#" onclick="doSignUp(); return false;" style="color:var(--p);font-weight:700;text-decoration:none;">First time? Set Password</a>
+        <a href="#" onclick="doForgotPass(); return false;" style="color:var(--ink3);text-decoration:none;">Forgot Password</a>
+        <div></div>
       </div>
     </div>
     <div class="lp-footer">Oxford Excellence Academy Portal - Data stored securely in your browser</div>
@@ -3836,9 +4049,10 @@
     </div>
     <div class="tb-r">
       <div class="tb-pill" id="tb-pill"></div>
-      <div id="cloud-dot" title="Supabase connected" style="display:none;font-size:.9rem;margin-right:2px;"></div>
-      <div class="ic-btn" onclick="toggleNotif()"><div class="ndot" id="ndot"></div>
-      </div>
+      <div id="cloud-dot" title="Supabase connected" style="display:none;font-size:.9rem;margin-right:2px;"></div><div class="ic-btn" onclick="toggleNotif()">
+<span class="material-symbols-outlined" style="font-size:1.25rem;">notifications</span>
+<div class="ndot" id="ndot"></div>
+</div>
       <div class="user-chip" onclick="goPage('profile')">
         <div class="uc-ava" id="uc-ava"></div>
         <span class="uc-name" id="uc-name">User</span>
@@ -3871,6 +4085,9 @@
 <!-- MODAL -->
 <div class="modal-bg" id="modal-bg">
   <div class="modal">
+    <button class="m-close" onclick="closeModal()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </button>
     <div class="m-handle"></div>
     <div id="modal-body"></div>
   </div>
@@ -3962,9 +4179,13 @@
       // CRITICAL HOTFIX: Scrub any massive base64 strings that crash cloud sync (over 100kb limit)
       if (DB.students) {
         Object.keys(DB.students).forEach(k => {
-          if (DB.students[k].photo && DB.students[k].photo.startsWith('data:image/') && DB.students[k].photo.length > 50000) {
-            console.warn(`Scrubbing giant base64 photo for ${DB.students[k].name} before cloud push`);
-            DB.students[k].photo = '';
+          if (Array.isArray(DB.students[k])) {
+            DB.students[k].forEach(stu => {
+              if (stu.photo && stu.photo.startsWith('data:image/') && stu.photo.length > 50000) {
+                console.warn('Scrubbing giant base64 photo');
+                stu.photo = '';
+              }
+            });
           }
         });
       }
@@ -4026,21 +4247,50 @@
 
 
     async function restoreSession() {
+      try {
       if (!_sb) return;
       const { data: sessionData } = await _sb.auth.getSession();
       const email = (sessionData?.session?.user?.email || '').toLowerCase();
       if (!email) return;
       const cloud = await loadCloudDB();
-      if (cloud) DB = cloud;
+      if (cloud && Object.keys(cloud.students || {}).length >= Object.keys(DB.students || {}).length) { DB = cloud; } else if (cloud) { console.warn('Cloud DB is smaller than local, ignoring cloud'); }
       
-      // CRITICAL HOTFIX: Scrub any massive base64 strings that might be stuck in local DB crashing the cloud sync
       let needsRescueSync = false;
       if (DB && DB.students) {
         Object.keys(DB.students).forEach(k => {
-          if (DB.students[k].photo && DB.students[k].photo.startsWith('data:image/') && DB.students[k].photo.length > 50000) {
-            console.warn(`Scrubbing giant base64 photo for ${DB.students[k].name}`);
-            DB.students[k].photo = '';
-            needsRescueSync = true;
+          if (Array.isArray(DB.students[k])) {
+            DB.students[k].forEach(stu => {
+              if (stu && stu.photo && stu.photo.startsWith('data:image/') && stu.photo.length > 50000) {
+                console.warn('Scrubbing giant base64 photo');
+                stu.photo = '';
+                needsRescueSync = true;
+              }
+            });
+          }
+        });
+      }
+
+      if (DB && DB.users) {
+        const hasAdmin = DB.users.some(u => u && u.role === 'admin' && u.email === 'admin@school.edu');
+        if (!hasAdmin) {
+           // needsRescueSync = true; DO NOT PUSH BLINDLY
+           // needsRescueSync = true; DO NOT PUSH BLINDLY
+        }
+      }
+      
+      if (DB && DB.students) {
+        Object.keys(DB.students).forEach(cid => {
+          if (Array.isArray(DB.students[cid])) {
+            DB.students[cid].forEach(s => {
+              if (s && s.name && s.roll) {
+                const cleanName = s.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+                const expectedEmail = cleanName + '.' + s.roll + '@oxford.com';
+                if (s.loginEmail !== expectedEmail) {
+                  s.loginEmail = expectedEmail;
+                  needsRescueSync = true;
+                }
+              }
+            });
           }
         });
       }
@@ -4048,20 +4298,44 @@
       stripStoredPasswords();
       ensureEnhancements();
       
-      if (needsRescueSync) {
-        saveDB(); // Push the scrubbed, safe DB up to the cloud!
-      }
+      if (needsRescueSync) saveDB();
       saveLocalDB();
+      
       const u = findUserProfile(email);
-      if (!u) return;
+      if (!u) {
+          console.warn('User profile not found. Logging out.');
+          _sb.auth.signOut();
+          sessionStorage.clear();
+          for(let i=0; i<localStorage.length; i++) {
+              if (localStorage.key(i).startsWith('sb-') && localStorage.key(i).endsWith('-auth-token')) {
+                  localStorage.removeItem(localStorage.key(i));
+              }
+          }
+          location.reload();
+          return;
+      }
+      
       loginRole = u.role;
       setCurrentUser(u);
-      document.getElementById('landing-page').style.display = 'none';
-      document.getElementById('login-page').style.display = 'none';
+      
+      const lp = document.getElementById('landing-page');
+      if (lp) lp.style.setProperty('display', 'none', 'important');
+      
+      const logp = document.getElementById('login-page');
+      if (logp) logp.style.display = 'none';
+      
       const app = document.getElementById('app');
-      app.style.display = 'flex';
-      app.style.flexDirection = 'column';
+      if (app) {
+          app.style.setProperty('display', 'flex', 'important');
+          app.style.flexDirection = 'column';
+      }
+      
       buildShell();
+      } catch (err) {
+          console.error('Session restore failed:', err);
+          const lp = document.getElementById('landing-page');
+          if (lp) lp.style.setProperty('display', 'block', 'important');
+      }
       goPage(curPage || 'dashboard');
       if (curRole === 'admin') refreshAdmissionApplications(true);
       applyBranding();
@@ -4165,22 +4439,25 @@
         DB.users.push(u);
         return u;
       }
+
+      // CRITICAL SECURITY FIX: Only auto-create an Admin account if ZERO admins exist in the system (first setup).
+      // Otherwise, malicious/unlinked users clicking the Admin tab will be granted admin access!
       if (preferredRole === 'admin') {
-        u = { id: uid(), name: em.split('@')[0].replace(/[._-]+/g, ' '), email: em, role: 'admin', photo: '' };
-        DB.users.push(u);
-        return u;
-      }
-      if (preferredRole === 'admin') {
-        u = { id: uid(), name: em.split('@')[0].replace(/[._-]+/g, ' '), email: em, role: 'admin', photo: '' };
-        DB.users.push(u);
-        return u;
+        const adminExists = DB.users.some(x => x.role === 'admin');
+        if (!adminExists) {
+          u = { id: uid(), name: em.split('@')[0].replace(/[._-]+/g, ' '), email: em, role: 'admin', photo: '' };
+          DB.users.push(u);
+          return u;
+        }
+        // Admin exists, do not auto-create
+        return null;
       }
 
+      // Teachers must be explicitly created by the Admin. Do NOT auto-create.
       if (preferredRole === 'teacher') {
-        u = { id: uid(), name: em.split('@')[0].replace(/[._-]+/g, ' '), email: em, role: 'teacher', photo: '', phone: '', subject: '', classIds: [], salary: 0, bonus: 0, deductions: 0, payrollStatus: 'pending', lastPaid: '', joinDate: '', notes: '' };
-        DB.users.push(u);
-        return u;
+        return null;
       }
+
       return null;
     }
 
@@ -4378,8 +4655,8 @@
     async function sendWhatsAppAPI(phone, message) {
       const isAuto = DB.settings?.waAuto !== false;
       if (!isAuto) return false;
-      
-      const cleanPhone = String(phone).replace(/\D/g, '');
+
+      const cleanPhone = normalizePhone(phone);
       if (!cleanPhone) return false;
 
       // 1. If Local API is configured, hit it directly!
@@ -4685,7 +4962,7 @@
         const { error } = await _sb.auth.signInWithPassword({ email: em, password: pw });
         if (error) { showToast(error.message || 'Incorrect email or password', 'te', 5200); return; }
         const cloud = await loadCloudDB();
-        if (cloud) DB = cloud;
+      if (cloud && Object.keys(cloud.students || {}).length >= Object.keys(DB.students || {}).length) { DB = cloud; } else if (cloud) { console.warn('Cloud DB is smaller than local, ignoring cloud'); }
         stripStoredPasswords();
         ensureEnhancements();
         const u = findUserProfile(em, loginRole);
@@ -4989,6 +5266,7 @@
         { p: 'classes', i: '', l: 'Classes', s: 'Classes' },
         { p: 'timetable', i: '', l: 'Timetable', s: 'Sched' },
         { p: 'exams', i: '', l: 'Exams', s: 'Exams' },
+        { p: 'exam_maker', i: 'filealt', l: 'Exam Paper Maker', s: 'Papers' },
         { p: 'notices', i: '', l: 'Notices & Assignments', s: 'News' },
         { p: '---' },
         { p: 'teachers', i: '', l: 'Teachers', s: 'Staff' },
@@ -5006,6 +5284,7 @@
         { p: 'grades', i: '', l: 'Grades', s: 'Grades' },
         { p: 'students', i: '', l: 'My Students', s: 'Class' },
         { p: 'notices', i: '', l: 'Notices & Assignments', s: 'News' },
+        { p: 'exam_maker', i: 'filealt', l: 'Exam Paper Maker', s: 'Papers' },
         { p: 'mytimetable', i: '', l: 'My Timetable', s: 'Sched' },
         { p: 'mypayroll', i: '', l: 'My Payslips', s: 'Payslip' },
       ];
@@ -5043,6 +5322,7 @@
 
     function goPage(p) {
       if (p === 'scanner') { openScanner(); return; }
+      if (p === 'exam_maker') { window.open('exam-maker.html', '_blank'); return; }
       curPage = p;
       sessionStorage.setItem('lastPage', p);
       document.querySelectorAll('[data-page]').forEach(el => el.classList.toggle('active', el.dataset.page === p));
@@ -5058,7 +5338,7 @@
       const map = {
         dashboard: () => curRole === 'admin' ? pgAdminDash() : curRole === 'teacher' ? pgTeacherDash() : curRole === 'scanner' ? pgScannerDash() : pgStudentDash(),
         students: pgStudents, admissions: pgAdmissions, classes: pgClasses, attendance: pgAttendance, grades: pgGrades,
-        fees: pgFees, exams: pgExams, notices: pgNotices, timetable: pgTimetable,
+        fees: pgFees, feereports: pgFeeReports, exams: pgExams, notices: pgNotices, timetable: pgTimetable,
         teachers: pgTeachers, payroll: pgPayroll, teacheratt: pgTeacherAtt, subjects: pgSubjects,
         reportcards: pgReportCards, idcards: pgClassIdCards, families: pgFamilies, settings: pgSettings,
         mygrades: pgMyGrades, myattend: pgMyAttend, qrcard: pgQRCard, myfees: pgMyFees, profile: pgProfile, mypayroll: pgMyPayroll,
@@ -5102,6 +5382,7 @@
     <div class="ph-sub">${new Date().toDateString()} - Academic Year ${DB.settings?.schoolYear || ''}</div>
   </div>
   <div class="ph-acts">
+    <button class="btn btn-wa btn-sm" onclick="broadcastLogins()">🔑 Broadcast Logins</button>
     <button class="btn btn-gh btn-sm" onclick="goPage('admissions')"> Admissions${newAdmissions ? ' (' + newAdmissions + ')' : ''}</button>
     <button class="btn btn-gh btn-sm" onclick="goPage('notices')"> Notice</button>
     <button class="btn btn-gh btn-sm" onclick="goPage('payroll')"> Payroll</button>
@@ -5109,11 +5390,11 @@
   </div>
 </div>
 <div class="sg fu d1">
-  <div class="sc sp"><div class="sc-ic"></div><div class="sc-val" style="color:var(--p);">${tot}</div><div class="sc-lbl">Total Students</div></div>
-  <div class="sc sg2"><div class="sc-ic"></div><div class="sc-val" style="color:var(--g);">${avgSc}%</div><div class="sc-lbl">Average Score</div></div>
-  <div class="sc sr"><div class="sc-ic"></div><div class="sc-val" style="color:var(--r);">${tot - feeOk}</div><div class="sc-lbl">Fee Pending</div></div>
-  <div class="sc sv"><div class="sc-ic"></div><div class="sc-val" style="color:var(--v);">${pendingPayroll}/${teacherCount}</div><div class="sc-lbl">Payroll Pending</div></div>
-  <div class="sc sp"><div class="sc-ic"></div><div class="sc-val" style="color:var(--p);">${newAdmissions}</div><div class="sc-lbl">New Admissions</div></div>
+<div class="sc sp"><div class="sc-ic"><span class="material-symbols-outlined">group</span></div><div class="sc-val" style="color:var(--p);">${tot}</div><div class="sc-lbl">Total Students</div></div>
+<div class="sc sg2"><div class="sc-ic"><span class="material-symbols-outlined">analytics</span></div><div class="sc-val" style="color:var(--g);">${avgSc}%</div><div class="sc-lbl">Average Score</div></div>
+<div class="sc sr"><div class="sc-ic"><span class="material-symbols-outlined">receipt_long</span></div><div class="sc-val" style="color:var(--r);">${tot - feeOk}</div><div class="sc-lbl">Fee Pending</div></div>
+<div class="sc sv"><div class="sc-ic"><span class="material-symbols-outlined">account_balance_wallet</span></div><div class="sc-val" style="color:var(--v);">${pendingPayroll}/${teacherCount}</div><div class="sc-lbl">Payroll Pending</div></div>
+<div class="sc sp"><div class="sc-ic"><span class="material-symbols-outlined">person_add</span></div><div class="sc-val" style="color:var(--p);">${newAdmissions}</div><div class="sc-lbl">New Admissions</div></div>
 </div>
 <div class="g2" style="margin-bottom:15px;">
   <div class="card fu d2" style="height:250px;display:flex;flex-direction:column;">
@@ -5169,10 +5450,10 @@
 </div>
   ${clsBar()}
 <div class="sg fu d1">
-  <div class="sc sp"><div class="sc-ic"></div><div class="sc-val" style="color:var(--p);">${sts.length}</div><div class="sc-lbl">Students</div></div>
-  <div class="sc sg2"><div class="sc-ic"></div><div class="sc-val" style="color:var(--g);">${avg}%</div><div class="sc-lbl">Class Average</div></div>
-  <div class="sc sr"><div class="sc-ic"></div><div class="sc-val" style="color:var(--r);">${atRisk}</div><div class="sc-lbl">At Risk</div></div>
-  <div class="sc so"><div class="sc-ic"></div><div class="sc-val" style="color:var(--o);">${DB.exams.length}</div><div class="sc-lbl">Exams</div></div>
+  <div class="sc sp"><div class="sc-ic"><span class="material-symbols-outlined">group</span></div><div class="sc-val" style="color:var(--p);">${sts.length}</div><div class="sc-lbl">Students</div></div>
+  <div class="sc sg2"><div class="sc-ic"><span class="material-symbols-outlined">analytics</span></div><div class="sc-val" style="color:var(--g);">${avg}%</div><div class="sc-lbl">Class Average</div></div>
+  <div class="sc sr"><div class="sc-ic"><span class="material-symbols-outlined">warning</span></div><div class="sc-val" style="color:var(--r);">${atRisk}</div><div class="sc-lbl">At Risk</div></div>
+  <div class="sc so"><div class="sc-ic"><span class="material-symbols-outlined">description</span></div><div class="sc-val" style="color:var(--o);">${DB.exams.length}</div><div class="sc-lbl">Exams</div></div>
 </div>
 <div class="g2">
   <div class="card fu d2">
@@ -5212,14 +5493,39 @@
       const a = avgStu(cid, stu.id); const ap = attPct(cid, stu.id);
       const cls = DB.classes.find(c => c.id === cid);
       const siblings = allSibIds.filter(id => id !== stu.id).map(id => allStus().find(s => s.id === id)).filter(Boolean);
+      let feeStar = '';
+      try { if (stu.id && studentFeeSummary(stu.id).dueAmount <= 0) feeStar = ' <span title="Star Student - Fees Cleared" style="cursor:help;">🌟</span>'; } catch(e){}
       return `
-<div class="ph fu"><div class="ph-tag">${isParent ? ' Parent Portal' : ' Student Portal'}</div><h1>Welcome, ${(stu.name || curUser?.name || '').split(' ')[0]}!</h1><div class="ph-sub">${cls?.name || ''} - Roll No. ${stu.roll || '-'} - ${new Date().toDateString()}</div></div>
-  ${isParent && allSibIds.length > 1 ? `<div class="fam-bar fu"><span style="font-size:.72rem;font-weight:700;color:var(--v);"> Children:</span>${allSibIds.map(id => { const s = allStus().find(x => x.id === id); if (!s) return ''; return `<div class="fam-chip${id === viewSid ? ' active' : ''}" onclick="window._viewSibId='${id}';goPage('dashboard')"><div class="ava" style="width:20px;height:20px;border-radius:5px;background:${gc(s.name)};font-size:.5rem;">${s.photo ? `<img src="${s.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:5px;"/>` : ini(s.name)}</div>${s.name.split(' ')[0]} <span class="badge ${s.fees === 'Paid' ? 'bg2' : 'br2'}" style="font-size:.55rem;">${s.fees === 'Paid' ? '?' : '!'}</span></div>`; }).join('')}</div>` : ''}
+<div class="ph fu" style="display:flex;justify-content:space-between;align-items:center;">
+  <div>
+    <div class="ph-tag">${isParent ? ' Parent Portal' : ' Student Portal'}</div>
+    <h1>Welcome, ${(stu.name || curUser?.name || '').split(' ')[0]}!${feeStar}</h1>
+    <div class="ph-sub">${cls?.name || ''} - Roll No. ${stu.roll || '-'} - ${new Date().toDateString()}</div>
+  </div>
+  <div style="width:65px;height:65px;border-radius:14px;overflow:hidden;background:${gc(stu.name || '')};color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:700;box-shadow:0 4px 12px rgba(0,0,0,0.06);flex-shrink:0;">
+    ${stu.photo ? `<img src="${stu.photo}" style="width:100%;height:100%;object-fit:cover;"/>` : ini(stu.name || '')}
+  </div>
+</div>
+  ${isParent && allSibIds.length > 1 ? `<div class="fam-bar fu"><span style="font-size:.72rem;font-weight:700;color:var(--v);"> Children:</span>${allSibIds.map(id => { const s = allStus().find(x => x.id === id); if (!s) return ''; return `<div class="fam-chip${id === viewSid ? ' active' : ''}" onclick="window._viewSibId='${id}';goPage('dashboard')"><div class="ava" style="width:20px;height:20px;border-radius:5px;background:${gc(s.name)};font-size:.5rem;">${s.photo ? `<img src="${s.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:5px;"/>` : ini(s.name)}</div>${s.name.split(' ')[0]} <span class="badge ${s.fees === 'Paid' ? 'bg2' : 'br2'}" style="font-size:.55rem;">${s.fees === 'Paid' ? '&#10003;' : '!'}</span></div>`; }).join('')}</div>` : ''}
+
+${(() => {
+  const recentSubmissions = (DB.paymentSubmissions || []).filter(p => p.sid === stu.id && new Date() - new Date(p.date) < 7 * 24 * 60 * 60 * 1000 && p.status !== 'pending').sort((a,b) => new Date(b.date) - new Date(a.date));
+  if (recentSubmissions.length > 0) {
+    const r = recentSubmissions[0];
+    const isAp = r.status === 'approved';
+    return `<div class="card fu" style="background:${isAp?'#f0fdf4':'var(--rl)'};border-left:4px solid ${isAp?'var(--g)':'var(--r)'};padding:12px;margin-bottom:15px;">
+      <div style="font-weight:800;color:${isAp?'var(--g)':'var(--r)'};display:flex;align-items:center;gap:5px;"><span class="material-symbols-outlined" style="font-size:1.1rem;">${isAp?'check_circle':'error'}</span> Payment ${isAp?'Verified':'Rejected'}</div>
+      <div style="font-size:0.75rem;margin-top:4px;color:var(--ink2);">Your online payment of ${DB.settings?.currency || 'PKR'} ${fmtMoney(r.amount)} for Transaction <b>${r.tid}</b> was ${isAp?'successfully verified and your fee is marked paid!':'rejected by administration. Please check your transaction details and submit again.'}</div>
+    </div>`;
+  }
+  return '';
+})()}
+
 <div class="sg fu d1">
-  <div class="sc sp"><div class="sc-ic"></div><div class="sc-val" style="color:var(--p);">${a}%</div><div class="sc-lbl">Avg Score</div></div>
-  <div class="sc sg2"><div class="sc-ic"></div><div class="sc-val" style="color:var(--g);font-size:1.45rem;">${lGrade(a)}</div><div class="sc-lbl">Grade</div></div>
-  <div class="sc so"><div class="sc-ic"></div><div class="sc-val" style="color:var(--o);">${ap}%</div><div class="sc-lbl">Attendance</div></div>
-  <div class="sc sr"><div class="sc-ic"></div><div class="sc-val" style="color:${stu.fees === 'Paid' ? 'var(--g)' : 'var(--r)'};">${stu.fees === 'Paid' ? '?' : '!'}</div><div class="sc-lbl">Fees</div></div>
+  <div class="sc sp"><div class="sc-ic"><span class="material-symbols-outlined">analytics</span></div><div class="sc-val" style="color:var(--p);">${a}%</div><div class="sc-lbl">Avg Score</div></div>
+  <div class="sc sg2"><div class="sc-ic"><span class="material-symbols-outlined">military_tech</span></div><div class="sc-val" style="color:var(--g);font-size:1.45rem;">${lGrade(a)}</div><div class="sc-lbl">Grade</div></div>
+  <div class="sc so"><div class="sc-ic"><span class="material-symbols-outlined">calendar_month</span></div><div class="sc-val" style="color:var(--o);">${ap}%</div><div class="sc-lbl">Attendance</div></div>
+  <div class="sc sr"><div class="sc-ic"><span class="material-symbols-outlined">payments</span></div><div class="sc-val" style="color:${stu.fees === 'Paid' ? 'var(--g)' : 'var(--r)'};">${stu.fees === 'Paid' ? '<span class="material-symbols-outlined" style="font-size:1.45rem;">check_circle</span>' : '!'}</div><div class="sc-lbl">Fees</div></div>
 </div>
 <div class="g2">
   <div class="card fu d2">
@@ -5235,9 +5541,10 @@
         ${DB.exams.slice(0, 3).map(e => `<div style="display:flex;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);"><div style="background:var(--p);color:#fff;border-radius:8px;padding:5px 7px;text-align:center;min-width:38px;flex-shrink:0;"><div style="font-size:.88rem;font-weight:900;line-height:1;">${e.date ? new Date(e.date).getDate() : '?'}</div><div style="font-size:.52rem;opacity:.8;">${e.date ? new Date(e.date).toLocaleString('en', { month: 'short' }) : '-'}</div></div><div><div style="font-weight:700;font-size:.8rem;">${e.subject}</div><div style="font-size:.67rem;color:var(--ink3);">${e.type} - ${e.time || '-'}</div></div></div>`).join('') || '<div style="color:var(--ink4);font-size:.76rem;text-align:center;padding:12px;">No upcoming exams</div>'}
     </div>
     <div class="card fu d5" style="margin-top:12px;">
-      <div class="ch"><div class="ct"> Contact Teachers</div></div>
+      <div class="ch"><div class="ct"> Contact School</div></div>
       <div style="padding:10px 0; display:flex; flex-wrap:wrap; gap:8px;">
-        ${(DB.users || []).filter(u => u.role === 'teacher' && (u.classIds || []).includes(cid)).map(t => `<a href="mailto:${t.email}?subject=Message from ${stu.name} (Parent/Student)" class="btn btn-gh btn-xs" style="text-decoration:none;"><span style="margin-right:4px;"><span class="material-symbols-outlined" style="font-size:inherit;vertical-align:-2px;">mail</span></span>${t.name}</a>`).join('') || '<div style="color:var(--ink4);font-size:.76rem;">No teachers assigned</div>'}
+        <a href="tel:${DB.school?.phone || ''}" class="btn btn-gh btn-xs" style="text-decoration:none;"><span style="margin-right:4px;"><span class="material-symbols-outlined" style="font-size:inherit;vertical-align:-2px;">call</span></span>${DB.school?.phone || 'No phone set'}</a>
+        <a href="mailto:${DB.school?.email || ''}?subject=Message from ${stu.name}" class="btn btn-gh btn-xs" style="text-decoration:none;"><span style="margin-right:4px;"><span class="material-symbols-outlined" style="font-size:inherit;vertical-align:-2px;">mail</span></span>${DB.school?.email || 'No email set'}</a>
       </div>
     </div>
   </div>
@@ -5253,17 +5560,18 @@
   <div><div class="ph-tag"> Students</div><h1>Student Roster</h1><div class="ph-sub">${cls?.name || ''} ${cls?.section || ''} - ${sts.length} enrolled</div></div>
 <div class="ph-acts">
     <input type="text" class="fi" placeholder="Search student or roll..." onkeyup="filterTable(this, 'students-tbody')" style="width:200px; padding:6px 10px; margin-right:4px;"/>
-    <button class="btn btn-gh btn-sm" onclick="switchIdCardClass('${curCls}')">Print IDs</button>
+    <button class="btn btn-gh btn-sm" onclick="window.idCardMode='student'; switchIdCardClass('${curCls}')">Print IDs</button>
+    ${['montessori a', 'nursery a', 'prep one a', 'prep two a'].includes(cls?.name?.toLowerCase()) ? `<button class="btn btn-g btn-sm" onclick="window.idCardMode='pickup'; switchIdCardClass('${curCls}')">Pickup Cards</button>` : ''}
     ${curRole !== 'teacher' ? `<button class="btn btn-gh btn-sm" onclick="openBulkModal()"> Bulk Import</button>
     <button class="btn btn-p" onclick="openAddStudentModal()">+ Add Student</button>` : ''}
   </div>
 </div>
   ${clsBar()}
 <div class="sg fu d1">
-  <div class="sc sp"><div class="sc-ic"></div><div class="sc-val" style="color:var(--p);">${sts.length}</div><div class="sc-lbl">Students</div></div>
-  <div class="sc sg2"><div class="sc-ic"></div><div class="sc-val" style="color:var(--g);">${sts.filter(s => s.fees === 'Paid').length}</div><div class="sc-lbl">Fees Paid</div></div>
-  <div class="sc sr"><div class="sc-ic"></div><div class="sc-val" style="color:var(--r);">${sts.filter(s => s.fees !== 'Paid').length}</div><div class="sc-lbl">Fee Pending</div></div>
-  <div class="sc sv"><div class="sc-ic"></div><div class="sc-val" style="color:var(--v);">${sts.filter(s => s.familyId).length}</div><div class="sc-lbl">In Family</div></div>
+  <div class="sc sp"><div class="sc-ic"><span class="material-symbols-outlined">group</span></div><div class="sc-val" style="color:var(--p);">${sts.length}</div><div class="sc-lbl">Students</div></div>
+  <div class="sc sg2"><div class="sc-ic"><span class="material-symbols-outlined">payments</span></div><div class="sc-val" style="color:var(--g);">${sts.filter(s => s.fees === 'Paid').length}</div><div class="sc-lbl">Fees Paid</div></div>
+  <div class="sc sr"><div class="sc-ic"><span class="material-symbols-outlined">receipt_long</span></div><div class="sc-val" style="color:var(--r);">${sts.filter(s => s.fees !== 'Paid').length}</div><div class="sc-lbl">Fee Pending</div></div>
+  <div class="sc sv"><div class="sc-ic"><span class="material-symbols-outlined">family_restroom</span></div><div class="sc-val" style="color:var(--v);">${sts.filter(s => s.familyId).length}</div><div class="sc-lbl">In Family</div></div>
 </div>
 <div class="card fu d2" style="padding:0;overflow:hidden;">
   <div class="tw">
@@ -5272,10 +5580,12 @@
       <tbody id="students-tbody">
           ${sts.length === 0 ? `<tr><td colspan="10" style="text-align:center;padding:28px;"><div style="color:var(--ink4);margin-bottom:10px;">No students yet</div>${curRole !== 'teacher' ? `<button class="btn btn-p btn-sm" onclick="openAddStudentModal()">+ Add First Student</button>` : ''}</td></tr>` : ''}
           ${sts.map((s, i) => {
-        const av = avgStu(curCls, s.id); const ap = attPct(curCls, s.id); const fam = s.familyId ? DB.families[s.familyId] : null; return `<tr>
+        const av = avgStu(curCls, s.id); const ap = attPct(curCls, s.id); const fam = s.familyId ? DB.families[s.familyId] : null; 
+        let feeCleared = false; try { feeCleared = studentFeeSummary(s.id).dueAmount <= 0; } catch(e){}
+        return `<tr>
           <td style="color:var(--ink4);font-size:.7rem;">${i + 1}</td>
           <td><div class="ava" style="width:30px;height:30px;border-radius:7px;background:${gc(s.name)};font-size:.54rem;">${s.photo ? `<img src="${s.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:7px;"/>` : ini(s.name)}</div></td>
-          <td><div style="font-weight:700;font-size:.8rem;">${s.name}</div>${fam ? `<div style="font-size:.62rem;color:var(--v);"> ${fam.parentName}</div>` : ''}</td>
+          <td><div style="font-weight:700;font-size:.8rem;">${s.name}${feeCleared ? ' <span title="Star Student - Fees Cleared" style="cursor:help;">🌟</span>' : ''}</div>${fam ? `<div style="font-size:.62rem;color:var(--v);"> ${fam.parentName}</div>` : ''}</td>
           <td><span class="badge bp2" style="font-size:.68rem;">${s.roll || '-'}</span></td>
           <td>${s.gender ? `<span class="badge ${s.gender === 'Male' ? 'bb2' : 'bpk2'}">${s.gender}</span>` : '-'}</td>
           <td><b style="color:${sCol(av)};">${av || 0}%</b> <span style="font-size:.62rem;color:var(--ink4);">${lGrade(av)}</span></td>
@@ -5313,9 +5623,9 @@
   <div class="ph-acts"><button class="btn btn-gh btn-sm" onclick="refreshAdmissionApplications()">Refresh Online</button><button class="btn btn-gh btn-sm" onclick="openLandingAdmissionForm()">Open Form</button><button class="btn btn-p btn-sm" onclick="goPage('students')">Students</button></div>
 </div>
 <div class="sg fu d1">
-  <div class="sc sp"><div class="sc-ic"></div><div class="sc-val" style="color:var(--p);">${newCount}</div><div class="sc-lbl">New</div></div>
-  <div class="sc sg2"><div class="sc-ic"></div><div class="sc-val" style="color:var(--o);">${contactedCount}</div><div class="sc-lbl">Contacted</div></div>
-  <div class="sc sv"><div class="sc-ic"></div><div class="sc-val" style="color:var(--g);">${approvedCount}</div><div class="sc-lbl">Approved</div></div>
+  <div class="sc sp"><div class="sc-ic"><span class="material-symbols-outlined">mark_email_unread</span></div><div class="sc-val" style="color:var(--p);">${newCount}</div><div class="sc-lbl">New</div></div>
+  <div class="sc sg2"><div class="sc-ic"><span class="material-symbols-outlined">support_agent</span></div><div class="sc-val" style="color:var(--o);">${contactedCount}</div><div class="sc-lbl">Contacted</div></div>
+  <div class="sc sv"><div class="sc-ic"><span class="material-symbols-outlined">how_to_reg</span></div><div class="sc-val" style="color:var(--g);">${approvedCount}</div><div class="sc-lbl">Approved</div></div>
 </div>
 <div class="ibox" id="admission-sync-note" style="margin-bottom:12px;">Online applications load from Supabase when Admin is signed in. Public visitors can submit through the landing page after running the SQL setup.</div>
 <div class="card fu">
@@ -5883,7 +6193,12 @@
         if (addBulkStudent(row, fallbackClassId, i)) added++;
       });
       const dbArrearsTotal = allStus().reduce((s, x) => s + num(x.arrears || 0), 0);
-      alert(`Import Complete!\n\nStudents updated/added: ${added}\nTotal Arrears Found in CSV: PKR ${csvArrearsTotal.toLocaleString()}\n\nIf the arrears sum is lower than you expect, please check your CSV file to ensure all values are entered correctly.`);
+      alert(`Import Complete!
+
+Students updated/added: ${added}
+Total Arrears Found in CSV: PKR ${csvArrearsTotal.toLocaleString()}
+
+If the arrears sum is lower than you expect, please check your CSV file to ensure all values are entered correctly.`);
       saveDB();
       closeModal();
       showToast(`✅ ${added} students imported. CSV Arrears: PKR ${csvArrearsTotal.toLocaleString()} | DB Arrears: PKR ${dbArrearsTotal.toLocaleString()}`, 'ts');
@@ -5955,16 +6270,28 @@
          if (n === 'P' && !log.in) {
             log.in = nowHHMM();
             if (stu?.whatsapp && DB.settings?.waAuto) {
-                sendWhatsAppAPI(stu.whatsapp, `Dear Parent,\n\n${stu.name} has just been marked as Check-In at ${tStr} today (${fmtDate(d)}).\n\n${DB.school.name}`);
+                sendWhatsAppAPI(stu.whatsapp, `Dear Parent,
+
+${stu.name} has just been marked as Check-In at ${tStr} today (${fmtDate(d)}).
+
+${DB.school.name}`);
             }
          } else if (n === 'O') {
             log.out = nowHHMM();
             if (stu?.whatsapp && DB.settings?.waAuto) {
-                sendWhatsAppAPI(stu.whatsapp, `Dear Parent,\n\n${stu.name} has just been marked as Check-Out at ${tStr} today (${fmtDate(d)}).\n\n${DB.school.name}`);
+                sendWhatsAppAPI(stu.whatsapp, `Dear Parent,
+
+${stu.name} has just been marked as Check-Out at ${tStr} today (${fmtDate(d)}).
+
+${DB.school.name}`);
             }
          } else if (n === 'A') {
             if (stu?.whatsapp && DB.settings?.waAuto) {
-                sendWhatsAppAPI(stu.whatsapp, `Dear Parent,\n\n${stu.name} is marked Absent today (${fmtDate(d)}).\n\n${DB.school.name}`);
+                sendWhatsAppAPI(stu.whatsapp, `Dear Parent,
+
+${stu.name} is marked Absent today (${fmtDate(d)}).
+
+${DB.school.name}`);
             }
          }
          DB.studentLogs[curCls][sid][d] = log;
@@ -5979,7 +6306,7 @@
       const absent = clsStus(curCls).filter(s => (DB.attendance[curCls]?.[s.id] || {})[d] === 'A');
       if (!absent.length) { showToast('No absent students today', 'tw2'); return; }
       const cls = DB.classes.find(c => c.id === curCls);
-      absent.forEach(s => { if (s.whatsapp) sendWhatsAppAPI(s.whatsapp, `Dear Parent, ${s.name} was ABSENT from ${DB.school.name} (${cls?.name || ''}) on ${fmtDate(d)}. Please ensure regular attendance.` + "\n\nThank you.\n" + `${DB.school.name}`); });
+      absent.forEach(s => { if (s.whatsapp) sendWhatsAppAPI(s.whatsapp, `Dear Parent, ${s.name} was ABSENT from ${DB.school.name} (${cls?.name || ''}) on ${fmtDate(d)}. Please ensure regular attendance.\n\nThank you.\n${DB.school.name}`); });
       showToast(` WhatsApp queued for ${absent.length} absent students`, 'ts');
     }
 
@@ -6006,10 +6333,10 @@
     </div>
   </div>
   <div class="sg fu d1">
-    <div class="sc sg2"><div class="sc-ic"></div><div class="sc-val" style="color:var(--g);">${P}</div><div class="sc-lbl">Present Days</div></div>
-    <div class="sc sv"><div class="sc-ic"></div><div class="sc-val" style="color:var(--y);">${La}</div><div class="sc-lbl">Late Arrivals</div></div>
-    <div class="sc sr"><div class="sc-ic"></div><div class="sc-val" style="color:var(--r);">${A}</div><div class="sc-lbl">Absent Days</div></div>
-    <div class="sc sp"><div class="sc-ic"></div><div class="sc-val" style="color:var(--p);">${entries.length}</div><div class="sc-lbl">Total Recorded</div></div>
+    <div class="sc sg2"><div class="sc-ic"><span class="material-symbols-outlined">event_available</span></div><div class="sc-val" style="color:var(--g);">${P}</div><div class="sc-lbl">Present Days</div></div>
+    <div class="sc sv"><div class="sc-ic"><span class="material-symbols-outlined">schedule</span></div><div class="sc-val" style="color:var(--y);">${La}</div><div class="sc-lbl">Late Arrivals</div></div>
+    <div class="sc sr"><div class="sc-ic"><span class="material-symbols-outlined">event_busy</span></div><div class="sc-val" style="color:var(--r);">${A}</div><div class="sc-lbl">Absent Days</div></div>
+    <div class="sc sp"><div class="sc-ic"><span class="material-symbols-outlined">calendar_month</span></div><div class="sc-val" style="color:var(--p);">${entries.length}</div><div class="sc-lbl">Total Recorded</div></div>
   </div>
   <div class="card fu d2">
     <div class="ch"><div class="ct"> Attendance History</div></div>
@@ -6340,6 +6667,7 @@
 <div class="ph ph-row fu">
   <div><div class="ph-tag"> Fees</div><h1>Fee Management</h1><div class="ph-sub">Year ${DB.settings?.schoolYear || ''} - all fee items per student</div></div>
   <div class="ph-acts">
+    <button class="btn btn-pr btn-sm" onclick="goPage('feereports')" style="background:var(--g); border-color:var(--g);">Fee Reports</button>
     <button class="btn btn-gh btn-sm" onclick="openFeeStructModal()">? Structure</button>
     <button class="btn btn-gh btn-sm" onclick="openFeeReminderModal()"> Manual Reminder</button>
     <button class="btn btn-wa btn-sm" onclick="sendBulkFeeReminder()"> Bulk Reminder</button>
@@ -6367,6 +6695,28 @@
   <div class="fh-bar"><div class="fh-fill" style="width:${collected + pending ? Math.round(collected / (collected + pending) * 100) : 0}%;"></div></div>
   <div style="display:flex;justify-content:space-between;font-size:.68rem;opacity:.6;margin-top:4px;"><span>${collected + (isBeforeAugust ? totalArrears : pending) ? Math.round(collected / (collected + (isBeforeAugust ? totalArrears : pending)) * 100) : 0}% collected</span><span>${isBeforeAugust ? fmtMoney(totalArrears) + ' total arrears' : fmtMoney(pending) + ' pending'}</span></div>
 </div>
+${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ? `
+<div class="card fu" style="border: 2px dashed var(--o); background: #fffdf5; margin-bottom: 20px;">
+  <div class="ch"><div class="ct" style="color: var(--o);"><span class="material-symbols-outlined" style="vertical-align:-4px; margin-right:5px;">pending_actions</span> Pending Online Payments</div></div>
+  <div style="font-size: 0.8rem; margin-bottom: 10px; color: var(--ink3);">These students have submitted online payment details. Verify the transaction in your Bank/EasyPaisa app before approving.</div>
+  ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').map(p => {
+    const s = allStus().find(x => x.id === p.sid);
+    return `<div style="display:flex; justify-content:space-between; align-items:center; background:#fff; border:1px solid #eee; padding:10px; border-radius:8px; margin-bottom:8px;">
+      <div>
+        <div style="font-weight:700;">${s ? s.name : 'Unknown Student'} <span style="font-size:0.7rem; color:var(--ink3); font-weight:normal;">(Roll: ${s ? s.roll : '-'})</span></div>
+        <div style="font-size:0.7rem; margin-top:2px;">Month: <b>${p.month}</b> | Trx ID: <b style="letter-spacing:0.5px;">${p.tid}</b></div>
+        <div style="font-size:0.65rem; color:var(--ink4); margin-top:2px;">Submitted: ${new Date(p.date).toLocaleString()}</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-weight:900; color:var(--p); font-size:1.1rem; margin-bottom:5px;">${DB.settings?.currency || 'PKR'} ${fmtMoney(p.amount)}</div>
+        <div style="display:flex; gap:6px; justify-content:flex-end;">
+          <button class="btn btn-sm btn-p" onclick="approvePaymentSubmission('${p.id}', '${p.sid}', '${p.month}', ${p.amount})">Approve</button>
+          <button class="btn btn-sm btn-gh" style="color:var(--r);" onclick="rejectPaymentSubmission('${p.id}')">Reject</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('')}
+</div>` : ''}
 <div class="g2">
   <div class="card fu d2">
     <div class="ch"><div class="ct"> Fee Structure</div><button class="btn btn-gh btn-sm" onclick="openFeeStructModal()">Edit</button></div>
@@ -6520,7 +6870,12 @@
       saveDB();
       
       if (s.whatsapp && DB.settings?.waAuto) {
-        const msg = `Dear Parent of ${s.name},\n\nWe have successfully received the payment of ${fmtMoney(amountPaid)} for the month of ${month}.\n\nThank you.\n${DB.school.name}`;
+        const msg = `Dear Parent of ${s.name},
+
+We have successfully received the payment of ${fmtMoney(amountPaid)} for the month of ${month}.
+
+Thank you.
+${DB.school.name}`;
         openWhatsAppMessage(s.whatsapp, msg);
       }
 
@@ -6730,7 +7085,22 @@
       const cls = DB.classes.find(c => c.id === s.classId);
       const amount = (fid === 'f1' && (s && s.customFee !== undefined && s.customFee !== '')) ? num(s.customFee) : num(fee.amount);
       const balance = (DB.fees.payments[s.id] || {})[fid]?.paid ? 0 : amount;
-      return `Dear Parent of ${s.name},\n\nThis is a friendly fee reminder from ${DB.school.name}.\nStudent: ${s.name}\nClass: ${cls?.name || ''}\nRoll No: ${s.roll || ''}\nFee Item: ${fee.name}\nAmount Due: ${fmtMoney(balance || amount)}\nDue Date: ${dueDate || fee.due || DB.settings?.defaultFeeDueDay || '5th of month'}\n${note ? `\nNote: ${note}\n` : ''}\nPlease share payment once deposited.\n\nThank you.\n${DB.school.name}`;
+      return `Dear Parent of ${s.name},
+
+This is a friendly fee reminder from ${DB.school.name}.
+Student: ${s.name}
+Class: ${cls?.name || ''}
+Roll No: ${s.roll || ''}
+Fee Item: ${fee.name}
+Amount Due: ${fmtMoney(balance || amount)}
+Due Date: ${dueDate || fee.due || DB.settings?.defaultFeeDueDay || '5th of month'}
+${note ? `
+Note: ${note}
+` : ''}
+Please share payment once deposited.
+
+Thank you.
+${DB.school.name}`;
     }
     function sendFeeWA(sid, fid = 'f1', dueDate, note = '') {
       const s = allStus().find(x => x.id === sid); if (!s?.whatsapp) { showToast('No WhatsApp number', 'te'); return false; }
@@ -6804,12 +7174,21 @@
         const amount = fmtMoney(row.firstFee.amount);
         
         try {
-          const msg = `Dear Parent of ${row.student.name},\n\nThis is a friendly fee reminder from ${DB.school.name}.\nStudent: ${row.student.name}\nAmount Due: ${amount}\n\nPlease share payment once deposited.\n\nThank you.\n${DB.school.name}`;
+          const msg = `Dear Parent of ${row.student.name},
+
+This is a friendly fee reminder from ${DB.school.name}.
+Student: ${row.student.name}
+Amount Due: ${amount}
+
+Please share payment once deposited.
+
+Thank you.
+${DB.school.name}`;
           
           await sendWhatsAppAPI(phone, msg);
           
           sent++;
-          await new Promise(r => setTimeout(r, 800)); // Sleep briefly between sends to avoid API rate limits
+          await new Promise(r => setTimeout(r, 2500)); // Sleep briefly between sends to avoid API rate limits
         } catch (err) {
           console.error(err);
         }
@@ -6940,6 +7319,108 @@
     }
 
     /* ------------------------------- EXAMS ------------------------------- */
+function pgFeeReports() {
+    window.feeReportTab = window.feeReportTab || 'cleared';
+    
+    const all = allStus();
+    const students = all.map(s => {
+        const summ = studentFeeSummary(s.id);
+        const cm = monthKey();
+        const isBeforeAugust = cm < '2026-08';
+        const arrears = isBeforeAugust ? num(s.arrears || 0) : summ.pendingArrears;
+        
+        let status = 'cleared';
+        if (summ.dueAmount > 0) {
+            if (arrears > 0) status = 'arrears';
+            else status = 'monthly';
+        }
+        
+        return { ...s, summ, status, arrears };
+    });
+    
+    const cleared = students.filter(s => s.status === 'cleared');
+    const pendingMonthly = students.filter(s => s.status === 'monthly');
+    const arrearsList = students.filter(s => s.status === 'arrears');
+    
+    let activeList = [];
+    if (window.feeReportTab === 'cleared') activeList = cleared;
+    else if (window.feeReportTab === 'monthly') activeList = pendingMonthly;
+    else if (window.feeReportTab === 'arrears') activeList = arrearsList;
+    
+    const clsName = (id) => { const c = DB.classes.find(x=>x.id===id); return c ? (c.name + ' ' + (c.section||'')).trim() : '-'; };
+
+    return `
+<div class="ph ph-row fu">
+  <div>
+    <button class="btn btn-gh btn-sm" onclick="goPage('fees')" style="margin-bottom:10px;">&larr; Back to Fees</button>
+    <div class="ph-tag"> Reports</div>
+    <h1>Detailed Fee Reports</h1>
+    <div class="ph-sub">View students by payment status</div>
+  </div>
+</div>
+
+<div class="sg fu d1">
+  <div class="sc sp" onclick="window.feeReportTab='cleared'; goPage('feereports')" style="cursor:pointer; ${window.feeReportTab==='cleared'?'border:2px solid var(--p);':''}"><div class="sc-ic"><span class="material-symbols-outlined">stars</span></div><div class="sc-val" style="color:var(--g);">${cleared.length}</div><div class="sc-lbl">Cleared (Zero Balance)</div></div>
+  <div class="sc sg2" onclick="window.feeReportTab='monthly'; goPage('feereports')" style="cursor:pointer; ${window.feeReportTab==='monthly'?'border:2px solid var(--p);':''}"><div class="sc-ic"><span class="material-symbols-outlined">pending_actions</span></div><div class="sc-val" style="color:var(--o);">${pendingMonthly.length}</div><div class="sc-lbl">Pending Monthly Fee</div></div>
+  <div class="sc so" onclick="window.feeReportTab='arrears'; goPage('feereports')" style="cursor:pointer; ${window.feeReportTab==='arrears'?'border:2px solid var(--p);':''}"><div class="sc-ic"><span class="material-symbols-outlined">warning</span></div><div class="sc-val" style="color:var(--r);">${arrearsList.length}</div><div class="sc-lbl">Previous Balance (Arrears)</div></div>
+</div>
+
+<div class="card fu">
+  <div class="ch">
+    <div class="ct">${window.feeReportTab === 'cleared' ? 'Cleared Students' : window.feeReportTab === 'monthly' ? 'Pending Monthly Fee' : 'Students with Arrears'}</div>
+    <button class="btn btn-gh btn-sm" onclick="printFeeReportArea()" style="margin-left:auto; margin-right: 15px;"><span class="material-symbols-outlined" style="font-size:16px; vertical-align:-3px; margin-right:4px;">print</span> Print List</button>
+    <input type="text" class="fi" placeholder="Search..." onkeyup="filterTable(this, 'fee-report-tbody')" style="width:200px; padding:6px 10px;"/>
+  </div>
+  
+  <div class="tbl-wrap" id="report-print-area">
+    <table>
+      <thead>
+        <tr>
+          <th>Student</th>
+          <th>Class</th>
+          <th>Father</th>
+          ${window.feeReportTab === 'arrears' ? '<th>Previous Balance</th>' : ''}
+          <th>Monthly Due</th>
+          <th>Total Due</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="fee-report-tbody">
+        ${activeList.map(s => `
+          <tr>
+            <td><b>${escHtml(s.name)}</b>${s.status === 'cleared' ? ' <span title="Star Student - Fees Cleared" style="cursor:help;">🌟</span>' : ''}</td>
+            <td>${escHtml(clsName(s.classId))}</td>
+            <td>${escHtml(s.father || '-')}</td>
+            ${window.feeReportTab === 'arrears' ? `<td style="color:var(--r); font-weight:bold;">${fmtMoney(s.summ.pendingArrears)}</td>` : ''}
+            <td>${fmtMoney(s.summ.pendingMonthly)}</td>
+            <td style="font-weight:bold;">${fmtMoney(s.summ.dueAmount)}</td>
+            <td><span class="badge ${window.feeReportTab === 'cleared' ? 'bg' : window.feeReportTab === 'monthly' ? 'bo' : 'br'}">${window.feeReportTab === 'cleared' ? 'Cleared' : window.feeReportTab === 'monthly' ? 'Monthly Pending' : 'Arrears'}</span></td>
+          </tr>
+        `).join('')}
+        ${activeList.length === 0 ? `<tr><td colspan="7" style="text-align:center; padding:20px; color:var(--ink4);">No students found in this category.</td></tr>` : ''}
+      </tbody>
+    </table>
+  </div>
+</div>
+`;
+}
+
+function printFeeReportArea() {
+    const prtContent = document.getElementById("report-print-area");
+    if (!prtContent) return;
+    const WinPrint = window.open('', '', 'left=0,top=0,width=800,height=900,toolbar=0,scrollbars=0,status=0');
+    WinPrint.document.write(`<html><head><title>Fee Report</title><style>
+      body { font-family: sans-serif; padding: 20px; }
+      table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+      th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 14px; }
+      th { background-color: #f4f4f4; }
+      h2 { text-align: center; margin-bottom: 20px; }
+    </style></head><body><h2>Fee Report - ${window.feeReportTab === 'cleared' ? 'Cleared Students' : window.feeReportTab === 'monthly' ? 'Pending Monthly Fee' : 'Students with Previous Balance (Arrears)'}</h2>` + prtContent.innerHTML + `</body></html>`);
+    WinPrint.document.close();
+    WinPrint.focus();
+    setTimeout(() => { WinPrint.print(); WinPrint.close(); }, 250);
+}
+
     function pgExams() {
       return `
 <div class="ph ph-row fu"><div><div class="ph-tag"> Exams</div><h1>Exam Schedule</h1></div><button class="btn btn-p" onclick="openExamModal()">+ Add Exam</button></div>
@@ -6985,13 +7466,17 @@
       const stus = allStus().filter(s => s.whatsapp && (obj.target === 'All' || s.classId === obj.target));
       if (!stus.length) return showToast('No students with WhatsApp found for this target.', 'tw2');
       showToast(`Broadcasting to ${stus.length} students...`, 'ts');
-      const msg = `📢 *${obj.title}*\n\n${obj.body}\n\n${DB.school.name}`;
+      const msg = `📢 *${obj.title}*
+
+${obj.body}
+
+${DB.school.name}`;
       let sent = 0;
       for (const s of stus) {
         try {
           await sendWhatsAppAPI(s.whatsapp, msg);
           sent++;
-          await new Promise(r => setTimeout(r, 800));
+          await new Promise(r => setTimeout(r, 2500));
         } catch(e){}
       }
       showToast(`Broadcast Complete: Sent to ${sent} students.`, 'ts', 5000);
@@ -7112,13 +7597,22 @@
     function openTeachModal(eid) {
       const t = eid ? DB.users.find(x => x.id === eid) : null;
       openModal(`
-  <h3>${t ? ' Edit Staff' : '? Add Staff'}</h3>
+  <h3>${t ? ' Edit Staff' : ' Add Staff'}</h3>
+  <div style="display:flex; gap:15px; margin-bottom:15px; align-items:center;">
+    <div class="pup" id="m-pup" onclick="document.getElementById('m-pf').click()">
+      ${t?.photo ? `<img src="${t.photo}"/>` : '<div class="pup-ic"></div><div class="pup-tx">Add Photo</div>'}
+    </div>
+    <input type="file" id="m-pf" accept="image/*" style="display:none;" onchange="prevStuPhoto(this)"/>
+    <input type="hidden" id="m-pd" value="${t?.photo || ''}"/>
+    <div><div style="font-weight:700;font-size:.83rem;">Staff Photo</div><div style="font-size:.7rem;color:var(--ink4);margin-top:2px;">Used in ID cards & profile</div>${t?.photo ? `<button class="btn btn-xs btn-gh" style="margin-top:5px;" onclick="clearStuPhoto()">Remove</button>` : ''}</div>
+  </div>
   <div class="fg2"><div class="fg"><label class="fl">Full Name <span class="req">*</span></label><input class="fi" id="mt-name" value="${t?.name || ''}" placeholder="Ms. Fatima Khan"/></div><div class="fg"><label class="fl">Login Email <span class="req">*</span></label><input class="fi" type="email" id="mt-email" value="${t?.email || ''}" placeholder="teacher@school.edu"/></div></div>
-  <div class="fg2"><div class="fg"><label class="fl">Role <span class="req">*</span></label><select class="fi" id="mt-role"><option value="teacher" ${t?.role !== 'scanner' ? 'selected' : ''}>Teacher</option><option value="scanner" ${t?.role === 'scanner' ? 'selected' : ''}>Gate Scanner</option></select></div><div class="fg"><label class="fl">Main Subject (Teachers)</label><select class="fi" id="mt-sub"><option value="">Select</option>${DB.subjects.map(s => `<option value="${s.name}" ${t?.subject === s.name ? 'selected' : ''}>${s.name}</option>`).join('')}</select></div></div>
+  <div class="fg2"><div class="fg"><label class="fl">Role <span class="req">*</span></label><select class="fi" id="mt-role"><option value="teacher" ${t?.role !== 'scanner' ? 'selected' : ''}>Teacher</option><option value="scanner" ${t?.role === 'scanner' ? 'selected' : ''}>Gate Scanner</option></select></div><div class="fg"><label class="fl">Job Title / Subject</label><input class="fi" id="mt-sub" list="subjList" value="${t?.subject || ''}" placeholder="e.g. Principal or Math"/><datalist id="subjList">${DB.subjects.map(s => `<option value="${s.name}"></option>`).join('')}</datalist></div></div>
   <div class="fg pw-field"><label class="fl">Login Password</label><input class="fi" type="password" id="mt-pass" placeholder="Enter password (for new logins or resets)" autocomplete="new-password"/><button type="button" class="pw-toggle" onclick="togglePassword(\'mt-pass\',this)">Show</button></div>
   ${t?.email ? `<div style="margin-top:-8px;margin-bottom:10px;text-align:right;"><button type="button" class="btn btn-gh btn-xs" style="color:var(--r);border-color:var(--rl);" onclick="adminResetPassword(document.getElementById('mt-email').value, document.getElementById('mt-pass').value, this)">Force Reset Password</button></div>` : ''}
   <div class="fg2"><div class="fg"><label class="fl">Phone</label><input class="fi" id="mt-phone" value="${t?.phone || ''}" placeholder="03XXXXXXXXX"/></div><div class="fg"><label class="fl">Joining Date</label><input class="fi" type="date" id="mt-join" value="${t?.joinDate || ''}"/></div></div>
-  <div class="fg2"><div class="fg"><label class="fl">Base Salary (Per Month)</label><input class="fi" type="number" id="mt-salary" value="${num(t?.salary || 40000)}" placeholder="45000"/></div><div class="fg"><label class="fl">Notes</label><input class="fi" id="mt-notes" value="${t?.notes || ''}" placeholder="Optional notes"/></div></div>
+  <div class="fg2"><div class="fg"><label class="fl">Staff ID No. (For ID Cards)</label><input class="fi" id="mt-empid" value="${t?.empId || ''}" placeholder="e.g. TCH-001"/></div><div class="fg"><label class="fl">Base Salary (Per Month)</label><input class="fi" type="number" id="mt-salary" value="${num(t?.salary || 40000)}" placeholder="45000"/></div></div>
+  <div class="fg"><label class="fl">Notes</label><input class="fi" id="mt-notes" value="${t?.notes || ''}" placeholder="Optional notes"/></div>
   <div class="fg"><label class="fl">Assigned Classes</label><div style="display:flex;flex-wrap:wrap;gap:7px;padding:10px;background:var(--card2);border:1.5px solid var(--border);border-radius:8px;">${DB.classes.map(c => `<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:.78px;font-weight:600;font-size:.76rem;"><input type="checkbox" value="${c.id}" ${(t?.classIds || []).includes(c.id) ? 'checked' : ''}/> ${c.name}${c.section ? ' ' + c.section : ''}</label>`).join('')}</div></div>
   <div class="m-btns"><button class="btn btn-p" onclick="saveTeach('${eid || ''}')"> ${t ? 'Update' : 'Add'}</button><button class="btn btn-gh" onclick="closeModal()">Cancel</button></div>`);
     }
@@ -7131,7 +7625,7 @@
       const classIds = [...document.querySelectorAll('#modal-body input[type=checkbox]:checked')].map(x => x.value);
       const loginPass = (document.getElementById('mt-pass')?.value || '').trim();
 
-      const obj = { name, email, subject: document.getElementById('mt-sub')?.value || '', classIds, role: role, phone: document.getElementById('mt-phone')?.value?.trim() || '', joinDate: document.getElementById('mt-join')?.value || '', salary: num(document.getElementById('mt-salary')?.value || 0), notes: document.getElementById('mt-notes')?.value?.trim() || '' }; 
+      const obj = { name, email, subject: document.getElementById('mt-sub')?.value || '', classIds, role: role, phone: document.getElementById('mt-phone')?.value?.trim() || '', joinDate: document.getElementById('mt-join')?.value || '', empId: document.getElementById('mt-empid')?.value?.trim() || '', salary: num(document.getElementById('mt-salary')?.value || 0), notes: document.getElementById('mt-notes')?.value?.trim() || '', photo: document.getElementById('m-pd')?.value || '' }; 
       
       if (!eid && email && loginPass && _sb) {
         const btn = document.querySelector('.m-btns .btn-p'); if (btn) btn.textContent = 'Creating Login...';
@@ -7155,7 +7649,7 @@
         const t = DB.users.find(x => x.id === eid); 
         if (t) Object.assign(t, obj); 
       } else {
-        DB.users.push({ id: uid(), ...obj, photo: '', lastPaid: '', payrollHistory: [] }); 
+        DB.users.push({ id: uid(), ...obj, lastPaid: '', payrollHistory: [] }); 
       }
       
       saveDB(); 
@@ -7174,10 +7668,10 @@
       return `
 <div class="ph ph-row fu"><div><div class="ph-tag"> Payroll</div><h1>Teacher Salary System</h1><div class="ph-sub">Manage salary, bonus, deductions, and payment status</div></div><div style="display:flex;gap:10px;align-items:center;"><input type="month" value="${window.payrollMonth}" onchange="window.payrollMonth=this.value; goPage('payroll')" style="padding:8px 12px; border-radius:8px; border:1px solid var(--border); font-size:0.9rem; font-weight:700; background:var(--card); color:var(--ink); cursor:pointer;" /><button class="btn btn-p" onclick="openTeachModal()">+ Add Teacher</button></div></div>
 <div class="sg fu d1">
-  <div class="sc sp"><div class="sc-ic"></div><div class="sc-val" style="color:var(--p);">${fmtMoney(total)}</div><div class="sc-lbl">Payroll for ${window.payrollMonth}</div></div>
-  <div class="sc sg2"><div class="sc-ic"></div><div class="sc-val" style="color:var(--g);">${paid}</div><div class="sc-lbl">Paid Teachers</div></div>
-  <div class="sc so"><div class="sc-ic"></div><div class="sc-val" style="color:var(--o);">${teachers.length - paid}</div><div class="sc-lbl">Pending Teachers</div></div>
-  <div class="sc sv"><div class="sc-ic"></div><div class="sc-val" style="color:var(--v);">${teachers.length}</div><div class="sc-lbl">Total Staff</div></div>
+  <div class="sc sp"><div class="sc-ic"><span class="material-symbols-outlined">payments</span></div><div class="sc-val" style="color:var(--p);">${fmtMoney(total)}</div><div class="sc-lbl">Payroll for ${window.payrollMonth}</div></div>
+  <div class="sc sg2"><div class="sc-ic"><span class="material-symbols-outlined">check_circle</span></div><div class="sc-val" style="color:var(--g);">${paid}</div><div class="sc-lbl">Paid Teachers</div></div>
+  <div class="sc so"><div class="sc-ic"><span class="material-symbols-outlined">hourglass_empty</span></div><div class="sc-val" style="color:var(--o);">${teachers.length - paid}</div><div class="sc-lbl">Pending Teachers</div></div>
+  <div class="sc sv"><div class="sc-ic"><span class="material-symbols-outlined">badge</span></div><div class="sc-val" style="color:var(--v);">${teachers.length}</div><div class="sc-lbl">Total Staff</div></div>
 </div>
   ${teachers.length === 0 ? `<div class="card"><div class="empty"><div class="empty-ic"></div><div class="empty-t">No teacher payroll records yet</div><button class="btn btn-p btn-sm" style="margin-top:10px;" onclick="openTeachModal()">Add Teacher</button></div></div>` :
           `<div class="g2">${teachers.map(t => { 
@@ -7248,7 +7742,13 @@
       showToast(`Salary marked paid for ${t.name}`, 'ts');
       
       if ((t.whatsapp || t.phone) && DB.settings?.waAuto) {
-         const msg = `Dear ${t.name},\n\nYour salary of ${DB.settings?.currency || 'PKR'} ${amount} for the month of ${month} has been successfully disbursed.\n\nThank you for your hard work and dedication!\n\n${DB.school?.name || 'School Administration'}`;
+         const msg = `Dear ${t.name},
+
+Your salary of ${DB.settings?.currency || 'PKR'} ${amount} for the month of ${month} has been successfully disbursed.
+
+Thank you for your hard work and dedication!
+
+${DB.school?.name || 'School Administration'}`;
          sendWhatsAppAPI(t.whatsapp || t.phone, msg);
       }
 
@@ -7261,31 +7761,111 @@
       const h = (t.payrollHistory || []).find(x => x.id === historyId); if (!h) return;
       const school = DB.school || {};
       
-      const pw = window.open('', '', 'width=600,height=800');
+      const pw = window.open('', '', 'width=800,height=600');
+      
       const html = `<!DOCTYPE html><html><head><title>Pay Slip - ${escHtml(t.name)}</title>
       <style>
-        @page { margin: 0; size: A5; }
-        body { font-family: sans-serif; padding: 30px; font-size: 14px; line-height: 1.5; color:#111; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        h1 { margin:0 0 5px 0; font-size: 20px; text-align:center; }
-        h2 { margin:0 0 20px 0; font-size: 14px; text-align:center; color:#555; border-bottom:1px solid #ddd; padding-bottom:15px; }
-        .row { display: flex; justify-content: space-between; margin-bottom: 8px; }
-        .row.bold { font-weight: bold; }
-        .row.total { border-top: 2px solid #111; padding-top: 10px; margin-top: 10px; font-size: 16px; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        @page { margin: 0; size: A5 landscape; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            margin: 0; padding: 20px; 
+            background: #fff; 
+            color: #111; 
+            -webkit-print-color-adjust: exact; 
+            print-color-adjust: exact; 
+        }
+        .slip-container {
+            padding: 30px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: #fff;
+            position: relative;
+            overflow: hidden;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .slip-container::before {
+            content: "";
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 250px; height: 250px;
+            background: url('${school.logo || 'oxford_logo.svg'}') no-repeat center center;
+            background-size: contain;
+            opacity: 0.04;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .slip-container > * { position: relative; z-index: 1; }
+        
+        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 2px solid #0d1e3d; }
+        .school-info h1 { margin: 0 0 5px 0; color: #0d1e3d; font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
+        .school-info p { margin: 0; color: #555; font-size: 13px; }
+        .slip-title { text-align: right; }
+        .slip-title h2 { margin: 0; color: #c9a84c; font-size: 20px; font-weight: 800; text-transform: uppercase; }
+        .slip-title p { margin: 5px 0 0 0; font-size: 13px; font-weight: 600; background: #0d1e3d; color: #fff; padding: 4px 12px; border-radius: 4px; display: inline-block; }
+
+        .emp-details { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; background: #f8f9fa; padding: 15px; border-radius: 6px; border: 1px solid #eee; font-size: 13px; }
+        .detail-row { display: flex; flex-direction: column; gap: 3px; }
+        .detail-row span { color: #555; font-size: 11px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
+        .detail-row b { font-size: 14px; color: #111; }
+
+        .salary-table { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 30px; }
+        .salary-table th { background: #0d1e3d; color: #fff; padding: 10px 12px; text-align: left; font-weight: 600; border: 1px solid #0d1e3d; }
+        .salary-table td { padding: 10px 12px; border: 1px solid #e0e0e0; }
+        .salary-table .amt { text-align: right; font-weight: 600; }
+        .deduction { color: #d32f2f; }
+        .salary-table tfoot td { font-weight: 800; font-size: 16px; background: #fdfaf2; border-top: 2px solid #c9a84c; border-bottom: 2px solid #c9a84c; }
+
+        .footer { display: flex; justify-content: flex-end; margin-top: 50px; }
+        .signature { text-align: center; font-size: 12px; color: #555; font-weight: 600; }
+        .sig-line { width: 180px; border-top: 1px solid #111; margin-bottom: 5px; }
+        
+        @media print {
+            body { padding: 0; }
+            .slip-container { border: none; padding: 15px; }
+        }
       </style></head><body>
-        <h1>${escHtml(school.name || 'School')}</h1>
-        <h2>Pay Slip: ${h.month}</h2>
-        <div style="margin-bottom:20px;">
-          <div class="row"><span>Staff Name:</span> <b>${escHtml(t.name)}</b></div>
-          <div class="row"><span>Paid On:</span> <b>${fmtDate(h.paidOn)}</b></div>
-        </div>
-        <div style="border:1px solid #ddd; padding: 15px;">
-          <div class="row"><span>Base Salary (Per Month):</span> <span>${fmtMoney(h.base)}</span></div>
-          <div class="row" style="color:#d32f2f;"><span>Attendance Deduction:</span> <span>-${fmtMoney(h.attDeduction)}</span></div>
-          <div class="row" style="color:#d32f2f;"><span>Other Deductions:</span> <span>-${fmtMoney(h.otherDeductions)}</span></div>
-          <div class="row total"><span>Net Paid Amount:</span> <span><b>${fmtMoney(h.amount)}</b></span></div>
-        </div>
-        <div style="margin-top:50px; text-align:right;">
-          <div style="border-top:1px solid #111; width:200px; display:inline-block; text-align:center; padding-top:5px;">Authorized Signature</div>
+        <div class="slip-container">
+            <div class="header">
+                <div class="school-info">
+                    <h1>${escHtml(school.name || 'Oxford Excellence Academy')}</h1>
+                    <p>${escHtml(school.phone || 'Staff Payroll System')}</p>
+                </div>
+                <div class="slip-title">
+                    <h2>PAY SLIP</h2>
+                    <p>Month: ${h.month}</p>
+                </div>
+            </div>
+            
+            <div class="emp-details">
+                <div class="detail-row"><span>Employee Name</span><b>${escHtml(t.name)}</b></div>
+                <div class="detail-row"><span>Role / Designation</span><b style="text-transform: capitalize;">${escHtml(t.role)}</b></div>
+                <div class="detail-row"><span>Staff ID</span><b>${escHtml(t.id.toUpperCase())}</b></div>
+                <div class="detail-row"><span>Payment Date</span><b>${fmtDate(h.paidOn)}</b></div>
+            </div>
+            
+            <table class="salary-table">
+                <thead>
+                    <tr><th>Earnings & Deductions</th><th class="amt">Amount</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Base Salary</td><td class="amt">${fmtMoney(h.base)}</td></tr>
+                    ${h.attDeduction > 0 ? `<tr class="deduction"><td>Attendance Deduction</td><td class="amt">-${fmtMoney(h.attDeduction)}</td></tr>` : ''}
+                    ${h.otherDeductions > 0 ? `<tr class="deduction"><td>Other Deductions</td><td class="amt">-${fmtMoney(h.otherDeductions)}</td></tr>` : ''}
+                </tbody>
+                <tfoot>
+                    <tr><td>Net Paid Amount</td><td class="amt" style="color: #27ae60;">${fmtMoney(h.amount)}</td></tr>
+                </tfoot>
+            </table>
+            
+            <div class="footer">
+                <div class="signature">
+                    <div class="sig-line"></div>
+                    <div>Authorized Signature</div>
+                </div>
+            </div>
         </div>
         <scr`+`ipt>window.onload=function(){setTimeout(function(){window.print();},500);};</scr`+`ipt>
       </body></html>`;
@@ -7619,7 +8199,7 @@
   <div class="ch"><div class="ct"> Subject Marks</div><button class="btn btn-p btn-sm" onclick="switchCls(getStu().classId||curCls);goPage('reportcards');setTimeout(()=>openReportCard(getStu().id,getStu().classId||curCls),200)"> Report Card</button></div>
     ${DB.subjects.map(sub => {
         const v = grades[sub.id] || 0; const l = lGrade(v); return `<div style="display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--border);">
-    <div style="width:32px;height:32px;border-radius:8px;background:${sub.color}18;display:flex;align-items:center;justify-content:center;font-size:.88rem;flex-shrink:0;border:1px solid ${sub.color}28;">${sub.icon}</div>
+    <div style="min-width:38px;padding:0 6px;height:32px;border-radius:8px;background:${sub.color}18;display:flex;align-items:center;justify-content:center;font-size:.76rem;font-weight:700;flex-shrink:0;border:1px solid ${sub.color}28;white-space:nowrap;overflow:hidden;">${sub.icon}</div>
     <div style="flex:1;"><div style="font-weight:700;font-size:.82rem;">${sub.name}</div><div class="pb" style="margin-top:5px;"><div class="pf" style="width:${v}%;background:${sub.color};"></div></div></div>
     <div style="text-align:right;flex-shrink:0;"><div style="font-weight:800;font-size:.95rem;color:${sub.color};">${v || '-'}</div><div style="font-size:.62rem;color:var(--ink4);">${l}</div></div>
   </div>`;
@@ -7642,7 +8222,16 @@
 </div>
 <div class="card fu d2"><div class="ch"><div class="ct">Attendance Log</div></div>
     ${entries.length === 0 ? `<div style="text-align:center;padding:20px;color:var(--ink4);">No records yet</div>` :
-          entries.map(([d, v]) => `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);"><div style="font-size:.8rem;color:var(--ink3);min-width:90px;">${fmtDate(d)}</div><span class="ac ${v === 'P' ? 'acP' : v === 'A' ? 'acA' : 'acL'}" style="cursor:default;">${v}</span><span style="font-size:.76rem;color:var(--ink3);">${v === 'P' ? 'Present' : v === 'A' ? 'Absent' : 'Leave'}</span></div>`).join('')}
+          entries.map(([d, v]) => {
+            const logs = DB.studentLogs?.[cid]?.[stu.id]?.[d] || {};
+            let logText = v === 'P' ? 'Present' : v === 'A' ? 'Absent' : 'Leave';
+            let times = [];
+            if (logs.in) times.push(`In: ${logs.in}`);
+            if (logs.out) times.push(`Out: ${logs.out}`);
+            if (times.length) logText += ` <span style="margin-left:8px;font-size:.72rem;background:var(--bg2);padding:2px 6px;border-radius:4px;color:var(--ink2);">` + times.join(' &bull; ') + `</span>`;
+            else logText += ` <span style="margin-left:8px;font-size:.65rem;color:var(--ink4);">(Manual Entry - No Time)</span>`;
+            return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);"><div style="font-size:.8rem;color:var(--ink3);min-width:90px;">${fmtDate(d)}</div><span class="ac ${v === 'P' ? 'acP' : v === 'A' ? 'acA' : 'acL'}" style="cursor:default;">${v}</span><span style="font-size:.76rem;color:var(--ink3);">${logText}</span></div>`;
+          }).join('')}
 </div>`;
     }
 
@@ -7662,14 +8251,132 @@
       setTimeout(() => document.body.classList.remove('printing-idcards'), 900);
     }
 
-    function classIdCardHtml(stu) {
+    async function downloadIdCardsPdf(mode) {
+      if (typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined') return showToast('PDF library not loaded', 'te');
+
+      let renderItems = [];
+      let filename = '';
+
+      if (mode === 'all') {
+        filename = 'All_School_Cards_Master.pdf';
+        DB.users.filter(u => u.role === 'teacher' || u.role === 'scanner').forEach(u => renderItems.push({type: 'staff', obj: u}));
+        const juniorClasses = ['montessori a', 'nursery a', 'prep one a', 'prep two a'];
+        allStus().forEach(stu => {
+          renderItems.push({type: 'student', obj: stu});
+          const cls = DB.classes.find(c => c.id === stu.classId);
+          if (cls && juniorClasses.includes(cls.name?.toLowerCase())) {
+            renderItems.push({type: 'pickup', obj: stu});
+          }
+        });
+        if(renderItems.length === 0) return showToast('No records found', 'te');
+      } else {
+        const isStaff = curCls === 'staff';
+        filename = isStaff ? 'Staff_ID_Cards.pdf' : (window.idCardMode === 'pickup' ? 'Pickup_Cards.pdf' : 'Class_ID_Cards.pdf');
+        if (isStaff) {
+          DB.users.filter(u => u.role === 'teacher' || u.role === 'scanner').forEach(u => renderItems.push({type: 'staff', obj: u}));
+        } else {
+          const cls = DB.classes.find(c => c.id === curCls) || DB.classes[0];
+          const isPickup = window.idCardMode === 'pickup';
+          (cls ? clsStus(cls.id) : []).forEach(stu => renderItems.push({type: isPickup ? 'pickup' : 'student', obj: stu}));
+        }
+        if(renderItems.length === 0) return showToast('No records found', 'te');
+      }
+
+      showToast('Generating PDF... Please wait, this may take a moment for many cards.', 'ti', 4000);
+
+      const perPage = 9;
+      const sheets = [];
+      for (let i = 0; i < renderItems.length; i += perPage) {
+        sheets.push(renderItems.slice(i, i + perPage));
+      }
+
+      try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p', 'mm', 'a4');
+
+        for (let i = 0; i < sheets.length; i++) {
+          showToast(`Generating page ${i + 1} of ${sheets.length}...`, 'ti', 3000);
+          await new Promise(r => setTimeout(r, 100)); // Yield to prevent browser freeze
+          
+          const group = sheets[i];
+          const container = document.createElement('div');
+          container.className = 'id-print-area';
+          container.style.position = 'absolute';
+          container.style.top = '-9999px';
+          container.style.left = '0px';
+          container.style.background = '#fff';
+          container.style.width = '794px';
+          
+          container.innerHTML = `<section class="id-a4-sheet" style="width:794px; min-height:1123px; padding:24px; margin:0; border:none; box-shadow:none; box-sizing:border-box; background:#fff; text-align:center; display:block;">
+            ${group.map(item => {
+              if (item.type === 'staff') return staffIdCardHtml(item.obj);
+              if (item.type === 'pickup') return classIdCardHtml(item.obj, 'pickup');
+              return classIdCardHtml(item.obj, 'student');
+            }).join('')}
+          </section>`;
+          
+          document.body.appendChild(container);
+          
+          const qrs = container.querySelectorAll('.ox-card-qr');
+          qrs.forEach(el => {
+            const sId = el.getAttribute('data-student-id');
+            const stId = el.getAttribute('data-staff-id');
+            const targetId = sId || stId;
+            const item = renderItems.find(x => x.obj.id === targetId);
+            if(item) {
+              const entity = item.obj;
+              let payload;
+              if (item.type === 'staff') {
+                payload = JSON.stringify({ kind: 'school-teacher-attendance-v1', id: entity.id, role: entity.role });
+              } else {
+                payload = JSON.stringify({ kind: 'school-attendance-v1', id: entity.id, classId: entity.classId });
+              }
+              new QRCode(el, {
+                text: payload,
+                width: 120,
+                height: 120,
+                colorDark: "#0d1e3d",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.M
+              });
+            }
+          });
+          
+          await new Promise(r => setTimeout(r, 400));
+          
+          // Use scale: 3.5 (keeps height ~3930px, safely under the 4096px GPU limit). Use JPEG 1.0 for max quality.
+          const canvas = await html2canvas(container, { scale: 3.5, useCORS: true, logging: false });
+          const imgData = canvas.toDataURL('image/jpeg', 1.0);
+          
+          if (i > 0) doc.addPage();
+          doc.addImage(imgData, 'JPEG', 0, 0, 210, 297);
+          
+          document.body.removeChild(container);
+          // Free heavy canvas memory explicitly to prevent RAM crashing mid-loop
+          canvas.width = 0;
+          canvas.height = 0;
+        }
+        
+        showToast('Saving PDF to your PC... this may take a moment!', 'ti', 4000);
+        await new Promise(r => setTimeout(r, 100));
+        
+        doc.save(filename);
+        showToast('PDF Downloaded successfully!', 'ts');
+      } catch(e) {
+        console.error(e);
+        showToast('Error generating PDF', 'te');
+      }
+    }
+
+    function classIdCardHtml(stu, forceMode) {
       const cls = DB.classes.find(c => c.id === stu.classId) || {};
       const grade = ((cls.name || '') + (cls.section ? ' ' + cls.section : '')).trim() || '-';
       const idNo = (stu.roll || stu.id || '').toString();
       const yr = DB.settings?.schoolYear || '2025 - 2026';
+      const isPickup = forceMode === 'pickup' || (!forceMode && window.idCardMode === 'pickup');
       return `<div class="vid-card-wrap" style="display:inline-block; margin:5px;">
         <div class="vid-card">
-          <div class="vid-card-inner">
+          <div class="vid-card-inner ${isPickup ? 'ox-pickup' : ''}">
             <div class="ox-header-bg"></div>
             <div class="ox-logo-box"><img src="logo.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/4774/4774574.png'"></div>
             <div class="ox-logo-text">OXFORD EXCELLENCE ACADEMY</div>
@@ -7677,8 +8384,8 @@
             <div class="ox-photo-wrap">${stu.photo ? `<img src="${stu.photo}"/>` : `<span>${ini(stu.name||'?')}</span>`}</div>
             
             <div class="ox-name-wrap">
-              <div class="ox-name">${(stu.name||'Student').replace(/^(\S+)\s+(.+)$/, '$1<br>$2')}</div>
-              <div class="ox-role">STUDENT</div>
+              <div class="ox-name">${(stu.name||'Student').replace(/^(\S+)\s+(.+)$/, '<div>$1</div><div>$2</div>')}</div>
+              <div class="ox-role">${isPickup ? 'PARENT PICKUP' : 'STUDENT'}</div>
             </div>
             
             <div class="ox-grid">
@@ -7695,8 +8402,8 @@
                 <div class="ox-val">${grade}</div>
               </div>
               <div class="ox-data-item">
-                <div class="ox-lbl">CAMPUS</div>
-                <div class="ox-val">${DB.school.city || 'Karachi'}</div>
+                <div class="ox-lbl">${isPickup ? 'PARENT' : 'FATHER'}</div>
+                <div class="ox-val" style="line-height:1.2; font-size:32px; padding-right:10px; white-space:normal; overflow:visible; word-break:break-word;" title="${escHtml(stu.father||'-')}">${escHtml(stu.father||'-')}</div>
               </div>
             </div>
             
@@ -7720,14 +8427,14 @@
             <div class="ox-photo-wrap">${staff.photo ? `<img src="${staff.photo}"/>` : `<span>${ini(staff.name||'?')}</span>`}</div>
             
             <div class="ox-name-wrap">
-              <div class="ox-name">${(staff.name||'Staff').replace(/^(\S+)\s+(.+)$/, '$1<br>$2')}</div>
+              <div class="ox-name">${(staff.name||'Staff').replace(/^(\S+)\s+(.+)$/, '<div>$1</div><div>$2</div>')}</div>
               <div class="ox-role">${isScanner ? 'SECURITY' : 'STAFF'}</div>
             </div>
             
             <div class="ox-grid">
               <div class="ox-data-item">
                 <div class="ox-lbl">ID NO.</div>
-                <div class="ox-val">STAFF</div>
+                <div class="ox-val">${staff.empId || 'STAFF'}</div>
               </div>
               <div class="ox-data-item">
                 <div class="ox-lbl">SESSION</div>
@@ -7762,11 +8469,18 @@
       const sheets = [];
       for (let i = 0; i < entities.length; i += perPage) sheets.push(entities.slice(i, i + perPage));
       
-      const optHtml = `<option value="staff" ${curCls === 'staff' ? 'selected' : ''}>? Staff & Teachers</option>` + DB.classes.map(c => `<option value="${c.id}" ${c.id === curCls ? 'selected' : ''}>${c.name}${c.section ? ' ' + c.section : ''}</option>`).join('');
-
+      const optHtml = `<option value="staff" ${curCls === 'staff' ? 'selected' : ''}>🏫 Staff & Teachers</option>` + DB.classes.map(c => `<option value="${c.id}" ${c.id === curCls ? 'selected' : ''}>${c.name}${c.section ? ' ' + c.section : ''}</option>`).join('');
+      const isPickup = window.idCardMode === 'pickup';
+      const typeHtml = isStaff ? '' : `<select class="fi" style="width:auto; margin-left:8px;" onchange="window.idCardMode=this.value; goPage('idcards')"><option value="student" ${!isPickup?'selected':''}>Student ID Cards</option><option value="pickup" ${isPickup?'selected':''}>Parent Pickup Cards (Green)</option></select>`;
+      
       return `
-<div class="ph ph-row fu no-print"><div><div class="ph-tag">ID Cards</div><h1>${isStaff ? 'Staff ID Cards' : 'Class ID Cards'}</h1><div class="ph-sub">Print ${entities.length} attendance QR cards for ${isStaff ? 'Staff & Teachers' : (cls?.name || 'selected class')} on A4 sheets.</div></div>
-  <div class="ph-acts"><select class="fi" style="width:auto;min-width:180px;" onchange="switchIdCardClass(this.value)">${optHtml}</select><button class="btn btn-p btn-sm" onclick="printClassIdCards()">Print A4 Cards</button></div></div>
+<div class="ph ph-row fu no-print"><div><div class="ph-tag">${isPickup ? 'Pickup Cards' : 'ID Cards'}</div><h1>${isStaff ? 'Staff ID Cards' : (isPickup ? 'Parent Pickup Cards' : 'Class ID Cards')}</h1><div class="ph-sub">Print ${entities.length} ${isPickup ? 'authorized pickup cards' : 'attendance QR cards'} for ${isStaff ? 'Staff & Teachers' : (cls?.name || 'selected class')} on A4 sheets.</div></div>
+  <div class="ph-acts" style="display:flex; align-items:center;">
+  <select class="fi" style="width:auto;min-width:180px;" onchange="switchIdCardClass(this.value)">${optHtml}</select>
+  ${typeHtml}
+  <button class="btn btn-gh btn-sm" style="margin-left:8px;" onclick="downloadIdCardsPdf('all')">Download All (PDF)</button>
+  <button class="btn btn-p btn-sm" onclick="downloadIdCardsPdf('class')">Download PDF</button>
+  <button class="btn btn-gh btn-sm" onclick="printClassIdCards()">Print</button></div></div>
 <div class="id-print-toolbar no-print"><div class="ibox" style="margin:0;flex:1;">Each card is 2.125in x 3.375in and includes the attendance QR used by the scanner.</div></div>
 <div class="id-print-area">
   ${sheets.length ? sheets.map(group => `<section class="id-a4-sheet">${group.map(e => isStaff ? staffIdCardHtml(e) : classIdCardHtml(e)).join('')}</section>`).join('') : '<div class="empty">No records found.</div>'}
@@ -7810,7 +8524,7 @@
             <div class="ox-photo-wrap">${personPhoto ? `<img src="${personPhoto}"/>` : `<span>${ini(personName||'?')}</span>`}</div>
             
             <div class="ox-name-wrap">
-              <div class="ox-name">${(personName||'Student').replace(/^(\S+)\s+(.+)$/, '$1<br>$2')}</div>
+              <div class="ox-name">${(personName||'Student').replace(/^(\S+)\s+(.+)$/, '<div>$1</div><div>$2</div>')}</div>
               <div class="ox-role">${isTeacherCard ? 'STAFF' : 'STUDENT'}</div>
             </div>
             
@@ -7840,7 +8554,6 @@
       </div>
 </div>
 <div style="display:flex;gap:8px;justify-content:center;margin-top:16px;">
-  <button class="btn btn-p btn-sm no-print" onclick="window.print()"> Print Card</button>
   <button class="btn btn-gh btn-sm no-print" onclick="showToast('Long-press QR to save as image')"> Save</button>
 </div>
 <div class="ibox" style="margin-top:12px;"> Gate operator scans this QR code to mark attendance instantly</div>`;
@@ -7861,15 +8574,190 @@
     }
 
     function pgMyFees() {
-      const stu = getStu(); const paid = DB.fees.payments[stu.id] || {}; const mand = DB.fees.items.filter(f => f.mandatory); const paidC = mand.filter(f => paid[f.id]?.paid).length;
+      const stu = getStu(); 
+      ensureMonthlyFeeLedger();
+      const rows = monthlyFeeRows(stu.id);
+      const sum = studentFeeSummary(stu.id);
+      
+      const unpaidCount = rows.filter(r => !r.paid).length;
+      const totalCount = rows.length;
+      const paidC = totalCount - unpaidCount;
+      
       return `
 <div class="ph fu"><div class="ph-tag"> My Fees</div><h1>Fee Status</h1><div class="ph-sub">${stu.name || ''}</div></div>
 <div class="fee-hero fu">
-  <div style="font-size:.7rem;opacity:.65;">Mandatory Fees</div>
-  <div style="font-family:var(--head);font-size:1.5rem;font-weight:700;margin:4px 0;">${paidC} of ${mand.length} paid</div>
-  <div class="fh-bar"><div class="fh-fill" style="width:${mand.length ? Math.round(paidC / mand.length * 100) : 0}%;"></div></div>
+  <div style="font-size:.7rem;opacity:.65;">Total Pending Balance</div>
+  <div style="font-family:var(--head);font-size:1.7rem;font-weight:700;margin:4px 0;color:${sum.dueAmount > 0 ? 'var(--o)' : '#fff'};">${DB.settings?.currency || 'PKR'} ${fmtMoney(sum.dueAmount)}</div>
+  <div style="font-size:.7rem;opacity:.65;">Total Paid: ${DB.settings?.currency || 'PKR'} ${fmtMoney(sum.paidAmount)}</div>
+  ${sum.dueAmount > 0 ? `<button class="btn btn-p" style="margin-top:10px; background:#fff; color:var(--p);" onclick="openPaymentSubmitModal('${stu.id}', ${sum.dueAmount})">Submit Online Payment Info</button>` : ''}
 </div>
-<div class="card fu d2">${DB.fees.items.map(f => { const isPaid = paid[f.id]?.paid; return `<div style="display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--border);"><div style="font-size:1.1rem;">${isPaid ? '?' : '?'}</div><div style="flex:1;"><div style="font-weight:700;font-size:.82rem;">${f.name}</div><div style="font-size:.7rem;color:var(--ink3);">Due: ${f.due} - ${f.mandatory ? 'Mandatory' : 'Optional'}</div>${isPaid ? `<div style="font-size:.65rem;color:var(--g);margin-top:1px;">Paid on ${fmtDate(paid[f.id]?.date)}</div>` : ''}</div><div style="text-align:right;flex-shrink:0;"><div style="font-weight:800;color:${isPaid ? 'var(--g)' : 'var(--r)'};">${DB.settings?.currency || 'PKR'} ${Number(f.amount || 0).toLocaleString()}</div><span class="badge ${isPaid ? 'bg2' : 'br2'}">${isPaid ? 'Paid' : 'Pending'}</span></div></div>`; }).join('')}</div>`;
+
+${(() => {
+  const submissions = (DB.paymentSubmissions || []).filter(p => p.sid === stu.id);
+  if (!submissions.length) return '';
+  return `<div class="card fu d2" style="margin-bottom:15px;">
+  <div class="ch"><div class="ct">Online Payments History</div></div>
+  ${submissions.slice().reverse().map(s => {
+    let clr = s.status === 'approved' ? 'var(--g)' : (s.status === 'rejected' ? 'var(--r)' : 'var(--o)');
+    let icon = s.status === 'approved' ? 'check_circle' : (s.status === 'rejected' ? 'cancel' : 'pending_actions');
+    return `<div style="display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--border);">
+      <div style="font-size:1.1rem;color:${clr};"><span class="material-symbols-outlined">${icon}</span></div>
+      <div style="flex:1;">
+        <div style="font-weight:700;font-size:.82rem;">Transaction: ${s.tid}</div>
+        <div style="font-size:.7rem;color:var(--ink3);">Submitted: ${new Date(s.date).toLocaleString()}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;">
+        <div style="font-weight:800;color:${clr};">${DB.settings?.currency || 'PKR'} ${fmtMoney(s.amount)}</div>
+        <span class="badge" style="background:${clr};color:#fff;font-size:0.6rem;">${s.status.toUpperCase()}</span>
+      </div>
+    </div>`;
+  }).join('')}
+  </div>`;
+})()}
+
+<div class="card fu d2">
+  <div class="ch"><div class="ct">Monthly Fee Ledger</div></div>
+  ${rows.length ? rows.reverse().map(r => `<div style="display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--border);"><div style="font-size:1.1rem;">${r.paid ? '✅' : '❗'}</div><div style="flex:1;"><div style="font-weight:700;font-size:.82rem;">Month of ${r.month}</div><div style="font-size:.7rem;color:var(--ink3);">Monthly Fee & Funds</div>${r.paid ? `<div style="font-size:.65rem;color:var(--g);margin-top:1px;">Paid on ${fmtDate(r.date)}</div>` : ''}</div><div style="text-align:right;flex-shrink:0;"><div style="font-weight:800;color:${r.paid ? 'var(--g)' : 'var(--r)'};">${DB.settings?.currency || 'PKR'} ${fmtMoney(num(r.amount))}</div><span class="badge ${r.paid ? 'bg2' : 'br2'}">${r.paid ? 'Paid' : 'Pending'}</span></div></div>`).join('') : '<div style="padding:15px;text-align:center;color:var(--ink4);font-size:.75rem;">No fee records found</div>'}
+  
+  ${sum.arrears > 0 ? `<div style="display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--border);"><div style="font-size:1.1rem;">❗</div><div style="flex:1;"><div style="font-weight:700;font-size:.82rem;">Previous Arrears</div><div style="font-size:.7rem;color:var(--ink3);">Unpaid past dues</div></div><div style="text-align:right;flex-shrink:0;"><div style="font-weight:800;color:var(--r);">${DB.settings?.currency || 'PKR'} ${fmtMoney(sum.arrears)}</div><span class="badge br2">Pending</span></div></div>` : ''}
+</div>`;
+    }
+
+    function openPaymentSubmitModal(sid, amount) {
+      const s = allStus().find(x => x.id === sid); if (!s) return;
+      openModal(`
+  <h3><span class="material-symbols-outlined" style="vertical-align:-4px;color:var(--p);margin-right:5px;">payments</span> Online Fee Payment</h3>
+  <div class="ibox">Please transfer your fee to one of our official accounts below. Once transferred, enter the exact amount paid and the Transaction ID / Reference Number to submit it for verification.</div>
+  
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:15px;">
+    <!-- Bank Account -->
+    <div style="border:1px solid #ddd;border-radius:8px;padding:12px;background:#f9fcf9;">
+      <div style="font-weight:800;color:#007a33;margin-bottom:5px;display:flex;align-items:center;gap:6px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        Bank Al Habib
+      </div>
+      <div style="font-size:.75rem;color:var(--ink3);">Account Number</div>
+      <div style="font-weight:700;font-size:.9rem;letter-spacing:0.5px;">PK58BAHL1294182703095901</div>
+      <div style="font-size:.75rem;color:var(--ink3);margin-top:4px;">Account Title</div>
+      <div style="font-weight:700;font-size:.85rem;">Adeeba</div>
+    </div>
+    
+    <!-- EasyPaisa -->
+    <div style="border:1px solid #ddd;border-radius:8px;padding:12px;background:#f5fbf7;">
+      <div style="font-weight:800;color:#00bd6a;margin-bottom:5px;display:flex;align-items:center;gap:6px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+        EasyPaisa
+      </div>
+      <div style="font-size:.75rem;color:var(--ink3);">Mobile Number</div>
+      <div style="font-weight:700;font-size:1.05rem;letter-spacing:1px;">03152945736</div>
+      <div style="font-size:.75rem;color:var(--ink3);margin-top:4px;">Account Title</div>
+      <div style="font-weight:700;font-size:.85rem;">Adiba Ansari</div>
+    </div>
+  </div>
+
+  <div class="fg">
+    <label class="fl">Total Pending Balance</label>
+    <div style="font-size:1.1rem;font-weight:800;color:var(--o);">${fmtMoney(amount)}</div>
+  </div>
+  
+  <div class="fg2">
+    <div class="fg">
+      <label class="fl">Amount Transferred</label>
+      <input type="number" class="fi" id="pay-amount" value="${amount}" />
+    </div>
+  </div>
+  
+  <div class="fg">
+    <label class="fl">Transaction ID / Reference Number *</label>
+    <input type="text" class="fi" id="pay-tid" placeholder="e.g. 1234567890" />
+  </div>
+
+  <div class="m-btns" style="margin-top:20px;">
+    <button class="btn btn-p" onclick="submitPaymentInfo('${sid}')">Submit for Verification</button>
+    <button class="btn btn-gh" onclick="closeModal()">Cancel</button>
+  </div>`);
+    }
+
+    async function submitPaymentInfo(sid) {
+      const amtStr = document.getElementById('pay-amount')?.value;
+      const tid = document.getElementById('pay-tid')?.value.trim();
+      const amt = parseFloat(amtStr);
+      if (isNaN(amt) || amt <= 0) return showToast('Please enter a valid amount', 'te');
+      if (!tid) return showToast('Please enter the Transaction ID', 'te');
+
+      const submission = {
+        id: 'ps_' + Date.now() + Math.floor(Math.random()*1000),
+        sid: sid,
+        amount: amt,
+        tid: tid,
+        date: new Date().toISOString(),
+        month: monthKey(),
+        status: 'pending'
+      };
+
+      // Save locally for UI optimism
+      if (!DB.paymentSubmissions) DB.paymentSubmissions = [];
+      DB.paymentSubmissions.push(submission);
+      saveLocalDB(); // Local only
+
+      showToast('Sending to Administration...', 'ti', 3000);
+      
+      if (_sb) {
+        try {
+          const { data, error } = await _sb.functions.invoke('submit-payment', {
+            body: { submission }
+          });
+          if (error) throw error;
+          if (data?.error) throw new Error(data.error);
+        } catch(e) {
+          console.error(e);
+          showToast('Error sending to admin, please try again.', 'te');
+          return;
+        }
+      }
+
+      closeModal();
+      showToast('Payment Info Submitted! Pending Verification by Admin.', 'ts', 5000);
+      goPage('dashboard');
+    }
+
+    function approvePaymentSubmission(id, sid, month, amount) {
+      if (!confirm('Are you sure you have verified this transaction in your bank account?')) return;
+      
+      const s = allStus().find(x => x.id === sid);
+      if (!s) return showToast('Student not found', 'te');
+      
+      const p = DB.paymentSubmissions.find(x => x.id === id);
+      if (p) p.status = 'approved';
+      
+      ensureMonthlyFeeLedger();
+      if (!DB.fees.monthlyLedger[sid]) DB.fees.monthlyLedger[sid] = {};
+      
+      const bill = calcStudentFeeBill(sid, month);
+      const totalDue = bill ? bill.totalDue : 0;
+      
+      let mRow = DB.fees.monthlyLedger[sid][month] || { paid: false, amountPaid: 0, date: new Date().toISOString() };
+      
+      const newPaid = num(mRow.amountPaid) + amount;
+      mRow.amountPaid = newPaid;
+      mRow.paid = newPaid >= totalDue;
+      mRow.date = new Date().toISOString();
+      
+      DB.fees.monthlyLedger[sid][month] = mRow;
+      s.fees = mRow.paid ? 'Paid' : 'Pending';
+      
+      saveDB();
+      showToast('Payment verified and recorded!', 'ts');
+      goPage('fees');
+    }
+
+    function rejectPaymentSubmission(id) {
+      if (!confirm('Reject this payment submission?')) return;
+      const p = DB.paymentSubmissions.find(x => x.id === id);
+      if (p) p.status = 'rejected';
+      saveDB();
+      showToast('Payment rejected.', 'ts');
+      goPage('fees');
     }
 
     function pgMyPayroll() {
@@ -7909,7 +8797,10 @@
     <div class="ava" style="width:58px;height:58px;border-radius:13px;background:${gc(curUser?.name || '?')};font-size:1.1rem;">${curUser?.photo ? `<img src="${curUser.photo}"/>` : ini(curUser?.name || '?')}</div>
     <div><div style="font-weight:700;font-size:.95rem;">${curUser?.name || ''}</div><div style="font-size:.74rem;color:var(--ink3);margin-top:2px;">${curUser?.email || ''} - <span class="badge bp2">${curUser?.role}</span></div></div>
   </div>
-  <div class="fg"><label class="fl">Upload Profile Photo</label><input type="file" accept="image/*" onchange="updateProfilePhoto(this)"/></div>
+  ${curRole !== 'student' && curRole !== 'parent' ? `<div class="fg"><label class="fl">Upload Profile Photo</label><input type="file" accept="image/*" onchange="updateProfilePhoto(this)"/></div>
+  <div class="div"></div>` : ''}
+  <div style="font-weight:700;font-size:.78rem;color:var(--ink3);margin-bottom:8px;">Push Notifications</div>
+  <button class="btn btn-gh btn-sm" onclick="enablePushNotifs()" id="btn-push-enable">🔔 Enable Push Notifications</button>
   <div class="div"></div>
   <div style="font-weight:700;font-size:.78rem;color:var(--ink3);margin-bottom:8px;">Change Supabase Auth Password</div>
   <div class="fg2"><div class="fg pw-field"><label class="fl">New Password</label><input class="fi" id="pp-n" type="password" placeholder="New password"/><button type="button" class="pw-toggle" onclick="togglePassword('pp-n',this)">Show</button></div><div class="fg pw-field"><label class="fl">Confirm</label><input class="fi" id="pp-c" type="password" placeholder="Confirm"/><button type="button" class="pw-toggle" onclick="togglePassword('pp-c',this)">Show</button></div></div>
@@ -7917,6 +8808,42 @@
   <div class="div"></div>
   <button class="btn btn-gh" onclick="logout()" style="width:100%;justify-content:center;">Sign Out</button>
 </div>`;
+    }
+    async function enablePushNotifs() {
+      if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+        showToast('Push notifications not supported on this browser/device.', 'te');
+        return;
+      }
+      
+      const btn = document.getElementById('btn-push-enable');
+      if (btn) btn.textContent = 'Requesting...';
+      
+      try {
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+          showToast('Notification permission denied.', 'te');
+          if (btn) btn.textContent = '🔔 Enable Push Notifications';
+          return;
+        }
+        
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: 'BD4rVjXgAw1QdCnNHL10HexE3CCkeKzo6_AXyXJK9HPiERvjIGmmseAVyxHw7d6UYeg2e-x8KIK56IBibU_0Rws'
+        });
+        
+        const u = DB.users.find(x => x.id === curUser.id);
+        if (u) {
+          u.pushSub = JSON.stringify(sub);
+          saveDB();
+          pushCloudDB();
+        }
+        showToast('Push Notifications Enabled!', 'ts');
+        if (btn) btn.textContent = '🔔 Push Enabled';
+      } catch (err) {
+        showToast('Failed to enable push: ' + err.message, 'te');
+        if (btn) btn.textContent = '🔔 Enable Push Notifications';
+      }
     }
     async function updateProfilePhoto(inp) { const f = inp.files[0]; if (!f) return; try { showToast('Uploading photo...', 'ts'); const url = await uploadToStorage(f); curUser.photo = url; const u = DB.users.find(x => x.id === curUser.id); if (u) u.photo = url; saveDB(); buildShell(); showToast('&#9989; Photo updated', 'ts'); } catch(e) { showToast(e.message, 'te'); } }
     async function changeMyPass() { const np = (document.getElementById('pp-n')?.value || '').trim(); const cp = (document.getElementById('pp-c')?.value || '').trim(); if (!np || np !== cp) { showToast('Passwords do not match', 'te'); return; } if (np.length < 8) { showToast('Min 8 chars', 'te'); return; } if (!_sb) { showToast('Supabase Auth is not configured', 'te'); return; } const { error } = await _sb.auth.updateUser({ password: np }); if (error) { showToast(error.message || 'Password update failed', 'te'); return; } showToast('Password updated in Supabase Auth', 'ts'); }
@@ -8035,8 +8962,23 @@
         DB.studentLogs[scanClassId][sid][d] = log;
         saveDB();
         
+        if (stu.familyId) {
+          const parent = DB.users.find(u => u.role === 'parent' && u.familyId === stu.familyId && u.pushSub);
+          if (parent && parent.pushSub && _sb) {
+            try {
+              _sb.functions.invoke('send-push', {
+                body: { sub: JSON.parse(parent.pushSub), title: 'Attendance Update', body: `${stu.name} has just been marked as ${action} at ${tStr} today (${fmtDate(d)}).` }
+              }).catch(e => console.warn('Push error', e));
+            } catch(e) {}
+          }
+        }
+
         if (stu.whatsapp && DB.settings?.waAuto) {
-          const msg = `Dear Parent,\n\n${stu.name} has just been marked as ${action} at ${tStr} today (${fmtDate(d)}).\n\n${DB.school.name}`;
+          const msg = `Dear Parent,
+
+${stu.name} has just been marked as ${action} at ${tStr} today (${fmtDate(d)}).
+
+${DB.school.name}`;
           sendWhatsAppAPI(stu.whatsapp, msg);
         }
 
@@ -8461,7 +9403,21 @@
     document.addEventListener('click', e => { const np = document.getElementById('np'); if (np?.classList.contains('open') && !np.contains(e.target) && !e.target.closest('.ic-btn')) closeNotif(); });
     function waMsg(wa, msg) { openWhatsAppMessage(wa, msg); }
     /* INIT handled after initDB() resolves above */
-</script>
+
+async function broadcastLogins() {
+  if (!confirm('This will send a WhatsApp message to ALL students with their login email and default password. Proceed?')) return;
+  const stus = allStus();
+  let queued = 0;
+  for (const s of stus) {
+    if (s.whatsapp) {
+      const msg = Dear Parent,\nHere are the login details for  to access the Oxford Excellence Academy portal:\n\nEmail: \nPassword: Password123!\n\nPlease login at: oxford.vercel.app;
+      sendWhatsAppAPI(s.whatsapp, msg);
+      queued++;
+    }
+  }
+  showToast(Queued  login messages to WhatsApp!, 'ts');
+}
+\n</script>
 <script>
 
     function initScrollReveals() {
@@ -8537,8 +9493,23 @@
           DB.attendance[cid][stu.id][d] = 'A'; // Auto-Absent
           changed = true;
           
+          if (stu.familyId) {
+            const parent = DB.users.find(u => u.role === 'parent' && u.familyId === stu.familyId && u.pushSub);
+            if (parent && parent.pushSub && _sb) {
+              try {
+                _sb.functions.invoke('send-push', {
+                  body: { sub: JSON.parse(parent.pushSub), title: 'Attendance Update', body: `${stu.name} is marked Absent today (${fmtDate(d)}).` }
+                }).catch(e => console.warn('Push error', e));
+              } catch(e) {}
+            }
+          }
+
           if (stu.whatsapp) {
-            sendWhatsAppAPI(stu.whatsapp, `Dear Parent,\n\n${stu.name} is marked Absent today (${fmtDate(d)}).\n\n${DB.school.name}`);
+            sendWhatsAppAPI(stu.whatsapp, `Dear Parent,
+
+${stu.name} is marked Absent today (${fmtDate(d)}).
+
+${DB.school.name}`);
           }
         }
       });
@@ -8580,7 +9551,121 @@
             });
         }
     }, 60000);
-</script>
+
+async function broadcastLogins() {
+  if (!confirm('This will send a WhatsApp message to ALL students with their login email and default password. Proceed?')) return;
+  const stus = allStus();
+  let queued = 0;
+  for (const s of stus) {
+    if (s.whatsapp) {
+      const msg = Dear Parent,\nHere are the login details for  to access the Oxford Excellence Academy portal:\n\nEmail: \nPassword: Password123!\n\nPlease login at: oxford.vercel.app;
+      sendWhatsAppAPI(s.whatsapp, msg);
+      queued++;
+    }
+  }
+  showToast(Queued  login messages to WhatsApp!, 'ts');
+}
+\n</script>
+<script>
+    // Register Service Worker for Web Push Notifications
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').then(reg => {
+          console.log('Service Worker registered', reg);
+        }).catch(err => {
+          console.warn('Service Worker registration failed', err);
+        });
+      });
+    }
+
+    window.runMaintenance = async function() {
+      if(!confirm('This will scrub any rogue admin accounts and automatically update ALL student login emails to studentname.rollnumber@oxford.com. Proceed?')) return;
+      
+      showToast('Running System Update...', 'ti', 4000);
+      
+      // 1. Scrub rogue admins (but not the real one)
+      let scrubbed = 0;
+      if (DB && DB.users) {
+        DB.users = DB.users.filter(u => {
+          if (u.role === 'admin' && u.email !== 'admin@school.edu' && (u.email.includes('@school.edu') || u.email.includes('@oxford.com'))) {
+             scrubbed++;
+             return false;
+          }
+          return true;
+        });
+      }
+
+      // 2. Update all student emails locally
+      const stus = allStus();
+      let updatedStudents = 0;
+      for (const s of stus) {
+        if (!s.name || !s.roll) continue;
+        const cleanName = s.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+        const email = `${cleanName}.${s.roll}@oxford.com`;
+        s.loginEmail = email;
+        updatedStudents++;
+      }
+
+      saveDB();
+      await pushCloudDB();
+      
+      showToast(`Update Complete! Scrubbed ${scrubbed} fake admins. Updated ${updatedStudents} student emails. Please refresh.`, 'ts', 8000);
+      setTimeout(() => location.reload(), 3000);
+    };
+
+    window.bulkCreateLogins = async function() {
+      if(!confirm('Are you sure you want to generate logins for ALL students using password "oxford123"?')) return;
+      
+      const stus = allStus();
+      let successCount = 0;
+      let errorCount = 0;
+      
+      showToast('Starting bulk login generation... Do not close the window!', 'ti', 4000);
+      
+      for (const s of stus) {
+        if (!s.name || !s.roll) continue;
+        
+        const cleanName = s.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+        const email = `${cleanName}.${s.roll}@oxford.com`;
+        
+        console.log(`Processing ${s.name}... Email: ${email}`);
+        
+        s.loginEmail = email;
+        syncStudentLoginProfile(s, s.id);
+        
+        try {
+          const { data, error } = await _sb.functions.invoke('create-auth-user', {
+            body: { email: email, password: 'oxford123', role: 'student' }
+          });
+          if (error && !error.message?.includes('already exists')) throw error;
+          if (data?.error && !data.error?.includes('already exists')) throw new Error(data.error);
+          successCount++;
+        } catch(e) {
+          console.error(`Failed for ${email}:`, e);
+          errorCount++;
+        }
+      }
+      
+      saveDB();
+      pushCloudDB();
+      showToast(`Bulk generation complete! Created/Updated: ${successCount}, Errors: ${errorCount}. Refreshing...`, 'ts', 8000);
+      setTimeout(() => location.reload(), 3000);
+    };
+
+async function broadcastLogins() {
+  if (!confirm('This will send a WhatsApp message to ALL students with their login email and default password. Proceed?')) return;
+  const stus = allStus();
+  let queued = 0;
+  for (const s of stus) {
+    if (s.whatsapp) {
+      const msg = Dear Parent,\nHere are the login details for  to access the Oxford Excellence Academy portal:\n\nEmail: \nPassword: Password123!\n\nPlease login at: oxford.vercel.app;
+      sendWhatsAppAPI(s.whatsapp, msg);
+      queued++;
+    }
+  }
+  showToast(Queued  login messages to WhatsApp!, 'ts');
+}
+\n</script>
 </body>
 
 </html>
