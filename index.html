@@ -3566,6 +3566,15 @@ Please login at: www.oxfordexcellenceacademy.com`;
 
 
 <script>
+
+window.addEventListener('error', function(e) {
+    if (e.message.includes('manifest')) return;
+    alert('JS Error: ' + e.message + ' at ' + e.filename + ':' + e.lineno);
+});
+window.addEventListener('unhandledrejection', function(e) {
+    if (e.reason && e.reason.message && e.reason.message.includes('manifest')) return;
+    alert('Promise Error: ' + (e.reason ? e.reason.message || e.reason : 'Unknown'));
+});
   for(let i=0; i<sessionStorage.length; i++){
     if(sessionStorage.key(i).startsWith('sb-') && sessionStorage.key(i).endsWith('-auth-token')){
       document.write('<style>#landing-page { display: none !important; }</style>');
@@ -3719,6 +3728,15 @@ Please login at: www.oxfordexcellenceacademy.com`;
             <div class="dot" style="width: 8px; height: 8px; border-radius: 50%; background: #e2e8f0; cursor: pointer;" onclick="document.getElementById('leadership-slider').scrollTo({left: 1000, behavior: 'smooth'})"></div>
         </div>
         <script>
+
+window.addEventListener('error', function(e) {
+    if (e.message.includes('manifest')) return;
+    alert('JS Error: ' + e.message + ' at ' + e.filename + ':' + e.lineno);
+});
+window.addEventListener('unhandledrejection', function(e) {
+    if (e.reason && e.reason.message && e.reason.message.includes('manifest')) return;
+    alert('Promise Error: ' + (e.reason ? e.reason.message || e.reason : 'Unknown'));
+});
             const leadershipSlider = document.getElementById('leadership-slider');
             leadershipSlider.addEventListener('scroll', function(e) {
                 const scrollLeft = e.target.scrollLeft;
@@ -3916,6 +3934,15 @@ Please login at: www.oxfordexcellenceacademy.com`;
             <button type="submit" class="ox-btn" style="width: 100%; padding: 16px; font-size: 1.15rem;">Submit Application</button>
         </form>
         <script>
+
+window.addEventListener('error', function(e) {
+    if (e.message.includes('manifest')) return;
+    alert('JS Error: ' + e.message + ' at ' + e.filename + ':' + e.lineno);
+});
+window.addEventListener('unhandledrejection', function(e) {
+    if (e.reason && e.reason.message && e.reason.message.includes('manifest')) return;
+    alert('Promise Error: ' + (e.reason ? e.reason.message || e.reason : 'Unknown'));
+});
             async function submitLandingForm(e) {
                 e.preventDefault();
                 const name = document.getElementById('lf-name').value;
@@ -4210,6 +4237,15 @@ Please login at: www.oxfordexcellenceacademy.com`;
 }
 </script>
     <script>
+
+window.addEventListener('error', function(e) {
+    if (e.message.includes('manifest')) return;
+    alert('JS Error: ' + e.message + ' at ' + e.filename + ':' + e.lineno);
+});
+window.addEventListener('unhandledrejection', function(e) {
+    if (e.reason && e.reason.message && e.reason.message.includes('manifest')) return;
+    alert('Promise Error: ' + (e.reason ? e.reason.message || e.reason : 'Unknown'));
+});
         document.addEventListener("DOMContentLoaded", (event) => {
             if (typeof gsap !== 'undefined') {
                 gsap.registerPlugin(ScrollTrigger);
@@ -4403,6 +4439,15 @@ Please login at: www.oxfordexcellenceacademy.com`;
 <div class="toast" id="toast"></div>
 
 <script>
+
+window.addEventListener('error', function(e) {
+    if (e.message.includes('manifest')) return;
+    alert('JS Error: ' + e.message + ' at ' + e.filename + ':' + e.lineno);
+});
+window.addEventListener('unhandledrejection', function(e) {
+    if (e.reason && e.reason.message && e.reason.message.includes('manifest')) return;
+    alert('Promise Error: ' + (e.reason ? e.reason.message || e.reason : 'Unknown'));
+});
     'use strict';
     /* ------------------------------- SUPABASE CONFIG ------------------------------- */
     const SUPABASE_URL  = 'https://iprqtkmtelgdhlenlsrc.supabase.co';
@@ -7334,8 +7379,12 @@ ${DB.school.name}`;
           <scr`+`ipt>window.onload=function(){setTimeout(function(){window.print();},500);};</scr`+`ipt>
         </body></html>`;
         
-        printWindow.document.write(html);
-        printWindow.document.close();
+        if (printWindow) {
+            printWindow.document.write(html);
+            printWindow.document.close();
+        } else {
+            console.warn('Popup blocked for receipt');
+        }
     }
 
     function feeReminderText(sid, fid, dueDate, note = '') {
@@ -9383,8 +9432,12 @@ ${DB.school.name}`;
       <\/scr`+`ipt>
       </body></html>`;
 
-      printWindow.document.write(html);
-      printWindow.document.close();
+      if (printWindow) {
+            printWindow.document.write(html);
+            printWindow.document.close();
+        } else {
+            console.warn('Popup blocked for receipt');
+        }
     }
 
     /* ------------------------------- ADMISSION FORM PRINT ------------------------------- */
@@ -9704,6 +9757,15 @@ Please login at: www.oxfordexcellenceacademy.com`;
 </script>
 <script>
 
+window.addEventListener('error', function(e) {
+    if (e.message.includes('manifest')) return;
+    alert('JS Error: ' + e.message + ' at ' + e.filename + ':' + e.lineno);
+});
+window.addEventListener('unhandledrejection', function(e) {
+    if (e.reason && e.reason.message && e.reason.message.includes('manifest')) return;
+    alert('Promise Error: ' + (e.reason ? e.reason.message || e.reason : 'Unknown'));
+});
+
     function initScrollReveals() {
       const items = document.querySelectorAll('.reveal');
       if (!items.length) return;
@@ -9876,6 +9938,15 @@ Please login at: www.oxfordexcellenceacademy.com`;
 }
 </script>
 <script>
+
+window.addEventListener('error', function(e) {
+    if (e.message.includes('manifest')) return;
+    alert('JS Error: ' + e.message + ' at ' + e.filename + ':' + e.lineno);
+});
+window.addEventListener('unhandledrejection', function(e) {
+    if (e.reason && e.reason.message && e.reason.message.includes('manifest')) return;
+    alert('Promise Error: ' + (e.reason ? e.reason.message || e.reason : 'Unknown'));
+});
     // Register Service Worker for Web Push Notifications
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
