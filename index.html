@@ -4661,7 +4661,7 @@ async function broadcastLogins() {
 
       try {
         if (!window.supabase) return false;
-        const { error } = await supabase.from('whatsapp_outbox').insert([{ recipient_phone: cleanPhone, message_body: message, status: 'pending' }]);
+        const { error } = await _sb.from('whatsapp_outbox').insert([{ recipient_phone: cleanPhone, message_body: message, status: 'pending' }]);
         return !error;
       } catch (e) {
         return false;
@@ -4713,7 +4713,7 @@ async function broadcastLogins() {
               });
               
               if (res.ok) {
-                await supabase.from('whatsapp_outbox').update({ status: 'sent', updated_at: new Date().toISOString() }).eq('id', msg.id);
+                await _sb.from('whatsapp_outbox').update({ status: 'sent', updated_at: new Date().toISOString() }).eq('id', msg.id);
               }
             } catch (e) {
               console.error('Outbox send fail:', e);
