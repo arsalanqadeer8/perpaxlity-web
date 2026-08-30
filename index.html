@@ -9652,23 +9652,25 @@ async function broadcastLogins() {
       setTimeout(() => location.reload(), 3000);
     };
 
+
 async function broadcastLogins() {
   if (!confirm('This will send a WhatsApp message to ALL students with their login email and default password. Proceed?')) return;
   const stus = allStus();
   let queued = 0;
   for (const s of stus) {
     if (s.whatsapp) {
-      const msg = Dear Parent,\nHere are the login details for  to access the Oxford Excellence Academy portal:\n\nEmail: \nPassword: Password123!\n\nPlease login at: oxford.vercel.app;
+      const msg = `Dear Parent,\nHere are the login details for ${s.name} to access the Oxford Excellence Academy portal:\n\nEmail: ${s.loginEmail}\nPassword: Password123!\n\nPlease login at: oxford.vercel.app`;
       sendWhatsAppAPI(s.whatsapp, msg);
       queued++;
     }
   }
-  showToast(Queued  login messages to WhatsApp!, 'ts');
+  showToast(`Queued ${queued} login messages to WhatsApp!`, 'ts');
 }
-\n</script>
+</script>
 </body>
 
 </html>
+
 
 
 
