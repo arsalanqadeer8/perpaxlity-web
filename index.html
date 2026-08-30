@@ -7169,10 +7169,20 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
       saveDB();
       
       if (s.whatsapp) {
+        const sum = studentFeeSummary(sid);
+        let dueText = '';
+        if (sum.dueAmount > 0) {
+            dueText = `\nRemaining Balance: ${fmtMoney(sum.dueAmount)}\n`;
+        } else if (sum.dueAmount < 0) {
+            dueText = `\nAdvance Credit: ${fmtMoney(Math.abs(sum.dueAmount))}\n`;
+        } else {
+            dueText = `\nRemaining Balance: ${fmtMoney(0)}\n`;
+        }
+
         const msg = `Dear Parent of ${s.name},
 
 We have successfully received the payment of ${fmtMoney(amountPaid)} for the month of ${month}.
-
+${dueText}
 Thank you.
 ${DB.school.name}`;
         openWhatsAppMessage(s.whatsapp, msg);
