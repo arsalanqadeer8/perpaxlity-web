@@ -4968,7 +4968,7 @@ Please login at: www.oxfordexcellenceacademy.com`;
       }
     }
 
-    function openWhatsAppMessage(phone, message) {
+    function sendWhatsAppAPI(phone, message) {
       if (!phone) return false;
       
       const isAuto = DB.settings?.waAuto !== false;
@@ -5337,7 +5337,7 @@ Please login at: www.oxfordexcellenceacademy.com`;
         return;
       }
       const msg = `Assalam o Alaikum, I want information about ${DB.school?.name || 'the school'}.`;
-      openWhatsAppMessage(phone, msg);
+      sendWhatsAppAPI(phone, msg);
     }
 
     /* ------------------------------- BRANDING ------------------------------- */
@@ -6523,7 +6523,7 @@ If the arrears sum is lower than you expect, please check your CSV file to ensur
          
          if (n === 'P' && !log.in) {
             log.in = nowHHMM();
-            if (stu?.whatsapp && DB.settings?.waAuto) {
+            if (stu?.whatsapp) {
                 sendWhatsAppAPI(stu.whatsapp, `Dear Parent,
 
 ${stu.name} has just been marked as Check-In at ${tStr} today (${fmtDate(d)}).
@@ -6532,7 +6532,7 @@ ${DB.school.name}`);
             }
          } else if (n === 'O') {
             log.out = nowHHMM();
-            if (stu?.whatsapp && DB.settings?.waAuto) {
+            if (stu?.whatsapp) {
                 sendWhatsAppAPI(stu.whatsapp, `Dear Parent,
 
 ${stu.name} has just been marked as Check-Out at ${tStr} today (${fmtDate(d)}).
@@ -6540,7 +6540,7 @@ ${stu.name} has just been marked as Check-Out at ${tStr} today (${fmtDate(d)}).
 ${DB.school.name}`);
             }
          } else if (n === 'A') {
-            if (stu?.whatsapp && DB.settings?.waAuto) {
+            if (stu?.whatsapp) {
                 sendWhatsAppAPI(stu.whatsapp, `Dear Parent,
 
 ${stu.name} is marked Absent today (${fmtDate(d)}).
@@ -7123,14 +7123,14 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
       
       saveDB();
       
-      if (s.whatsapp && DB.settings?.waAuto) {
+      if (s.whatsapp) {
         const msg = `Dear Parent of ${s.name},
 
 We have successfully received the payment of ${fmtMoney(amountPaid)} for the month of ${month}.
 
 Thank you.
 ${DB.school.name}`;
-        openWhatsAppMessage(s.whatsapp, msg);
+        sendWhatsAppAPI(s.whatsapp, msg);
       }
 
       showToast('Payment received & ledger updated');
@@ -7359,7 +7359,7 @@ ${DB.school.name}`;
     function sendFeeWA(sid, fid = 'f1', dueDate, note = '') {
       const s = allStus().find(x => x.id === sid); if (!s?.whatsapp) { showToast('No WhatsApp number', 'te'); return false; }
       const phone = normalizePhone(s.whatsapp); if (!phone || phone.length < 11) { showToast('Invalid WhatsApp number. Use 923XXXXXXXXX or 03XXXXXXXXX.', 'te', 5200); return false; }
-      const ok = openWhatsAppMessage(phone, feeReminderText(sid, fid, dueDate, note));
+      const ok = sendWhatsAppAPI(phone, feeReminderText(sid, fid, dueDate, note));
       if (ok) showToast('WhatsApp opened with message. Tap Send in WhatsApp.', 'ts', 4200);
       return ok;
     }
@@ -7995,7 +7995,7 @@ ${DB.school.name}`;
       closeModal();
       showToast(`Salary marked paid for ${t.name}`, 'ts');
       
-      if ((t.whatsapp || t.phone) && DB.settings?.waAuto) {
+      if ((t.whatsapp || t.phone)) {
          const msg = `Dear ${t.name},
 
 Your salary of ${DB.settings?.currency || 'PKR'} ${amount} for the month of ${month} has been successfully disbursed.
@@ -9227,7 +9227,7 @@ ${(() => {
           }
         }
 
-        if (stu.whatsapp && DB.settings?.waAuto) {
+        if (stu.whatsapp) {
           const msg = `Dear Parent,
 
 ${stu.name} has just been marked as ${action} at ${tStr} today (${fmtDate(d)}).
@@ -9655,7 +9655,7 @@ ${DB.school.name}`;
     function toggleNotif() { document.getElementById('np').classList.toggle('open'); }
     function closeNotif() { document.getElementById('np').classList.remove('open'); }
     document.addEventListener('click', e => { const np = document.getElementById('np'); if (np?.classList.contains('open') && !np.contains(e.target) && !e.target.closest('.ic-btn')) closeNotif(); });
-    function waMsg(wa, msg) { openWhatsAppMessage(wa, msg); }
+    function waMsg(wa, msg) { sendWhatsAppAPI(wa, msg); }
     /* INIT handled after initDB() resolves above */
 
 async function broadcastLogins() {
