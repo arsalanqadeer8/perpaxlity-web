@@ -7145,11 +7145,18 @@ ${DB.school.name}`;
        const mRow = DB.fees.monthlyLedger[sid][month];
        if(mRow) {
           delete DB.fees.monthlyLedger[sid][month];
+          
+          if (DB.fees.payments && DB.fees.payments[sid] && DB.fees.payments[sid].f1) {
+             delete DB.fees.payments[sid].f1;
+          }
+          
           saveDB();
           showToast('Payment undone');
           openStudentFeeModal(sid, month);
           goPage('fees');
        }
+    }
+    }
     }
 
     function printFeeReceipt(sid, month) {
