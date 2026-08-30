@@ -28,7 +28,7 @@ Email: ${s.loginEmail}
 Password: oxford123
 
 Please login at: www.oxfordexcellenceacademy.com`;
-      sendWhatsAppAPI(s.whatsapp, msg);
+      openWhatsAppMessage(s.whatsapp, msg);
       queued++;
     }
   }
@@ -68,7 +68,7 @@ Email: ${s.loginEmail}
 Password: oxford123
 
 Please login at: www.oxfordexcellenceacademy.com`;
-      sendWhatsAppAPI(s.whatsapp, msg);
+      openWhatsAppMessage(s.whatsapp, msg);
       queued++;
     }
   }
@@ -108,7 +108,7 @@ Email: ${s.loginEmail}
 Password: oxford123
 
 Please login at: www.oxfordexcellenceacademy.com`;
-      sendWhatsAppAPI(s.whatsapp, msg);
+      openWhatsAppMessage(s.whatsapp, msg);
       queued++;
     }
   }
@@ -148,7 +148,7 @@ Email: ${s.loginEmail}
 Password: oxford123
 
 Please login at: www.oxfordexcellenceacademy.com`;
-      sendWhatsAppAPI(s.whatsapp, msg);
+      openWhatsAppMessage(s.whatsapp, msg);
       queued++;
     }
   }
@@ -188,7 +188,7 @@ Email: ${s.loginEmail}
 Password: oxford123
 
 Please login at: www.oxfordexcellenceacademy.com`;
-      sendWhatsAppAPI(s.whatsapp, msg);
+      openWhatsAppMessage(s.whatsapp, msg);
       queued++;
     }
   }
@@ -228,7 +228,7 @@ Email: ${s.loginEmail}
 Password: oxford123
 
 Please login at: www.oxfordexcellenceacademy.com`;
-      sendWhatsAppAPI(s.whatsapp, msg);
+      openWhatsAppMessage(s.whatsapp, msg);
       queued++;
     }
   }
@@ -3596,7 +3596,7 @@ Email: ${s.loginEmail}
 Password: oxford123
 
 Please login at: www.oxfordexcellenceacademy.com`;
-      sendWhatsAppAPI(s.whatsapp, msg);
+      openWhatsAppMessage(s.whatsapp, msg);
       queued++;
     }
   }
@@ -3772,7 +3772,7 @@ Email: ${s.loginEmail}
 Password: oxford123
 
 Please login at: www.oxfordexcellenceacademy.com`;
-      sendWhatsAppAPI(s.whatsapp, msg);
+      openWhatsAppMessage(s.whatsapp, msg);
       queued++;
     }
   }
@@ -4018,7 +4018,7 @@ Email: ${s.loginEmail}
 Password: oxford123
 
 Please login at: www.oxfordexcellenceacademy.com`;
-      sendWhatsAppAPI(s.whatsapp, msg);
+      openWhatsAppMessage(s.whatsapp, msg);
       queued++;
     }
   }
@@ -4171,7 +4171,7 @@ Email: ${s.loginEmail}
 Password: oxford123
 
 Please login at: www.oxfordexcellenceacademy.com`;
-      sendWhatsAppAPI(s.whatsapp, msg);
+      openWhatsAppMessage(s.whatsapp, msg);
       queued++;
     }
   }
@@ -4211,7 +4211,7 @@ Email: ${s.loginEmail}
 Password: oxford123
 
 Please login at: www.oxfordexcellenceacademy.com`;
-      sendWhatsAppAPI(s.whatsapp, msg);
+      openWhatsAppMessage(s.whatsapp, msg);
       queued++;
     }
   }
@@ -4317,7 +4317,7 @@ Email: ${s.loginEmail}
 Password: oxford123
 
 Please login at: www.oxfordexcellenceacademy.com`;
-      sendWhatsAppAPI(s.whatsapp, msg);
+      openWhatsAppMessage(s.whatsapp, msg);
       queued++;
     }
   }
@@ -5013,7 +5013,7 @@ window.addEventListener('unhandledrejection', function(e) {
       }
     }
 
-    function sendWhatsAppAPI(phone, message) {
+    function openWhatsAppMessage(phone, message) {
       if (!phone) return false;
       
       const isAuto = DB.settings?.waAuto !== false;
@@ -7175,7 +7175,7 @@ We have successfully received the payment of ${fmtMoney(amountPaid)} for the mon
 
 Thank you.
 ${DB.school.name}`;
-        sendWhatsAppAPI(s.whatsapp, msg);
+        openWhatsAppMessage(s.whatsapp, msg);
       }
 
       showToast('Payment received & ledger updated');
@@ -7782,7 +7782,7 @@ ${DB.school.name}`;
       let sent = 0;
       for (const s of stus) {
         try {
-          await sendWhatsAppAPI(s.whatsapp, msg);
+          await openWhatsAppMessage(s.whatsapp, msg);
           sent++;
           await new Promise(r => setTimeout(r, 2500));
         } catch(e){}
@@ -9730,7 +9730,7 @@ Email: ${s.loginEmail}
 Password: oxford123
 
 Please login at: www.oxfordexcellenceacademy.com`;
-      sendWhatsAppAPI(s.whatsapp, msg);
+      openWhatsAppMessage(s.whatsapp, msg);
       queued++;
     }
   }
@@ -9912,7 +9912,7 @@ Email: ${s.loginEmail}
 Password: oxford123
 
 Please login at: www.oxfordexcellenceacademy.com`;
-      sendWhatsAppAPI(s.whatsapp, msg);
+      openWhatsAppMessage(s.whatsapp, msg);
       queued++;
     }
   }
@@ -10046,7 +10046,7 @@ Email: ${s.loginEmail}
 Password: oxford123
 
 Please login at: www.oxfordexcellenceacademy.com`;
-      sendWhatsAppAPI(s.whatsapp, msg);
+      openWhatsAppMessage(s.whatsapp, msg);
       queued++;
     }
   }
