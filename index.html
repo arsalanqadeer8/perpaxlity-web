@@ -9,8 +9,8 @@
 <link rel="manifest" href="manifest.json" />
 <link rel="icon" type="image/png" href="favicon.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="hero_image.webp?v=4" type="image/webp">
 <script src="https://cdn.jsdelivr.net/npm/chart.js">
 </script>
 <script>
@@ -1355,8 +1355,7 @@
       letter-spacing: 0.05em;
       white-space: nowrap;
       border-bottom: 1px solid #e2e8f0 !important;
-      padding-top: 12px;
-      padding-bottom: 12px;
+      padding: 10px 12px;
     }
 
     td {
@@ -1437,7 +1436,7 @@
       border: 1px solid var(--border);
       width: 100%;
       max-width: 540px;
-      max-height: 94vh;
+      max-height: 90vh;
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -1445,6 +1444,10 @@
       animation: fadeUp .28s cubic-bezier(.22, 1, .36, 1);
       border-radius: var(--radius-lg) var(--radius-lg) 0 0;
       position: relative;
+    }
+    .modal.modal-wide {
+      max-width: 780px;
+      max-height: 94vh;
     }
     .m-close {
       position: absolute;
@@ -1469,6 +1472,9 @@
     #modal-body {
       padding: 20px 16px;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      flex: 1 1 auto;
+      min-height: 0;
     }
 
     @media(min-width:560px) {
@@ -1899,6 +1905,17 @@
     .ox-pickup .ox-val { color: #1a4f2b !important; }
     .ox-pickup .ox-photo-wrap span { color: #1a4f2b !important; }
     .ox-pickup .ox-role { color: #1a4f2b !important; font-size: 24px; letter-spacing: 8px; }
+
+    /* Examination Admit Card Color Override (Royal Exam Indigo / Gold) */
+    .ox-admit .ox-header-bg { background: #1e1b4b !important; border-bottom: 12px solid #f59e0b !important; }
+    .ox-admit .ox-footer-bg { background: #1e1b4b !important; }
+    .ox-admit .ox-name { color: #1e1b4b !important; }
+    .ox-admit .ox-val { color: #1e1b4b !important; }
+    .ox-admit .ox-photo-wrap { border: 12px solid #f59e0b !important; }
+    .ox-admit .ox-photo-wrap span { color: #1e1b4b !important; }
+    .ox-admit .ox-role { color: #b45309 !important; font-size: 22px; letter-spacing: 4px; font-weight: 900; }
+    .ox-admit .ox-logo-box { border: 8px solid #f59e0b !important; }
+    .ox-admit .ox-data-item { border-left: 6px solid #f59e0b !important; }
 
     .school-id-card {
       width: 3.375in;
@@ -2573,8 +2590,13 @@
       .tb,
       .bn,
       .sb,
-      .no-print {
+      .no-print,
+      .m-close {
         display: none !important;
+      }
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
       }
 
       .main {
@@ -2582,10 +2604,13 @@
         max-width: 100% !important;
       }
 
-      .rc {
+      .rc, .rc-doc {
         box-shadow: none !important;
         border: none !important;
         max-width: 100% !important;
+      }
+      .modal {
+        overflow: visible !important;
       }
 
       .pw {
@@ -3176,8 +3201,8 @@
     .ox-btn-outline:hover { background: var(--ox-bg); color: var(--ox-primary); border-color: var(--ox-primary); }
     
     /* Hero Section */
-    .ox-hero { padding: 120px 5%; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; text-align: left; min-height: 90vh; position: relative; overflow: hidden; background-color: #2c3e50; }
-    .ox-hero::before { content: ''; position: absolute; inset: 0; background: rgba(10, 25, 47, 0.65); z-index: 1; }
+    .ox-hero { padding: 120px 5%; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; text-align: left; min-height: 90vh; position: relative; overflow: hidden; background-color: #0a192f; }
+    .ox-hero::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(10, 25, 47, 0.88) 0%, rgba(10, 25, 47, 0.6) 45%, rgba(10, 25, 47, 0.22) 100%); z-index: 1; pointer-events: none; }
     .ox-hero-content { position: relative; z-index: 2; max-width: 800px; }
     .ox-badge { display: inline-block; background: rgba(212, 175, 55, 0.2); color: var(--ox-gold); padding: 8px 24px; border-radius: 30px; font-size: 0.85rem; font-weight: 700; margin-bottom: 24px; letter-spacing: 1px; text-transform: uppercase; border: 1px solid rgba(212, 175, 55, 0.4); }
     .ox-hero h1 { font-size: clamp(3rem, 6vw, 5.5rem); line-height: 1.1; color: #ffffff; margin-bottom: 24px; font-weight: 800; letter-spacing: -2px; }
@@ -3408,7 +3433,11 @@ window.addEventListener('unhandledrejection', function(e) {
     </nav>
 
     <header class="ox-hero">
-        <img src="hero_image.png" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0;" alt="Hero Background">
+        <picture style="position:absolute; inset:0; width:100%; height:100%; z-index:0; pointer-events:none;">
+            <source srcset="hero_image.webp?v=4" type="image/webp">
+            <source srcset="hero_image.jpg?v=4" type="image/jpeg">
+            <img src="hero_image.png?v=4" loading="eager" fetchpriority="high" decoding="sync" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center right; z-index:0;" alt="Oxford Excellence Academy Campus">
+        </picture>
         <div class="ox-hero-content gs-anim-up" style="position:relative; z-index:2;">
             <div class="ox-badge">Admissions Open</div>
             <h1>Empowering the <br><span>Global Leaders</span> of Tomorrow</h1>
@@ -4306,6 +4335,10 @@ window.addEventListener('unhandledrejection', function(e) {
       const landBtn = document.getElementById('land-login-btn');
       if (landBtn) { landBtn.disabled = false; landBtn.textContent = 'Login to School Portal'; }
       DB = loadDB() || defaultDB();
+      window.DB = DB;
+      window.openReportCard = openReportCard;
+      window.buildShell = buildShell;
+      window.goPage = goPage;
       DB.school.name = 'Oxford Excellence Academy';
       DB.school.tagline = 'Learn • Grow • Excel';
       DB.school.logo = 'oxford_logo.svg';
@@ -4686,7 +4719,19 @@ window.addEventListener('unhandledrejection', function(e) {
     function fmtDate(d) { if (!d) return '-'; const p = d.split('-'); if(p.length === 3) return p[2]+'/'+p[1]+'/'+p[0]; return d; }
     function allStus() { return Object.values(DB.students).flat(); }
     function clsStus(cid) { return DB.students[cid] || []; }
-    function getClsSubjects(cid) { const cls = (DB.classes || []).find(c => c.id === cid); if (cls && cls.subjectIds && Array.isArray(cls.subjectIds) && cls.subjectIds.length) { const list = (DB.subjects || []).filter(s => cls.subjectIds.includes(s.id)); if (list.length) return list; } return DB.subjects || []; }
+    function getClsSubjects(cid) {
+      if (!cid) return DB.subjects || [];
+      const byClass = (DB.subjects || []).filter(s => Array.isArray(s.classIds) && s.classIds.includes(cid));
+      if (byClass.length > 0) return byClass;
+      const cls = (DB.classes || []).find(c => c.id === cid);
+      if (cls && Array.isArray(cls.subjectIds) && cls.subjectIds.length > 0) {
+        const bySubj = (DB.subjects || []).filter(s => cls.subjectIds.includes(s.id));
+        if (bySubj.length > 0) return bySubj;
+      }
+      const anyHasClassIds = (DB.subjects || []).some(s => Array.isArray(s.classIds) && s.classIds.length > 0);
+      if (anyHasClassIds) return [];
+      return DB.subjects || [];
+    }
     function avgStu(cid, sid, tid = curTerm) { const g = (DB.grades[cid + '_' + tid] || {})[sid] || {}; const v = Object.values(g).filter(x => x > 0); return v.length ? Math.round(v.reduce((a, b) => a + b, 0) / v.length) : 0; }
     function attPct(cid, sid) { const a = (DB.attendance[cid] || {})[sid] || {}; const arr = Object.values(a); if (!arr.length) return clsStus(cid).find(s => s.id === sid)?.attendance || 0; return Math.round(arr.filter(x => x === 'P').length / arr.length * 100); }
     function nextRoll(cid) { const s = clsStus(cid); return String(s.length + 1).padStart(3, '0'); }
@@ -4747,6 +4792,7 @@ window.addEventListener('unhandledrejection', function(e) {
       if (phone.startsWith('+')) phone = phone.slice(1);
       phone = phone.replace(/\D/g, '');
       if (phone.startsWith('0092')) phone = phone.slice(2);
+      if (phone.startsWith('920')) phone = '92' + phone.slice(3);
       if (phone.startsWith('92')) return phone;
       if (phone.startsWith('0') && phone.length >= 10) return `92${phone.slice(1)}`;
       if (phone.startsWith('3') && phone.length === 10) return `92${phone}`;
@@ -5493,7 +5539,8 @@ window.addEventListener('unhandledrejection', function(e) {
     /* ------------------------------- ADMIN DASHBOARD ------------------------------- */
     function pgAdminDash() {
       const all = allStus(); const tot = all.length;
-      const feeOk = all.filter(s => (DB.fees.payments[s.id] || {})['f1']?.paid).length;
+      const cm = monthKey();
+      const feeOk = all.filter(s => DB.fees.monthlyLedger?.[s.id]?.[cm]?.paid).length;
       const avgSc = tot ? Math.round(all.reduce((a, s) => a + avgStu(s.classId, s.id), 0) / tot) : 0;
       const teachers = DB.users.filter(u => u.role === 'teacher');
       const teacherCount = teachers.length;
@@ -5592,7 +5639,7 @@ window.addEventListener('unhandledrejection', function(e) {
 
     let _qkAD = {};
     function qkAtt(sid, val, btn) { _qkAD[sid] = val; const p = btn.parentElement; const bs = p.querySelectorAll('button'); bs[0].style.background = val === 'P' ? 'var(--g)' : 'var(--gl)'; bs[0].style.color = val === 'P' ? '#fff' : 'var(--g)'; bs[1].style.background = val === 'A' ? 'var(--r)' : 'var(--rl)'; bs[1].style.color = val === 'A' ? '#fff' : 'var(--r)'; }
-    function saveQkAtt() { const d = today(); Object.entries(_qkAD).forEach(([sid, val]) => { if (!DB.attendance[curCls]) DB.attendance[curCls] = {}; if (!DB.attendance[curCls][sid]) DB.attendance[curCls][sid] = {}; DB.attendance[curCls][sid][d] = val; }); saveDB(); _qkAD = {}; showToast('Attendance saved', 'ts'); }
+    function saveQkAtt() { const d = today(); Object.entries(_qkAD).forEach(([sid, val]) => { if (!DB.attendance[curCls]) DB.attendance[curCls] = {}; if (!DB.attendance[curCls][sid]) DB.attendance[curCls][sid] = {}; DB.attendance[curCls][sid][d] = val; }); saveDB(); if (_sb && typeof pushCloudDB === 'function') pushCloudDB(); _qkAD = {}; showToast('Attendance saved & synced', 'ts'); }
 
     function markTeacherAtt(status) {
       const t = nowHHMM(); const d = today();
@@ -6895,21 +6942,31 @@ If the arrears sum is lower than you expect, please check your CSV file to ensur
          DB.studentLogs[curCls][sid][d] = log;
          saveDB();
 
+         // Debounce: cancel previous timer, wait 3s before sending WA
          if (!window.attTimeouts) window.attTimeouts = {};
          clearTimeout(window.attTimeouts[sid]);
          window.attTimeouts[sid] = setTimeout(() => {
              const finalN = DB.attendance[curCls][sid][d];
-             log.msgSent = true; if (finalN === 'P') {
-                 const _wa = getStudentWA(stu); if (_wa) sendWhatsAppAPI(_wa, `Dear Parent,\n\n${stu.name} has just been marked as Check-In at ${tStr} today (${fmtDate(d)}).\n\n${DB.school.name}`);
-             } else if (finalN === 'O') {
-                 const _wa = getStudentWA(stu); if (_wa) sendWhatsAppAPI(_wa, `Dear Parent,\n\n${stu.name} has just been marked as Check-Out at ${tStr} today (${fmtDate(d)}).\n\n${DB.school.name}`);
-             } else if (finalN === 'A') {
-                 const _wa = getStudentWA(stu); if (_wa) sendWhatsAppAPI(_wa, `Dear Parent,\n\n${stu.name} is marked Absent today (${fmtDate(d)}).\n\n${DB.school.name}`);
+             const currentLog = (DB.studentLogs[curCls]?.[sid]?.[d]) || {};
+             // BUG FIX: Only send WA if this status was not already sent today
+             if (finalN && finalN !== currentLog.lastMsgStatus) {
+                 currentLog.lastMsgStatus = finalN;
+                 if (DB.studentLogs[curCls] && DB.studentLogs[curCls][sid]) {
+                     DB.studentLogs[curCls][sid][d] = currentLog;
+                     saveDB();
+                 }
+                 if (finalN === 'P') {
+                     const _wa = getStudentWA(stu); if (_wa) sendWhatsAppAPI(_wa, `Dear Parent,\n\n${stu.name} has just been marked as Check-In at ${tStr} today (${fmtDate(d)}).\n\n${DB.school.name}`);
+                 } else if (finalN === 'O') {
+                     const _wa = getStudentWA(stu); if (_wa) sendWhatsAppAPI(_wa, `Dear Parent,\n\n${stu.name} has just been marked as Check-Out at ${tStr} today (${fmtDate(d)}).\n\n${DB.school.name}`);
+                 } else if (finalN === 'A') {
+                     const _wa = getStudentWA(stu); if (_wa) sendWhatsAppAPI(_wa, `Dear Parent,\n\n${stu.name} is marked Absent today (${fmtDate(d)}).\n\n${DB.school.name}`);
+                 }
              }
          }, 3000);
       }
     }
-    function markAll(v) { const d = today(); clsStus(curCls).forEach(s => { if (!DB.attendance[curCls]) DB.attendance[curCls] = {}; if (!DB.attendance[curCls][s.id]) DB.attendance[curCls][s.id] = {}; DB.attendance[curCls][s.id][d] = v; const el = document.getElementById(`ac-${s.id}-${d}`); if (el) { el.className = `ac ${v === 'P' ? 'acP' : 'acA'}`; el.textContent = v; } }); }
+    function markAll(v) { const d = today(); clsStus(curCls).forEach(s => { if (!DB.attendance[curCls]) DB.attendance[curCls] = {}; if (!DB.attendance[curCls][s.id]) DB.attendance[curCls][s.id] = {}; DB.attendance[curCls][s.id][d] = v; const el = document.getElementById(`ac-${s.id}-${d}`); if (el) { el.className = `ac ${v === 'P' ? 'acP' : 'acA'}`; el.textContent = v; } }); saveDB(); showToast('Marked all as ' + v + '. Don\'t forget to Save Attendance!', 'ts'); }
     function saveAtt() {
       const d = today();
       let count = 0;
@@ -6940,7 +6997,8 @@ If the arrears sum is lower than you expect, please check your CSV file to ensur
       const absent = clsStus(curCls).filter(s => (DB.attendance[curCls]?.[s.id] || {})[d] === 'A');
       if (!absent.length) { showToast('No absent students today', 'tw2'); return; }
       const cls = DB.classes.find(c => c.id === curCls);
-      absent.forEach(s => { if (getStudentWA(s)) sendWhatsAppAPI(getStudentWA(s), `Dear Parent, ${s.name} was ABSENT from ${DB.school.name} (${cls?.name || ''}) on ${fmtDate(d)}. Please ensure regular attendance.\n\nThank you.\n${DB.school.name}`); });
+      absent.forEach(s => { const sLog = DB.studentLogs?.[curCls]?.[s.id]?.[d] || {}; if (sLog.lastMsgStatus === 'A') return; // BUG FIX: skip if already sent today
+      if (getStudentWA(s)) sendWhatsAppAPI(getStudentWA(s), `Dear Parent, ${s.name} was ABSENT from ${DB.school.name} (${cls?.name || ''}) on ${fmtDate(d)}. Please ensure regular attendance.\n\nThank you.\n${DB.school.name}`); });
       showToast(` WhatsApp queued for ${absent.length} absent students`, 'ts');
     }
 
@@ -7101,7 +7159,7 @@ If the arrears sum is lower than you expect, please check your CSV file to ensur
   ${clsBar('switchGrdCls')}
   ${sts.length === 0 ? `<div class="card"><div class="empty"><div class="empty-ic"></div><div class="empty-t">No students</div></div></div>` : `
 <div class="card fu d2" style="padding:0;overflow:hidden;"><div class="tw"><table>
-  <thead><tr><th>Roll</th><th>Student</th>${getClsSubjects(curCls).map(s => `<th style="text-align:center;">${s.icon}<br/><span style="font-weight:400;">${s.code}</span></th>`).join('')}<th>Avg</th><th>Grade</th></tr></thead>
+  <thead><tr><th>Roll</th><th>Student</th>${getClsSubjects(curCls).map(s => `<th style="text-align:center;"><div style="font-weight:700;font-size:.76rem;line-height:1.2;">${s.name}</div><div style="font-size:.63rem;color:var(--ink4);font-weight:500;margin-top:2px;">${s.code || s.icon || ''}</div></th>`).join('')}<th>Avg</th><th>Grade</th></tr></thead>
   <tbody>${sts.map(s => {
         const tKey = curCls + '_' + curTerm;
         if (!DB.grades[tKey]) DB.grades[tKey] = {};
@@ -7121,16 +7179,31 @@ If the arrears sum is lower than you expect, please check your CSV file to ensur
       const tKey = curCls + '_' + curTerm;
       if (!DB.grades[tKey]) DB.grades[tKey] = {};
       if (!DB.grades[tKey][sid]) DB.grades[tKey][sid] = {};
-      const v = Math.min(100, Math.max(0, parseInt(val) || 0));
-      DB.grades[tKey][sid][subId] = v;
-      const vals = Object.values(DB.grades[tKey][sid]).filter(x => x > 0);
+      if (val === '' || val === null || val === undefined) {
+        delete DB.grades[tKey][sid][subId];
+      } else {
+        const v = Math.min(100, Math.max(0, parseInt(val) || 0));
+        DB.grades[tKey][sid][subId] = v;
+      }
+      const vals = Object.values(DB.grades[tKey][sid]).filter(x => typeof x === 'number' && x > 0);
       const av = vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : 0;
       const ae = document.getElementById(`av-${sid}`); const ge = document.getElementById(`gr-${sid}`);
-      if (ae) { ae.textContent = av || '-'; ae.style.color = sCol(av); }
-      if (ge) ge.innerHTML = `<span class="badge ${gCls(av)}">${lGrade(av)}</span>`;
+      if (ae) { ae.textContent = vals.length ? av : '-'; ae.style.color = sCol(av); }
+      if (ge) ge.innerHTML = `<span class="badge ${gCls(av)}">${vals.length ? lGrade(av) : '-'}</span>`;
     }
-    function saveGrades() { saveDB(); showToast('? Grades saved', 'ts'); }
-    function clearGrades() { if (!confirm('Clear all grades for this class in this term?')) return; delete DB.grades[curCls + '_' + curTerm]; saveDB(); goPage('grades'); }
+    async function saveGrades() {
+      saveDB();
+      if (_sb && typeof pushCloudDB === 'function') await pushCloudDB();
+      showToast('✅ Grades saved & synced to cloud', 'ts');
+    }
+    async function clearGrades() {
+      if (!confirm('Clear all grades for this class in this term?')) return;
+      delete DB.grades[curCls + '_' + curTerm];
+      saveDB();
+      if (_sb && typeof pushCloudDB === 'function') await pushCloudDB();
+      showToast('Grades cleared', 'ts');
+      goPage('grades');
+    }
     function switchGrdCls(cid) { curCls = cid; updatePill(); goPage('grades'); }
 
     /* ------------------------------- FEES ------------------------------- */
@@ -7263,15 +7336,27 @@ If the arrears sum is lower than you expect, please check your CSV file to ensur
           currentMonthBill = tuition + van + itemsTotal;
       }
 
-      let truePendingTotal = Math.max(0, totalDue);
-      let pendingArrears = Math.max(0, truePendingTotal - currentMonthBill);
-      let pendingMonthly = truePendingTotal - pendingArrears;
+      const curMonthRow = DB.fees.monthlyLedger?.[sid]?.[cm];
+      const isCurMonthPaid = curMonthRow ? curMonthRow.paid : false;
 
-      return { payments: DB.fees.payments[sid] || {}, mandatory, mandatoryPaid: 0, paidAmount, dueAmount: totalDue, arrears, pendingArrears, pendingMonthly, totalAmount: paidAmount + totalDue };
+      let truePendingTotal = Math.max(0, totalDue);
+      let pendingMonthly = 0;
+      let pendingArrears = 0;
+
+      if (isCurMonthPaid) {
+          pendingMonthly = 0;
+          pendingArrears = truePendingTotal;
+      } else {
+          pendingMonthly = Math.min(truePendingTotal, currentMonthBill);
+          pendingArrears = Math.max(0, truePendingTotal - pendingMonthly);
+      }
+
+      return { payments: DB.fees.payments[sid] || {}, mandatory, mandatoryPaid: isCurMonthPaid ? 1 : 0, paidAmount, dueAmount: totalDue, arrears, pendingArrears, pendingMonthly, totalAmount: paidAmount + totalDue };
     }
 
     function filterFeeTable() {
         const classQ = document.getElementById('fee-class-filter')?.value.toLowerCase() || '';
+        const statusQ = document.getElementById('fee-status-filter')?.value || '';
         const textQ = document.getElementById('fee-search-filter')?.value.toLowerCase().trim() || '';
         const tbody = document.getElementById('fees-tbody');
         if (!tbody) return;
@@ -7280,7 +7365,12 @@ If the arrears sum is lower than you expect, please check your CSV file to ensur
             const classCellText = tr.children[1] ? tr.children[1].textContent.toLowerCase().trim() : '';
             const matchesClass = !classQ || classCellText === classQ;
             const matchesText = !textQ || rowText.includes(textQ);
-            tr.style.display = (matchesClass && matchesText) ? '' : 'none';
+            let matchesStatus = true;
+            if (statusQ === 'both-paid') matchesStatus = tr.dataset.aug === 'paid' && tr.dataset.sep === 'paid';
+            else if (statusQ === 'sep-unpaid') matchesStatus = tr.dataset.sep === 'unpaid';
+            else if (statusQ === 'aug-unpaid') matchesStatus = tr.dataset.aug === 'unpaid';
+            else if (statusQ === 'arrears') matchesStatus = tr.dataset.arrears === 'yes';
+            tr.style.display = (matchesClass && matchesText && matchesStatus) ? '' : 'none';
         });
     }
 
@@ -7293,16 +7383,21 @@ If the arrears sum is lower than you expect, please check your CSV file to ensur
       const pendingArrears = summaries.reduce((sum, x) => sum + (x.pendingArrears || 0), 0);
       const pendingMonthly = summaries.reduce((sum, x) => sum + (x.pendingMonthly || 0), 0);
       const totalArrears = all.reduce((sum, s) => sum + num(s.arrears || 0), 0);
-      const fullyPaid = summaries.filter(x => x.mandatory.length && x.mandatoryPaid === x.mandatory.length).length;
+      const fullyPaid = summaries.filter(x => x.dueAmount <= 0).length;
       const totalAnnual = DB.fees.items.filter(f => f.mandatory).reduce((a, f) => a + Number(f.amount || 0), 0);
       const cm = monthKey();
       const isBeforeAugust = cm < '2026-08';
+      const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      const mIdx = parseInt(cm.split('-')[1], 10) - 1;
+      const monthName = mNames[mIdx] || 'Current Month';
+      const curMonthPaidStus = all.filter(s => DB.fees.monthlyLedger?.[s.id]?.[cm]?.paid);
+      const curMonthIncome = curMonthPaidStus.reduce((sum, s) => sum + num(DB.fees.monthlyLedger[s.id][cm].amountPaid || monthlyFeeAmount(s)), 0);
       return `
 <div class="ph ph-row fu">
   <div><div class="ph-tag"> Fees</div><h1>Fee Management</h1><div class="ph-sub">Year ${DB.settings?.schoolYear || ''} - all fee items per student</div></div>
   <div class="ph-acts">
     <button class="btn btn-g btn-sm" onclick="goPage('feereports')">Fee Reports</button>
-    <button class="btn btn-gh btn-sm" onclick="openFeeStructModal()">? Structure</button>
+    <button class="btn btn-gh btn-sm" onclick="openFeeStructModal()"> Structure</button>
     <button class="btn btn-gh btn-sm" onclick="openFeeReminderModal()"> Manual Reminder</button>
     <button class="btn btn-wa btn-sm" onclick="sendBulkFeeReminder()"> Bulk Reminder</button>
     <button class="btn btn-gh btn-sm" onclick="openBulkFeeVoucherModal()">&#128196; Vouchers</button>
@@ -7312,21 +7407,21 @@ If the arrears sum is lower than you expect, please check your CSV file to ensur
   <div class="lm-card">
     <div class="lm-label">Total Collection</div>
     <div class="lm-value" style="color:#0f172a;">${fmtMoney(collected)}</div>
-    <div class="lm-sub">${fullyPaid} fully paid &middot; ${all.length - fullyPaid} pending</div>
+    <div class="lm-sub">${fullyPaid} cleared &middot; ${all.length - fullyPaid} pending</div>
   </div>
   <div class="lm-card">
-    <div class="lm-label">Monthly Income</div>
-    <div class="lm-value" style="color:#0284c7;">${fmtMoney(all.filter(s => (DB.fees.payments[s.id] || {})['f1']?.paid).length * (DB.fees.items[0]?.amount || 0))}</div>
-    <div class="lm-sub">${all.filter(s => (DB.fees.payments[s.id] || {})['f1']?.paid).length} of ${all.length} paid tuition</div>
+    <div class="lm-label">${monthName} Income</div>
+    <div class="lm-value" style="color:#0284c7;">${fmtMoney(curMonthIncome)}</div>
+    <div class="lm-sub">${curMonthPaidStus.length} of ${all.length} paid for ${monthName}</div>
   </div>
   <div class="lm-card">
     <div class="lm-label">${isBeforeAugust ? 'Total Prev. Arrears' : 'Total Pending Balance'}</div>
     <div class="lm-value" style="color:#ef4444;">${fmtMoney(isBeforeAugust ? totalArrears : pending)}</div>
-    <div class="lm-sub">${isBeforeAugust ? 'Monthly fee starts Aug 2026' : `Monthly: <b>${fmtMoney(pendingMonthly)}</b> &middot; Arrears: <b style="color:#ef4444;">${fmtMoney(pendingArrears)}</b>`}</div>
+    <div class="lm-sub">${isBeforeAugust ? 'Monthly fee starts Aug 2026' : `${monthName}: <b>${fmtMoney(pendingMonthly)}</b> &middot; Arrears: <b style="color:#ef4444;">${fmtMoney(pendingArrears)}</b>`}</div>
   </div>
   <div class="lm-card">
     <div class="lm-label">Collection Rate</div>
-    <div class="lm-value" style="color:#10b981;">${collected + (isBeforeAugust ? totalArrears : pending) ? Math.round(collected / (collected + (isBeforeAugust ? totalArrears : pending)) * 100) : 0}%</div>
+    <div class="lm-value" style="color:#10b981;">${(collected + (isBeforeAugust ? totalArrears : pending)) > 0 ? Math.round(collected / (collected + (isBeforeAugust ? totalArrears : pending)) * 100) : 0}%</div>
     <div class="lm-sub">Of total expected revenue</div>
   </div>
 </div>
@@ -7338,8 +7433,8 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
     const s = allStus().find(x => x.id === p.sid);
     return `<div style="display:flex; justify-content:space-between; align-items:center; background:#fff; border:1px solid #eee; padding:10px; border-radius:8px; margin-bottom:8px;">
       <div>
-        <div style="font-weight:700;">${s ? s.name : 'Unknown Student'} <span style="font-size:0.7rem; color:var(--ink3); font-weight:normal;">(Roll: ${s ? s.roll : '-'})</span></div>
-        <div style="font-size:0.7rem; margin-top:2px;">Month: <b>${p.month}</b> | Trx ID: <b style="letter-spacing:0.5px;">${p.tid}</b></div>
+        <div style="font-weight:700;">${s ? escHtml(s.name) : 'Unknown Student'} <span style="font-size:0.7rem; color:var(--ink3); font-weight:normal;">(Roll: ${s ? escHtml(s.roll) : '-'})</span></div>
+        <div style="font-size:0.7rem; margin-top:2px;">Month: <b>${escHtml(p.month)}</b> | Trx ID: <b style="letter-spacing:0.5px;">${escHtml(p.tid)}</b></div>
         <div style="font-size:0.65rem; color:var(--ink4); margin-top:2px;">Submitted: ${new Date(p.date).toLocaleString()}</div>
       </div>
       <div style="text-align:right;">
@@ -7352,42 +7447,87 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
     </div>`;
   }).join('')}
 </div>` : ''}
-<div class="g2">
-  <div class="card fu d2">
-    <div class="ch"><div class="ct"> Fee Structure</div><button class="btn btn-gh btn-sm" onclick="openFeeStructModal()">Edit</button></div>
-      ${DB.fees.items.map(f => `<div style="display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid var(--border);">
-      <div style="flex:1;"><div style="font-weight:700;font-size:.8rem;">${f.name}</div><div style="font-size:.68rem;color:var(--ink3);">Due: ${f.due} - ${f.mandatory ? 'Mandatory' : 'Optional'}</div></div>
-      <div style="font-weight:800;color:var(--p);font-size:.88rem;">${fmtMoney(f.amount)}</div>
-    </div>`).join('')}
-    <div style="padding-top:9px;font-weight:800;font-size:.83rem;display:flex;justify-content:space-between;border-top:1px solid var(--border);margin-top:4px;"><span>Mandatory Total</span><span style="color:var(--p);">${fmtMoney(totalAnnual)}</span></div>
+<div class="card fu d2" style="margin-bottom:16px;">
+  <div class="ch">
+    <div class="ct"> Fee Structure</div>
+    <button class="btn btn-gh btn-sm" onclick="openFeeStructModal()">Edit</button>
   </div>
-  <div class="card fu d3" style="padding:0;overflow:hidden;">
-    <div class="ch" style="padding:13px 14px 9px;">
-      <div class="ct"> Student Fee Status</div>
-      <div style="margin-left:auto; display:flex; gap:10px; align-items:center;">
-        <select id="fee-class-filter" class="fi" onchange="filterFeeTable()" style="padding:6px 10px; width:160px;">
-          <option value="">All Classes</option>
-          ${DB.classes.map(c => `<option value="${escHtml(c.name)}">${escHtml(c.name)}</option>`).join('')}
-        </select>
-        <input type="text" id="fee-search-filter" class="fi" placeholder="Search student or roll..." onkeyup="filterFeeTable()" style="width:200px; padding:6px 10px;"/>
+  <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;">
+    ${DB.fees.items.map(f => `<div style="flex:1;min-width:220px;background:var(--card2);padding:10px 14px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border);">
+      <div>
+        <div style="font-weight:700;font-size:.82rem;">${escHtml(f.name)}</div>
+        <div style="font-size:.68rem;color:var(--ink3);">Due: ${escHtml(f.due)} - ${f.mandatory ? 'Mandatory' : 'Optional'}</div>
       </div>
+      <div style="font-weight:800;color:var(--p);font-size:.92rem;">${fmtMoney(f.amount)}</div>
+    </div>`).join('')}
+    <div style="padding:10px 14px;background:var(--pg2);border-radius:8px;display:flex;gap:10px;align-items:center;margin-left:auto;">
+      <span style="font-size:.8rem;font-weight:700;">Mandatory Total:</span>
+      <span style="font-weight:900;color:var(--p);font-size:1rem;">${fmtMoney(totalAnnual)}</span>
     </div>
-    <div class="tw" style="border:none;"><table>
-      <thead><tr><th>Student</th><th>Class</th><th>Mandatory</th><th>Balance</th><th>Action</th></tr></thead>
-      <tbody id="fees-tbody">${all.map(s => {
-        const sum = studentFeeSummary(s.id);
-        const complete = sum.mandatory.length && sum.mandatoryPaid === sum.mandatory.length;
-        const cls = DB.classes.find(c => c.id === s.classId);
-        const arrBalance = num(s.arrears || 0);
-        return `<tr><td><div style="font-weight:700;font-size:.78rem;">${s.name}</div><div style="font-size:.63rem;color:var(--ink4);">Roll ${s.roll}</div></td><td style="font-size:.72rem;">${cls?.name || '-'}</td><td><span class="badge ${complete ? 'bg2' : 'br2'}">${sum.mandatoryPaid}/${sum.mandatory.length} paid</span></td><td><div style="font-weight:800;color:${arrBalance > 0 ? 'var(--r)' : 'var(--g)'};font-size:.85rem;">${fmtMoney(arrBalance)}</div><div style="font-size:.65rem;color:var(--ink4);margin-top:1px;">Monthly (Aug+): ${fmtMoney(monthlyFeeAmount(s))}</div></td>
-        <td><div style="display:flex;gap:3px;flex-wrap:wrap;">
-          <button class="btn btn-xs btn-p" onclick="openStudentFeeModal('${s.id}')">Manage</button>
-          <button class="btn btn-xs btn-gh" onclick="openVoucherModal('${s.id}')">Voucher</button>
-            ${getStudentWA(s) && sum.dueAmount ? `<button class="btn btn-xs btn-wa" onclick="openFeeReminderModal('${s.id}')">WA</button>` : ''}
-        </div></td></tr>`;
-      }).join('')}
-      </tbody></table></div>
   </div>
+</div>
+
+<div class="card fu d3" style="padding:0;overflow:hidden;">
+  <div class="ch" style="padding:13px 14px 9px;">
+    <div class="ct"> Student Fee Status</div>
+    <div style="margin-left:auto; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+      <select id="fee-class-filter" class="fi" onchange="filterFeeTable()" style="padding:6px 8px; width:130px;">
+        <option value="">All Classes</option>
+        ${DB.classes.map(c => `<option value="${escHtml(c.name)}">${escHtml(c.name)}</option>`).join('')}
+      </select>
+      <select id="fee-status-filter" class="fi" onchange="filterFeeTable()" style="padding:6px 8px; width:145px;">
+        <option value="">All Status</option>
+        <option value="both-paid">Aug & Sep Paid</option>
+        <option value="sep-unpaid">Sep Unpaid</option>
+        <option value="aug-unpaid">Aug Unpaid</option>
+        <option value="arrears">Has Arrears</option>
+      </select>
+      <input type="text" id="fee-search-filter" class="fi" placeholder="Search student or roll..." onkeyup="filterFeeTable()" style="width:160px; padding:6px 10px;"/>
+    </div>
+  </div>
+  <div class="tw" style="border:none;overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;">
+    <thead><tr>
+      <th style="padding:10px 14px;text-align:left;">Student</th>
+      <th style="padding:10px 14px;text-align:left;">Class</th>
+      <th style="padding:10px 14px;text-align:left;">Aug & Sep Status</th>
+      <th style="padding:10px 14px;text-align:left;">Total Due</th>
+      <th style="padding:10px 20px;text-align:right;">Action</th>
+    </tr></thead>
+    <tbody id="fees-tbody">${all.map(s => {
+      const sum = studentFeeSummary(s.id);
+      const cls = DB.classes.find(c => c.id === s.classId);
+      const augRow = DB.fees.monthlyLedger?.[s.id]?.['2026-08'];
+      const sepRow = DB.fees.monthlyLedger?.[s.id]?.['2026-09'];
+      const augPaid = augRow ? augRow.paid : false;
+      const sepPaid = sepRow ? sepRow.paid : false;
+      const mFee = monthlyFeeAmount(s) + num(s.vanFee || 0);
+      return `<tr data-aug="${augPaid ? 'paid' : 'unpaid'}" data-sep="${sepPaid ? 'paid' : 'unpaid'}" data-arrears="${sum.pendingArrears > 0 ? 'yes' : 'no'}">
+        <td style="padding:10px 14px;"><div style="font-weight:700;font-size:.78rem;">${escHtml(s.name)}</div><div style="font-size:.63rem;color:var(--ink4);">Roll ${escHtml(s.roll || '-')}</div></td>
+        <td style="padding:10px 14px;font-size:.72rem;">${escHtml(cls?.name || '-')}</td>
+        <td style="padding:10px 14px;white-space:nowrap;">
+          <div style="font-weight:700;font-size:.82rem;">${fmtMoney(mFee)} <span style="font-size:0.68rem;color:var(--ink4);font-weight:normal;">/mo</span></div>
+          <div style="margin-top:4px;display:flex;gap:5px;align-items:center;flex-wrap:wrap;">
+            <span style="font-size:0.68rem;color:var(--ink3);">Aug:</span>
+            ${augPaid ? `<span class="badge bg2" style="font-size:0.62rem;padding:1px 6px;">PAID</span>` : `<span class="badge br2" style="font-size:0.62rem;padding:1px 6px;">UNPAID</span>`}
+            <span style="font-size:0.68rem;color:var(--ink3);margin-left:4px;">Sep:</span>
+            ${sepPaid ? `<span class="badge bg2" style="font-size:0.62rem;padding:1px 6px;">PAID</span>` : `<span class="badge br2" style="font-size:0.62rem;padding:1px 6px;">UNPAID</span>`}
+          </div>
+        </td>
+        <td style="padding:10px 14px;white-space:nowrap;">
+          <div style="font-weight:800;color:${sum.dueAmount > 0 ? 'var(--r)' : 'var(--g)'};font-size:.88rem;">${fmtMoney(sum.dueAmount)}</div>
+          ${sum.pendingArrears > 0 ? `<div style="font-size:.63rem;color:var(--ink4);margin-top:1px;">Arrears: ${fmtMoney(sum.pendingArrears)}</div>` : ''}
+        </td>
+        <td style="padding:10px 20px 10px 10px;text-align:right;white-space:nowrap;">
+          <div style="display:inline-flex;gap:5px;justify-content:flex-end;align-items:center;">
+            <button class="btn btn-xs btn-p" onclick="openStudentFeeModal('${s.id}')">Manage</button>
+            <button class="btn btn-xs btn-gh" onclick="openVoucherModal('${s.id}')">Voucher</button>
+            ${getStudentWA(s) && sum.dueAmount > 0 ? `<button class="btn btn-xs btn-wa" onclick="openFeeReminderModal('${s.id}')">WA</button>` : ''}
+          </div>
+        </td>
+      </tr>`;
+    }).join('')}
+    </tbody></table></div>
 </div>`;
     }
 
@@ -7413,7 +7553,7 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
         const arrears = arrearsDetail.total;
         
         let itemsTotal = 0;
-        let breakdownHtml = `<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span>Monthly Fee:</span> <b>${fmtMoney(tuition)}</b></div>`;
+        let breakdownHtml = `<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span>${monthName} Fee:</span> <b>${fmtMoney(tuition)}</b></div>`;
         if (van > 0) breakdownHtml += `<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span>Van Transport Fee:</span> <b>${fmtMoney(van)}</b></div>`;
         
         if (arrearsDetail.breakdown.length > 0) {
@@ -7439,114 +7579,287 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
     function openStudentFeeModal(sid, targetMonth = null) {
       const s = allStus().find(x => x.id === sid); if (!s) return;
       const cls = DB.classes.find(c => c.id === s.classId);
-      const month = targetMonth || monthKey();
-      const bill = calcStudentFeeBill(sid, month);
+      const initialArrears = getTrueInitialArrears(sid);
+      const tuition = monthlyFeeAmount(s);
+      const van = num(s.vanFee || 0);
+      
+      const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      
+      let months = ['2026-08', '2026-09', '2026-10'];
+      if (targetMonth && !months.includes(targetMonth)) {
+        months.push(targetMonth);
+        months.sort();
+      }
+
+      let unpaidMonthsSum = 0;
+      
+      let monthsHtml = months.map(m => {
+        const dParts = m.split('-');
+        const mIdx = parseInt(dParts[1], 10) - 1;
+        const mName = (mNames[mIdx] || m) + ' ' + dParts[0];
+        
+        let itemsTotal = 0;
+        let itemNames = [];
+        (DB.fees.items || []).forEach(f => {
+          if (f.id === 'f1') return;
+          if (f.applyMonth && f.applyMonth !== 'All' && f.applyMonth.toLowerCase() !== (mNames[mIdx] || '').toLowerCase()) return;
+          const amt = num(f.amount);
+          itemsTotal += amt;
+          itemNames.push(`${f.name}: ${fmtMoney(amt)}`);
+        });
+        const monthlyTotal = tuition + van + itemsTotal;
+        
+        const mRow = DB.fees.monthlyLedger?.[sid]?.[m];
+        const isPaid = mRow ? mRow.paid : false;
+        const paidAmt = mRow ? num(mRow.amountPaid || mRow.amount || 0) : 0;
+        const paidOn = mRow?.paidOn;
+        
+        if (!isPaid) unpaidMonthsSum += monthlyTotal;
+        
+        return `
+          <div style="background:#ffffff; border:1px solid ${isPaid ? '#e2e8f0' : '#fecaca'}; border-radius:12px; padding:13px 16px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+            <div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-weight:700; font-size:0.95rem; color:#0f172a;">${mName}</span>
+                ${isPaid 
+                  ? `<span style="background:#dcfce7; color:#15803d; font-size:0.7rem; font-weight:700; padding:2px 8px; border-radius:6px; display:inline-flex; align-items:center; gap:3px;">
+                       <span>✓</span> PAID
+                     </span>` 
+                  : `<span style="background:#fee2e2; color:#b91c1c; font-size:0.7rem; font-weight:700; padding:2px 8px; border-radius:6px; display:inline-flex; align-items:center; gap:3px;">
+                       <span>●</span> UNPAID
+                     </span>`}
+              </div>
+              <div style="font-size:0.8rem; color:#64748b; margin-top:3px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                <span>Monthly Fee: <b style="color:#0f172a;">${fmtMoney(monthlyTotal)}</b></span>
+                ${itemNames.length > 0 ? `<span style="background:#fef3c7; color:#92400e; font-size:0.7rem; font-weight:600; padding:1px 6px; border-radius:4px;">Includes ${itemNames.join(', ')}</span>` : ''}
+                ${van > 0 ? `<span style="color:#94a3b8;">&bull;</span> <span>Van: ${fmtMoney(van)}</span>` : ''}
+                ${isPaid && paidOn ? `<span style="color:#94a3b8;">&bull;</span> <span style="color:#059669; font-weight:600;">Paid on ${fmtDate(paidOn)}</span>` : ''}
+              </div>
+            </div>
+            <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+              ${isPaid ? `
+                <button class="btn btn-xs" style="background:#ffffff; color:#dc2626; border:1px solid #fecaca; font-weight:600; padding:5px 12px; border-radius:7px; font-size:0.75rem; cursor:pointer;" onclick="toggleMonthPayment('${sid}', '${m}', false)">
+                  Mark Unpaid
+                </button>
+                <button class="btn btn-xs" style="background:#f8fafc; color:#334155; border:1px solid #e2e8f0; font-weight:600; padding:5px 12px; border-radius:7px; font-size:0.75rem; cursor:pointer;" onclick="printFeeReceipt('${sid}', '${m}')">
+                  Receipt
+                </button>
+              ` : `
+                <button class="btn btn-xs" style="background:#10b981; color:#ffffff; border:none; font-weight:700; padding:6px 14px; border-radius:7px; font-size:0.78rem; cursor:pointer; box-shadow:0 1px 3px rgba(16,185,129,0.3);" onclick="toggleMonthPayment('${sid}', '${m}', true)">
+                  ✓ Mark Paid
+                </button>
+                <button class="btn btn-xs" style="background:#f8fafc; color:#64748b; border:1px solid #e2e8f0; font-weight:600; padding:5px 10px; border-radius:7px; font-size:0.72rem; cursor:pointer;" onclick="promptCustomMonthPayment('${sid}', '${m}', ${monthlyTotal})">
+                  Custom Amt
+                </button>
+              `}
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      const totalDue = getLedgerArrears(sid, getNextMonth('2026-09'));
+      const initials = s.name.split(' ').map(n => n[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'ST';
       
       openModal(`
-        <h3> ${escHtml(s.name)} Fees</h3>
-        <div class="ibox" style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
-          <div>${escHtml(cls?.name || '')} - Roll ${escHtml(s.roll || '-')} - Arrears <b style="color:${num(s.arrears) ? 'var(--r)' : 'var(--g)'};">${fmtMoney(num(s.arrears))}</b></div>
-          <div><input type="month" value="${month}" onchange="openStudentFeeModal('${sid}', this.value)" style="padding:4px 8px;border-radius:6px;border:1px solid var(--border);outline:none;font-family:inherit;"></div>
-        </div>
-        
-        <div style="background:var(--card2);padding:14px;border-radius:12px;margin-bottom:15px;font-size:0.85rem;display:flex;flex-direction:column;gap:8px;">
-           <div style="font-weight:700;color:var(--ink3);margin-bottom:4px;">Ledger Breakdown: ${month}</div>
-           ${bill.breakdownHtml}
-           <hr style="border:0;border-top:1px dashed var(--border);margin:4px 0;" />
-           <div style="display:flex;justify-content:space-between;color:var(--p);font-size:1.1rem;font-weight:900;"><span>Total Due:</span> <span>${fmtMoney(bill.totalDue)}</span></div>
+        <!-- Student Header -->
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:16px; padding-bottom:14px; border-bottom:1px solid #e2e8f0;">
+          <div style="display:flex; gap:12px; align-items:center;">
+            <div style="width:42px; height:42px; border-radius:10px; background:linear-gradient(135deg, #1e293b, #0f172a); color:#ffffff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1rem; letter-spacing:0.5px; box-shadow:0 2px 6px rgba(15,23,42,0.15); flex-shrink:0;">
+              ${initials}
+            </div>
+            <div>
+              <div style="font-weight:800; font-size:1.12rem; color:#0f172a; line-height:1.2;">
+                ${escHtml(s.name)}
+              </div>
+              <div style="display:flex; gap:6px; align-items:center; margin-top:4px; flex-wrap:wrap;">
+                <span style="background:#f1f5f9; color:#475569; font-size:0.74rem; font-weight:600; padding:2px 7px; border-radius:5px;">${escHtml(cls?.name || 'Class')}</span>
+                <span style="background:#f1f5f9; color:#475569; font-size:0.74rem; font-weight:600; padding:2px 7px; border-radius:5px;">Roll: ${escHtml(s.roll || '-')}</span>
+                <span style="font-size:0.74rem; color:#64748b; margin-left:2px;">Monthly Fee: <b style="color:#0f172a;">${fmtMoney(tuition + van)}</b></span>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <button class="btn btn-xs" style="background:#ecfdf5; color:#059669; border:1px solid #a7f3d0; font-weight:700; padding:5px 11px; border-radius:7px; display:inline-flex; align-items:center; gap:4px; font-size:0.75rem; cursor:pointer;" onclick="markAllMonths('${sid}', true)">
+              <span>✓</span> Mark Both Paid
+            </button>
+            <button class="btn btn-xs" style="background:#fef2f2; color:#dc2626; border:1px solid #fecaca; font-weight:700; padding:5px 11px; border-radius:7px; display:inline-flex; align-items:center; gap:4px; font-size:0.75rem; cursor:pointer;" onclick="markAllMonths('${sid}', false)">
+              <span>✕</span> Mark Both Unpaid
+            </button>
+          </div>
         </div>
 
-        ${bill.isPaid ? `
-           <div style="text-align:center;padding:15px;background:var(--pg2);color:var(--g);border-radius:10px;font-weight:800;margin-bottom:15px;">
-              ${fmtMoney(bill.amountPaid)} Paid on ${fmtDate(bill.mRow.paidOn)}
-           </div>
-           <div class="m-btns" style="flex-wrap:wrap;">
-              <button class="btn btn-gh btn-sm" onclick="unmarkStudentPayment('${sid}', '${month}')">Undo Payment</button>
-              <button class="btn btn-g btn-sm" onclick="printFeeReceipt('${sid}', '${month}')">Print Receipt</button>
-              <button class="btn btn-gh btn-sm" onclick="closeModal()">Close</button>
-           </div>
-        ` : `
-           <div class="fg">
-              <label class="fl">Amount Received Today (Partial Payments roll over to Arrears)</label>
-              <input class="fi" type="number" id="ms-receive-amt" value="${bill.totalDue}" />
-           </div>
-           <div class="m-btns" style="flex-wrap:wrap;">
-              <button class="btn btn-p btn-sm" onclick="receiveStudentPayment('${sid}', '${month}', ${bill.totalDue}, ${bill.arrears})">Receive Payment</button>
-              <button class="btn btn-gh btn-sm" onclick="closeModal()">Cancel</button>
-           </div>
-        `}
+        <div style="font-weight:700; font-size:0.78rem; color:#64748b; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.6px; display:flex; align-items:center; gap:6px;">
+          <span>Session Months Ledger</span>
+        </div>
+        
+        ${monthsHtml}
+        
+        <!-- Summary Box -->
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:14px 18px; margin:14px 0 16px 0;">
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.84rem; color:#475569; margin-bottom:7px;">
+            <span>Previous Arrears (Admission / Opening Balance):</span>
+            <span style="font-weight:700; color:${initialArrears > 0 ? '#b91c1c' : '#334155'}; font-size:0.92rem;">
+              ${fmtMoney(initialArrears)}
+            </span>
+          </div>
+          ${unpaidMonthsSum > 0 ? `
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.84rem; color:#475569; margin-bottom:7px;">
+            <span>Unpaid Months Dues:</span>
+            <span style="font-weight:700; color:#dc2626; font-size:0.92rem;">
+              + ${fmtMoney(unpaidMonthsSum)}
+            </span>
+          </div>
+          ` : ''}
+          <div style="border-top:1px solid #e2e8f0; margin:9px 0;"></div>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-weight:800; font-size:0.92rem; color:#0f172a;">Total Net Balance Due</div>
+              <div style="font-size:0.72rem; color:#94a3b8; margin-top:1px;">Live balance after all received payments</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:1.35rem; font-weight:900; letter-spacing:-0.5px; color:${totalDue > 0 ? '#dc2626' : '#10b981'};">
+                ${fmtMoney(totalDue)}
+              </div>
+              ${totalDue <= 0 ? `<div style="font-size:0.7rem; color:#10b981; font-weight:700; text-transform:uppercase;">Fully Cleared ✓</div>` : ''}
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer Buttons -->
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; padding-top:12px; border-top:1px solid #f1f5f9;">
+          <div style="display:flex; gap:8px;">
+            <button class="btn" style="background:#0f172a; color:#ffffff; font-weight:600; font-size:0.82rem; padding:8px 16px; border-radius:8px; border:none; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 4px rgba(15,23,42,0.12); cursor:pointer;" onclick="openVoucherModal('${sid}')">
+              <span>🖶</span> Issue Fee Challan
+            </button>
+            ${getStudentWA(s) ? `
+            <button class="btn" style="background:#15803d; color:#ffffff; font-weight:600; font-size:0.82rem; padding:8px 16px; border-radius:8px; border:none; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 4px rgba(21,128,61,0.15); cursor:pointer;" onclick="sendVoucherWhatsApp('${sid}', '2026-10')">
+              <span>💬</span> WhatsApp Oct Challan
+            </button>
+            ` : ''}
+          </div>
+          <button class="btn" style="background:#ffffff; color:#64748b; border:1px solid #cbd5e1; font-weight:600; font-size:0.82rem; padding:8px 18px; border-radius:8px; cursor:pointer;" onclick="closeModal()">
+            Close
+          </button>
+        </div>
       `);
     }
 
-    function receiveStudentPayment(sid, month, totalDue, snapshotArrears) {
+    function toggleMonthPayment(sid, month, isPaid, customAmount = null) {
       const s = allStus().find(x => x.id === sid); if (!s) return;
-      const amountPaid = num(document.getElementById('ms-receive-amt')?.value || 0);
-      
       if (!DB.fees.monthlyLedger) DB.fees.monthlyLedger = {};
       if (!DB.fees.monthlyLedger[sid]) DB.fees.monthlyLedger[sid] = {};
       
-      let saveSnapshot = snapshotArrears;
-      if (Object.keys(DB.fees.monthlyLedger[sid]).filter(m => DB.fees.monthlyLedger[sid][m].paid).length === 0) {
-          saveSnapshot = num(s.arrears || 0);
+      const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      const mIdx = parseInt(month.split('-')[1], 10) - 1;
+      const monthName = mNames[mIdx];
+      
+      let itemsTotal = 0;
+      (DB.fees.items || []).forEach(f => {
+        if (f.id === 'f1') return;
+        if (f.applyMonth && f.applyMonth !== 'All' && f.applyMonth !== monthName) return;
+        itemsTotal += num(f.amount);
+      });
+      const mFee = monthlyFeeAmount(s) + num(s.vanFee || 0) + itemsTotal;
+      const initialArrears = getTrueInitialArrears(sid);
+      
+      if (isPaid) {
+        const amt = customAmount !== null ? num(customAmount) : mFee;
+        DB.fees.monthlyLedger[sid][month] = {
+          month,
+          paid: true,
+          paidOn: today(),
+          amount: mFee,
+          amountPaid: amt,
+          totalDue: mFee,
+          arrearsSnapshot: initialArrears
+        };
       } else {
-          saveSnapshot = num(s.arrears || 0);
+        DB.fees.monthlyLedger[sid][month] = {
+          month,
+          paid: false,
+          amount: mFee,
+          amountPaid: 0,
+          totalDue: mFee,
+          arrearsSnapshot: initialArrears
+        };
       }
       
-      DB.fees.monthlyLedger[sid][month] = { 
-         month, 
-         paid: true, 
-         paidOn: today(), 
-         totalDue: totalDue, 
-         amountPaid: amountPaid, 
-         arrearsSnapshot: saveSnapshot
-      };
+      if (DB.fees.payments && DB.fees.payments[sid] && DB.fees.payments[sid].f1 && !isPaid) {
+        delete DB.fees.payments[sid].f1;
+      }
       
-      s.fees = getLedgerArrears(sid, getNextMonth(month)) <= 0 ? 'Paid' : 'Pending';
+      s.fees = getLedgerArrears(sid, getNextMonth('2026-09')) <= 0 ? 'Paid' : 'Pending';
       
       saveDB();
-      
-      if (s.whatsapp) {
-        const sum = studentFeeSummary(sid);
-        let dueText = '';
-        if (sum.dueAmount > 0) {
-            dueText = `\nRemaining Balance: ${fmtMoney(sum.dueAmount)}\n`;
-        } else if (sum.dueAmount < 0) {
-            dueText = `\nAdvance Credit: ${fmtMoney(Math.abs(sum.dueAmount))}\n`;
-        } else {
-            dueText = `\nRemaining Balance: ${fmtMoney(0)}\n`;
-        }
-
-        const msg = `Dear Parent of ${s.name},
-
-We have successfully received the payment of ${fmtMoney(amountPaid)} for the month of ${month}.
-${dueText}
-Thank you.
-${DB.school.name}`;
-        openWhatsAppMessage(s.whatsapp, msg);
-      }
-
-      showToast('Payment received & ledger updated');
+      showToast(isPaid ? `${monthName} marked as PAID` : `${monthName} marked as UNPAID`);
       goPage('fees');
-        openStudentFeeModal(sid, month);
-        printFeeReceipt(sid, month);
+      openStudentFeeModal(sid, month);
+    }
+
+    function promptCustomMonthPayment(sid, month, defaultFee) {
+      const s = allStus().find(x => x.id === sid); if (!s) return;
+      const amtStr = prompt(`Enter received amount for ${month} (${s.name}):`, defaultFee);
+      if (amtStr === null) return;
+      const amt = num(amtStr);
+      toggleMonthPayment(sid, month, true, amt);
+    }
+
+    function markAllMonths(sid, isPaid) {
+      const s = allStus().find(x => x.id === sid); if (!s) return;
+      if (!DB.fees.monthlyLedger) DB.fees.monthlyLedger = {};
+      if (!DB.fees.monthlyLedger[sid]) DB.fees.monthlyLedger[sid] = {};
+      
+      const months = ['2026-08', '2026-09'];
+      const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      const initialArrears = getTrueInitialArrears(sid);
+      
+      months.forEach(m => {
+        const mIdx = parseInt(m.split('-')[1], 10) - 1;
+        const monthName = mNames[mIdx];
+        let itemsTotal = 0;
+        (DB.fees.items || []).forEach(f => {
+          if (f.id === 'f1') return;
+          if (f.applyMonth && f.applyMonth !== 'All' && f.applyMonth !== monthName) return;
+          itemsTotal += num(f.amount);
+        });
+        const mFee = monthlyFeeAmount(s) + num(s.vanFee || 0) + itemsTotal;
+        
+        if (isPaid) {
+          DB.fees.monthlyLedger[sid][m] = {
+            month: m,
+            paid: true,
+            paidOn: today(),
+            amount: mFee,
+            amountPaid: mFee,
+            totalDue: mFee,
+            arrearsSnapshot: initialArrears
+          };
+        } else {
+          DB.fees.monthlyLedger[sid][m] = {
+            month: m,
+            paid: false,
+            amount: mFee,
+            amountPaid: 0,
+            totalDue: mFee,
+            arrearsSnapshot: initialArrears
+          };
+        }
+      });
+      
+      s.fees = getLedgerArrears(sid, getNextMonth('2026-09')) <= 0 ? 'Paid' : 'Pending';
+      
+      saveDB();
+      showToast(isPaid ? 'Both August & September marked as PAID' : 'Both August & September marked as UNPAID');
+      goPage('fees');
+      openStudentFeeModal(sid);
+    }
+
+    function receiveStudentPayment(sid, month, totalDue, snapshotArrears) {
+      toggleMonthPayment(sid, month, true);
     }
     
     function unmarkStudentPayment(sid, month) {
-       const s = allStus().find(x => x.id === sid); if (!s) return;
-       if(!confirm('Undo payment? The ledger will automatically recalculate balances.')) return;
-       const mRow = DB.fees.monthlyLedger[sid][month];
-       if(mRow) {
-          delete DB.fees.monthlyLedger[sid][month];
-          
-          if (DB.fees.payments && DB.fees.payments[sid] && DB.fees.payments[sid].f1) {
-             delete DB.fees.payments[sid].f1;
-          }
-          
-          saveDB();
-          showToast('Payment undone');
-          openStudentFeeModal(sid, month);
-          goPage('fees');
-       }
+      toggleMonthPayment(sid, month, false);
     }
 
     function printFeeReceipt(sid, month) {
@@ -7767,7 +8080,8 @@ ${DB.school.name}`;
     function openFeeReminderModal(sid = '') {
       const students = allStus().filter(s => getStudentWA(s));
       if (!students.length) { showToast('No students with WhatsApp numbers found', 'te'); return; }
-      const selected = sid ? students.find(s => s.id === sid) : students.find(s => !(DB.fees.payments[s.id] || {})['f1']?.paid) || students[0];
+      const cm = monthKey();
+      const selected = sid ? students.find(s => s.id === sid) : students.find(s => !DB.fees.monthlyLedger?.[s.id]?.[cm]?.paid) || students[0];
       openModal(`
   <h3> Manual WhatsApp Fee Reminder</h3>
   <div class="ibox">Choose the parent, fee item, due date, and optional custom note. WhatsApp opens with the message ready to send.</div>
@@ -8184,7 +8498,7 @@ ${DB.school.name}`;
         return `<td style="padding:6px;vertical-align:top;background:var(--card);">
           <select class="fi" style="font-size:.7rem;padding:5px 8px;width:100%;margin-bottom:4px;font-weight:600;" onchange="setTT('${d}',${pi},'subject',this.value)">
             <option value="">- Subject -</option>
-            ${DB.subjects.map(s => `<option value="${s.name}" ${cell.subject === s.name ? 'selected' : ''}>${s.icon} ${s.name}</option>`).join('')}
+            ${getClsSubjects(curCls).map(s => `<option value="${s.name}" ${cell.subject === s.name ? 'selected' : ''}>${s.icon} ${s.name}</option>`).join('')}
           </select>
           <select class="fi" style="font-size:.68rem;padding:4px 8px;width:100%;" onchange="setTT('${d}',${pi},'teacher',this.value)">
             <option value="">- Teacher -</option>
@@ -8532,16 +8846,48 @@ ${DB.school?.name || 'School Administration'}`;
     /* ------------------------------- SUBJECTS ------------------------------- */
     function pgSubjects() {
       return `
-<div class="ph ph-row fu"><div><div class="ph-tag"> Subjects</div><h1>Subjects</h1></div><button class="btn btn-p" onclick="openSubjModal()">+ Add Subject</button></div>
-<div class="g3">${DB.subjects.map(s => `<div class="card fu" style="padding:12px;display:flex;align-items:center;gap:10px;"><div style="width:36px;height:36px;border-radius:8px;background:${s.color}18;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;border:1px solid ${s.color}30;flex-shrink:0;overflow:hidden;letter-spacing:-0.2px;text-align:center;">${cleanIcon(s.icon, s.code || 'SUB')}</div><div style="flex:1;min-width:0;"><div style="font-weight:700;font-size:.83rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.name}</div><div style="font-size:.66rem;color:var(--ink4);">${s.code}</div></div><div style="display:flex;flex-direction:column;gap:3px;"><button class="btn btn-xs btn-gh" onclick="openSubjModal('${s.id}')">Edit</button><button class="btn btn-xs" style="background:var(--rl);color:var(--r);" onclick="DB.subjects=DB.subjects.filter(x=>x.id!=='${s.id}');saveDB();showToast('Deleted');goPage('subjects')">Delete</button></div></div>`).join('')}<div class="card fu" style="display:flex;align-items:center;justify-content:center;border:2px dashed var(--border2);background:transparent;cursor:pointer;min-height:72px;" onclick="openSubjModal()"><div style="text-align:center;color:var(--ink4);"><div style="font-size:1.1rem;">+</div><div style="font-size:.7rem;font-weight:600;">Add Subject</div></div></div></div>`;
+<div class="ph ph-row fu"><div><div class="ph-tag"> Subjects</div><h1>Subjects</h1><div class="ph-sub">Assign subjects to specific classes</div></div><button class="btn btn-p" onclick="openSubjModal()">+ Add Subject</button></div>
+<div class="g3">${DB.subjects.map(s => {
+        const assignedClasses = (s.classIds || []).map(cid => (DB.classes.find(c => c.id === cid) || {}).name).filter(Boolean);
+        const clsLabel = assignedClasses.length === 0 ? '<span style="color:var(--ink4);font-style:italic;">All Classes</span>' : assignedClasses.length <= 3 ? assignedClasses.join(', ') : `${assignedClasses.slice(0,2).join(', ')} + ${assignedClasses.length - 2} more`;
+        return `<div class="card fu" style="padding:14px;display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:38px;height:38px;border-radius:8px;background:${s.color}18;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;border:1px solid ${s.color}30;flex-shrink:0;overflow:hidden;letter-spacing:-0.2px;text-align:center;color:${s.color};">${cleanIcon(s.icon, s.code || 'SUB')}</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-weight:700;font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.name}</div>
+              <div style="font-size:.68rem;color:var(--ink4);">Code: ${s.code || '-'}</div>
+            </div>
+            <div style="display:flex;gap:4px;">
+              <button class="btn btn-xs btn-gh" onclick="openSubjModal('${s.id}')">Edit</button>
+              <button class="btn btn-xs" style="background:var(--rl);color:var(--r);" onclick="if(confirm('Delete ${s.name}?')){DB.subjects=DB.subjects.filter(x=>x.id!=='${s.id}');saveDB();if(_sb&&typeof pushCloudDB==='function')pushCloudDB();showToast('Deleted');goPage('subjects')}">Delete</button>
+            </div>
+          </div>
+          <div style="font-size:.7rem;color:var(--ink3);border-top:1px solid var(--border);padding-top:8px;">
+            <b>Classes:</b> ${clsLabel}
+          </div>
+        </div>`;
+      }).join('')}<div class="card fu" style="display:flex;align-items:center;justify-content:center;border:2px dashed var(--border2);background:transparent;cursor:pointer;min-height:90px;" onclick="openSubjModal()"><div style="text-align:center;color:var(--ink4);"><div style="font-size:1.3rem;">+</div><div style="font-size:.75rem;font-weight:600;">Add Subject</div></div></div></div>`;
     }
     function openSubjModal(eid) { 
       const s = eid ? DB.subjects.find(x => x.id === eid) : null; 
       const classCheckboxes = DB.classes.map(c => {
-        const isChecked = (!s?.classIds || s.classIds.length === 0 || s.classIds.includes(c.id)) ? 'checked' : '';
-        return `<label style="display:flex;align-items:center;gap:5px;font-size:.75rem;cursor:pointer;"><input type="checkbox" class="subj-cls-cb" value="${c.id}" ${isChecked}/> ${c.name}</label>`;
+        const isChecked = (s && Array.isArray(s.classIds) && s.classIds.includes(c.id)) ? 'checked' : (!s ? 'checked' : '');
+        return `<label style="display:flex;align-items:center;gap:6px;font-size:.78rem;cursor:pointer;background:#fff;border:1px solid var(--border);padding:6px 10px;border-radius:6px;"><input type="checkbox" class="subj-cls-cb" value="${c.id}" ${isChecked}/> ${c.name}</label>`;
       }).join('');
-      openModal(`<h3>${s ? 'Edit Subject' : 'Add Subject'}</h3><div class="fg2"><div class="fg"><label class="fl">Name <span class="req">*</span></label><input class="fi" id="ms-name" value="${s?.name || ''}" placeholder="Mathematics"/></div><div class="fg"><label class="fl">Code</label><input class="fi" id="ms-code" value="${s?.code || ''}" placeholder="MATH"/></div></div><div class="fg2"><div class="fg"><label class="fl">Icon Text</label><input class="fi" id="ms-icon" value="${cleanIcon(s?.icon, '')}" placeholder="MATH"/></div><div class="fg"><label class="fl">Color</label><input class="fi" type="color" id="ms-color" value="${s?.color || '#2563eb'}" style="height:44px;cursor:pointer;padding:6px;"/></div></div><div class="fg"><label class="fl">Assigned Classes</label><div style="display:flex;flex-wrap:wrap;gap:10px;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--card2);max-height:150px;overflow-y:auto;">${classCheckboxes}</div></div><div class="m-btns"><button class="btn btn-p" onclick="saveSubj('${eid || ''}')"> ${s ? 'Update' : 'Add'}</button><button class="btn btn-gh" onclick="closeModal()">Cancel</button></div>`); 
+      openModal(`<h3>${s ? 'Edit Subject' : 'Add Subject'}</h3>
+      <div class="fg2"><div class="fg"><label class="fl">Name <span class="req">*</span></label><input class="fi" id="ms-name" value="${s?.name || ''}" placeholder="Mathematics"/></div><div class="fg"><label class="fl">Code</label><input class="fi" id="ms-code" value="${s?.code || ''}" placeholder="MATH"/></div></div>
+      <div class="fg2"><div class="fg"><label class="fl">Icon Text</label><input class="fi" id="ms-icon" value="${cleanIcon(s?.icon, '')}" placeholder="MATH"/></div><div class="fg"><label class="fl">Color</label><input class="fi" type="color" id="ms-color" value="${s?.color || '#2563eb'}" style="height:44px;cursor:pointer;padding:6px;"/></div></div>
+      <div class="fg">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <label class="fl" style="margin:0;">Assigned Classes</label>
+          <div style="display:flex;gap:6px;">
+            <button type="button" class="btn btn-xs btn-gh" onclick="document.querySelectorAll('.subj-cls-cb').forEach(cb=>cb.checked=true)">Select All</button>
+            <button type="button" class="btn btn-xs btn-gh" onclick="document.querySelectorAll('.subj-cls-cb').forEach(cb=>cb.checked=false)">Clear All</button>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(130px, 1fr));gap:6px;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--card2);max-height:180px;overflow-y:auto;">${classCheckboxes}</div>
+      </div>
+      <div class="m-btns"><button class="btn btn-p" onclick="saveSubj('${eid || ''}')">${s ? 'Update Subject' : 'Add Subject'}</button><button class="btn btn-gh" onclick="closeModal()">Cancel</button></div>`); 
     }
     function saveSubj(eid) { 
   const name = (document.getElementById('ms-name')?.value || '').trim(); 
@@ -8555,7 +8901,11 @@ ${DB.school?.name || 'School Administration'}`;
   } else {
     DB.subjects.push({ id: uid(), ...obj }); 
   }
-  saveDB(); closeModal(); showToast('Saved', 'ts'); goPage('subjects'); 
+  saveDB();
+  if (_sb && typeof pushCloudDB === 'function') pushCloudDB();
+  closeModal();
+  showToast('Saved & Synced', 'ts');
+  goPage('subjects');
 }
 
     /* ------------------------------- REPORT CARDS ------------------------------- */
@@ -8574,42 +8924,243 @@ ${DB.school?.name || 'School Administration'}`;
 <div class="card fu d1"><div class="ch"><div class="ct">Select Student</div></div><div style="display:flex;flex-wrap:wrap;gap:7px;">${sts.map(s => `<button class="btn btn-gh btn-sm" onclick="openReportCard('${s.id}','${curCls}')" style="display:flex;align-items:center;gap:7px;"><div class="ava" style="width:22px;height:22px;border-radius:5px;background:${gc(s.name)};font-size:.46rem;flex-shrink:0;">${s.photo ? `<img src="${s.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:5px;"/>` : ini(s.name)}</div>${s.name}</button>`).join('')}</div></div>`}`;
     }
     function switchRCCls(cid) { curCls = cid; updatePill(); goPage('reportcards'); }
+    function printStudentReportCard(sid, cid) {
+      const content = document.getElementById('printable-reportcard');
+      if (!content) { window.print(); return; }
+      const pw = window.open('', '_blank', 'width=950,height=1250');
+      if (!pw) { window.print(); return; }
+      pw.document.open();
+      pw.document.write(`<!DOCTYPE html>
+<html>
+<head>
+  <title>Progress Report Card - ${escHtml(DB.school.name)}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800;12..96,900&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    body { background:#fff; font-family:'Inter',system-ui,sans-serif; padding:12mm 15mm; color:#0f172a; }
+    @page { size: A4 portrait; margin: 8mm; }
+    @media print {
+      body { padding: 4mm 6mm; }
+      .no-print { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+  ${content.outerHTML}
+</body>
+</html>`);
+      pw.document.close();
+      const s = pw.document.createElement('script');
+      s.textContent = 'setTimeout(function() { window.focus(); window.print(); }, 500);';
+      pw.document.body.appendChild(s);
+    }
+
+    const OXFORD_STAMP_B64 = "data:image/png;base64,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";
+
     function openReportCard(sid, cid) {
       const s = clsStus(cid).find(x => x.id === sid); if (!s) return;
       const cls = DB.classes.find(c => c.id === cid);
       const grades = DB.grades[cid + '_' + curTerm]?.[sid] || {};
       const ap = attPct(cid, sid);
-      const rows = getClsSubjects(curCls).map(sub => { const v = grades[sub.id] || 0; return { sub, v }; });
+      const rows = getClsSubjects(cid).map(sub => { const v = grades[sub.id] || 0; return { sub, v }; });
       const filled = rows.filter(r => r.v > 0);
       const total = filled.reduce((a, r) => a + r.v, 0);
+      const maxPossible = rows.length * 100;
       const av = filled.length ? Math.round(total / filled.length) : 0;
+      const isPass = av >= 40;
+      const termName = (DB.settings?.terms?.find(t => t.id === curTerm) || {}).name || 'Academic Assessment';
+      const cleanSchoolName = escHtml(DB.school.name || 'Oxford Excellence Academy');
+      const cleanTagline = escHtml(DB.school.tagline || 'Learn • Grow • Excel');
+      const cleanAddress = escHtml(DB.school.address || 'R-84, Sector 10, Bagh-e-Korangi, Karachi');
+      const cleanPhone = escHtml(DB.school.phone || '0320-5772271');
+
       openModal(`
-  <div class="rc">
-    <div class="rc-head">
-      <div class="rc-hl">${DB.school.logo ? `<img src="${DB.school.logo}"/>` : ''}</div>
-      <div><div class="rc-hn">${DB.school.name}</div><div class="rc-hs">${DB.school.tagline || ''}</div></div>
+  <div id="printable-reportcard" class="rc-doc" style="background:#ffffff;border:2px solid #0a192f;padding:26px 30px;font-family:'Inter',system-ui,sans-serif;color:#0f172a;box-sizing:border-box;position:relative;border-radius:4px;">
+    
+    <!-- Top Decorative Line -->
+    <div style="height:5px;background:linear-gradient(90deg, #0a192f 0%, #c9a84c 50%, #0a192f 100%);margin:-26px -30px 22px -30px;"></div>
+
+    <!-- Official Header (Never cut off! Generous breathing space) -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;border-bottom:2px solid #0a192f;gap:20px;">
+      <!-- Logo with plenty of padding and explicit height -->
+      <div style="width:84px;height:84px;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:4px;">
+        <img src="${DB.school.logo || 'oxford_logo.svg'}" style="max-width:100%;max-height:100%;object-fit:contain;display:block;" alt="School Crest"/>
+      </div>
+
+      <!-- School Identity -->
+      <div style="flex:1;text-align:center;">
+        <div style="font-family:'Bricolage Grotesque',Georgia,serif;font-size:1.55rem;font-weight:900;letter-spacing:0.8px;color:#0a192f;text-transform:uppercase;line-height:1.15;">
+          ${cleanSchoolName}
+        </div>
+        <div style="font-size:0.82rem;font-weight:700;color:#c9a84c;letter-spacing:1px;margin-top:3px;font-style:italic;">
+          ${cleanTagline}
+        </div>
+        <div style="font-size:0.72rem;color:#475569;margin-top:3px;font-weight:500;">
+          ${cleanAddress} &bull; Ph: ${cleanPhone}
+        </div>
+      </div>
+
+      <!-- Term & Session Badge -->
+      <div style="text-align:right;flex-shrink:0;min-width:110px;">
+        <div style="border:1.5px solid #0a192f;border-radius:6px;padding:6px 10px;background:#f8fafc;text-align:center;">
+          <div style="font-size:0.62rem;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Academic Session</div>
+          <div style="font-size:0.9rem;font-weight:900;color:#0a192f;margin-top:1px;">${DB.settings?.schoolYear || '2025-26'}</div>
+        </div>
+      </div>
     </div>
-    <div class="rc-body">
-      <div style="text-align:center;background:var(--card2);border-radius:9px;padding:9px;margin-bottom:14px;"><div style="font-weight:700;font-size:.86rem;color:var(--ink2);letter-spacing:.4px;text-transform:uppercase;">Progress Report Card</div><div style="font-size:.72rem;color:var(--ink4);">Academic Year ${DB.settings?.schoolYear || ''}</div></div>
-      <div style="display:flex;gap:12px;margin-bottom:14px;">
-        <div class="ava" style="width:56px;height:56px;border-radius:11px;background:${gc(s.name)};font-size:.98rem;flex-shrink:0;">${s.photo ? `<img src="${s.photo}"/>` : ini(s.name)}</div>
-        <div><div style="font-weight:700;font-size:.95rem;">${s.name}</div><div style="font-size:.72rem;color:var(--ink3);margin-top:2px;">Class: <b>${cls?.name || ''}${cls?.section ? ' ' + cls.section : ''}</b> - Roll: <b>${s.roll || '-'}</b></div><div style="font-size:.7rem;color:var(--ink3);">Father: ${s.father || '-'} - Attendance: <b style="color:${ap >= 90 ? 'var(--g)' : ap >= 75 ? 'var(--o)' : 'var(--r)'};">${ap}%</b></div></div>
+
+    <!-- Report Title Ribbon -->
+    <div style="text-align:center;margin:14px 0 16px 0;">
+      <span style="display:inline-block;background:#0a192f;color:#ffffff;padding:5px 22px;border-radius:20px;font-size:0.82rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;">
+        STUDENT PROGRESS REPORT &bull; ${escHtml(termName.toUpperCase())}
+      </span>
+    </div>
+
+    <!-- Student Details Grid (Official Box) -->
+    <div style="border:1px solid #cbd5e1;background:#f8fafc;border-radius:8px;padding:12px 16px;margin-bottom:18px;">
+      <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:10px 16px;font-size:0.78rem;">
+        <div>
+          <div style="font-size:0.64rem;color:#64748b;font-weight:700;text-transform:uppercase;">Student Name</div>
+          <div style="font-size:0.92rem;font-weight:800;color:#0a192f;text-transform:uppercase;margin-top:2px;">${escHtml(s.name)}</div>
+        </div>
+        <div>
+          <div style="font-size:0.64rem;color:#64748b;font-weight:700;text-transform:uppercase;">Father / Guardian</div>
+          <div style="font-size:0.88rem;font-weight:700;color:#0f172a;margin-top:2px;">${escHtml(s.father || '-')}</div>
+        </div>
+        <div>
+          <div style="font-size:0.64rem;color:#64748b;font-weight:700;text-transform:uppercase;">Class & Section</div>
+          <div style="font-size:0.88rem;font-weight:800;color:#0a192f;margin-top:2px;">${escHtml(cls?.name || '')}${cls?.section ? ' (' + escHtml(cls.section) + ')' : ''} &bull; Roll #${s.roll || '-'}</div>
+        </div>
+        <div>
+          <div style="font-size:0.64rem;color:#64748b;font-weight:700;text-transform:uppercase;">Term Attendance</div>
+          <div style="font-size:0.88rem;font-weight:800;color:${ap >= 85 ? '#16a34a' : ap >= 75 ? '#d97706' : '#dc2626'};
+margin-top:2px;">${ap}% Regularity</div>
+        </div>
       </div>
-      <table style="margin-bottom:11px;">
-        <thead><tr><th>Subject</th><th style="text-align:center;">Marks</th><th style="text-align:center;">%</th><th style="text-align:center;">Grade</th></tr></thead>
-        <tbody>${rows.map(({ sub, v }) => `<tr><td>${sub.icon} <b>${sub.name}</b></td><td style="text-align:center;font-weight:700;">${v || '-'}</td><td style="text-align:center;"><div class="pb" style="width:56px;display:inline-block;vertical-align:middle;margin-right:5px;"><div class="pf" style="width:${v}%;background:${sub.color};"></div></div>${v}%</td><td style="text-align:center;"><span class="badge ${gCls(v)}">${lGrade(v)}</span></td></tr>`).join('')}
-        <tr style="background:var(--card2);"><td><b>Overall</b></td><td style="text-align:center;font-weight:800;">${total}</td><td style="text-align:center;font-weight:800;color:${sCol(av)};">${av}%</td><td style="text-align:center;"><span class="badge ${gCls(av)}" style="font-size:.74rem;">${lGrade(av)}</span></td></tr></tbody>
+    </div>
+
+    <!-- Marks Table (Executive Academic Table) -->
+    <div style="border:1px solid #cbd5e1;border-radius:6px;overflow:hidden;margin-bottom:16px;">
+      <table style="width:100%;border-collapse:collapse;font-size:0.84rem;margin:0;">
+        <thead>
+          <tr style="background:#0a192f;color:#ffffff;text-transform:uppercase;font-size:0.72rem;letter-spacing:0.6px;">
+            <th style="padding:10px 14px;text-align:center;width:38px;background:#0a192f !important;color:#ffffff !important;border:none;">#</th>
+            <th style="padding:10px 14px;text-align:left;background:#0a192f !important;color:#ffffff !important;border:none;">Subject Name</th>
+            <th style="padding:10px 14px;text-align:center;width:95px;background:#0a192f !important;color:#ffffff !important;border:none;">Max Marks</th>
+            <th style="padding:10px 14px;text-align:center;width:95px;background:#0a192f !important;color:#ffffff !important;border:none;">Obtained</th>
+            <th style="padding:10px 14px;text-align:center;width:80px;background:#0a192f !important;color:#ffffff !important;border:none;">%</th>
+            <th style="padding:10px 14px;text-align:center;width:75px;background:#0a192f !important;color:#ffffff !important;border:none;">Grade</th>
+            <th style="padding:10px 14px;text-align:center;width:130px;background:#0a192f !important;color:#ffffff !important;border:none;">Remarks</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map(({ sub, v }, idx) => {
+            const grade = lGrade(v);
+            const remark = v >= 85 ? 'Outstanding' : v >= 75 ? 'Excellent' : v >= 60 ? 'Good' : v >= 50 ? 'Satisfactory' : v > 0 ? 'Needs Attention' : '-';
+            return `
+            <tr style="border-bottom:1px solid #e2e8f0;background:${idx % 2 === 0 ? '#ffffff' : '#f8fafc'};">
+              <td style="padding:9px 14px;color:#64748b;font-weight:600;text-align:center;">${idx + 1}</td>
+              <td style="padding:9px 14px;text-align:left;">
+                <span style="font-weight:700;color:#0f172a;font-size:0.86rem;">${escHtml(sub.name)}</span>
+                ${sub.code && sub.code.toUpperCase() !== sub.name.toUpperCase() ? `<span style="font-size:0.62rem;color:#64748b;font-weight:600;margin-left:6px;background:#e2e8f0;padding:2px 5px;border-radius:3px;">${escHtml(sub.code)}</span>` : ''}
+              </td>
+              <td style="padding:9px 14px;text-align:center;color:#64748b;font-weight:600;">100</td>
+              <td style="padding:9px 14px;text-align:center;font-weight:800;font-size:0.92rem;color:${v > 0 ? '#0a192f' : '#94a3b8'};">${v > 0 ? v : '-'}</td>
+              <td style="padding:9px 14px;text-align:center;font-weight:700;color:${v >= 50 ? '#0f172a' : '#dc2626'};">${v > 0 ? v + '%' : '-'}</td>
+              <td style="padding:9px 14px;text-align:center;">
+                <span style="font-weight:800;font-size:0.82rem;color:${v >= 80 ? '#15803d' : v >= 60 ? '#b45309' : '#b91c1c'};">${grade}</span>
+              </td>
+              <td style="padding:9px 14px;text-align:center;font-size:0.74rem;font-weight:600;color:${v >= 75 ? '#15803d' : v >= 50 ? '#475569' : '#b91c1c'};">${remark}</td>
+            </tr>`;
+          }).join('')}
+          <!-- Grand Total Row -->
+          <tr style="background:#f1f5f9;border-top:2px solid #0a192f;font-weight:800;">
+            <td colspan="2" style="padding:10px 14px;text-align:left;font-size:0.88rem;color:#0a192f;letter-spacing:0.8px;text-transform:uppercase;font-weight:900;">GRAND TOTAL</td>
+            <td style="padding:10px 14px;text-align:center;font-size:0.9rem;color:#0a192f;font-weight:800;">${maxPossible}</td>
+            <td style="padding:10px 14px;text-align:center;font-size:1.02rem;color:#0a192f;font-weight:900;">${total}</td>
+            <td style="padding:10px 14px;text-align:center;font-size:1.02rem;color:${sCol(av)};font-weight:900;">${av}%</td>
+            <td style="padding:10px 14px;text-align:center;font-size:0.95rem;color:#0a192f;font-weight:900;">${lGrade(av)}</td>
+            <td style="padding:10px 14px;text-align:center;font-size:0.82rem;font-weight:900;color:${isPass ? '#15803d' : '#b91c1c'};text-transform:uppercase;">${isPass ? 'PROMOTED' : 'CONDITIONAL'}</td>
+          </tr>
+        </tbody>
       </table>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
-        <div style="background:${av >= 40 ? 'var(--gl)' : 'var(--rl)'};border-radius:8px;padding:9px;text-align:center;"><div style="font-size:.64rem;color:var(--ink4);">Result</div><div style="font-weight:800;font-size:1.05rem;color:${av >= 40 ? 'var(--g)' : 'var(--r)'};">${av >= 40 ? 'PASS ?' : 'FAIL ?'}</div></div>
-        <div style="background:var(--card2);border-radius:8px;padding:9px;text-align:center;"><div style="font-size:.64rem;color:var(--ink4);">Overall Grade</div><div style="font-weight:800;font-size:1.05rem;color:${sCol(av)};">${lGrade(av)}</div></div>
+    </div>
+
+    <!-- Result & Cumulative Performance Summary -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+      <div style="border:1.5px solid ${isPass ? '#86efac' : '#fca5a5'};background:${isPass ? '#f0fdf4' : '#fef2f2'};border-radius:6px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.5px;font-weight:700;color:${isPass ? '#166534' : '#991b1b'};">Final Academic Standing</div>
+          <div style="font-size:1.2rem;font-weight:900;color:${isPass ? '#15803d' : '#b91c1c'};margin-top:2px;">${isPass ? 'PASSED / PROMOTED' : 'NEEDS IMPROVEMENT'}</div>
+        </div>
+        <div style="font-size:1.8rem;">${isPass ? '🎓' : '⚠️'}</div>
       </div>
-      <div style="font-size:.66rem;color:var(--ink5);text-align:center;border-top:1px solid var(--border);padding-top:8px;">${DB.school.name} - ${DB.school.city || ''} - Printed: ${fmtDate(today())}</div>
+
+      <div style="border:1.5px solid #cbd5e1;background:#f8fafc;border-radius:6px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.5px;font-weight:700;color:#475569;">Cumulative Performance</div>
+          <div style="font-size:1.2rem;font-weight:900;color:#0a192f;margin-top:2px;">Grade ${lGrade(av)} <span style="font-size:0.85rem;font-weight:700;color:${sCol(av)};">(${av}%)</span></div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:0.65rem;color:#64748b;">Evaluated Subjects</div>
+          <div style="font-size:0.95rem;font-weight:800;color:#0a192f;">${filled.length} of ${rows.length}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grading Scale Key -->
+    <div style="border:1px solid #e2e8f0;background:#f8fafc;border-radius:4px;padding:6px 12px;margin-bottom:24px;font-size:0.64rem;color:#475569;display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px;">
+      <span><b>Grading Scale:</b></span>
+      <span><b>A+</b> &ge; 90% (Outstanding)</span>
+      <span><b>A</b> &ge; 80% (Excellent)</span>
+      <span><b>B+</b> &ge; 70% (Very Good)</span>
+      <span><b>B</b> &ge; 60% (Good)</span>
+      <span><b>C</b> &ge; 50% (Satisfactory)</span>
+      <span><b>F</b> &lt; 50% (Fail)</span>
+    </div>
+
+    <!-- Official Signatures -->
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:16px;padding-top:10px;">
+      <div style="text-align:center;width:180px;">
+        <div style="border-bottom:1.5px solid #0f172a;margin-bottom:6px;height:24px;"></div>
+        <div style="font-size:0.75rem;font-weight:800;color:#0f172a;">Class Teacher</div>
+        <div style="font-size:0.62rem;color:#64748b;">Signature & Date</div>
+      </div>
+      <div style="text-align:center;display:flex;align-items:center;justify-content:center;">
+        <img src="${OXFORD_STAMP_B64}" style="width:80px;height:80px;object-fit:contain;transform:rotate(-2deg);" alt="Institutional Stamp"/>
+      </div>
+      <div style="text-align:center;width:180px;">
+        <div style="border-bottom:1.5px solid #0f172a;margin-bottom:6px;height:24px;"></div>
+        <div style="font-size:0.75rem;font-weight:800;color:#0f172a;">Principal / Headmistress</div>
+        <div style="font-size:0.62rem;color:#64748b;">Authorized Signatory</div>
+      </div>
+    </div>
+
+    <!-- Official Footer Note -->
+    <div style="margin-top:20px;text-align:center;font-size:0.6rem;color:#94a3b8;border-top:1px solid #e2e8f0;padding-top:6px;">
+      Official Academic Transcript &bull; Issued by ${cleanSchoolName} &bull; Generated digitally via Oxford Portal
     </div>
   </div>
-  <div class="m-btns no-print" style="margin-top:11px;"><button class="btn btn-p" onclick="window.print()"> Print</button><button class="btn btn-gh" onclick="closeModal()">Close</button></div>`);
-    }
 
+  <!-- Action Buttons (Hidden when printing!) -->
+  <div class="m-btns no-print" style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;">
+    <button class="btn btn-p" onclick="printStudentReportCard('${sid}', '${cid}')" style="display:flex;align-items:center;gap:6px;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+      Print / Download PDF
+    </button>
+    ${getStudentWA(s) ? `
+    <button class="btn btn-wa" onclick="sendWhatsAppAPI('${getStudentWA(s)}', 'Dear Parent,\n\nProgress Report Card for ${escAttr(s.name)} (${escAttr(cls?.name || '')}):\nOverall Marks: ${total}/${maxPossible} (${av}%)\nOverall Grade: ${lGrade(av)}\nResult: ${isPass ? 'PASSED' : 'NEEDS ATTENTION'}\nAttendance: ${ap}%\n\n${cleanSchoolName}')" style="display:flex;align-items:center;gap:6px;">
+      WhatsApp Parent
+    </button>` : ''}
+    <button class="btn btn-gh" onclick="closeModal()">Close</button>
+  </div>
+      `);
+
+      const m = document.querySelector('.modal');
+      if (m) m.classList.add('modal-wide');
+    }
     /* ------------------------------- FAMILIES ------------------------------- */
     function pgFamilies() {
       const fams = Object.entries(DB.families);
@@ -8896,7 +9447,7 @@ ${DB.school?.name || 'School Administration'}`;
 </div>
 <div class="card fu d2">
   <div class="ch"><div class="ct"> Subject Marks</div><button class="btn btn-p btn-sm" onclick="switchCls(getStu().classId||curCls);goPage('reportcards');setTimeout(()=>openReportCard(getStu().id,getStu().classId||curCls),200)"> Report Card</button></div>
-    ${DB.subjects.map(sub => {
+    ${getClsSubjects(cid).map(sub => {
         const v = grades[sub.id] || 0; const l = lGrade(v); return `<div style="display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--border);">
     <div style="min-width:38px;padding:0 6px;height:32px;border-radius:8px;background:${sub.color}18;display:flex;align-items:center;justify-content:center;font-size:.76rem;font-weight:700;flex-shrink:0;border:1px solid ${sub.color}28;white-space:nowrap;overflow:hidden;">${sub.icon}</div>
     <div style="flex:1;"><div style="font-weight:700;font-size:.82rem;">${sub.name}</div><div class="pb" style="margin-top:5px;"><div class="pf" style="width:${v}%;background:${sub.color};"></div></div></div>
@@ -8970,13 +9521,14 @@ ${DB.school?.name || 'School Administration'}`;
         if(renderItems.length === 0) return showToast('No records found', 'te');
       } else {
         const isStaff = curCls === 'staff';
-        filename = isStaff ? 'Staff_ID_Cards.pdf' : (window.idCardMode === 'pickup' ? 'Pickup_Cards.pdf' : 'Class_ID_Cards.pdf');
+        const isPickup = window.idCardMode === 'pickup';
+        const isAdmit = window.idCardMode === 'admit';
+        filename = isStaff ? 'Staff_ID_Cards.pdf' : (isPickup ? 'Pickup_Cards.pdf' : (isAdmit ? 'Exam_Admit_Cards.pdf' : 'Class_ID_Cards.pdf'));
         if (isStaff) {
           DB.users.filter(u => u.role === 'teacher' || u.role === 'scanner').forEach(u => renderItems.push({type: 'staff', obj: u}));
         } else {
           const cls = DB.classes.find(c => c.id === curCls) || DB.classes[0];
-          const isPickup = window.idCardMode === 'pickup';
-          (cls ? clsStus(cls.id) : []).forEach(stu => renderItems.push({type: isPickup ? 'pickup' : 'student', obj: stu}));
+          (cls ? clsStus(cls.id) : []).forEach(stu => renderItems.push({type: isPickup ? 'pickup' : (isAdmit ? 'admit' : 'student'), obj: stu}));
         }
         if(renderItems.length === 0) return showToast('No records found', 'te');
       }
@@ -9010,6 +9562,7 @@ ${DB.school?.name || 'School Administration'}`;
             ${group.map(item => {
               if (item.type === 'staff') return staffIdCardHtml(item.obj);
               if (item.type === 'pickup') return classIdCardHtml(item.obj, 'pickup');
+              if (item.type === 'admit') return classIdCardHtml(item.obj, 'admit');
               return classIdCardHtml(item.obj, 'student');
             }).join('')}
           </section>`;
@@ -9073,9 +9626,15 @@ ${DB.school?.name || 'School Administration'}`;
       const idNo = (stu.roll || stu.id || '').toString();
       const yr = DB.settings?.schoolYear || '2025 - 2026';
       const isPickup = forceMode === 'pickup' || (!forceMode && window.idCardMode === 'pickup');
+      const isAdmit = forceMode === 'admit' || (!forceMode && window.idCardMode === 'admit');
+
+      const cardRole = isAdmit ? 'EXAM ADMIT CARD' : (isPickup ? 'PARENT PICKUP' : 'STUDENT');
+      const cardTheme = isAdmit ? 'ox-admit' : (isPickup ? 'ox-pickup' : '');
+      const examTitle = DB.settings?.examTerm || 'MID-TERM 2026';
+
       return `<div class="vid-card-wrap" style="display:inline-block; margin:5px;">
         <div class="vid-card">
-          <div class="vid-card-inner ${isPickup ? 'ox-pickup' : ''}">
+          <div class="vid-card-inner ${cardTheme}">
             <div class="ox-header-bg"></div>
             <div class="ox-logo-box"><img src="logo.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/4774/4774574.png'"></div>
             <div class="ox-logo-text">OXFORD EXCELLENCE ACADEMY</div>
@@ -9084,17 +9643,17 @@ ${DB.school?.name || 'School Administration'}`;
             
             <div class="ox-name-wrap">
               <div class="ox-name">${(stu.name||'Student').replace(/^(\S+)\s+(.+)$/, '<div>$1</div><div>$2</div>')}</div>
-              <div class="ox-role">${isPickup ? 'PARENT PICKUP' : 'STUDENT'}</div>
+              <div class="ox-role">${cardRole}</div>
             </div>
             
             <div class="ox-grid">
               <div class="ox-data-item">
-                <div class="ox-lbl">ID NO.</div>
-                <div class="ox-val">${String(idNo || '001').padStart(3,'0')}</div>
+                <div class="ox-lbl">${isAdmit ? 'ROLL NO.' : 'ID NO.'}</div>
+                <div class="ox-val">${String(stu.roll || idNo || '001').padStart(3,'0')}</div>
               </div>
               <div class="ox-data-item">
-                <div class="ox-lbl">SESSION</div>
-                <div class="ox-val">${yr}</div>
+                <div class="ox-lbl">${isAdmit ? 'EXAM' : 'SESSION'}</div>
+                <div class="ox-val">${isAdmit ? examTitle : yr}</div>
               </div>
               <div class="ox-data-item">
                 <div class="ox-lbl">GRADE</div>
@@ -9170,17 +9729,22 @@ ${DB.school?.name || 'School Administration'}`;
       
       const optHtml = `<option value="staff" ${curCls === 'staff' ? 'selected' : ''}>🏫 Staff & Teachers</option>` + DB.classes.map(c => `<option value="${c.id}" ${c.id === curCls ? 'selected' : ''}>${c.name}${c.section ? ' ' + c.section : ''}</option>`).join('');
       const isPickup = window.idCardMode === 'pickup';
-      const typeHtml = isStaff ? '' : `<select class="fi" style="width:auto; margin-left:8px;" onchange="window.idCardMode=this.value; goPage('idcards')"><option value="student" ${!isPickup?'selected':''}>Student ID Cards</option><option value="pickup" ${isPickup?'selected':''}>Parent Pickup Cards (Green)</option></select>`;
+      const isAdmit = window.idCardMode === 'admit';
+      const typeHtml = isStaff ? '' : `<select class="fi" style="width:auto; margin-left:8px;" onchange="window.idCardMode=this.value; goPage('idcards')"><option value="student" ${(!isPickup && !isAdmit)?'selected':''}>Student ID Cards</option><option value="pickup" ${isPickup?'selected':''}>Parent Pickup Cards (Green)</option><option value="admit" ${isAdmit?'selected':''}>🎓 Exam Admit Cards (Roll No Slips)</option></select>`;
       
+      const tagText = isStaff ? 'Staff ID' : (isAdmit ? 'Admit Cards' : (isPickup ? 'Pickup Cards' : 'ID Cards'));
+      const titleText = isStaff ? 'Staff ID Cards' : (isAdmit ? 'Examination Admit Cards' : (isPickup ? 'Parent Pickup Cards' : 'Class ID Cards'));
+      const subText = isStaff ? 'Staff & Teachers' : (isAdmit ? 'exam admit cards with roll numbers and hall QR' : (isPickup ? 'authorized pickup cards' : 'attendance QR cards'));
+
       return `
-<div class="ph ph-row fu no-print"><div><div class="ph-tag">${isPickup ? 'Pickup Cards' : 'ID Cards'}</div><h1>${isStaff ? 'Staff ID Cards' : (isPickup ? 'Parent Pickup Cards' : 'Class ID Cards')}</h1><div class="ph-sub">Print ${entities.length} ${isPickup ? 'authorized pickup cards' : 'attendance QR cards'} for ${isStaff ? 'Staff & Teachers' : (cls?.name || 'selected class')} on A4 sheets.</div></div>
+<div class="ph ph-row fu no-print"><div><div class="ph-tag">${tagText}</div><h1>${titleText}</h1><div class="ph-sub">Print ${entities.length} ${subText} for ${isStaff ? 'Staff & Teachers' : (cls?.name || 'selected class')} on A4 sheets.</div></div>
   <div class="ph-acts" style="display:flex; align-items:center;">
   <select class="fi" style="width:auto;min-width:180px;" onchange="switchIdCardClass(this.value)">${optHtml}</select>
   ${typeHtml}
   <button class="btn btn-gh btn-sm" style="margin-left:8px;" onclick="downloadIdCardsPdf('all')">Download All (PDF)</button>
   <button class="btn btn-p btn-sm" onclick="downloadIdCardsPdf('class')">Download PDF</button>
   <button class="btn btn-gh btn-sm" onclick="printClassIdCards()">Print</button></div></div>
-<div class="id-print-toolbar no-print"><div class="ibox" style="margin:0;flex:1;">Each card is 2.125in x 3.375in and includes the attendance QR used by the scanner.</div></div>
+<div class="id-print-toolbar no-print"><div class="ibox" style="margin:0;flex:1;">${isAdmit ? '🎓 Examination Admit Cards: CR-80 standard badge (2.125in x 3.375in) with student roll number, exam term, and hall check-in QR.' : 'Each card is 2.125in x 3.375in and includes the attendance QR used by the scanner.'}</div></div>
 <div class="id-print-area">
   ${sheets.length ? sheets.map(group => `<section class="id-a4-sheet">${group.map(e => isStaff ? staffIdCardHtml(e) : classIdCardHtml(e)).join('')}</section>`).join('') : '<div class="empty">No records found.</div>'}
 </div>`;
@@ -10151,6 +10715,8 @@ ${DB.school.name}`;
     function closeModal() {
       const bg = document.getElementById('modal-bg');
       if (bg) bg.classList.remove('open');
+      const m = document.querySelector('.modal');
+      if (m) m.classList.remove('modal-wide');
       const body = document.getElementById('modal-body');
       if (body) body.innerHTML = '';
     }
@@ -10188,7 +10754,7 @@ ${DB.school.name}`;
         ...trackingNotifs,
         ...(curRole === 'admin' ? (DB.admissions || []).filter(a => (a.status || 'new') === 'new').slice(0, 3).map(a => ({ ic: '', tx: `New admission: ${a.studentName}`, tm: fmtDate(a.createdAt), bg: 'var(--pl)' })) : []),
         ...DB.notices.slice(-3).map(n => ({ ic: '', tx: n.title, tm: fmtDate(n.date), bg: 'var(--pl)' })),
-        ...(curRole === 'admin' ? allStus().filter(s => !(DB.fees.payments[s.id] || {})['f1']?.paid).slice(0, 2).map(s => ({ ic: '', tx: `Fee pending: ${s.name}`, tm: '', bg: 'var(--rl)' })) : []),
+        ...(curRole === 'admin' ? allStus().filter(s => !DB.fees.monthlyLedger?.[s.id]?.[monthKey()]?.paid).slice(0, 2).map(s => ({ ic: '', tx: `Fee pending: ${s.name}`, tm: '', bg: 'var(--rl)' })) : []),
       ];
       const np = document.getElementById('np-list');
       if (np) np.innerHTML = notifs.map(n => `<div class="np-it"><div class="np-ic" style="background:${n.bg};">${n.ic}</div><div><div class="np-tx">${n.tx}</div><div class="np-tm">${n.tm}</div></div></div>`).join('') || '<div style="padding:14px;text-align:center;font-size:.78rem;color:var(--ink4);">All clear &#10024;</div>';
@@ -10280,7 +10846,11 @@ window.addEventListener('unhandledrejection', function(e) {
               if (attData) {
                   attData.forEach(row => {
                       if (!DB.attendance[row.class_id]) DB.attendance[row.class_id] = {};
-                      const sid = row.id.split('_')[1];
+                      // row.id = classId_studentId, but classId itself contains underscores
+                      // so we extract studentId by removing the classId prefix
+                      const sid = row.id.startsWith(row.class_id + '_') 
+                          ? row.id.slice(row.class_id.length + 1) 
+                          : row.id.split('_').pop();
                       DB.attendance[row.class_id][sid] = row.data;
                   });
               }
@@ -10627,70 +11197,127 @@ function deleteExpense(eid) {
 
 
 // --- PRE FEE VOUCHER FEATURE ---
-function generateVoucherHTML(sid, month) {
+function generateVoucherHTML(sid, targetMonth = null) {
     const s = allStus().find(x => x.id === sid);
+    if (!s) return '';
     const cls = DB.classes.find(c => c.id === s.classId);
-    const bill = calcStudentFeeBill(sid, month);
+    const tm = targetMonth || getNextMonth(monthKey()); // Defaults to upcoming month e.g. '2026-10'
     
-    const hasExtra = bill.van > 0 || bill.applicableItems.length > 0;
+    const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const shortMNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const dParts = tm.split('-');
+    const mIdx = parseInt(dParts[1], 10) - 1;
+    const targetMonthName = mNames[mIdx] || tm;
+    const targetMonthDisplay = targetMonthName + ' ' + dParts[0];
+    
+    const tuition = monthlyFeeAmount(s);
+    const van = num(s.vanFee || 0);
+    const initialArrears = getTrueInitialArrears(sid);
+    
     let tableRows = '';
+    let currentCharges = tuition + van;
     
-    if (hasExtra) {
-        tableRows += '<tr><td style="padding:6px 8px; border:1px solid #333;">Tuition Fee</td><td style="padding:6px 8px; border:1px solid #333; text-align:right;">' + fmtMoney(bill.tuition) + '</td></tr>';
-        if (bill.van > 0) tableRows += '<tr><td style="padding:6px 8px; border:1px solid #333;">Transport / Van Fee</td><td style="padding:6px 8px; border:1px solid #333; text-align:right;">' + fmtMoney(bill.van) + '</td></tr>';
+    // Target Month Tuition
+    tableRows += '<tr>' +
+      '<td style="padding:4px 8px; border:1px solid #333;">' + targetMonthName + ' Tuition Fee</td>' +
+      '<td style="padding:4px 8px; border:1px solid #333; text-align:right; font-weight:700;">' + fmtMoney(tuition) + '</td>' +
+    '</tr>';
+    
+    // Transport / Van Fee
+    if (van > 0) {
+        tableRows += '<tr>' +
+          '<td style="padding:4px 8px; border:1px solid #333;">Transport / Van Fee</td>' +
+          '<td style="padding:4px 8px; border:1px solid #333; text-align:right; font-weight:700;">' + fmtMoney(van) + '</td>' +
+        '</tr>';
+    }
+    
+    // Target Month Applicable Items (e.g. Examination Fee, Annual Charges, etc.)
+    (DB.fees.items || []).forEach(f => {
+        if (f.id === 'f1') return;
+        if (f.applyMonth && f.applyMonth !== 'All' && f.applyMonth.toLowerCase() !== targetMonthName.toLowerCase()) return;
+        const amt = num(f.amount);
+        currentCharges += amt;
+        tableRows += '<tr>' +
+          '<td style="padding:4px 8px; border:1px solid #333; font-weight:700; color:#1e293b;">' + escHtml(f.name) + '</td>' +
+          '<td style="padding:4px 8px; border:1px solid #333; text-align:right; font-weight:700;">' + fmtMoney(amt) + '</td>' +
+        '</tr>';
+    });
+    
+    // Prior Months Status & Arrears (months before targetMonth)
+    let priorUnpaidSum = 0;
+    let curP = '2026-08';
+    while (curP < tm) {
+        const pmIdx = parseInt(curP.split('-')[1], 10) - 1;
+        const pmName = (shortMNames[pmIdx] || curP);
+        const mRow = DB.fees.monthlyLedger?.[sid]?.[curP];
+        const isPaid = mRow ? mRow.paid : false;
         
-        bill.applicableItems.forEach(f => {
-            tableRows += '<tr><td style="padding:6px 8px; border:1px solid #333;">' + escHtml(f.name) + '</td><td style="padding:6px 8px; border:1px solid #333; text-align:right;">' + fmtMoney(f.amount) + '</td></tr>';
+        let pmItems = 0;
+        (DB.fees.items || []).forEach(f => {
+            if (f.id === 'f1') return;
+            if (f.applyMonth && f.applyMonth !== 'All' && f.applyMonth.toLowerCase() !== (mNames[pmIdx] || '').toLowerCase()) return;
+            pmItems += num(f.amount);
         });
+        const pmTotal = tuition + van + pmItems;
         
-        let currentTotal = bill.tuition + bill.van + bill.itemsTotal;
-        tableRows += '<tr><td style="padding:6px 8px; border:1px solid #333; font-weight:700; background:#f4f4f4;">Current Month Subtotal</td><td style="padding:6px 8px; border:1px solid #333; text-align:right; font-weight:700; background:#f4f4f4;">' + fmtMoney(currentTotal) + '</td></tr>';
-    } else {
-        tableRows += '<tr><td style="padding:6px 8px; border:1px solid #333;">Current Month Fee</td><td style="padding:6px 8px; border:1px solid #333; text-align:right;">' + fmtMoney(bill.tuition) + '</td></tr>';
+        if (!isPaid) {
+            priorUnpaidSum += pmTotal;
+            tableRows += '<tr>' +
+              '<td style="padding:4px 8px; border:1px solid #333; color:#b91c1c; font-weight:700;">' + pmName + ' Fee (Unpaid)</td>' +
+              '<td style="padding:4px 8px; border:1px solid #333; text-align:right; color:#b91c1c; font-weight:700;">' + fmtMoney(pmTotal) + '</td>' +
+            '</tr>';
+        }
+        curP = getNextMonth(curP);
     }
     
-    if (bill.arrears > 0) {
-        tableRows += '<tr><td style="padding:6px 8px; border:1px solid #333;">Previous Balance (Arrears)</td><td style="padding:6px 8px; border:1px solid #333; text-align:right; font-weight:600;">' + fmtMoney(bill.arrears) + '</td></tr>';
-    } else if (bill.arrears < 0) {
-        tableRows += '<tr><td style="padding:6px 8px; border:1px solid #333;">Advance Credit</td><td style="padding:6px 8px; border:1px solid #333; text-align:right; font-weight:600;">' + fmtMoney(bill.arrears) + '</td></tr>';
+    // Previous Balance / Admission Arrears
+    if (initialArrears > 0) {
+        tableRows += '<tr>' +
+          '<td style="padding:4px 8px; border:1px solid #333;">Previous Balance (Admission / Old Arrears)</td>' +
+          '<td style="padding:4px 8px; border:1px solid #333; text-align:right; font-weight:700; color:#b91c1c;">' + fmtMoney(initialArrears) + '</td>' +
+        '</tr>';
+    } else if (initialArrears < 0) {
+        tableRows += '<tr>' +
+          '<td style="padding:4px 8px; border:1px solid #333;">Advance Credit</td>' +
+          '<td style="padding:4px 8px; border:1px solid #333; text-align:right; font-weight:700; color:#166534;">-' + fmtMoney(Math.abs(initialArrears)) + '</td>' +
+        '</tr>';
     }
     
-    let totalPayable = bill.totalDue;
-    const mNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    const monthStr = mNames[parseInt(month.split('-')[1], 10) - 1] + ' ' + month.split('-')[0];
-    const logoHtml = DB.school?.logo ? '<img src="' + DB.school.logo + '" style="max-height:48px; width:auto;">' : '';
+    const totalPayable = Math.max(0, currentCharges + priorUnpaidSum + initialArrears);
+    const logoHtml = DB.school?.logo ? '<img src="' + DB.school.logo + '" style="max-height:44px; width:auto;">' : '';
 
-    return '<div style="border: 2px solid #222; border-radius: 12px; background:#fff; display:flex; flex-direction:column; box-sizing:border-box; padding:18px; width:100%; height:100%; overflow:hidden; position:relative;">' +
-            '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px; border-bottom: 2px solid #222; padding-bottom: 10px;">' +
-                '<div style="flex-shrink:0; margin-right:10px;">' + logoHtml + '</div>' +
+    return '<div style="border: 2px solid #222; border-radius: 10px; background:#fff; display:flex; flex-direction:column; box-sizing:border-box; padding:14px; width:100%; height:100%; overflow:hidden; position:relative;">' +
+            '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px; border-bottom: 2px solid #222; padding-bottom: 8px;">' +
+                '<div style="flex-shrink:0; margin-right:8px;">' + logoHtml + '</div>' +
                 '<div style="text-align:right; line-height:1.2; flex-grow:1;">' +
-                    '<div style="font-size:15px; font-weight:900; color:#000; text-transform:uppercase; letter-spacing:0.5px;">' + escHtml(DB.school?.name || 'School') + '</div>' +
-                    '<div style="font-size:12px; font-weight:700; color:#444; margin-top:4px;">FEE CHALLAN - <span style="background:#e5e7eb; padding:2px 6px; border-radius:4px; color:#000;">' + monthStr + '</span></div>' +
+                    '<div style="font-size:14px; font-weight:900; color:#000; text-transform:uppercase; letter-spacing:0.5px;">' + escHtml(DB.school?.name || 'School') + '</div>' +
+                    '<div style="font-size:11px; font-weight:700; color:#444; margin-top:2px;">FEE CHALLAN - <span style="background:#e5e7eb; padding:1px 6px; border-radius:4px; color:#000; font-weight:800;">' + targetMonthDisplay + '</span></div>' +
                 '</div>' +
             '</div>' +
-            '<div style="display:grid; grid-template-columns: 50px 1fr; gap:4px; font-size:12px; margin-bottom:15px; align-items:end;">' +
-                '<div style="font-weight:700; color:#555; padding-bottom:2px;">Name:</div><div style="font-weight:800; border-bottom:1px solid #ccc; padding-bottom:2px;">' + escHtml(s.name) + '</div>' +
-                '<div style="font-weight:700; color:#555; padding-bottom:2px;">Roll:</div><div style="font-weight:700; border-bottom:1px solid #ccc; padding-bottom:2px;">' + escHtml(s.roll || '-') + '</div>' +
-                '<div style="font-weight:700; color:#555; padding-bottom:2px;">Class:</div><div style="font-weight:700; border-bottom:1px solid #ccc; padding-bottom:2px;">' + escHtml(cls?.name || '-') + '</div>' +
+            '<div style="display:grid; grid-template-columns: 45px 1fr; gap:3px; font-size:11px; margin-bottom:8px; align-items:end;">' +
+                '<div style="font-weight:700; color:#555; padding-bottom:1px;">Name:</div><div style="font-weight:800; border-bottom:1px solid #ccc; padding-bottom:1px;">' + escHtml(s.name) + '</div>' +
+                '<div style="font-weight:700; color:#555; padding-bottom:1px;">Roll:</div><div style="font-weight:700; border-bottom:1px solid #ccc; padding-bottom:1px;">' + escHtml(s.roll || '-') + '</div>' +
+                '<div style="font-weight:700; color:#555; padding-bottom:1px;">Class:</div><div style="font-weight:700; border-bottom:1px solid #ccc; padding-bottom:1px;">' + escHtml(cls?.name || '-') + '</div>' +
             '</div>' +
-            '<table style="width:100%; font-size:12px; border-collapse:collapse; margin-bottom:auto;">' +
+            '<table style="width:100%; font-size:11px; border-collapse:collapse; margin-bottom:auto;">' +
                 '<thead>' +
-                    '<tr><th style="padding:6px 8px; border:1px solid #333; text-align:left; background:#e5e7eb; color:#000;">Particulars</th><th style="padding:6px 8px; border:1px solid #333; text-align:right; background:#e5e7eb; color:#000; width:45%;">Amount</th></tr>' +
+                    '<tr><th style="padding:4px 8px; border:1px solid #333; text-align:left; background:#e5e7eb; color:#000;">Particulars</th><th style="padding:4px 8px; border:1px solid #333; text-align:right; background:#e5e7eb; color:#000; width:38%;">Amount</th></tr>' +
                 '</thead>' +
                 '<tbody>' + tableRows + '</tbody>' +
                 '<tfoot>' +
-                    '<tr><th style="padding:8px 8px; border:1px solid #333; text-align:left; font-size:14px; background:#f0fdf4; color:#166534;">TOTAL PAYABLE</th><th style="padding:8px 8px; border:1px solid #333; text-align:right; font-size:14px; background:#f0fdf4; color:#166534;">' + fmtMoney(totalPayable) + '</th></tr>' +
+                    '<tr><th style="padding:6px 8px; border:1px solid #333; text-align:left; font-size:13px; background:#f0fdf4; color:#166534;">TOTAL PAYABLE</th><th style="padding:6px 8px; border:1px solid #333; text-align:right; font-size:13px; background:#f0fdf4; color:#166534;">' + fmtMoney(totalPayable) + '</th></tr>' +
                 '</tfoot>' +
             '</table>' +
-            '<div style="display:flex; justify-content:space-between; margin-top:25px; padding-top:5px;">' +
-                '<div style="border-top:1px solid #000; width:40%; text-align:center; font-size:10px; font-weight:600; padding-top:4px;">Cashier Signature</div>' +
-                '<div style="border-top:1px solid #000; width:40%; text-align:center; font-size:10px; font-weight:600; padding-top:4px;">Principal Signature</div>' +
+            '<div style="display:flex; justify-content:space-between; margin-top:14px; padding-top:4px;">' +
+                '<div style="border-top:1px solid #000; width:40%; text-align:center; font-size:9px; font-weight:600; padding-top:3px;">Cashier Signature</div>' +
+                '<div style="border-top:1px solid #000; width:40%; text-align:center; font-size:9px; font-weight:600; padding-top:3px;">Principal Signature</div>' +
             '</div>' +
         '</div>';
 }
 
-function printPreFeeVoucher(sid, month) {
-    const html = '<html><head><title>Fee Voucher</title><style>' +
+function printPreFeeVoucher(sid, targetMonth = null) {
+    const tm = targetMonth || getNextMonth(monthKey());
+    const html = '<html><head><title>Fee Voucher - ' + tm + '</title><style>' +
       'body { font-family: sans-serif; color:#000; margin:0; padding:20px; } ' +
       '.page-layout { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 20px; height: 260mm; box-sizing:border-box; margin-bottom:20mm; } ' +
       '@media print { ' +
@@ -10699,79 +11326,293 @@ function printPreFeeVoucher(sid, month) {
       '  .page-layout { margin: 0; border: none; height: calc(100vh - 20mm); page-break-after: always; gap: 10mm; } ' +
       '}' +
       '</style></head><body>' +
-      '<div class="page-layout">' + generateVoucherHTML(sid, month) + '</div>' +
+      '<div class="page-layout">' + generateVoucherHTML(sid, tm) + '</div>' +
       '<scr'+'ipt>window.onload=function(){setTimeout(function(){window.print();},500);};</scr'+'ipt></body></html>';
     let printWindow = window.open('', '', 'width=800,height=900');
     if (printWindow) { printWindow.document.write(html); printWindow.document.close(); } else { showToast('Popup blocked', 'te'); }
     closeModal();
 }
 
-function generateVoucherMsg(sid, month) {
+function generateVoucherMsg(sid, targetMonth = null) {
     const s = allStus().find(x => x.id === sid);
+    if (!s) return '';
     const cls = DB.classes.find(c => c.id === s.classId);
-    const bill = calcStudentFeeBill(sid, month);
+    const tm = targetMonth || getNextMonth(monthKey());
+    
     const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    const monthStr = mNames[parseInt(month.split('-')[1], 10) - 1] + ' ' + month.split('-')[0];
+    const dParts = tm.split('-');
+    const mIdx = parseInt(dParts[1], 10) - 1;
+    const targetMonthName = mNames[mIdx] || tm;
     
-    let currentTotal = bill.tuition + bill.van + bill.itemsTotal;
-    let msg = '📄 *FEE CHALLAN - ' + monthStr + '*\nStudent: ' + s.name + '\nRoll No: ' + (s.roll || '-') + '\nClass: ' + (cls?.name || '-') + '\n\n*Current Month Charges:*\nTuition Fee: Rs ' + bill.tuition;
-    if (bill.van > 0) msg += '\nTransport: Rs ' + bill.van;
-    bill.applicableItems.forEach(f => { msg += '\n' + f.name + ': Rs ' + f.amount; });
-    msg += '\n_(Current Subtotal: Rs ' + currentTotal + ')_';
+    const tuition = monthlyFeeAmount(s);
+    const van = num(s.vanFee || 0);
+    const initialArrears = getTrueInitialArrears(sid);
     
-    if (bill.arrears > 0) msg += '\n\nPrevious Balance (Arrears): Rs ' + bill.arrears;
-    else if (bill.arrears < 0) msg += '\n\nAdvance Credit: Rs ' + Math.abs(bill.arrears);
+    let currentCharges = tuition + van;
+    let chargesLines = `• Monthly Tuition: Rs ${tuition}\n`;
+    if (van > 0) chargesLines += `• Transport / Van: Rs ${van}\n`;
     
-    msg += '\n-------------------------\n*Total Payable: Rs ' + bill.totalDue + '*\n-------------------------\n\nPlease pay by the 10th. Thank you!\n' + (DB.school?.name || 'School');
+    (DB.fees.items || []).forEach(f => {
+        if (f.id === 'f1') return;
+        if (f.applyMonth && f.applyMonth !== 'All' && f.applyMonth.toLowerCase() !== targetMonthName.toLowerCase()) return;
+        const amt = num(f.amount);
+        currentCharges += amt;
+        chargesLines += `• ${f.name}: Rs ${amt}\n`;
+    });
+    
+    let priorUnpaidSum = 0;
+    let priorLines = '';
+    let curP = '2026-08';
+    while (curP < tm) {
+        const pmIdx = parseInt(curP.split('-')[1], 10) - 1;
+        const pmName = mNames[pmIdx] || curP;
+        const mRow = DB.fees.monthlyLedger?.[sid]?.[curP];
+        const isPaid = mRow ? mRow.paid : false;
+        
+        let pmItems = 0;
+        (DB.fees.items || []).forEach(f => {
+            if (f.id === 'f1') return;
+            if (f.applyMonth && f.applyMonth !== 'All' && f.applyMonth.toLowerCase() !== pmName.toLowerCase()) return;
+            pmItems += num(f.amount);
+        });
+        const pmTotal = tuition + van + pmItems;
+        
+        if (!isPaid) {
+            priorUnpaidSum += pmTotal;
+            priorLines += `• ${pmName} Fee (Unpaid): Rs ${pmTotal}\n`;
+        }
+        curP = getNextMonth(curP);
+    }
+    
+    if (initialArrears > 0) {
+        priorLines += `• Previous Balance (Arrears): Rs ${initialArrears}\n`;
+    } else if (initialArrears < 0) {
+        priorLines += `• Advance Credit: Rs ${Math.abs(initialArrears)}\n`;
+    }
+    
+    const totalPayable = Math.max(0, currentCharges + priorUnpaidSum + initialArrears);
+    
+    let msg = `📄 *FEE CHALLAN - ${targetMonthName.toUpperCase()} ${dParts[0]}*\n`;
+    msg += `*${DB.school?.name || 'Oxford Excellence Academy'}*\n\n`;
+    msg += `*Student:* ${s.name}\n`;
+    msg += `*Roll No:* ${s.roll || '-'}\n`;
+    msg += `*Class:* ${cls?.name || '-'}\n`;
+    msg += `*Due Date:* 10th ${targetMonthName} ${dParts[0]}\n\n`;
+    msg += `*${targetMonthName} Fee Breakdown:*\n`;
+    msg += chargesLines;
+    msg += `_(Current Subtotal: Rs ${currentCharges})_\n\n`;
+    
+    if (priorLines) {
+        msg += `*Unpaid Prior Dues & Arrears:*\n`;
+        msg += priorLines;
+        msg += `\n`;
+    }
+    
+    msg += `-------------------------\n`;
+    msg += `*TOTAL PAYABLE: Rs ${totalPayable}*\n`;
+    msg += `-------------------------\n\n`;
+    msg += `Please submit the due amount before the 10th. Thank you!\n`;
+    msg += `${DB.school?.name || 'Oxford Excellence Academy'}`;
+    
     return msg;
 }
 
-function sendVoucherWhatsApp(sid, month) {
-    const msg = generateVoucherMsg(sid, month);
+function sendVoucherWhatsApp(sid, targetMonth = null) {
+    const tm = targetMonth || getNextMonth(monthKey());
+    const msg = generateVoucherMsg(sid, tm);
     const s = allStus().find(x => x.id === sid);
     if (!getStudentWA(s)) return showToast('No WhatsApp number');
     sendWhatsAppAPI(getStudentWA(s), msg);
-    showToast('Voucher sent to WhatsApp Queue', 'ts');
+    showToast('Voucher queued for WhatsApp (' + tm + ')', 'ts');
     closeModal();
 }
 
-function openVoucherModal(sid) {
-    const cm = monthKey();
+function updateSingleVoucherPreview(sid, targetMonth) {
     const s = allStus().find(x => x.id === sid);
-    openModal('<h3>&#128196; Pre Fee Voucher</h3>' +
-        '<div style="margin-bottom:15px;font-size:0.9rem;color:var(--ink3);">Generate a fee challan for <strong>' + escHtml(s.name) + '</strong> for ' + cm + '. This calculates exact real-time arrears and current fee.</div>' +
-        '<div class="m-btns"><button class="btn btn-p" onclick="printPreFeeVoucher(\'' + sid + '\', \'' + cm + '\')">&#128424; Print Voucher</button>' +
-        (getStudentWA(s) ? '<button class="btn btn-wa" onclick="sendVoucherWhatsApp(\'' + sid + '\', \'' + cm + '\')">&#128241; WhatsApp Voucher</button>' : '') +
-        '<button class="btn btn-gh" onclick="closeModal()">Cancel</button></div>'
-    );
+    if (!s) return;
+    const tm = targetMonth || getNextMonth(monthKey());
+    const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const dParts = tm.split('-');
+    const mIdx = parseInt(dParts[1], 10) - 1;
+    const targetMonthName = mNames[mIdx] || tm;
+    
+    const tuition = monthlyFeeAmount(s);
+    const van = num(s.vanFee || 0);
+    const initialArrears = getTrueInitialArrears(sid);
+    
+    let itemsTotal = 0;
+    let itemBadges = [];
+    (DB.fees.items || []).forEach(f => {
+        if (f.id === 'f1') return;
+        if (f.applyMonth && f.applyMonth !== 'All' && f.applyMonth.toLowerCase() !== targetMonthName.toLowerCase()) return;
+        const amt = num(f.amount);
+        itemsTotal += amt;
+        itemBadges.push(`${f.name} (PKR ${fmtMoney(amt)})`);
+    });
+    
+    let priorUnpaidSum = 0;
+    let curP = '2026-08';
+    while (curP < tm) {
+        const pmIdx = parseInt(curP.split('-')[1], 10) - 1;
+        const pmName = mNames[pmIdx] || curP;
+        const mRow = DB.fees.monthlyLedger?.[sid]?.[curP];
+        const isPaid = mRow ? mRow.paid : false;
+        if (!isPaid) {
+            let pmItems = 0;
+            (DB.fees.items || []).forEach(f => {
+                if (f.id === 'f1') return;
+                if (f.applyMonth && f.applyMonth !== 'All' && f.applyMonth.toLowerCase() !== pmName.toLowerCase()) return;
+                pmItems += num(f.amount);
+            });
+            priorUnpaidSum += (tuition + van + pmItems);
+        }
+        curP = getNextMonth(curP);
+    }
+    
+    const currentMonthCharges = tuition + van + itemsTotal;
+    const totalPayable = Math.max(0, currentMonthCharges + priorUnpaidSum + initialArrears);
+    
+    const previewEl = document.getElementById('single-voucher-preview');
+    if (!previewEl) return;
+    
+    previewEl.innerHTML = `
+      <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:12px 14px; margin-top:10px;">
+        <div style="font-weight:700; font-size:0.85rem; color:#0f172a; margin-bottom:8px; display:flex; justify-content:space-between;">
+          <span>${targetMonthName} ${dParts[0]} Charges:</span>
+          <span>PKR ${fmtMoney(currentMonthCharges)}</span>
+        </div>
+        <div style="font-size:0.78rem; color:#64748b; line-height:1.5;">
+          <div>&bull; Monthly Tuition: <b>PKR ${fmtMoney(tuition)}</b></div>
+          ${van > 0 ? `<div>&bull; Transport / Van: <b>PKR ${fmtMoney(van)}</b></div>` : ''}
+          ${itemBadges.map(b => `<div style="color:#b45309; font-weight:600;">&bull; ${escHtml(b)}</div>`).join('')}
+        </div>
+        
+        <div style="border-top:1px dashed #e2e8f0; margin:8px 0;"></div>
+        
+        <div style="font-size:0.78rem; color:#64748b; display:flex; justify-content:space-between;">
+          <span>Prior Arrears & Unpaid Months:</span>
+          <b>PKR ${fmtMoney(priorUnpaidSum + initialArrears)}</b>
+        </div>
+        
+        <div style="border-top:1px solid #e2e8f0; margin:8px 0;"></div>
+        
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-weight:800; font-size:0.92rem; color:#0f172a;">Challan Total Payable:</span>
+          <span style="font-weight:900; font-size:1.15rem; color:#dc2626;">PKR ${fmtMoney(totalPayable)}</span>
+        </div>
+      </div>
+    `;
+}
+
+function openVoucherModal(sid) {
+    const s = allStus().find(x => x.id === sid);
+    if (!s) return;
+    const nextM = getNextMonth(monthKey()); // e.g. '2026-10'
+    const curM = monthKey(); // e.g. '2026-09'
+    const thirdM = getNextMonth(nextM); // e.g. '2026-11'
+    
+    openModal(`
+      <div style="margin-bottom:12px;">
+        <h3 style="margin:0 0 4px 0;">📄 Issue Fee Challan</h3>
+        <div style="font-size:0.85rem; color:#64748b;">
+          Issue fee voucher for <b>${escHtml(s.name)}</b> (Roll: ${escHtml(s.roll || '-')})
+        </div>
+      </div>
+
+      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:14px; margin-bottom:14px;">
+        <div class="fg" style="margin-bottom:10px;">
+          <label class="fl" style="font-weight:700; color:#0f172a;">Select Challan Billing Month</label>
+          <select class="fi" id="single-voucher-month" onchange="updateSingleVoucherPreview('${sid}', this.value)" style="font-weight:600; padding:8px 10px;">
+            <option value="${nextM}" selected>Upcoming Month: October 2026 (Includes Exam Fee)</option>
+            <option value="${curM}">Current Month: September 2026</option>
+            <option value="${thirdM}">Advance Month: November 2026</option>
+          </select>
+        </div>
+
+        <div id="single-voucher-preview"></div>
+      </div>
+
+      <div class="m-btns" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-p" style="background:#0f172a; color:#fff;" onclick="printPreFeeVoucher('${sid}', document.getElementById('single-voucher-month').value)">
+            🖶 Print Fee Voucher
+          </button>
+          ${getStudentWA(s) ? `
+          <button class="btn btn-wa" style="background:#15803d; color:#fff;" onclick="sendVoucherWhatsApp('${sid}', document.getElementById('single-voucher-month').value)">
+            💬 WhatsApp Voucher
+          </button>
+          ` : ''}
+        </div>
+        <button class="btn btn-gh" onclick="closeModal()">Cancel</button>
+      </div>
+    `);
+    
+    updateSingleVoucherPreview(sid, nextM);
 }
 
 function openBulkFeeVoucherModal() {
-    openModal('<h3>&#128196; Bulk Fee Vouchers</h3>' +
-        '<div class="fg"><label class="fl">Select Class</label><select class="fi" id="bulk-voucher-class"><option value="All">All Classes (Entire School)</option>' + DB.classes.map(c => '<option value="' + c.id + '">' + c.name + '</option>').join('') + '</select></div>' +
-        '<div class="m-btns" style="margin-top:15px;">' +
-        '<button class="btn btn-p" onclick="bulkPrintPreFeeVouchers(document.getElementById(\'bulk-voucher-class\').value)">&#128424; Print All</button>' +
-        '<button class="btn btn-wa" onclick="bulkWhatsappPreFeeVouchers(document.getElementById(\'bulk-voucher-class\').value)">&#128241; WhatsApp All</button>' +
-        '<button class="btn btn-gh" onclick="closeModal()">Cancel</button></div>'
-    );
+    const nextM = getNextMonth(monthKey()); // '2026-10'
+    const curM = monthKey(); // '2026-09'
+    const thirdM = getNextMonth(nextM); // '2026-11'
+
+    openModal(`
+      <div style="margin-bottom:12px;">
+        <h3 style="margin:0 0 4px 0;">📄 Bulk Issue Fee Challans</h3>
+        <div style="font-size:0.85rem; color:#64748b;">
+          Issue fee vouchers for upcoming month with examination fees and previous arrears
+        </div>
+      </div>
+
+      <div class="fg" style="margin-bottom:12px;">
+        <label class="fl" style="font-weight:700;">Select Billing Month</label>
+        <select class="fi" id="bulk-voucher-month" style="font-weight:600; padding:8px 10px;">
+          <option value="${nextM}" selected>Upcoming Month: October 2026 (Includes Examination Fee)</option>
+          <option value="${curM}">Current Month: September 2026</option>
+          <option value="${thirdM}">Advance Month: November 2026</option>
+        </select>
+      </div>
+
+      <div class="fg" style="margin-bottom:14px;">
+        <label class="fl" style="font-weight:700;">Select Class</label>
+        <select class="fi" id="bulk-voucher-class" style="padding:8px 10px;">
+          <option value="All">All Classes (Entire School)</option>
+          ${DB.classes.map(c => `<option value="${c.id}">${escHtml(c.name)}</option>`).join('')}
+        </select>
+      </div>
+
+      <div style="background:#f1f5f9; border-radius:8px; padding:10px 12px; margin-bottom:16px; font-size:0.8rem; color:#475569; line-height:1.4;">
+        ℹ️ Each voucher will include the selected month's tuition, van fee, applicable examination/annual charges, and real-time previous arrears.
+      </div>
+
+      <div class="m-btns" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-p" style="background:#0f172a; color:#fff;" onclick="bulkPrintPreFeeVouchers(document.getElementById('bulk-voucher-class').value, document.getElementById('bulk-voucher-month').value)">
+            🖶 Print All Vouchers
+          </button>
+          <button class="btn btn-wa" style="background:#15803d; color:#fff;" onclick="bulkWhatsappPreFeeVouchers(document.getElementById('bulk-voucher-class').value, document.getElementById('bulk-voucher-month').value)">
+            💬 WhatsApp All
+          </button>
+        </div>
+        <button class="btn btn-gh" onclick="closeModal()">Cancel</button>
+      </div>
+    `);
 }
 
-function bulkPrintPreFeeVouchers(classId) {
-    const cm = monthKey();
+function bulkPrintPreFeeVouchers(classId, targetMonth = null) {
+    const cm = targetMonth || getNextMonth(monthKey());
     const stus = allStus().filter(s => classId === 'All' || s.classId === classId);
     if (!stus.length) return showToast('No students found');
     
-    let html = '<html><head><title>Bulk Fee Vouchers</title><style>' +
+    let html = '<html><head><title>Bulk Fee Vouchers - ' + cm + '</title><style>' +
       'body { font-family: sans-serif; color:#000; margin:0; padding:20px; background:#f0f0f0; } ' +
       '.page-layout { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 20px; height: 260mm; width: 190mm; margin: 0 auto 20mm; box-sizing:border-box; background:#fff; padding:20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-radius:8px; } ' +
       '@media print { ' +
       '  body, html { margin: 0; padding: 0; background: #fff; } ' +
       '  @page { size: A4 portrait; margin: 10mm; } ' +
-      '  .page-layout { margin: 0; padding: 0; border: none; box-shadow:none; height: calc(100vh - 20mm); width: 100%; page-break-after: always; gap: 10mm; border-radius:0; } ' +
+      '  .page-layout { margin: 0; border: none; box-shadow:none; height: calc(100vh - 20mm); width: 100%; page-break-after: always; gap: 10mm; border-radius:0; } ' +
       '}' +
       '</style></head><body>';
       
-    // Group students into chunks of 4
     let chunks = [];
     for (let i = 0; i < stus.length; i += 4) {
         chunks.push(stus.slice(i, i + 4));
@@ -10791,14 +11632,14 @@ function bulkPrintPreFeeVouchers(classId) {
     closeModal();
 }
 
-function bulkWhatsappPreFeeVouchers(classId) {
-    const cm = monthKey();
+function bulkWhatsappPreFeeVouchers(classId, targetMonth = null) {
+    const cm = targetMonth || getNextMonth(monthKey());
     const stus = allStus().filter(s => classId === 'All' || s.classId === classId);
     if (!stus.length) return showToast('No students found');
-    if (!confirm('Are you sure you want to queue ' + stus.length + ' vouchers to WhatsApp Outbox?')) return;
+    if (!confirm('Queue vouchers for ' + stus.length + ' students for ' + cm + ' to WhatsApp Outbox?')) return;
     let queued = 0;
     stus.forEach(s => { if (s.whatsapp) { sendWhatsAppAPI(getStudentWA(s), generateVoucherMsg(s.id, cm)); queued++; } });
-    showToast('Queued ' + queued + ' vouchers to WhatsApp', 'ts');
+    showToast('Queued ' + queued + ' vouchers to WhatsApp for ' + cm, 'ts');
     closeModal();
 }
 // --- END PRE FEE VOUCHER ---
