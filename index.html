@@ -7460,6 +7460,7 @@ If the arrears sum is lower than you expect, please check your CSV file to ensur
       const monthName = mNames[mIdx] || 'Current Month';
       const curMonthPaidStus = all.filter(s => DB.fees.monthlyLedger?.[s.id]?.[cm]?.paid);
       const curMonthIncome = curMonthPaidStus.reduce((sum, s) => sum + num(DB.fees.monthlyLedger[s.id][cm].amountPaid || monthlyFeeAmount(s)), 0);
+      const totalMonthlyFee = all.reduce((sum, s) => sum + num(monthlyFeeAmount(s)), 0);
       return `
 <div class="ph ph-row fu">
   <div><div class="ph-tag"> Fees</div><h1>Fee Management</h1><div class="ph-sub">Year ${DB.settings?.schoolYear || ''} - all fee items per student</div></div>
@@ -7471,11 +7472,11 @@ If the arrears sum is lower than you expect, please check your CSV file to ensur
     <button class="btn btn-gh btn-sm" onclick="openBulkFeeVoucherModal()">&#128196; Vouchers</button>
   </div>
 </div>
-<div class="ledger-metrics fu">
+<div class="ledger-metrics fu" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
   <div class="lm-card">
-    <div class="lm-label">Total Collection</div>
-    <div class="lm-value" style="color:#0f172a;">${fmtMoney(collected)}</div>
-    <div class="lm-sub">${fullyPaid} cleared &middot; ${all.length - fullyPaid} pending</div>
+    <div class="lm-label">Total Monthly Fee</div>
+    <div class="lm-value" style="color:#2563eb;">${fmtMoney(totalMonthlyFee)}</div>
+    <div class="lm-sub">Monthly tuition revenue (${all.length} students)</div>
   </div>
   <div class="lm-card">
     <div class="lm-label">${monthName} Income</div>
@@ -7486,6 +7487,11 @@ If the arrears sum is lower than you expect, please check your CSV file to ensur
     <div class="lm-label">${isBeforeAugust ? 'Total Prev. Arrears' : 'Total Pending Balance'}</div>
     <div class="lm-value" style="color:#ef4444;">${fmtMoney(isBeforeAugust ? totalArrears : pending)}</div>
     <div class="lm-sub">${isBeforeAugust ? 'Monthly fee starts Aug 2026' : `${monthName}: <b>${fmtMoney(pendingMonthly)}</b> &middot; Arrears: <b style="color:#ef4444;">${fmtMoney(pendingArrears)}</b>`}</div>
+  </div>
+  <div class="lm-card">
+    <div class="lm-label">Total Collection</div>
+    <div class="lm-value" style="color:#0f172a;">${fmtMoney(collected)}</div>
+    <div class="lm-sub">${fullyPaid} cleared &middot; ${all.length - fullyPaid} pending</div>
   </div>
   <div class="lm-card">
     <div class="lm-label">Collection Rate</div>
