@@ -38,9 +38,22 @@
         .q-marks { font-weight: bold; margin-left: 10px; flex-shrink: 0; font-size: 13px; color: #555; }
         .urdu .q-marks { margin-left: 0; margin-right: 10px; }
         
-        .compact-mode .q-row { margin-bottom: 8px !important; }
-        .compact-mode .student-lines { margin-bottom: 18px !important; margin-top: 10px !important; }
-        .compact-mode .blank-lines { height: 22px !important; }
+        /* Line & Question Spacing options */
+        .spacing-tight .q-row { margin-bottom: 6px !important; line-height: 1.25 !important; }
+        .spacing-tight .header-print { margin-bottom: 10px !important; padding-bottom: 6px !important; }
+        .spacing-tight .student-lines { margin-top: 8px !important; margin-bottom: 12px !important; }
+        .spacing-tight .q-container { font-size: 14px !important; }
+        .spacing-tight .blank-lines { height: 20px !important; margin-top: 3px !important; }
+        
+        .spacing-normal .q-row { margin-bottom: 12px !important; line-height: 1.45 !important; }
+        .spacing-normal .blank-lines { height: 32px !important; }
+        
+        .spacing-relaxed .q-row { margin-bottom: 20px !important; line-height: 1.7 !important; }
+        .spacing-relaxed .blank-lines { height: 42px !important; }
+        
+        .compact-mode .q-row { margin-bottom: 6px !important; }
+        .compact-mode .student-lines { margin-bottom: 14px !important; margin-top: 8px !important; }
+        .compact-mode .blank-lines { height: 20px !important; }
         
         .blank-lines { border-bottom: 1px dotted #999; height: 35px; width: 100%; margin-top: 5px; }
         
@@ -76,6 +89,7 @@
     let curExam = null;
     let printMode = 'worksheet'; // worksheet, compact
     let mcqLayout = '1line'; // 1line, 2col
+    let printSpacing = 'tight'; // tight, normal, relaxed
 
     async function init() {
         // 1. Resolve Auth & Current User
@@ -524,6 +538,15 @@
                         <label class="text-sm font-bold flex items-center gap-1 cursor-pointer hover:text-blue-300"><input type="radio" name="mcqlayout" ${mcqLayout==='2col'?'checked':''} onchange="mcqLayout='2col';renderApp()"> <i class="fa fa-th-large ml-1"></i> 2-Cols</label>
                     </div>
                     <div class="w-px h-6 bg-gray-700"></div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-gray-400 font-bold uppercase tracking-wider"><i class="fa fa-text-height mr-1"></i> Spacing:</span>
+                        <select onchange="printSpacing=this.value;renderApp()" class="bg-gray-800 text-white border border-gray-600 rounded px-2 py-1 text-xs font-bold cursor-pointer hover:border-blue-400 focus:outline-none">
+                            <option value="tight" ${printSpacing==='tight'?'selected':''}>Tight (Saves Paper)</option>
+                            <option value="normal" ${printSpacing==='normal'?'selected':''}>Normal</option>
+                            <option value="relaxed" ${printSpacing==='relaxed'?'selected':''}>Relaxed</option>
+                        </select>
+                    </div>
+                    <div class="w-px h-6 bg-gray-700"></div>
                     <label class="text-sm font-bold flex items-center gap-2" title="Adjust this slider to make the exam fit perfectly onto your desired number of pages!">
                         <i class="fa fa-search-minus cursor-pointer" onclick="document.getElementById('p-scale').value = Math.max(50, parseInt(document.getElementById('p-scale').value)-5); document.getElementById('p-scale').dispatchEvent(new Event('input'))"></i>
                         Scale <input id="p-scale" type="range" min="50" max="150" value="100" oninput="document.getElementById('print-area').style.zoom = this.value + '%'; document.getElementById('zoom-val').innerText = this.value + '%';" class="w-20"> 
@@ -538,7 +561,7 @@
             
             <div style="padding-top: 60px;" class="no-print"></div>
             
-            <div id="print-area" class="exam-paper ${rtl ? 'urdu' : ''}">
+            <div id="print-area" class="exam-paper spacing-${printSpacing} ${printMode==='compact'?'compact-mode':''} ${rtl ? 'urdu' : ''}">
                 <!-- Header -->
                 <div class="header-print ${rtl ? 'flex-row-reverse' : ''}">
                     <div style="width: 95px;" class="flex-shrink-0 flex justify-start items-center">
