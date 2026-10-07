@@ -17,7 +17,28 @@
             #print-area, #print-area * { visibility: visible; }
             #print-area { position: absolute; left: 0; top: 0; width: 100%; padding: 0; background: white; margin: 0; }
             .no-print { display: none !important; }
-            @page { margin: 15mm; size: A4; }
+            @page {
+                margin: 15mm 15mm 18mm 15mm;
+                size: A4;
+                @bottom-right {
+                    content: "Page " counter(page) " of " counter(pages);
+                    font-size: 11px;
+                    font-family: system-ui, sans-serif;
+                    font-weight: bold;
+                    color: #444;
+                }
+            }
+            .print-page-footer {
+                display: flex !important;
+                justify-content: space-between;
+                align-items: center;
+                border-top: 1px solid #aaa;
+                padding-top: 8px;
+                margin-top: 30px;
+                font-size: 11px;
+                font-weight: bold;
+                color: #555;
+            }
             body { background: white; }
         }
         
@@ -543,6 +564,7 @@
                     <div class="uppercase">Subject: ${curExam.subj}</div>
                     <div class="uppercase">Time: ${curExam.time}</div>
                     <div class="uppercase">Total Marks: ${curExam.totalMarks}</div>
+                    <div class="uppercase print-page-num" style="font-weight:bold;">Page 1</div>
                 </div>
                 
                 <div class="student-lines ${rtl ? 'flex-row-reverse' : ''}">
@@ -620,7 +642,12 @@
         
         html += `
                 </div>
-                <div class="text-center mt-12 text-xs text-gray-500 font-bold tracking-widest no-print border-t pt-4">--- END OF PAPER ---</div>
+                <div class="print-page-footer mt-8 border-t border-gray-400 pt-3 flex justify-between items-center text-xs text-gray-600 font-bold">
+                    <span>Oxford Excellence Academy &bull; ${curExam.title}</span>
+                    <span class="tracking-widest">--- END OF EXAMINATION PAPER ---</span>
+                    <span>Class ${curExam.cls} &bull; Page 1</span>
+                </div>
+                <div class="text-center mt-6 text-xs text-gray-400 font-bold tracking-widest no-print border-t pt-2">--- END OF PAPER ---</div>
             </div>
         `;
         
