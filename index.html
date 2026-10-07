@@ -1949,8 +1949,40 @@
       transform: translateY(-1px);
       box-shadow: 0 3px 6px rgba(0,0,0,0.12);
     }
+    .card-select-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 9px;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #334155;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s ease;
+    }
+    .card-select-label:hover {
+      background: #e2e8f0;
+      border-color: #94a3b8;
+    }
+    .card-select-label input[type="checkbox"] {
+      width: 14px;
+      height: 14px;
+      cursor: pointer;
+      accent-color: #2563eb;
+      margin: 0;
+    }
+    .card-select-label.is-selected {
+      background: #eff6ff;
+      border-color: #3b82f6;
+      color: #1d4ed8;
+    }
     @media print {
       .vid-card-actions { display: none !important; }
+      .card-select-label { display: none !important; }
     }
 
     .school-id-card {
@@ -5523,7 +5555,7 @@ window.addEventListener('unhandledrejection', function(e) {
       updatePill();
       closeNotif();
       if (p === 'qrcard') setTimeout(buildQRCard, 90);
-      if (p === 'idcards') { setTimeout(buildClassIdCardQrs, 50); setTimeout(buildClassIdCardQrs, 150); setTimeout(buildClassIdCardQrs, 350); }
+      if (p === 'idcards') { setTimeout(buildClassIdCardQrs, 50); setTimeout(buildClassIdCardQrs, 150); setTimeout(buildClassIdCardQrs, 350); setTimeout(updateCardSelectionUI, 60); }
       if (p === 'dashboard' && curRole === 'admin') setTimeout(renderAdminCharts, 120);
     }
 
@@ -9525,6 +9557,66 @@ margin-top:2px;">${ap}% Regularity</div>
       return JSON.stringify({ id: stu?.id || '' });
     }
 
+    // --- Multi-Selection for ID & Admit Cards ---
+    window.selectedCardEntities = window.selectedCardEntities || new Set();
+
+    function toggleCardSelection(id) {
+      const sId = String(id);
+      if (window.selectedCardEntities.has(sId)) {
+        window.selectedCardEntities.delete(sId);
+      } else {
+        window.selectedCardEntities.add(sId);
+      }
+      updateCardSelectionUI();
+    }
+
+    function toggleSelectAllCards(selectAll) {
+      const isStaff = curCls === 'staff';
+      const entities = isStaff ? (DB.users || []).filter(u => u.role === 'teacher' || u.role === 'scanner') : (clsStus(curCls) || []);
+      if (selectAll) {
+        entities.forEach(e => window.selectedCardEntities.add(String(e.id)));
+      } else {
+        entities.forEach(e => window.selectedCardEntities.delete(String(e.id)));
+      }
+      updateCardSelectionUI();
+    }
+
+    function clearCardSelection() {
+      window.selectedCardEntities.clear();
+      updateCardSelectionUI();
+    }
+
+    function updateCardSelectionUI() {
+      const count = window.selectedCardEntities.size;
+      const countEl = document.getElementById('selected-card-count');
+      if (countEl) countEl.textContent = count;
+      
+      const btn = document.getElementById('btn-download-selected-cards');
+      if (btn) {
+        btn.disabled = count === 0;
+        btn.style.opacity = count === 0 ? '0.5' : '1';
+        btn.style.cursor = count === 0 ? 'not-allowed' : 'pointer';
+        btn.innerHTML = `📥 Download Selected (${count}) PDF`;
+      }
+
+      // Sync checkboxes in DOM
+      document.querySelectorAll('.card-select-cb').forEach(cb => {
+        const checked = window.selectedCardEntities.has(String(cb.value));
+        cb.checked = checked;
+        const parentLbl = cb.closest('.card-select-label');
+        if (parentLbl) parentLbl.classList.toggle('is-selected', checked);
+      });
+
+      // Sync select all checkbox
+      const isStaff = curCls === 'staff';
+      const entities = isStaff ? (DB.users || []).filter(u => u.role === 'teacher' || u.role === 'scanner') : (clsStus(curCls) || []);
+      const selectAllCb = document.getElementById('select-all-cards-cb');
+      if (selectAllCb && entities.length > 0) {
+        const allChecked = entities.every(e => window.selectedCardEntities.has(String(e.id)));
+        selectAllCb.checked = allChecked;
+      }
+    }
+
     function switchIdCardClass(cid) {
       curCls = cid;
       updatePill();
@@ -9543,7 +9635,29 @@ margin-top:2px;">${ap}% Regularity</div>
       let renderItems = [];
       let filename = '';
 
-      if (mode === 'all_admit') {
+      if (mode === 'selected') {
+        const isAdmit = window.idCardMode === 'admit';
+        const isPickup = window.idCardMode === 'pickup';
+        const isStaff = curCls === 'staff';
+        filename = isAdmit ? 'Selected_Exam_Admit_Cards.pdf' : (isPickup ? 'Selected_Pickup_Cards.pdf' : (isStaff ? 'Selected_Staff_Cards.pdf' : 'Selected_Student_ID_Cards.pdf'));
+        
+        const selIds = Array.from(window.selectedCardEntities);
+        if (selIds.length === 0) return showToast('Please select at least one student or card first', 'tw2');
+
+        selIds.forEach(id => {
+          const stu = allStus().find(s => String(s.id) === String(id));
+          if (stu) {
+            renderItems.push({ type: isPickup ? 'pickup' : (isAdmit ? 'admit' : 'student'), obj: stu });
+          } else {
+            const staff = (DB.users || []).find(u => String(u.id) === String(id));
+            if (staff) {
+              renderItems.push({ type: 'staff', obj: staff });
+            }
+          }
+        });
+
+        if (renderItems.length === 0) return showToast('No matching records found for selection', 'te');
+      } else if (mode === 'all_admit') {
         filename = 'All_School_Admit_Cards.pdf';
         allStus().forEach(stu => renderItems.push({type: 'admit', obj: stu}));
         if(renderItems.length === 0) return showToast('No students found', 'te');
@@ -9788,7 +9902,11 @@ margin-top:2px;">${ap}% Regularity</div>
           </div>
           <div class="ox-qr-wrap"><div class="ox-card-qr" data-student-id="${stu.id}"></div></div>
         </div>
-        <div class="vid-card-actions no-print">
+        <div class="vid-card-actions no-print" style="display:flex; flex-direction:column; gap:6px; align-items:center;">
+          <label class="card-select-label ${window.selectedCardEntities && window.selectedCardEntities.has(String(stu.id)) ? 'is-selected' : ''}" style="width:100%; justify-content:center;">
+            <input type="checkbox" class="card-select-cb" value="${stu.id}" ${window.selectedCardEntities && window.selectedCardEntities.has(String(stu.id)) ? 'checked' : ''} onchange="toggleCardSelection('${stu.id}')">
+            <span>Select Card</span>
+          </label>
           <button type="button" class="vid-card-btn" onclick="downloadSingleCardPdf('${stu.id}', '${isAdmit ? 'admit' : (isPickup ? 'pickup' : 'student')}')" title="Download this card as a single PDF">
             📥 Download ${isAdmit ? 'Admit Card' : 'PDF'}
           </button>
@@ -9836,6 +9954,12 @@ margin-top:2px;">${ap}% Regularity</div>
           </div>
           <div class="ox-qr-wrap"><div class="ox-card-qr" data-staff-id="${staff.id}"></div></div>
         </div>
+        <div class="vid-card-actions no-print" style="display:flex; flex-direction:column; gap:6px; align-items:center;">
+          <label class="card-select-label ${window.selectedCardEntities && window.selectedCardEntities.has(String(staff.id)) ? 'is-selected' : ''}" style="width:100%; justify-content:center;">
+            <input type="checkbox" class="card-select-cb" value="${staff.id}" ${window.selectedCardEntities && window.selectedCardEntities.has(String(staff.id)) ? 'checked' : ''} onchange="toggleCardSelection('${staff.id}')">
+            <span>Select Card</span>
+          </label>
+        </div>
       </div>`;
     }
 
@@ -9860,19 +9984,39 @@ margin-top:2px;">${ap}% Regularity</div>
       const titleText = isStaff ? 'Staff ID Cards' : (isAdmit ? 'Examination Admit Cards' : (isPickup ? 'Parent Pickup Cards' : 'Class ID Cards'));
       const subText = isStaff ? 'Staff & Teachers' : (isAdmit ? 'exam admit cards with roll numbers and hall QR' : (isPickup ? 'authorized pickup cards' : 'attendance QR cards'));
 
+      const selectedCount = window.selectedCardEntities ? window.selectedCardEntities.size : 0;
+      const allSelected = entities.length > 0 && entities.every(e => window.selectedCardEntities && window.selectedCardEntities.has(String(e.id)));
+
       return `
 <div class="ph ph-row fu no-print"><div><div class="ph-tag">${tagText}</div><h1>${titleText}</h1><div class="ph-sub">Print ${entities.length} ${subText} for ${isStaff ? 'Staff & Teachers' : (cls?.name || 'selected class')} on A4 sheets.</div></div>
-  <div class="ph-acts" style="display:flex; align-items:center;">
+  <div class="ph-acts" style="display:flex; align-items:center; flex-wrap:wrap; gap:8px;">
   <select class="fi" style="width:auto;min-width:180px;" onchange="switchIdCardClass(this.value)">${optHtml}</select>
   ${typeHtml}
-  <button class="btn btn-gh btn-sm" style="margin-left:8px;" onclick="downloadIdCardsPdf('${isAdmit ? 'all_admit' : 'all'}')">
+  <button id="btn-download-selected-cards" class="btn btn-p btn-sm" style="background:#0284c7; color:#fff; font-weight:700; ${selectedCount===0?'opacity:0.5;cursor:not-allowed;':''}" ${selectedCount===0?'disabled':''} onclick="downloadIdCardsPdf('selected')">
+    📥 Download Selected (<span id="selected-card-count">${selectedCount}</span>) PDF
+  </button>
+  <button class="btn btn-gh btn-sm" onclick="downloadIdCardsPdf('${isAdmit ? 'all_admit' : 'all'}')">
     ${isAdmit ? '📥 Download All Admit Cards (PDF)' : 'Download All (PDF)'}
   </button>
   <button class="btn btn-p btn-sm" onclick="downloadIdCardsPdf('class')">
-    ${isAdmit ? '📥 Download Class Admit Cards (PDF)' : 'Download PDF'}
+    ${isAdmit ? '📥 Download Class Admit Cards (PDF)' : 'Download Class PDF'}
   </button>
-  <button class="btn btn-gh btn-sm" onclick="printClassIdCards()">Print</button></div></div>
-<div class="id-print-toolbar no-print"><div class="ibox" style="margin:0;flex:1;">${isAdmit ? '🎓 Examination Admit Cards: CR-80 standard badge (2.125in x 3.375in) with student roll number, exam term, and hall check-in QR.' : 'Each card is 2.125in x 3.375in and includes the attendance QR used by the scanner.'}</div></div>
+  <button class="btn btn-gh btn-sm" onclick="printClassIdCards()">Print</button>
+</div></div>
+
+<div class="id-print-toolbar no-print" style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px 14px; margin-bottom:14px;">
+  <div style="display:flex; align-items:center; gap:12px;">
+    <label style="display:inline-flex; align-items:center; gap:7px; font-size:12px; font-weight:700; cursor:pointer; user-select:none; color:#1e293b;">
+      <input type="checkbox" id="select-all-cards-cb" ${allSelected?'checked':''} onchange="toggleSelectAllCards(this.checked)" style="width:16px; height:16px; accent-color:#0284c7; cursor:pointer;">
+      <span>Select All Visible (${entities.length})</span>
+    </label>
+    <button class="btn btn-xs btn-gh" style="font-size:11px;" onclick="clearCardSelection()">Clear Selection</button>
+  </div>
+  <div class="ibox" style="margin:0; flex:1; min-width:260px; font-size:12px; color:#475569;">
+    ${isAdmit ? '🎓 <b>Examination Admit Cards:</b> Select arbitrary students using the checkboxes on each card, or click <b>Select All</b>, then hit <b>Download Selected PDF</b> to generate all cards in one single combined PDF file.' : '💡 <b>Tip:</b> Check the cards you want to download and click <b>Download Selected PDF</b> to get one single combined PDF file.'}
+  </div>
+</div>
+
 <div class="id-print-area">
   ${sheets.length ? sheets.map(group => `<section class="id-a4-sheet">${group.map(e => isStaff ? staffIdCardHtml(e) : classIdCardHtml(e)).join('')}</section>`).join('') : '<div class="empty">No records found.</div>'}
 </div>`;

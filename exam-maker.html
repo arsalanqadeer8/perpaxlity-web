@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Paper Maker - Oxford Excellence Academy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; background: #f3f4f6; }
+        .urdu { font-family: 'Noto Nastaliq Urdu', serif; direction: rtl; text-align: right; }
+        
+        @media print {
+            body * { visibility: hidden; }
+            #print-area, #print-area * { visibility: visible; }
+            #print-area { position: absolute; left: 0; top: 0; width: 100%; padding: 0; background: white; margin: 0; }
+            .no-print { display: none !important; }
+            @page { margin: 15mm; size: A4; }
+            body { background: white; }
+        }
+        
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&display=swap');
+        .urdu { font-family: 'Noto Nastaliq Urdu', serif; direction: rtl; text-align: right; }
+        .urdu-left { text-align: left; }
+        
+        .exam-paper { background: white; padding: 40px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); max-width: 800px; margin: 20px auto; min-height: 1123px; position: relative; }
+        .q-row { display: flex; align-items: flex-start; margin-bottom: 12px; font-size: 15px; }
+        .q-num { font-weight: bold; margin-right: 10px; flex-shrink: 0; width: 25px; }
+        .urdu .q-num { margin-right: 0; margin-left: 10px; }
+        .q-body { flex-grow: 1; }
+        .q-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; margin-left: 5px; }
+        .urdu .q-opts { margin-left: 0; margin-right: 5px; }
+        .q-marks { font-weight: bold; margin-left: 10px; flex-shrink: 0; font-size: 13px; color: #555; }
+        .urdu .q-marks { margin-left: 0; margin-right: 10px; }
+        
+        .blank-lines { border-bottom: 1px dotted #999; height: 35px; width: 100%; margin-top: 5px; }
+        
+        .header-print { display: flex; justify-content: space-between; border-bottom: 2px solid black; padding-bottom: 10px; margin-bottom: 20px; align-items: center; }
+        .header-print img { height: 60px; }
+        .header-meta { font-size: 13px; margin-top: 10px; }
+        .student-lines { display: flex; gap: 20px; margin-top: 15px; margin-bottom: 30px;}
+        .student-lines div { flex-grow: 1; border-bottom: 1px solid black; padding-bottom: 2px; font-weight: bold; font-size: 14px; }
+    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://unpkg.com/mathlive"></script>
+</head>
+<body>
+
+<div id="app">
+    <div class="flex items-center justify-center h-screen">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    </div>
+</div>
+
+<script>
+    const SUPABASE_URL  = 'https://iprqtkmtelgdhlenlsrc.supabase.co';
+    const SUPABASE_KEY  = 'sb_publishable_DX0GG-V6vp9ey7_FxbvLdw_ql-E8nEt';
+    const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { storage: window.localStorage } });
+
+    let mainDB = null;
+    let examDB = { exams: [] };
+    let curUser = null;
+    
+    // View state
+    let curView = 'list'; // list, draft, print
+    let curExam = null;
+    let printMode = 'worksheet'; // worksheet, compact
+
+    async function init() {
+        // 1. Resolve Auth & Current User
+        const { data: auth } = await _sb.auth.getSession();
+        let authEmail = auth?.session?.user?.email;
+
+        // Try reading master portal data from localStorage
+        let localSchoolDB = null;
+        try {
+            const raw = localStorage.getItem('oxford_v1');
+            if (raw) localSchoolDB = JSON.parse(raw);
+        } catch(e) {}
+
+        // If no auth session, check if logged into portal in current browser tab/storage
+        if (!authEmail && localSchoolDB?.users?.length) {
+            // Find an admin or teacher user in local DB as fallback
+            const staffUser = localSchoolDB.users.find(u => u.role === 'admin' || u.role === 'teacher');
+            if (staffUser) {
+                authEmail = staffUser.email;
+            }
+        }
+
+        if (!authEmail) {
+            document.getElementById('app').innerHTML = '<div class="p-10 text-center text-red-600 font-bold text-xl mt-20"><i class="fa fa-lock text-4xl mb-4"></i><br>Access Denied.<br>Please log in through the main portal first.</div>';
+            return;
+        }
+
+        // Try fetching staff from 'staff' table or fallback to snapshot/localStorage
+        try {
+            const { data: stfData } = await _sb.from('staff').select('*');
+            if (stfData && stfData.length > 0) {
+                curUser = stfData.map(r => r.data || r).find(x => x.email === authEmail);
+            }
+        } catch(e) {}
+
+        // Fallback curUser from localSchoolDB or db_snapshot
+        if (!curUser && localSchoolDB?.users) {
+            curUser = localSchoolDB.users.find(x => (x.email || '').toLowerCase() === authEmail.toLowerCase());
+        }
+
+        // Cloud snapshot fallback if still missing
+        if (!curUser || !localSchoolDB) {
+            try {
+                const { data: snap } = await _sb.from('db_snapshot').select('data').eq('id', 1).maybeSingle();
+                if (snap?.data) {
+                    localSchoolDB = snap.data;
+                    if (!curUser && snap.data.users) {
+                        curUser = snap.data.users.find(x => (x.email || '').toLowerCase() === authEmail.toLowerCase());
+                    }
+                }
+            } catch(e) {}
+        }
+
+        if (!curUser) {
+            // If authenticated user is admin
+            curUser = { id: 'admin', name: 'Administrator', email: authEmail, role: 'admin' };
+        }
+
+        // 2. Load Classes & Subjects
+        let classesList = [];
+        let subjectsList = [];
+
+        try {
+            const { data: cData } = await _sb.from('classes').select('*');
+            if (cData && cData.length > 0) classesList = cData.map(r => r.data || r);
+        } catch(e) {}
+
+        try {
+            const { data: mData } = await _sb.from('miscellaneous').select('*').like('id', 'subject_%');
+            if (mData && mData.length > 0) subjectsList = mData.map(r => r.data || r);
+        } catch(e) {}
+
+        if (classesList.length === 0 && localSchoolDB?.classes) {
+            classesList = localSchoolDB.classes;
+        }
+        if (subjectsList.length === 0 && localSchoolDB?.subjects) {
+            subjectsList = localSchoolDB.subjects;
+        }
+
+        mainDB = {
+            classes: classesList,
+            subjects: subjectsList
+        };
+
+        // 3. Load Papers / Exams
+        let loadedExams = [];
+        try {
+            const { data: pData } = await _sb.from('miscellaneous').select('*').like('id', 'paper_%');
+            if (pData && pData.length > 0) loadedExams = pData.map(r => r.data || r);
+        } catch(e) {}
+
+        // Fallback exams from db_snapshot id: 2 or localStorage
+        if (loadedExams.length === 0) {
+            try {
+                const { data: snap2 } = await _sb.from('db_snapshot').select('data').eq('id', 2).maybeSingle();
+                if (snap2?.data?.exams) loadedExams = snap2.data.exams;
+            } catch(e) {}
+        }
+
+        if (loadedExams.length === 0) {
+            try {
+                const localExams = JSON.parse(localStorage.getItem('oxford_exams_cache') || '[]');
+                if (Array.isArray(localExams) && localExams.length > 0) loadedExams = localExams;
+            } catch(e) {}
+        }
+
+        examDB.exams = loadedExams;
+        renderApp();
+    }
+    
+    function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 5); }
+
+    async function saveExams() {
+        try {
+            localStorage.setItem('oxford_exams_cache', JSON.stringify(examDB.exams));
+            await _sb.from('db_snapshot').upsert({ id: 2, data: examDB, updated_at: new Date().toISOString() });
+        } catch(e) {
+            console.warn('saveExams error:', e);
+        }
+    }
+
+    function renderApp() {
+        if (curView === 'list') renderList();
+        else if (curView === 'draft') renderDraft();
+        else if (curView === 'print') renderPrint();
+    }
+
+    function resumeDraft() {
+        try { curExam = JSON.parse(localStorage.getItem('exam_draft')); curView = 'draft'; renderApp(); } catch(e) {}
+    }
+
+    // --- LIST VIEW ---
+    function renderList() {
+        let draftBanner = '';
+        if (localStorage.getItem('exam_draft') && curUser.role !== 'student') {
+            draftBanner = `<div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6 flex justify-between items-center rounded shadow-sm">
+                <div><i class="fa fa-exclamation-circle mr-2"></i> You have an unsaved exam draft!</div>
+                <div class="flex gap-2">
+                    <button onclick="resumeDraft()" class="bg-yellow-500 text-white px-3 py-1 rounded font-bold hover:bg-yellow-600 text-sm shadow-sm">Resume Draft</button>
+                    <button onclick="localStorage.removeItem('exam_draft'); renderApp();" class="bg-gray-200 text-gray-700 px-3 py-1 rounded font-bold hover:bg-gray-300 text-sm">Discard</button>
+                </div>
+            </div>`;
+        }
+        
+        let html = `
+            <div class="max-w-5xl mx-auto mt-10 p-5 bg-white rounded shadow">
+                ${draftBanner}
+                <div class="flex justify-between items-center mb-6 border-b pb-4">
+                    <h1 class="text-2xl font-bold text-gray-800"><i class="fa fa-file-alt text-blue-600 mr-2"></i> Exam Paper Maker</h1>
+                    ${curUser.role !== 'student' ? `<button onclick="startNewExam()" class="bg-blue-600 text-white px-4 py-2 rounded font-bold hover:bg-blue-700 shadow"><i class="fa fa-plus mr-1"></i> Draft New Exam</button>` : ''}
+                </div>
+                
+                <h2 class="text-lg font-bold mb-3 text-gray-700">Saved Exam Papers</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        `;
+        
+        let visibleExams = examDB.exams || [];
+        if (curUser.role === 'teacher') {
+            visibleExams = visibleExams.filter(ex => ex.authorId === curUser.id);
+        }
+        
+        if (visibleExams.length === 0) html += `<div class="text-gray-500 italic p-5">No exams created yet.</div>`;
+        
+        visibleExams.forEach(ex => {
+            html += `
+                <div class="border rounded-lg p-4 flex flex-col justify-between hover:shadow-md transition bg-gray-50">
+                    <div>
+                        <div class="flex justify-between">
+                           <div class="text-xs font-bold text-gray-500 uppercase tracking-wide">${ex.cls} &bull; ${ex.subj}</div>
+                           <div class="text-xs font-bold px-2 py-1 rounded bg-yellow-100 text-yellow-800 uppercase tracking-wide">${ex.status || 'Draft'}</div>
+                        </div>
+                        <h3 class="font-bold text-lg text-blue-800 mt-1">${ex.title}</h3>
+                        <div class="text-sm text-gray-600 mt-2"><i class="fa fa-user mr-1 w-4"></i> By: ${ex.authorName}</div>
+                        <div class="text-sm text-gray-600"><i class="fa fa-list-ol mr-1 w-4"></i> ${ex.questions.length} Questions | ${ex.totalMarks} Marks</div>
+                        <div class="text-sm text-gray-600"><i class="fa fa-language mr-1 w-4"></i> ${ex.lang === 'ur' ? 'Urdu (RTL)' : 'English'}</div>
+                    </div>
+                    <div class="mt-4 flex gap-2">
+                        ${curUser.role === 'admin' ? `<button onclick="openPrint('${ex.id}')" class="bg-green-600 text-white px-3 py-1.5 rounded text-sm font-bold flex-1 hover:bg-green-700 shadow-sm"><i class="fa fa-print mr-1"></i> Review & Print</button>` : ''}
+                        ${curUser.id === ex.authorId || curUser.role === 'admin' ? `<button onclick="editExam('${ex.id}')" class="bg-gray-200 text-gray-800 px-3 py-1.5 rounded text-sm font-bold flex-1 hover:bg-gray-300 shadow-sm"><i class="fa fa-edit mr-1"></i> Edit</button>` : ''}
+                        ${curUser.role === 'admin' ? `<button onclick="deleteExam('${ex.id}')" class="bg-red-100 text-red-600 px-3 py-1.5 rounded text-sm font-bold hover:bg-red-200 shadow-sm"><i class="fa fa-trash"></i></button>` : ''}
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += `</div></div>`;
+        document.getElementById('app').innerHTML = html;
+    }
+
+    function startNewExam() {
+        curExam = {
+            id: uid(), authorId: curUser.id, authorName: curUser.name,
+            title: 'Mid Term Examination 2025', cls: '', subj: '',
+            totalMarks: 50, time: '2 Hours', lang: 'en', status: 'Draft',
+            questions: []
+        };
+        curView = 'draft'; renderApp();
+    }
+    
+    function editExam(id) {
+        curExam = examDB.exams.find(x => x.id === id);
+        curView = 'draft'; renderApp();
+    }
+    
+    async function deleteExam(id) {
+        if(!confirm('Delete this exam completely?')) return;
+        examDB.exams = examDB.exams.filter(x => x.id !== id);
+        document.getElementById('app').innerHTML = '<div class="p-10 text-center font-bold">Deleting...</div>';
+        try { await _sb.from('miscellaneous').delete().eq('id', 'paper_' + id); } catch(e) {}
+        await saveExams();
+        renderApp();
+    }
+
+    // --- DRAFT VIEW ---
+    function renderDraft() {
+        const cOpts = mainDB.classes.map(c => `<option value="${c.name}" ${curExam.cls===c.name?'selected':''}>${c.name}</option>`).join('');
+        const sOpts = mainDB.subjects.map(s => `<option value="${s.name}" ${curExam.subj===s.name?'selected':''}>${s.name}</option>`).join('');
+        
+        let marksCount = curExam.questions.reduce((sum, q) => sum + Number(q.marks||0), 0);
+        let marksColor = marksCount !== Number(curExam.totalMarks) ? 'text-red-600 bg-red-100 px-2 py-1 rounded' : 'text-green-700 bg-green-100 px-2 py-1 rounded';
+        
+        let html = `
+            <div class="max-w-4xl mx-auto mt-5 mb-10 p-5 bg-white rounded shadow">
+                <div class="flex justify-between items-center border-b pb-4 mb-4">
+                    <h2 class="text-xl font-bold"><i class="fa fa-pen text-blue-600 mr-2"></i> Draft Exam</h2>
+                    <div class="space-x-2 flex items-center">
+                        ${marksCount !== Number(curExam.totalMarks) ? `<span class="text-xs text-red-600 font-bold mr-3 hidden sm:inline"><i class="fa fa-exclamation-triangle"></i> Marks mismatch!</span>` : ''}
+                        <button onclick="curView='list'; renderApp()" class="px-3 py-1.5 bg-gray-200 rounded font-bold text-sm hover:bg-gray-300">Cancel</button>
+                        <button onclick="saveDraft()" class="px-3 py-1.5 bg-blue-600 text-white rounded font-bold text-sm hover:bg-blue-700 shadow"><i class="fa fa-save mr-1"></i> Save to Admin</button>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6 bg-gray-50 p-4 rounded border">
+                    <div class="col-span-2 md:col-span-1"><label class="block text-xs font-bold text-gray-500 uppercase">Exam Title</label><input type="text" id="e-title" value="${curExam.title}" class="w-full p-2 border rounded mt-1" onchange="updateEx('title', this.value)"></div>
+                    <div><label class="block text-xs font-bold text-gray-500 uppercase">Language</label>
+                        <select id="e-lang" class="w-full p-2 border rounded mt-1" onchange="updateEx('lang', this.value); renderApp();">
+                            <option value="en" ${curExam.lang==='en'?'selected':''}>English</option>
+                            <option value="ur" ${curExam.lang==='ur'?'selected':''}>Urdu (RTL Nastaliq)</option>
+                        </select>
+                    </div>
+                    <div><label class="block text-xs font-bold text-gray-500 uppercase">Class</label><select id="e-cls" class="w-full p-2 border rounded mt-1" onchange="updateEx('cls', this.value)"><option value="">Select Class</option>${cOpts}</select></div>
+                    <div><label class="block text-xs font-bold text-gray-500 uppercase">Subject</label><select id="e-subj" class="w-full p-2 border rounded mt-1" onchange="updateEx('subj', this.value)"><option value="">Select Subject</option>${sOpts}</select></div>
+                    <div><label class="block text-xs font-bold text-gray-500 uppercase">Time Allowed</label><input type="text" id="e-time" value="${curExam.time}" class="w-full p-2 border rounded mt-1" onchange="updateEx('time', this.value)"></div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase">Total Marks</label>
+                        <div class="flex items-center gap-2 mt-1">
+                            <input type="number" id="e-marks" value="${curExam.totalMarks}" class="w-1/2 p-2 border rounded font-bold text-center" onchange="updateEx('totalMarks', this.value); renderApp();">
+                            <span class="text-xs font-bold ${marksColor} ml-2 whitespace-nowrap">Sum: ${marksCount}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <h3 class="font-bold text-lg mb-2">Questions</h3>
+                <div id="q-list" class="space-y-4 mb-6 ${curExam.lang === 'ur' ? 'urdu' : ''}">
+        `;
+        
+        let qNum = 1;
+        curExam.questions.forEach((q, i) => {
+            let isH = q.type === 'heading';
+            if (isH) qNum = 1;
+            html += `
+                <div class="border rounded p-4 relative bg-white shadow-sm hover:border-blue-300 transition">
+                    <button onclick="removeQ(${i})" class="absolute top-2 ${curExam.lang === 'ur' ? 'left-2 right-auto' : 'right-2'} text-red-500 hover:text-red-700 bg-red-50 rounded-full w-6 h-6 flex items-center justify-center no-print" title="Delete"><i class="fa fa-times text-sm"></i></button>
+                    <div class="absolute top-2 ${curExam.lang === 'ur' ? 'left-10 right-auto' : 'right-10'} flex gap-1 no-print">
+                        ${i > 0 ? `<button onclick="moveQ(${i}, -1)" class="text-blue-500 hover:text-blue-700 bg-blue-50 rounded w-6 h-6 flex items-center justify-center" title="Move Up"><i class="fa fa-arrow-up text-xs"></i></button>` : ''}
+                        ${i < curExam.questions.length - 1 ? `<button onclick="moveQ(${i}, 1)" class="text-blue-500 hover:text-blue-700 bg-blue-50 rounded w-6 h-6 flex items-center justify-center" title="Move Down"><i class="fa fa-arrow-down text-xs"></i></button>` : ''}
+                    </div>
+                    
+                    <div class="flex gap-2 items-start mb-2">
+                        ${isH ? '<span class="font-bold mt-2 text-blue-600 w-8"><i class="fa fa-heading"></i></span>' : `<span class="font-bold mt-2 text-gray-700 w-8 text-right pr-2">${toUrduNum(qNum++)}.</span>`}
+                        <textarea class="flex-grow p-2 border rounded text-sm w-full outline-none focus:ring-1 focus:ring-blue-500 resize-y ${isH ? 'font-bold text-center bg-gray-50' : ''} ${curExam.lang==='ur'?'urdu':''}" rows="${isH?1:2}" placeholder="${isH ? 'Type Section Heading (e.g. Q1. Attempt any 5)' : 'Type your question here...'}" onchange="updateQ(${i}, 'q', this.value)">${q.q}</textarea>
+                        ${!isH ? `<input type="number" class="w-16 p-2 border rounded text-sm text-center font-bold outline-none focus:ring-1 focus:ring-blue-500" placeholder="Pts" value="${q.marks}" onchange="updateQ(${i}, 'marks', this.value)" title="Marks">` : ''}
+                    </div>
+            `;
+            if (!isH) {
+                html += `<div class="flex gap-2 pl-10 pr-4 mb-2">
+                    <button onclick="updateQ(${i}, 'showMath', !${q.showMath}); renderApp();" class="text-xs bg-gray-100 border text-gray-700 px-2 py-1 rounded hover:bg-gray-200 font-bold"><i class="fa fa-square-root-alt"></i> ${q.showMath ? 'Remove Math Keyboard' : 'Add Math Keyboard'}</button>
+                    <label class="text-xs bg-gray-100 border text-gray-700 px-2 py-1 rounded hover:bg-gray-200 font-bold cursor-pointer"><i class="fa fa-image"></i> Add Image <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(${i}, this.files[0])"></label>
+                </div>`;
+                if (q.showMath) {
+                    html += `
+                        <div class="mt-1 pl-10 pr-4 mb-3">
+                            <math-field virtual-keyboard-mode="manual" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; background: white;" oninput="updateQ(${i}, 'math', this.value)">${q.math || ''}</math-field>
+                            <div class="text-xs text-blue-600 mt-1 font-bold flex flex-col gap-1">
+  <span><i class="fa fa-info-circle"></i> Click the keyboard icon on the right side of the box to open the Math Keyboard!</span>
+  <span><i class="fa fa-lightbulb text-yellow-500"></i> Tip: Want this equation to appear in the middle of your question text instead of below it? Just type <b>[math]</b> exactly where you want it inside the text box above!</span>
+</div>
+                        </div>
+                    `;
+                }
+                if (q.image) {
+                    html += `
+                        <div class="mt-2 pl-10 pr-4 mb-3">
+                            <div class="relative inline-block">
+                                <img src="${q.image}" class="max-h-32 border rounded shadow-sm">
+                                <button onclick="updateQ(${i}, 'image', ''); renderApp();" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-700 shadow"><i class="fa fa-times"></i></button>
+                            </div>
+                            <div class="flex gap-2 mt-2">
+                                <select onchange="updateQ(${i}, 'imageSize', this.value); renderApp();" class="text-xs border p-1 rounded bg-white text-gray-700 outline-none">
+                                    <option value="sm" ${q.imageSize==='sm'?'selected':''}>Size: Small</option>
+                                    <option value="md" ${!q.imageSize||q.imageSize==='md'?'selected':''}>Size: Medium</option>
+                                    <option value="lg" ${q.imageSize==='lg'?'selected':''}>Size: Large</option>
+                                    <option value="full" ${q.imageSize==='full'?'selected':''}>Size: Full Width</option>
+                                </select>
+                                <select onchange="updateQ(${i}, 'imageAlign', this.value); renderApp();" class="text-xs border p-1 rounded bg-white text-gray-700 outline-none">
+                                    <option value="left" ${q.imageAlign==='left'?'selected':''}>Align: Left</option>
+                                    <option value="center" ${!q.imageAlign||q.imageAlign==='center'?'selected':''}>Align: Center</option>
+                                    <option value="right" ${q.imageAlign==='right'?'selected':''}>Align: Right</option>
+                                </select>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            
+            if (q.type === 'mcq' || q.type === 'tf') {
+                html += `<div class="grid grid-cols-2 gap-2 pl-8 pr-8">`;
+                let optsList = q.type === 'tf' ? (curExam.lang==='ur'?['صحیح','غلط']:['True', 'False']) : (curExam.lang==='ur'?['۱','۲','۳','۴']:['A', 'B', 'C', 'D']);
+                optsList.forEach((l, idx) => {
+                    html += `<div class="flex items-center gap-1 ${curExam.lang==='ur'?'flex-row-reverse':''}"><span class="text-xs font-bold text-gray-500 w-4 ${curExam.lang==='ur'?'text-left':''}">${l})</span><input type="text" class="w-full p-1.5 border rounded text-sm outline-none focus:ring-1 focus:ring-blue-500 ${curExam.lang==='ur'?'urdu':''}" placeholder="Option" value="${q.opts[idx]||''}" onchange="updateOpts(${i}, ${idx}, this.value)"></div>`;
+                });
+                html += `</div>`;
+            } else if (q.type === 'matching') {
+                html += `<div class="pl-8 pr-8 mt-2 flex items-center justify-between mb-2"><div class="text-xs text-gray-500"><i class="fa fa-info-circle"></i> Leave 'Right column' blank for empty boxes.</div><div class="flex items-center gap-2"><label class="text-xs font-bold text-gray-600">Rows:</label><input type="number" value="${q.lines||5}" class="border rounded w-16 p-1 text-sm text-center font-bold" onchange="updateQ(${i}, 'lines', this.value)"></div></div>`;
+                html += `<div class="flex gap-2 pl-8 pr-8 mb-2"><input type="text" class="w-1/2 p-1.5 border-b-2 border-gray-400 font-bold text-sm outline-none bg-transparent ${curExam.lang==='ur'?'urdu':''}" placeholder="Left Heading" value="${q.colA||'Column A'}" onchange="updateQ(${i}, 'colA', this.value)"><input type="text" class="w-1/2 p-1.5 border-b-2 border-gray-400 font-bold text-sm outline-none bg-transparent ${curExam.lang==='ur'?'urdu':''}" placeholder="Right Heading" value="${q.colB||'Column B'}" onchange="updateQ(${i}, 'colB', this.value)"></div>`;
+                let rCount = Number(q.lines || 5);
+                for(let idx=0; idx<rCount; idx++) {
+                    let parts = (q.opts[idx]||'|').split('|');
+                    html += `<div class="flex gap-2 pl-8 pr-8 mb-1 ${curExam.lang==='ur'?'flex-row-reverse':''}"><input type="text" class="w-1/2 p-1.5 border rounded text-sm outline-none focus:ring-1 focus:ring-blue-500 ${curExam.lang==='ur'?'urdu':''}" placeholder="Left item" value="${parts[0]||''}" onchange="updateMatch(${i}, ${idx}, 0, this.value)"><input type="text" class="w-1/2 p-1.5 border rounded text-sm outline-none focus:ring-1 focus:ring-blue-500 ${curExam.lang==='ur'?'urdu':''}" placeholder="Right item (Leave empty for line)" value="${parts[1]||''}" onchange="updateMatch(${i}, ${idx}, 1, this.value)"></div>`;
+                }
+            } else if (!isH) {
+                html += `<div class="pl-8 pr-8 mt-2 flex items-center gap-2 bg-gray-50 p-2 rounded inline-flex"><i class="fa fa-align-justify text-gray-400"></i> <label class="text-xs text-gray-600 font-bold">Blank answering lines:</label> <input type="number" value="${q.lines||3}" class="border rounded w-16 p-1 text-sm text-center font-bold" onchange="updateQ(${i}, 'lines', this.value)"></div>`;
+            }
+            
+            html += `</div>`;
+        });
+        
+        if (curExam.questions.length === 0) {
+            html += `<div class="text-center p-10 border-2 border-dashed rounded text-gray-400 font-bold"><i class="fa fa-arrow-down text-2xl mb-2 block"></i>Add your first question below</div>`;
+        }
+        
+        html += `
+                </div>
+                <div class="flex flex-wrap gap-2 justify-center border-t pt-5">
+                    <button onclick="addQ('heading')" class="bg-gray-100 text-gray-700 border border-gray-300 px-3 py-1.5 rounded text-sm font-bold hover:bg-gray-200"><i class="fa fa-heading mr-1"></i> Add Heading</button>
+                    <button onclick="addQ('mcq')" class="bg-indigo-50 text-indigo-700 border border-indigo-200 px-3 py-1.5 rounded text-sm font-bold hover:bg-indigo-100"><i class="fa fa-list-ol mr-1"></i> Add MCQ</button>
+                    <button onclick="addQ('tf')" class="bg-purple-50 text-purple-700 border border-purple-200 px-3 py-1.5 rounded text-sm font-bold hover:bg-purple-100"><i class="fa fa-check mr-1"></i> Add True/False</button>
+                    <button onclick="addQ('matching')" class="bg-orange-50 text-orange-700 border border-orange-200 px-3 py-1.5 rounded text-sm font-bold hover:bg-orange-100"><i class="fa fa-columns mr-1"></i> Add Columns</button>
+                    <button onclick="addQ('short')" class="bg-teal-50 text-teal-700 border border-teal-200 px-3 py-1.5 rounded text-sm font-bold hover:bg-teal-100"><i class="fa fa-pen mr-1"></i> Add Question</button>
+                </div>
+            </div>
+        `;
+        document.getElementById('app').innerHTML = html;
+    }
+
+    function handleImageUpload(idx, file) {
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 500;
+                let width = img.width; let height = img.height;
+                if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                canvas.width = width; canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                updateQ(idx, 'image', canvas.toDataURL('image/jpeg', 0.8));
+                renderApp();
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+    
+    function toUrduNum(num) {
+        if (curExam.lang !== 'ur') return num;
+        return num.toString().replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+    }
+    
+    function autoSave() { if(curView === 'draft' && curExam) localStorage.setItem('exam_draft', JSON.stringify(curExam)); }
+    function updateEx(k, v) { curExam[k] = v; autoSave(); }
+    function updateQ(idx, k, v) { curExam.questions[idx][k] = v; autoSave(); if(k==='marks') renderApp(); }
+    function updateOpts(qIdx, optIdx, v) { curExam.questions[qIdx].opts[optIdx] = v; autoSave(); }
+    function updateMatch(qIdx, optIdx, side, v) { 
+        let parts = (curExam.questions[qIdx].opts[optIdx] || '|').split('|');
+        if (parts.length !== 2) parts = ['',''];
+        parts[side] = v;
+        curExam.questions[qIdx].opts[optIdx] = parts.join('|');
+        autoSave();
+    }
+    function moveQ(idx, dir) {
+        if (idx + dir < 0 || idx + dir >= curExam.questions.length) return;
+        const temp = curExam.questions[idx];
+        curExam.questions[idx] = curExam.questions[idx + dir];
+        curExam.questions[idx + dir] = temp;
+        autoSave();
+        renderApp();
+    }
+    function removeQ(idx) { curExam.questions.splice(idx, 1); autoSave(); renderApp(); }
+    function addQ(type) {
+        let defOpts = type==='tf' ? (curExam.lang==='ur'?['صحیح','غلط']:['True', 'False']) : type==='matching' ? ['|','|','|','|','|'] : ['','','',''];
+        curExam.questions.push({ type, q: '', opts: defOpts, marks: type==='heading'?0:1, lines: type==='short'?3: type==='matching'?5:0, colA: 'Column A', colB: 'Column B', math: '', image: '', showMath: false });
+        autoSave();
+        renderApp();
+        setTimeout(() => window.scrollTo(0, document.body.scrollHeight), 50);
+    }
+    
+    async function saveDraft() {
+        if (!curExam.cls || !curExam.subj) {
+            alert('Please select a Class and Subject before saving.');
+            return;
+        }
+        curExam.status = 'Submitted';
+        const exst = examDB.exams.findIndex(x => x.id === curExam.id);
+        if (exst > -1) examDB.exams[exst] = curExam;
+        else examDB.exams.push(curExam);
+        
+        localStorage.removeItem('exam_draft');
+        
+        document.getElementById('app').innerHTML = '<div class="p-10 text-center font-bold text-blue-600 mt-20 text-xl"><i class="fa fa-circle-notch fa-spin mr-2"></i> Saving to Admin database...</div>';
+        try { await _sb.from('miscellaneous').upsert({ id: 'paper_' + curExam.id, data: curExam }); } catch(e) {}
+        await saveExams();
+        curView = 'list'; renderApp();
+    }
+
+    // --- PRINT VIEW ---
+    function openPrint(id) {
+        curExam = examDB.exams.find(x => x.id === id);
+        curView = 'print'; renderApp();
+    }
+    
+    function renderPrint() {
+        const rtl = curExam.lang === 'ur';
+        let html = `
+            <div class="no-print bg-gray-900 text-white p-3 flex justify-between items-center fixed top-0 w-full z-50 shadow-lg">
+                <div class="font-bold flex items-center"><i class="fa fa-print mr-3 text-blue-400"></i> Print Mode: ${curExam.title}</div>
+                <div class="flex items-center gap-5">
+                    <label class="text-sm font-bold flex items-center gap-1 cursor-pointer hover:text-blue-300"><input type="radio" name="pm" ${printMode==='worksheet'?'checked':''} onchange="printMode='worksheet';renderApp()"> <i class="fa fa-align-justify ml-1"></i> Worksheet Mode</label>
+                    <label class="text-sm font-bold flex items-center gap-1 cursor-pointer hover:text-blue-300"><input type="radio" name="pm" ${printMode==='compact'?'checked':''} onchange="printMode='compact';renderApp()"> <i class="fa fa-compress-alt ml-1"></i> Compact Mode</label>
+                    <div class="w-px h-6 bg-gray-700"></div>
+                    <label class="text-sm font-bold flex items-center gap-2" title="Adjust this slider to make the exam fit perfectly onto your desired number of pages!">
+                        <i class="fa fa-search-minus cursor-pointer" onclick="document.getElementById('p-scale').value = Math.max(50, parseInt(document.getElementById('p-scale').value)-5); document.getElementById('p-scale').dispatchEvent(new Event('input'))"></i>
+                        Scale <input id="p-scale" type="range" min="50" max="150" value="100" oninput="document.getElementById('print-area').style.zoom = this.value + '%'; document.getElementById('zoom-val').innerText = this.value + '%';" class="w-20"> 
+                        <i class="fa fa-search-plus cursor-pointer" onclick="document.getElementById('p-scale').value = Math.min(150, parseInt(document.getElementById('p-scale').value)+5); document.getElementById('p-scale').dispatchEvent(new Event('input'))"></i>
+                        <span id="zoom-val" class="w-10 text-right">100%</span>
+                    </label>
+                    <div class="w-px h-6 bg-gray-700"></div>
+                    <button onclick="window.print()" class="bg-blue-600 px-5 py-1.5 rounded font-bold hover:bg-blue-500 shadow"><i class="fa fa-print mr-1"></i> Print PDF</button>
+                    <button onclick="curView='list';renderApp()" class="bg-gray-700 px-3 py-1.5 rounded hover:bg-gray-600"><i class="fa fa-times"></i> Close</button>
+                </div>
+            </div>
+            
+            <div style="padding-top: 60px;" class="no-print"></div>
+            
+            <div id="print-area" class="exam-paper ${rtl ? 'urdu' : ''}">
+                <!-- Header -->
+                <div class="header-print ${rtl ? 'flex-row-reverse' : ''}">
+                    <div style="width: 100px;"></div>
+                    <div class="text-center flex-grow px-4">
+                        <h1 class="text-2xl font-bold uppercase tracking-widest">Oxford Excellence Academy</h1>
+                        <h2 class="text-lg font-bold mt-1 uppercase text-gray-800">${curExam.title}</h2>
+                    </div>
+                    <div style="width: 100px;"></div>
+                </div>
+                
+                <div class="header-meta flex justify-between font-bold border-b-2 border-gray-300 pb-2 mb-3 ${rtl ? 'flex-row-reverse' : ''}">
+                    <div class="uppercase">Class: ${curExam.cls}</div>
+                    <div class="uppercase">Subject: ${curExam.subj}</div>
+                    <div class="uppercase">Time: ${curExam.time}</div>
+                    <div class="uppercase">Total Marks: ${curExam.totalMarks}</div>
+                </div>
+                
+                <div class="student-lines ${rtl ? 'flex-row-reverse' : ''}">
+                    <div class="flex items-end"><span class="mr-2 whitespace-nowrap">Student Name:</span> <span class="flex-grow border-b border-black block pb-1"></span></div>
+                    <div class="flex items-end"><span class="mr-2 whitespace-nowrap">Roll No:</span> <span class="flex-grow border-b border-black block pb-1"></span></div>
+                    <div class="flex items-end"><span class="mr-2 whitespace-nowrap">Date:</span> <span class="flex-grow border-b border-black block pb-1"></span></div>
+                </div>
+                
+                <!-- Questions -->
+                <div class="q-container">
+        `;
+        
+        let qNum = 1;
+        curExam.questions.forEach((q, i) => {
+            let isH = q.type === 'heading';
+            if (isH) {
+                qNum = 1;
+                html += `<div class="text-left font-bold text-lg mt-6 mb-2 pb-1 ${rtl ? 'urdu text-right' : ''}">${q.q}</div>`;
+                return;
+            }
+            html += `
+                <div class="q-row ${rtl ? 'flex-row-reverse' : ''}">
+                    <div class="q-num">${toUrduNum(qNum++)}.</div>
+                    <div class="q-body">
+                        <div style="white-space: pre-wrap; font-weight: 500;" id="q-text-${i}"></div>
+                        ${(q.math && !q.q.includes('[math]')) ? `<div class="mt-2 text-left" id="math-print-${i}" data-display="true"></div>` : ''}
+            `;
+            if (q.image) {
+                let imgClasses = 'mt-3 max-w-full ';
+                if (!q.imageAlign || q.imageAlign === 'center') imgClasses += 'mx-auto block ';
+                else if (q.imageAlign === 'right') imgClasses += 'ml-auto block ';
+                else imgClasses += 'mr-auto block ';
+                let imgStyles = '';
+                if (q.imageSize === 'sm') imgStyles = 'max-height: 150px;';
+                else if (q.imageSize === 'lg') imgStyles = 'max-height: 400px;';
+                else if (q.imageSize === 'full') imgStyles = 'width: 100%; object-fit: contain;';
+                else imgStyles = 'max-height: 250px;';
+                html += `<img src="${q.image}" class="${imgClasses}" style="${imgStyles}">`;
+            }
+            
+            if (q.type === 'mcq' || q.type === 'tf') {
+                html += `<div class="q-opts ${rtl ? 'urdu' : ''}">`;
+                let optsList = q.type === 'tf' ? (curExam.lang==='ur'?['[   ] صحیح','[   ] غلط']:['[   ] True', '[   ] False']) : (curExam.lang==='ur'?['۱','۲','۳','۴']:['A', 'B', 'C', 'D']);
+                optsList.forEach((l, idx) => {
+                    let text = q.type === 'tf' ? (q.opts[idx]||l.replace('[   ] ', '')) : q.opts[idx];
+                    html += `<div>${q.type==='tf'?'[   ] ':l+') '} ${text||''}</div>`;
+                });
+                html += `</div>`;
+            } else if (q.type === 'matching') {
+                html += `<table class="w-full max-w-xl mt-4 mb-4 border-collapse border border-black text-sm">`;
+                html += `<thead><tr><th class="border border-black p-2 ${rtl ? 'text-right' : 'text-left'}">${q.colA||'Column A'}</th><th class="border border-black p-2 ${rtl ? 'text-right' : 'text-left'}">${q.colB||'Column B'}</th></tr></thead><tbody>`;
+                let rCount = Number(q.lines || 5);
+                for(let idx=0; idx<rCount; idx++) {
+                    let parts = (q.opts[idx]||'|').split('|');
+                    if (parts[0] || parts[1] || printMode === 'worksheet') {
+                        let rightCol = parts[1] ? parts[1] : '';
+                        html += `<tr><td class="border border-black p-2 w-1/2 align-top">${parts[0]||''}</td><td class="border border-black p-2 w-1/2 align-top">${rightCol}</td></tr>`;
+                    }
+                }
+                html += `</tbody></table>`;
+            } else {
+                if (printMode === 'worksheet' && q.lines) {
+                    for(let l=0; l<q.lines; l++) {
+                        html += `<div class="blank-lines"></div>`;
+                    }
+                }
+            }
+            
+            html += `
+                    </div>
+                    <div class="q-marks">[${q.marks}]</div>
+                </div>
+            `;
+        });
+        
+        html += `
+                </div>
+                <div class="text-center mt-12 text-xs text-gray-500 font-bold tracking-widest no-print border-t pt-4">--- END OF PAPER ---</div>
+            </div>
+        `;
+        
+        document.getElementById('app').innerHTML = html;
+        setTimeout(() => {
+            curExam.questions.forEach((q, i) => {
+                const textEl = document.getElementById(`q-text-${i}`);
+                if (textEl) {
+                    if (q.q.includes('[math]') && q.math) {
+                        textEl.innerHTML = q.q.split('[math]').join(`<span id="math-print-${i}" data-display="false" style="display:inline-block; vertical-align:middle; margin:0 4px;"></span>`);
+                    } else {
+                        textEl.innerText = q.q;
+                    }
+                }
+                if (q.math && window.katex) {
+                    const mathEl = document.getElementById(`math-print-${i}`);
+                    if (mathEl) {
+                        const isDisplay = mathEl.getAttribute('data-display') === 'true';
+                        try { let m = q.math.replace(/\\imaginaryI/g, 'i').replace(/\\exponentialE/g, 'e').replace(/\\differentialD/g, 'd'); katex.render(m, mathEl, { displayMode: isDisplay, throwOnError: false }); } catch(e) {}
+                    }
+                }
+            });
+        }, 100);
+    }
+
+    init();
+</script>
+</body>
+</html>
