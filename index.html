@@ -3453,11 +3453,32 @@ window.addEventListener('unhandledrejection', function(e) {
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 
 <style>
-.ledger-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px; }
-.lm-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); font-family: 'Inter', system-ui, sans-serif; }
-.lm-label { font-size: 0.75rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
-.lm-value { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 6px; }
-.lm-sub { font-size: 0.75rem; color: #94a3b8; }
+.ledger-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; margin-bottom: 22px; }
+.lm-card { 
+  background: #ffffff; 
+  border: 1px solid #e2e8f0; 
+  border-radius: 12px; 
+  padding: 16px 18px; 
+  box-shadow: 0 1px 3px rgba(15,23,42,0.04), 0 1px 2px rgba(15,23,42,0.02); 
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.lm-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(15,23,42,0.06);
+  transform: translateY(-1px);
+}
+.lm-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.lm-label { font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; }
+.lm-icon { width: 32px; height: 32px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-size: 15px; }
+.lm-value { font-size: 1.65rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 8px; color: #0f172a; }
+.lm-value small { font-size: 0.82rem; font-weight: 600; color: #64748b; margin-right: 4px; letter-spacing: 0; }
+.lm-sub { font-size: 0.73rem; color: #64748b; font-weight: 500; border-top: 1px solid #f1f5f9; padding-top: 8px; margin-top: 2px; display: flex; align-items: center; gap: 4px; }
 </style>
 
 
@@ -7472,31 +7493,50 @@ If the arrears sum is lower than you expect, please check your CSV file to ensur
     <button class="btn btn-gh btn-sm" onclick="openBulkFeeVoucherModal()">&#128196; Vouchers</button>
   </div>
 </div>
-<div class="ledger-metrics fu" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
-  <div class="lm-card">
-    <div class="lm-label">Total Monthly Fee</div>
-    <div class="lm-value" style="color:#2563eb;">${fmtMoney(totalMonthlyFee)}</div>
-    <div class="lm-sub">Monthly tuition revenue (${all.length} students)</div>
+<div class="ledger-metrics fu">
+  <div class="lm-card" style="border-top: 3px solid #2563eb;">
+    <div class="lm-top">
+      <div class="lm-label">Total Monthly Fee</div>
+      <div class="lm-icon" style="background:#eff6ff; color:#2563eb;">💰</div>
+    </div>
+    <div class="lm-value"><small>PKR</small>${fmtMoney(totalMonthlyFee)}</div>
+    <div class="lm-sub"><span>👥 Total Expected Tuition (${all.length} students)</span></div>
   </div>
-  <div class="lm-card">
-    <div class="lm-label">${monthName} Income</div>
-    <div class="lm-value" style="color:#0284c7;">${fmtMoney(curMonthIncome)}</div>
-    <div class="lm-sub">${curMonthPaidStus.length} of ${all.length} paid for ${monthName}</div>
+
+  <div class="lm-card" style="border-top: 3px solid #0284c7;">
+    <div class="lm-top">
+      <div class="lm-label">${monthName} Collected</div>
+      <div class="lm-icon" style="background:#f0f9ff; color:#0284c7;">📥</div>
+    </div>
+    <div class="lm-value" style="color:#0284c7;"><small style="color:#0284c7;">PKR</small>${fmtMoney(curMonthIncome)}</div>
+    <div class="lm-sub"><span>✅ <b>${curMonthPaidStus.length}</b> of ${all.length} students paid for ${monthName}</span></div>
   </div>
-  <div class="lm-card">
-    <div class="lm-label">${isBeforeAugust ? 'Total Prev. Arrears' : 'Total Pending Balance'}</div>
-    <div class="lm-value" style="color:#ef4444;">${fmtMoney(isBeforeAugust ? totalArrears : pending)}</div>
-    <div class="lm-sub">${isBeforeAugust ? 'Monthly fee starts Aug 2026' : `${monthName}: <b>${fmtMoney(pendingMonthly)}</b> &middot; Arrears: <b style="color:#ef4444;">${fmtMoney(pendingArrears)}</b>`}</div>
+
+  <div class="lm-card" style="border-top: 3px solid #ef4444;">
+    <div class="lm-top">
+      <div class="lm-label">${isBeforeAugust ? 'Prev. Arrears' : 'Total Pending'}</div>
+      <div class="lm-icon" style="background:#fef2f2; color:#ef4444;">⏳</div>
+    </div>
+    <div class="lm-value" style="color:#ef4444;"><small style="color:#ef4444;">PKR</small>${fmtMoney(isBeforeAugust ? totalArrears : pending)}</div>
+    <div class="lm-sub"><span>${isBeforeAugust ? 'Starts Aug 2026' : `${monthName}: <b>${fmtMoney(pendingMonthly)}</b> · Arrears: <b style="color:#ef4444;">${fmtMoney(pendingArrears)}</b>`}</span></div>
   </div>
-  <div class="lm-card">
-    <div class="lm-label">Total Collection</div>
-    <div class="lm-value" style="color:#0f172a;">${fmtMoney(collected)}</div>
-    <div class="lm-sub">${fullyPaid} cleared &middot; ${all.length - fullyPaid} pending</div>
+
+  <div class="lm-card" style="border-top: 3px solid #0f172a;">
+    <div class="lm-top">
+      <div class="lm-label">Overall Collection</div>
+      <div class="lm-icon" style="background:#f8fafc; color:#0f172a;">💼</div>
+    </div>
+    <div class="lm-value"><small>PKR</small>${fmtMoney(collected)}</div>
+    <div class="lm-sub"><span>💳 ${fullyPaid} cleared · ${all.length - fullyPaid} pending</span></div>
   </div>
-  <div class="lm-card">
-    <div class="lm-label">Collection Rate</div>
+
+  <div class="lm-card" style="border-top: 3px solid #10b981;">
+    <div class="lm-top">
+      <div class="lm-label">Recovery Rate</div>
+      <div class="lm-icon" style="background:#ecfdf5; color:#10b981;">📈</div>
+    </div>
     <div class="lm-value" style="color:#10b981;">${(collected + (isBeforeAugust ? totalArrears : pending)) > 0 ? Math.round(collected / (collected + (isBeforeAugust ? totalArrears : pending)) * 100) : 0}%</div>
-    <div class="lm-sub">Of total expected revenue</div>
+    <div class="lm-sub"><span>🎯 Overall collection efficiency</span></div>
   </div>
 </div>
 ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ? `
