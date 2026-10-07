@@ -3464,45 +3464,57 @@ window.addEventListener('unhandledrejection', function(e) {
 }
 .lm-card { 
   background: #ffffff; 
-  border: 1px solid #e2e8f0; 
-  border-radius: 10px; 
-  padding: 18px 20px; 
-  box-shadow: 0 1px 2px rgba(0,0,0,0.03); 
-  font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  border: 1px solid #e9eef5; 
+  border-radius: 12px; 
+  padding: 20px 22px; 
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02); 
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 110px;
-  transition: border-color .15s ease, box-shadow .15s ease;
+  min-height: 116px;
+  position: relative;
+  transition: all .2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .lm-card:hover {
   border-color: #cbd5e1;
-  box-shadow: 0 4px 12px rgba(15,23,42,0.05);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+  transform: translateY(-2px);
 }
 .lm-label { 
-  font-size: 0.72rem; 
-  font-weight: 600; 
+  font-size: 0.68rem; 
+  font-weight: 700; 
   color: #64748b; 
   text-transform: uppercase; 
-  letter-spacing: 0.05em; 
-  margin-bottom: 8px; 
+  letter-spacing: 0.08em; 
+  margin-bottom: 10px; 
 }
 .lm-value { 
-  font-size: 1.65rem; 
+  font-size: 1.6rem; 
   font-weight: 700; 
-  letter-spacing: -0.02em; 
-  line-height: 1.2; 
+  letter-spacing: -0.03em; 
+  line-height: 1.15; 
   color: #0f172a; 
   margin-bottom: 8px; 
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+.lm-currency {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #64748b;
 }
 .lm-sub { 
   font-size: 0.75rem; 
-  color: #94a3b8; 
+  color: #64748b; 
   font-weight: 400; 
   line-height: 1.4;
+  margin-top: auto;
 }
 .lm-sub b {
-  color: #475569;
+  color: #334155;
   font-weight: 600;
 }
 </style>
@@ -7522,32 +7534,32 @@ If the arrears sum is lower than you expect, please check your CSV file to ensur
 <div class="ledger-metrics fu">
   <div class="lm-card">
     <div class="lm-label">Total Monthly Fee</div>
-    <div class="lm-value" style="color:#0f172a;">PKR ${fmtMoney(totalMonthlyFee)}</div>
-    <div class="lm-sub">Expected monthly revenue (${all.length} students)</div>
+    <div class="lm-value" style="color:#0f172a;"><span class="lm-currency">PKR</span> ${num(totalMonthlyFee).toLocaleString()}</div>
+    <div class="lm-sub">Monthly tuition revenue (${all.length} students)</div>
   </div>
 
   <div class="lm-card">
     <div class="lm-label">${monthName} Collected</div>
-    <div class="lm-value" style="color:#0284c7;">PKR ${fmtMoney(curMonthIncome)}</div>
+    <div class="lm-value" style="color:#0284c7;"><span class="lm-currency" style="color:#0284c7;">PKR</span> ${num(curMonthIncome).toLocaleString()}</div>
     <div class="lm-sub"><b>${curMonthPaidStus.length}</b> of ${all.length} paid for ${monthName}</div>
   </div>
 
   <div class="lm-card">
     <div class="lm-label">${isBeforeAugust ? 'Prev. Arrears' : 'Total Pending'}</div>
-    <div class="lm-value" style="color:#ef4444;">PKR ${fmtMoney(isBeforeAugust ? totalArrears : pending)}</div>
-    <div class="lm-sub">${isBeforeAugust ? 'Starts Aug 2026' : `${monthName}: <b>PKR ${fmtMoney(pendingMonthly)}</b> &middot; Arrears: <b style="color:#ef4444;">PKR ${fmtMoney(pendingArrears)}</b>`}</div>
+    <div class="lm-value" style="color:#ef4444;"><span class="lm-currency" style="color:#ef4444;">PKR</span> ${num(isBeforeAugust ? totalArrears : pending).toLocaleString()}</div>
+    <div class="lm-sub">${isBeforeAugust ? 'Starts Aug 2026' : `${monthName}: <b>PKR ${num(pendingMonthly).toLocaleString()}</b> &middot; Arrears: <b style="color:#ef4444;">PKR ${num(pendingArrears).toLocaleString()}</b>`}</div>
   </div>
 
   <div class="lm-card">
     <div class="lm-label">Overall Collection</div>
-    <div class="lm-value" style="color:#0f172a;">PKR ${fmtMoney(collected)}</div>
+    <div class="lm-value" style="color:#0f172a;"><span class="lm-currency">PKR</span> ${num(collected).toLocaleString()}</div>
     <div class="lm-sub">${fullyPaid} cleared &middot; ${all.length - fullyPaid} pending</div>
   </div>
 
   <div class="lm-card">
     <div class="lm-label">Collection Rate</div>
     <div class="lm-value" style="color:#10b981;">${(collected + (isBeforeAugust ? totalArrears : pending)) > 0 ? Math.round(collected / (collected + (isBeforeAugust ? totalArrears : pending)) * 100) : 0}%</div>
-    <div class="lm-sub">Of total expected revenue</div>
+    <div class="lm-sub">Overall collection efficiency</div>
   </div>
 </div>
 ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ? `
