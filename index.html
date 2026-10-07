@@ -1917,6 +1917,42 @@
     .ox-admit .ox-logo-box { border: 8px solid #f59e0b !important; }
     .ox-admit .ox-data-item { border-left: 6px solid #f59e0b !important; }
 
+    .vid-card-actions {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 6px;
+      margin-bottom: 12px;
+      width: 2.125in;
+    }
+    .vid-card-btn {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #1e293b;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      transition: all 0.15s ease;
+      width: 100%;
+    }
+    .vid-card-btn:hover {
+      background: #0f172a;
+      color: #ffffff;
+      border-color: #0f172a;
+      transform: translateY(-1px);
+      box-shadow: 0 3px 6px rgba(0,0,0,0.12);
+    }
+    @media print {
+      .vid-card-actions { display: none !important; }
+    }
+
     .school-id-card {
       width: 3.375in;
       height: 2.125in;
@@ -9507,7 +9543,11 @@ margin-top:2px;">${ap}% Regularity</div>
       let renderItems = [];
       let filename = '';
 
-      if (mode === 'all') {
+      if (mode === 'all_admit') {
+        filename = 'All_School_Admit_Cards.pdf';
+        allStus().forEach(stu => renderItems.push({type: 'admit', obj: stu}));
+        if(renderItems.length === 0) return showToast('No students found', 'te');
+      } else if (mode === 'all') {
         filename = 'All_School_Cards_Master.pdf';
         DB.users.filter(u => u.role === 'teacher' || u.role === 'scanner').forEach(u => renderItems.push({type: 'staff', obj: u}));
         const juniorClasses = ['montessori a', 'nursery a', 'prep one a', 'prep two a'];
@@ -9620,6 +9660,85 @@ margin-top:2px;">${ap}% Regularity</div>
       }
     }
 
+    async function downloadSingleCardPdf(studentId, forceMode) {
+      if (typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined') return showToast('PDF library not loaded', 'te');
+      const stu = allStus().find(s => String(s.id) === String(studentId));
+      if (!stu) return showToast('Student not found', 'te');
+
+      const mode = forceMode || window.idCardMode || 'admit';
+      const isAdmit = mode === 'admit';
+      const isPickup = mode === 'pickup';
+      const cleanName = (stu.name || 'Student').replace(/[^a-zA-Z0-9_-]/g, '_');
+      const filename = isAdmit ? `AdmitCard_${cleanName}_Roll${stu.roll || stu.id}.pdf` : (isPickup ? `PickupCard_${cleanName}.pdf` : `IDCard_${cleanName}.pdf`);
+
+      showToast(`Generating ${isAdmit ? 'Admit Card' : 'Card'} PDF for ${stu.name}...`, 'ti', 3000);
+
+      const container = document.createElement('div');
+      container.className = 'id-print-area';
+      container.style.position = 'absolute';
+      container.style.top = '-9999px';
+      container.style.left = '0px';
+      container.style.background = '#fff';
+      container.style.padding = '0';
+      container.style.margin = '0';
+
+      // Standard CR-80 card dimensions in pixels at 300 DPI: ~638px x 1013px (2.125in x 3.375in)
+      const cardWrap = document.createElement('div');
+      cardWrap.style.width = '2.125in';
+      cardWrap.style.height = '3.375in';
+      cardWrap.style.display = 'inline-block';
+      cardWrap.style.overflow = 'hidden';
+      cardWrap.style.background = '#fff';
+      cardWrap.innerHTML = classIdCardHtml(stu, mode);
+
+      // Remove any action buttons inside container if rendered
+      cardWrap.querySelectorAll('.vid-card-actions').forEach(btn => btn.remove());
+
+      container.appendChild(cardWrap);
+      document.body.appendChild(container);
+
+      const qrEl = cardWrap.querySelector('.ox-card-qr');
+      if (qrEl) {
+        const payload = JSON.stringify({ kind: 'school-attendance-v1', id: stu.id, classId: stu.classId });
+        qrEl.innerHTML = '';
+        new QRCode(qrEl, {
+          text: payload,
+          width: 120,
+          height: 120,
+          colorDark: '#0d1e3d',
+          colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      }
+
+      await new Promise(r => setTimeout(r, 350));
+
+      try {
+        const canvas = await html2canvas(cardWrap.querySelector('.vid-card') || cardWrap, { scale: 4.0, useCORS: true, logging: false });
+        const imgData = canvas.toDataURL('image/jpeg', 1.0);
+
+        const { jsPDF } = window.jspdf;
+        // Exact CR-80 card size: 54mm width, 85.6mm height portrait
+        const doc = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: [54, 85.6]
+        });
+
+        doc.addImage(imgData, 'JPEG', 0, 0, 54, 85.6);
+        doc.save(filename);
+
+        document.body.removeChild(container);
+        canvas.width = 0;
+        canvas.height = 0;
+        showToast('Admit Card downloaded successfully!', 'ts');
+      } catch (err) {
+        console.error(err);
+        if (container.parentNode) document.body.removeChild(container);
+        showToast('Error generating Admit Card PDF', 'te');
+      }
+    }
+
     function classIdCardHtml(stu, forceMode) {
       const cls = DB.classes.find(c => c.id === stu.classId) || {};
       const grade = ((cls.name || '') + (cls.section ? ' ' + cls.section : '')).trim() || '-';
@@ -9668,6 +9787,11 @@ margin-top:2px;">${ap}% Regularity</div>
             <div class="ox-footer-bg"></div>
           </div>
           <div class="ox-qr-wrap"><div class="ox-card-qr" data-student-id="${stu.id}"></div></div>
+        </div>
+        <div class="vid-card-actions no-print">
+          <button type="button" class="vid-card-btn" onclick="downloadSingleCardPdf('${stu.id}', '${isAdmit ? 'admit' : (isPickup ? 'pickup' : 'student')}')" title="Download this card as a single PDF">
+            📥 Download ${isAdmit ? 'Admit Card' : 'PDF'}
+          </button>
         </div>
       </div>`;
     }
@@ -9741,8 +9865,12 @@ margin-top:2px;">${ap}% Regularity</div>
   <div class="ph-acts" style="display:flex; align-items:center;">
   <select class="fi" style="width:auto;min-width:180px;" onchange="switchIdCardClass(this.value)">${optHtml}</select>
   ${typeHtml}
-  <button class="btn btn-gh btn-sm" style="margin-left:8px;" onclick="downloadIdCardsPdf('all')">Download All (PDF)</button>
-  <button class="btn btn-p btn-sm" onclick="downloadIdCardsPdf('class')">Download PDF</button>
+  <button class="btn btn-gh btn-sm" style="margin-left:8px;" onclick="downloadIdCardsPdf('${isAdmit ? 'all_admit' : 'all'}')">
+    ${isAdmit ? '📥 Download All Admit Cards (PDF)' : 'Download All (PDF)'}
+  </button>
+  <button class="btn btn-p btn-sm" onclick="downloadIdCardsPdf('class')">
+    ${isAdmit ? '📥 Download Class Admit Cards (PDF)' : 'Download PDF'}
+  </button>
   <button class="btn btn-gh btn-sm" onclick="printClassIdCards()">Print</button></div></div>
 <div class="id-print-toolbar no-print"><div class="ibox" style="margin:0;flex:1;">${isAdmit ? '🎓 Examination Admit Cards: CR-80 standard badge (2.125in x 3.375in) with student roll number, exam term, and hall check-in QR.' : 'Each card is 2.125in x 3.375in and includes the attendance QR used by the scanner.'}</div></div>
 <div class="id-print-area">
