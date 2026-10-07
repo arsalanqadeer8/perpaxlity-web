@@ -527,15 +527,15 @@
             <div id="print-area" class="exam-paper ${rtl ? 'urdu' : ''}">
                 <!-- Header -->
                 <div class="header-print ${rtl ? 'flex-row-reverse' : ''}">
-                    <div style="width: 75px;" class="flex-shrink-0"></div>
+                    <div style="width: 95px;" class="flex-shrink-0 flex justify-start items-center">
+                        <img src="logo.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/4774/4774574.png'" alt="Logo" style="height: 85px; width: auto; object-fit: contain; filter: grayscale(100%) contrast(120%); -webkit-filter: grayscale(100%) contrast(120%);">
+                    </div>
                     <div class="text-center flex-grow px-2">
                         <h1 class="text-2xl font-extrabold uppercase tracking-widest text-black">Oxford Excellence Academy</h1>
                         <div class="text-xs font-bold uppercase tracking-wider text-gray-700 mt-0.5">Montessori to Matric</div>
                         <h2 class="text-base font-bold mt-1.5 uppercase text-gray-900 border-t border-gray-400 inline-block px-4 pt-0.5">${curExam.title}</h2>
                     </div>
-                    <div style="width: 75px;" class="flex-shrink-0 flex justify-end items-center">
-                        <img src="logo.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/4774/4774574.png'" alt="Logo" style="height: 65px; width: auto; object-fit: contain;">
-                    </div>
+                    <div style="width: 95px;" class="flex-shrink-0"></div>
                 </div>
                 
                 <div class="header-meta flex justify-between font-bold border-b-2 border-gray-300 pb-2 mb-3 ${rtl ? 'flex-row-reverse' : ''}">
