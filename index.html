@@ -10455,7 +10455,8 @@ ${(() => {
         
         // Physical scanners type very fast and press Enter
         if (e.key === "Enter") {
-            if (_hwScanBuffer.includes('school-student') || _hwScanBuffer.includes('school-teacher')) {
+            const buf = _hwScanBuffer.trim();
+            if (buf.includes('school-student') || buf.includes('school-teacher') || buf.startsWith('{') && buf.includes('"id"')) {
                 // We got a complete QR scan from a physical scanner!
                 e.preventDefault();
                 console.log("Hardware Scanner detected QR!");
@@ -10467,7 +10468,7 @@ ${(() => {
                     if (fb) { fb.className = 'scan-fb'; fb.innerHTML = ''; } if (lb) { lb.className = 'scan-log'; lb.innerHTML = ''; }
                 }
                 
-                onQRScan(_hwScanBuffer);
+                onQRScan(buf);
             }
             _hwScanBuffer = "";
         } else if (e.key.length === 1) {
@@ -10487,7 +10488,7 @@ ${(() => {
     }
 function playBeep(t){try{const x=new(window.AudioContext||window.webkitAudioContext)();const o=x.createOscillator();const g=x.createGain();o.connect(g);g.connect(x.destination);if(t==='ok'){o.type='sine';o.frequency.value=1500;g.gain.setValueAtTime(0.5,x.currentTime);g.gain.exponentialRampToValueAtTime(0.001,x.currentTime+0.1);o.start();o.stop(x.currentTime+0.1);}else{o.type='square';o.frequency.value=250;g.gain.setValueAtTime(0.2,x.currentTime);g.gain.exponentialRampToValueAtTime(0.001,x.currentTime+0.3);o.start();o.stop(x.currentTime+0.3);}}catch(e){}}
 
-    function onQRScan(raw) {
+    async function onQRScan(raw) {
       const fb = document.getElementById('scan-fb');
       try {
         const data = JSON.parse(raw);
@@ -10526,7 +10527,10 @@ function playBeep(t){try{const x=new(window.AudioContext||window.webkitAudioCont
           }
 
           DB.teacherAttendance[teacher.id][d] = log;
-          saveDB();
+          saveLocalDB();
+          if (_sb) {
+            _sb.from('miscellaneous').upsert({ id: `tAtt_${teacher.id}`, data: DB.teacherAttendance[teacher.id] }).catch(e => console.warn('Realtime tAtt push err:', e));
+          }
           playBeep('ok');
           if (fb) { fb.className = 'scan-fb show'; fb.innerHTML = `<b>${action}</b>: <b>${teacher.name}</b> - Staff<br/><span style="font-size:.7rem;opacity:.75;">${action} at ${tStr}</span>`; }
           const lb = document.getElementById('scan-log-box');
@@ -10562,7 +10566,7 @@ function playBeep(t){try{const x=new(window.AudioContext||window.webkitAudioCont
           action = 'Check-In';
           if (!DB.attendance[scanClassId]) DB.attendance[scanClassId] = {};
           if (!DB.attendance[scanClassId][sid]) DB.attendance[scanClassId][sid] = {};
-          if (!DB.attendance[scanClassId][sid][d]) DB.attendance[scanClassId][sid][d] = 'P';
+          DB.attendance[scanClassId][sid][d] = 'P';
           const el = document.getElementById(`ac-${sid}-${d}`);
           if (el) { el.className = 'ac acP'; el.textContent = 'P'; }
         } else if (!log.out) {
@@ -10574,17 +10578,36 @@ function playBeep(t){try{const x=new(window.AudioContext||window.webkitAudioCont
           }
           log.out = t;
           action = 'Check-Out';
-          if (DB.attendance[scanClassId] && DB.attendance[scanClassId][sid]) {
-             DB.attendance[scanClassId][sid][d] = 'O';
-             const el = document.getElementById(`ac-${sid}-${d}`);
-             if (el) { el.className = 'ac acO'; el.textContent = 'O'; }
-          }
+          if (!DB.attendance[scanClassId]) DB.attendance[scanClassId] = {};
+          if (!DB.attendance[scanClassId][sid]) DB.attendance[scanClassId][sid] = {};
+          DB.attendance[scanClassId][sid][d] = 'O';
+          const el = document.getElementById(`ac-${sid}-${d}`);
+          if (el) { el.className = 'ac acO'; el.textContent = 'O'; }
         } else {
           throw new Error(`Already checked out at ${log.out}`);
         }
         
         DB.studentLogs[scanClassId][sid][d] = log;
-        saveDB();
+        saveLocalDB();
+
+        // INSTANT REAL-TIME CLOUD PUSH: Immediately commit to Supabase without any 2-second debounce
+        if (_sb && curRole !== 'student' && curRole !== 'parent') {
+          const attDoc = {
+            id: `${scanClassId}_${sid}`,
+            class_id: scanClassId,
+            data: DB.attendance[scanClassId][sid]
+          };
+          const logDoc = {
+            id: `studentLog_${scanClassId}`,
+            data: DB.studentLogs[scanClassId]
+          };
+
+          _sb.from('attendance').upsert(attDoc).then(() => {
+            showSyncBadge('Scan saved to cloud', '#4caf50');
+          }).catch(e => console.warn('Realtime attendance upsert error:', e));
+
+          _sb.from('miscellaneous').upsert(logDoc).catch(e => console.warn('Realtime studentLog upsert error:', e));
+        }
         
         if (stu.familyId) {
           const parent = DB.users.find(u => u.role === 'parent' && u.familyId === stu.familyId && u.pushSub);
