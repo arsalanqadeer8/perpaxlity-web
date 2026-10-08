@@ -11310,15 +11310,50 @@ function playBeep(t){try{const x=new(window.AudioContext||window.webkitAudioCont
     async function onQRScan(raw) {
       const fb = document.getElementById('scan-fb');
       try {
-        const data = JSON.parse(raw);
+        let data = null;
+        let sid = '';
+        let isTeacherPayload = false;
+
+        const rawStr = String(raw || '').trim();
+        if (!rawStr) throw new Error('Empty scan data');
+
+        // Robust parsing: JSON or plain text / query string
+        if (rawStr.startsWith('{') && rawStr.endsWith('}')) {
+          try {
+            data = JSON.parse(rawStr);
+          } catch(err) {
+            data = null;
+          }
+        }
+
+        if (data && typeof data === 'object') {
+          if (data.kind === 'school-teacher-attendance-v1' || data.role === 'teacher') {
+            isTeacherPayload = true;
+            sid = String(data.id || '').trim();
+          } else {
+            sid = String(data.id || data.studentId || data.roll || '').trim();
+          }
+        } else {
+          // Check for URL query params e.g. ?id=stu_123 or plain text id
+          if (rawStr.includes('id=')) {
+            const m = rawStr.match(/[?&]id=([^&]+)/);
+            if (m) sid = decodeURIComponent(m[1]).trim();
+          }
+          if (!sid) {
+            sid = rawStr;
+          }
+        }
+
         const d = today();
 
-        if (data.kind === 'school-teacher-attendance-v1' || data.role === 'teacher') {
+        // 1. Staff / Teacher attendance branch
+        if (isTeacherPayload || (data && (data.role === 'teacher' || data.kind === 'school-teacher-attendance-v1'))) {
           if (curRole !== 'admin' && curRole !== 'scanner') throw new Error('Only gate/admin users can mark teacher attendance');
-          const tid = String(data.id || '').trim();
-          const teacher = DB.users.find(u => u.id === tid && u.role === 'teacher');
+          const tid = sid;
+          const teacher = (DB.users || []).find(u => (u.id === tid || u.empId === tid) && u.role === 'teacher');
           if (!teacher) throw new Error('Teacher not found');
           
+          if (!DB.teacherAttendance) DB.teacherAttendance = {};
           if (!DB.teacherAttendance[teacher.id]) DB.teacherAttendance[teacher.id] = {};
           const log = DB.teacherAttendance[teacher.id][d] || {};
           
@@ -11336,13 +11371,25 @@ function playBeep(t){try{const x=new(window.AudioContext||window.webkitAudioCont
             const inParts = log.checkIn.split(':');
             const inMins = parseInt(inParts[0]) * 60 + parseInt(inParts[1]);
             const outMins = tObj.getHours() * 60 + tObj.getMinutes();
-            if (outMins - inMins < 30) {
-              throw new Error(`Scanned too soon after Check-In (${log.checkIn})`);
+            if (outMins - inMins < 5) {
+              if (fb) {
+                fb.className = 'scan-fb show';
+                fb.innerHTML = `<b>Already Checked In</b>: <b>${teacher.name}</b><br/><span style="font-size:.7rem;opacity:.75;">Logged at ${log.checkIn}. Checkout available after 5 min.</span>`;
+              }
+              playBeep('ok');
+              setTimeout(() => { _scanActive = true; requestAnimationFrame(scanTick); }, 1600);
+              return;
             }
             log.checkOut = t;
             action = 'Check-Out';
           } else {
-            throw new Error(`Already checked out at ${log.checkOut}`);
+            if (fb) {
+              fb.className = 'scan-fb show';
+              fb.innerHTML = `<b>Already Complete</b>: <b>${teacher.name}</b><br/><span style="font-size:.7rem;opacity:.75;">In: ${log.checkIn} | Out: ${log.checkOut}</span>`;
+            }
+            playBeep('ok');
+            setTimeout(() => { _scanActive = true; requestAnimationFrame(scanTick); }, 1600);
+            return;
           }
 
           DB.teacherAttendance[teacher.id][d] = log;
@@ -11358,22 +11405,39 @@ function playBeep(t){try{const x=new(window.AudioContext||window.webkitAudioCont
           return;
         }
 
-        const sid = String(data.id || '').trim();
-        if (!sid) throw new Error('Missing student id');
+        // 2. Student attendance branch
+        if (!sid) throw new Error('Missing student ID in card QR');
 
-        const stu = allStus().find(s => s.id === sid);
-        if (!stu) throw new Error('Student not found');
+        // Look up student authoritative record across the whole database
+        const stus = allStus();
+        const stu = stus.find(s => s.id === sid || String(s.roll || '') === sid);
+        if (!stu) throw new Error(`Student not found (ID: ${sid})`);
 
-        const scanClassId = data.classId || stu.classId || curCls;
-        const cls = DB.classes.find(c => c.id === scanClassId);
-        if (!cls || !DB.students[scanClassId]?.some(s => s.id === sid)) throw new Error('Student/class mismatch');
-        if (curRole === 'teacher' && !(curUser?.classIds || []).includes(scanClassId)) throw new Error('Class not assigned to this teacher');
+        // Find current class authoritative location
+        let scanClassId = stu.classId;
+        if (!scanClassId || !DB.students[scanClassId]?.some(s => s.id === stu.id)) {
+          // Find which class list actually contains this student
+          const foundEntry = Object.entries(DB.students).find(([cid, list]) => (list || []).some(s => s.id === stu.id));
+          if (foundEntry) {
+            scanClassId = foundEntry[0];
+            stu.classId = scanClassId;
+          }
+        }
+        if (!scanClassId) scanClassId = data?.classId || curCls;
+
+        const cls = DB.classes.find(c => c.id === scanClassId) || { id: scanClassId, name: 'Class' };
+
+        // If a teacher is scanning inside classroom, ensure it's their class. Gate scanner / admin can scan all.
+        const isGateScanner = curRole === 'admin' || curRole === 'scanner' || document.getElementById('scan-ov')?.classList.contains('open');
+        if (curRole === 'teacher' && !isGateScanner && !(curUser?.classIds || []).includes(scanClassId)) {
+          throw new Error(`Class ${cls.name} is not assigned to your teacher account`);
+        }
 
         if (!DB.studentLogs) DB.studentLogs = {};
         if (!DB.studentLogs[scanClassId]) DB.studentLogs[scanClassId] = {};
-        if (!DB.studentLogs[scanClassId][sid]) DB.studentLogs[scanClassId][sid] = {};
+        if (!DB.studentLogs[scanClassId][stu.id]) DB.studentLogs[scanClassId][stu.id] = {};
         
-        const log = DB.studentLogs[scanClassId][sid][d] || {};
+        const log = DB.studentLogs[scanClassId][stu.id][d] || {};
         const t = nowHHMM();
         const tObj = new Date();
         const tStr = tObj.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' });
@@ -11384,37 +11448,50 @@ function playBeep(t){try{const x=new(window.AudioContext||window.webkitAudioCont
           log.in = t;
           action = 'Check-In';
           if (!DB.attendance[scanClassId]) DB.attendance[scanClassId] = {};
-          if (!DB.attendance[scanClassId][sid]) DB.attendance[scanClassId][sid] = {};
-          DB.attendance[scanClassId][sid][d] = 'P';
-          const el = document.getElementById(`ac-${sid}-${d}`);
+          if (!DB.attendance[scanClassId][stu.id]) DB.attendance[scanClassId][stu.id] = {};
+          DB.attendance[scanClassId][stu.id][d] = 'P';
+          const el = document.getElementById(`ac-${stu.id}-${d}`);
           if (el) { el.className = 'ac acP'; el.textContent = 'P'; }
         } else if (!log.out) {
           const inParts = log.in.split(':');
           const inMins = parseInt(inParts[0]) * 60 + parseInt(inParts[1]);
           const outMins = tObj.getHours() * 60 + tObj.getMinutes();
-          if (outMins - inMins < 30) {
-            throw new Error(`Scanned too soon after Check-In (${log.in})`);
+          if (outMins - inMins < 5) {
+            // Friendly notice if scanned too soon rather than an error buzzer
+            if (fb) {
+              fb.className = 'scan-fb show';
+              fb.innerHTML = `<b>Already Checked In</b>: <b>${stu.name}</b><br/><span style="font-size:.7rem;opacity:.75;">Logged at ${log.in}. Checkout available after 5 min.</span>`;
+            }
+            playBeep('ok');
+            setTimeout(() => { _scanActive = true; requestAnimationFrame(scanTick); }, 1600);
+            return;
           }
           log.out = t;
           action = 'Check-Out';
           if (!DB.attendance[scanClassId]) DB.attendance[scanClassId] = {};
-          if (!DB.attendance[scanClassId][sid]) DB.attendance[scanClassId][sid] = {};
-          DB.attendance[scanClassId][sid][d] = 'O';
-          const el = document.getElementById(`ac-${sid}-${d}`);
+          if (!DB.attendance[scanClassId][stu.id]) DB.attendance[scanClassId][stu.id] = {};
+          DB.attendance[scanClassId][stu.id][d] = 'O';
+          const el = document.getElementById(`ac-${stu.id}-${d}`);
           if (el) { el.className = 'ac acO'; el.textContent = 'O'; }
         } else {
-          throw new Error(`Already checked out at ${log.out}`);
+          if (fb) {
+            fb.className = 'scan-fb show';
+            fb.innerHTML = `<b>Already Complete</b>: <b>${stu.name}</b><br/><span style="font-size:.7rem;opacity:.75;">Check-In: ${log.in} | Check-Out: ${log.out}</span>`;
+          }
+          playBeep('ok');
+          setTimeout(() => { _scanActive = true; requestAnimationFrame(scanTick); }, 1600);
+          return;
         }
         
-        DB.studentLogs[scanClassId][sid][d] = log;
+        DB.studentLogs[scanClassId][stu.id][d] = log;
         saveLocalDB();
 
-        // INSTANT REAL-TIME CLOUD PUSH: Immediately commit to Supabase without any 2-second debounce
+        // INSTANT REAL-TIME CLOUD PUSH: Immediately commit to Supabase without any debounce
         if (_sb && curRole !== 'student' && curRole !== 'parent') {
           const attDoc = {
-            id: `${scanClassId}_${sid}`,
+            id: `${scanClassId}_${stu.id}`,
             class_id: scanClassId,
-            data: DB.attendance[scanClassId][sid]
+            data: DB.attendance[scanClassId][stu.id]
           };
           const logDoc = {
             id: `studentLog_${scanClassId}`,
@@ -11457,15 +11534,11 @@ ${DB.school.name}`;
 
       } catch (e) {
         playBeep('err');
-        if (fb) { fb.className = 'scan-fb err show'; fb.textContent = `&#10060; ${e.message}`; }
+        if (fb) { fb.className = 'scan-fb err show'; fb.textContent = `❌ ${e.message}`; }
         setTimeout(() => { _scanActive = true; requestAnimationFrame(scanTick); }, 2000);
       }
     }
-    function stopScanner() {
-      document.getElementById('scan-ov').classList.remove('open');
-      if (_qrS) { try { _qrS.stop(); } catch { } finally { _qrS = null; } }
-      document.getElementById('qr-reader').innerHTML = '';
-    }
+
 
     function printIDCards(cid) {
       const cls = DB.classes.find(c => c.id === cid);
