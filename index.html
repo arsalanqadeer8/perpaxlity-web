@@ -9308,58 +9308,101 @@ function printFeeReportArea() {
       window._noticeUploadedPhoto = n?.photo || '';
       openModal(`
   <h3>${n ? ' Edit Notice' : ' Post Notice'}</h3>
-  <div class="fg"><label class="fl">Title <span class="req">*</span></label><input class="fi" id="mn-title" value="${n?.title || ''}" placeholder="e.g. Annual Prize Distribution / Sports Day"/></div>
-  <div class="fg"><label class="fl">Message</label><textarea class="fi" id="mn-body" style="min-height:90px;" placeholder="Details of the notice...">${n?.body || ''}</textarea></div>
-  <div class="fg2"><div class="fg"><label class="fl">Target Audience</label><select class="fi" id="mn-target"><option value="All">Entire School</option>${Object.keys(DB.classes || {}).map(cid => `<option value="${cid}" ${n?.target === cid ? 'selected' : ''}>Class: ${DB.classes[cid].name}</option>`).join('')}</select></div><div class="fg"><label class="fl">Date</label><input class="fi" type="date" id="mn-date" value="${n?.date || today()}"/></div></div>
+  <form autocomplete="off" onsubmit="return false;">
+    <!-- Hidden dummy fields to neutralize aggressive browser credential autofill -->
+    <input type="text" style="display:none;" tabindex="-1"/>
+    <input type="password" style="display:none;" tabindex="-1"/>
 
-  <!-- Photo Attachment Section -->
-  <div class="fg" style="margin-top:10px; background:var(--bg2, #f8fafc); padding:11px; border-radius:8px; border:1px solid var(--bdr);">
-    <label class="fl" style="font-weight:600;"><i class="fas fa-image" style="color:var(--p);margin-right:5px;"></i> Attach Photo / Circular / Flyer (Optional)</label>
-    <div style="display:flex;align-items:center;gap:10px;margin-top:4px;">
-      <input type="file" id="mn-photo-file" accept="image/*" style="font-size:.8rem;" onchange="handleNoticePhotoSelect(this)"/>
-      <button type="button" id="mn-remove-photo" class="btn btn-xs btn-gh" style="display:${window._noticeUploadedPhoto ? 'inline-block' : 'none'};" onclick="removeNoticePhoto()">Remove Photo</button>
+    <div class="fg">
+      <label class="fl">Title <span class="req">*</span></label>
+      <input class="fi" id="mn-title" name="notice_announcement_title_${Date.now()}" value="${n?.title || ''}" placeholder="e.g. Annual Prize Distribution / Sports Day" autocomplete="off"/>
     </div>
-    <div id="mn-photo-preview-wrap" style="margin-top:8px;display:${window._noticeUploadedPhoto ? 'block' : 'none'};">
-      <img id="mn-photo-preview" src="${window._noticeUploadedPhoto || ''}" style="max-height:120px;border-radius:6px;border:1px solid var(--bdr);object-fit:cover;"/>
+    <div class="fg">
+      <label class="fl">Message</label>
+      <textarea class="fi" id="mn-body" style="min-height:90px;" placeholder="Details of the notice...">${n?.body || ''}</textarea>
     </div>
-  </div>
+    <div class="fg2">
+      <div class="fg">
+        <label class="fl">Target Audience</label>
+        <select class="fi" id="mn-target">
+          <option value="All">Entire School</option>
+          ${Object.keys(DB.classes || {}).map(cid => `<option value="${cid}" ${n?.target === cid ? 'selected' : ''}>Class: ${DB.classes[cid].name}</option>`).join('')}
+        </select>
+      </div>
+      <div class="fg">
+        <label class="fl">Date</label>
+        <input class="fi" type="date" id="mn-date" value="${n?.date || today()}"/>
+      </div>
+    </div>
 
-  ${!n ? `
-  <div class="fg" style="margin-top:12px; background:#f0fdf4; padding:12px; border-radius:8px; border:1px solid #bbf7d0;">
-    <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:bold; color:#166534;">
-      <input type="checkbox" id="mn-wa" style="width:18px; height:18px;" checked onchange="toggleNoticeBroadcastFields(this.checked)">
-      <i class="fab fa-whatsapp" style="font-size:1.2rem; color:#25D366;"></i> Broadcast this Notice via WhatsApp
-    </label>
+    <!-- Photo Attachment Section -->
+    <div class="fg" style="margin-top:10px; background:var(--bg2, #f8fafc); padding:11px; border-radius:8px; border:1px solid var(--bdr);">
+      <label class="fl" style="font-weight:600;"><i class="fas fa-image" style="color:var(--p);margin-right:5px;"></i> Attach Photo / Circular / Flyer (Optional)</label>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:4px;">
+        <input type="file" id="mn-photo-file" accept="image/*" style="font-size:.8rem;" onchange="handleNoticePhotoSelect(this)"/>
+        <button type="button" id="mn-remove-photo" class="btn btn-xs btn-gh" style="display:${window._noticeUploadedPhoto ? 'inline-block' : 'none'};" onclick="removeNoticePhoto()">Remove Photo</button>
+      </div>
+      <div id="mn-photo-preview-wrap" style="margin-top:8px;display:${window._noticeUploadedPhoto ? 'block' : 'none'};">
+        <img id="mn-photo-preview" src="${window._noticeUploadedPhoto || ''}" style="max-height:120px;border-radius:6px;border:1px solid var(--bdr);object-fit:cover;"/>
+      </div>
+    </div>
 
-    <!-- Admin Password Security Gate -->
-    <div id="mn-pass-wrap" style="margin-top:10px; padding-top:10px; border-top:1px dashed #bbf7d0;">
-      <label class="fl" style="color:#166534; font-size:.78rem; font-weight:700;">
-        🔒 Admin Password Required for WhatsApp Broadcast:
+    ${!n ? `
+    <div class="fg" style="margin-top:12px; background:#f0fdf4; padding:12px; border-radius:8px; border:1px solid #bbf7d0;">
+      <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:bold; color:#166534;">
+        <input type="checkbox" id="mn-wa" style="width:18px; height:18px;" checked onchange="toggleNoticeBroadcastFields()">
+        <i class="fab fa-whatsapp" style="font-size:1.2rem; color:#25D366;"></i> Broadcast this Notice via WhatsApp
       </label>
-      <div style="display:flex; gap:8px; margin-top:4px;">
-        <input type="password" class="fi" id="mn-admin-pass" placeholder="Enter Admin Login Password" style="background:#fff; border-color:#86efac;" autocomplete="current-password"/>
-        <button type="button" class="btn btn-xs btn-gh" style="background:#fff;" onclick="togglePassword('mn-admin-pass', this)">Show</button>
-      </div>
-      <div style="font-size:.7rem; color:#15803d; margin-top:3px;">
-        To prevent accidental or unauthorized mass broadcasts, please verify your login password.
-      </div>
-    </div>
-  </div>` : ''}
 
-  <div class="m-btns" style="margin-top:16px;">
-    <button class="btn btn-p" id="mn-submit-btn" onclick="saveNotice('${eid || ''}')">${n ? 'Update Notice' : 'Post & Send'}</button>
-    <button class="btn btn-gh" onclick="closeModal()">Cancel</button>
-  </div>`);
+      <!-- Admin Password Gate: Appears ONLY when sending a Photo -->
+      <div id="mn-pass-wrap" style="margin-top:10px; padding-top:10px; border-top:1px dashed #bbf7d0; display:none;">
+        <label class="fl" style="color:#166534; font-size:.78rem; font-weight:700;">
+          🔒 Admin Password Required to Broadcast Photo:
+        </label>
+        <div style="display:flex; gap:8px; margin-top:4px;">
+          <input type="password" class="fi" id="mn-admin-pass" name="notice_auth_gate_${Date.now()}" placeholder="Enter Admin Login Password" style="background:#fff; border-color:#86efac;" autocomplete="new-password"/>
+          <button type="button" class="btn btn-xs btn-gh" style="background:#fff;" onclick="togglePassword('mn-admin-pass', this)">Show</button>
+        </div>
+        <div style="font-size:.7rem; color:#15803d; margin-top:3px;">
+          Admin login password confirmation is required only when broadcasting an image/photo to all parents.
+        </div>
+      </div>
+    </div>` : ''}
+
+    <div class="m-btns" style="margin-top:16px;">
+      <button class="btn btn-p" id="mn-submit-btn" onclick="saveNotice('${eid || ''}')">${n ? 'Update Notice' : 'Post & Send'}</button>
+      <button class="btn btn-gh" onclick="closeModal()">Cancel</button>
+    </div>
+  </form>`);
+
+      // Ensure fields start clean and browser hasn't injected cached login credentials
+      setTimeout(() => {
+        const titleEl = document.getElementById('mn-title');
+        const passEl = document.getElementById('mn-admin-pass');
+        if (titleEl && !eid && (titleEl.value.includes('@') || titleEl.value.toLowerCase() === 'admin')) {
+          titleEl.value = '';
+        }
+        if (passEl) passEl.value = '';
+        toggleNoticeBroadcastFields();
+      }, 50);
     }
 
-    function toggleNoticeBroadcastFields(checked) {
+    function toggleNoticeBroadcastFields() {
+      const isWa = document.getElementById('mn-wa')?.checked;
+      const hasPhoto = !!(window._noticeUploadedPhoto || document.getElementById('mn-photo-file')?.files?.length);
       const pwrap = document.getElementById('mn-pass-wrap');
-      if (pwrap) pwrap.style.display = checked ? 'block' : 'none';
+      // Admin password is required ONLY when broadcasting with a photo
+      if (pwrap) {
+        pwrap.style.display = (isWa && hasPhoto) ? 'block' : 'none';
+      }
     }
 
     function handleNoticePhotoSelect(input) {
       const file = input.files && input.files[0];
-      if (!file) return;
+      if (!file) {
+        toggleNoticeBroadcastFields();
+        return;
+      }
       const reader = new FileReader();
       reader.onload = function(e) {
         window._noticeUploadedPhoto = e.target.result;
@@ -9369,6 +9412,7 @@ function printFeeReportArea() {
         if (prev) prev.src = e.target.result;
         if (prevWrap) prevWrap.style.display = 'block';
         if (rmBtn) rmBtn.style.display = 'inline-block';
+        toggleNoticeBroadcastFields();
       };
       reader.readAsDataURL(file);
     }
@@ -9381,6 +9425,7 @@ function printFeeReportArea() {
       const rmBtn = document.getElementById('mn-remove-photo');
       if (prevWrap) prevWrap.style.display = 'none';
       if (rmBtn) rmBtn.style.display = 'none';
+      toggleNoticeBroadcastFields();
     }
 
     async function verifyAdminPassword(pwd) {
@@ -9410,12 +9455,14 @@ function printFeeReportArea() {
       if (!title) { showToast('Title required', 'te'); return; }
 
       const isWaBroadcast = !eid && document.getElementById('mn-wa')?.checked;
+      const photoFile = document.getElementById('mn-photo-file')?.files?.[0];
+      const hasPhoto = !!(window._noticeUploadedPhoto || photoFile);
       const adminPass = (document.getElementById('mn-admin-pass')?.value || '').trim();
 
-      // If broadcasting via WhatsApp (especially with photo or bulk text), verify Admin Login Password
-      if (isWaBroadcast) {
+      // Require Admin Password ONLY when sending a photo via WhatsApp broadcast
+      if (isWaBroadcast && hasPhoto) {
         if (!adminPass) {
-          showToast('🔒 Admin password required to authorize WhatsApp broadcast', 'te');
+          showToast('🔒 Admin password required to send photo via WhatsApp', 'te');
           document.getElementById('mn-admin-pass')?.focus();
           return;
         }
@@ -9424,14 +9471,13 @@ function printFeeReportArea() {
         const ok = await verifyAdminPassword(adminPass);
         if (!ok) {
           if (sBtn) { sBtn.disabled = false; sBtn.textContent = 'Post & Send'; }
-          showToast('❌ Incorrect Admin Password! Broadcast cancelled.', 'te');
+          showToast('❌ Incorrect Admin Password! Photo broadcast cancelled.', 'te');
           return;
         }
       }
 
       // Check if there is an image to upload to Supabase Storage
       let photoUrl = window._noticeUploadedPhoto || '';
-      const photoFile = document.getElementById('mn-photo-file')?.files?.[0];
       if (photoFile && _sb) {
         try {
           showToast('Uploading notice image...', 'ts');
