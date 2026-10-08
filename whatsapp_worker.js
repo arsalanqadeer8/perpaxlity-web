@@ -168,20 +168,55 @@ async function processQueue() {
                         const page = await browser.newPage();
                         await page.setViewport({ width: 440, height: 750, deviceScaleFactor: 2 });
 
+                        // Check if this is a family combined voucher or a single student voucher
+                        const isFamily = payload.is_family && Array.isArray(payload.students);
+                        const cardWidth = isFamily ? 420 : 360;
+                        const viewportHeight = isFamily ? Math.max(750, 480 + (payload.particulars || []).length * 28) : 750;
+
+                        await page.setViewport({ width: cardWidth + 80, height: viewportHeight, deviceScaleFactor: 2 });
+
                         let rowsHtml = '';
                         (payload.particulars || []).forEach(p => {
+                            const isHeader = p.isHeader;
                             const isAlert = p.isUnpaid;
                             const isCredit = p.isCredit;
-                            const color = isAlert ? '#b91c1c' : (isCredit ? '#166534' : '#1e293b');
-                            const weight = (isAlert || isCredit) ? '700' : '400';
-                            rowsHtml += `
-                            <tr>
-                              <td style="padding:5px 8px; border:1px solid #222; font-size:11.5px; color:${color}; font-weight:${weight};">${p.name}</td>
-                              <td style="padding:5px 8px; border:1px solid #222; font-size:11.5px; text-align:right; color:${color}; font-weight:700;">PKR ${Number(p.amount || 0).toLocaleString()}</td>
-                            </tr>`;
+                            
+                            if (isHeader) {
+                                rowsHtml += `
+                                <tr style="background:#f1f5f9;">
+                                  <td colspan="2" style="padding:6px 8px; border:1px solid #222; font-size:12px; font-weight:900; color:#0f172a;">${p.name}</td>
+                                </tr>`;
+                            } else {
+                                const color = isAlert ? '#b91c1c' : (isCredit ? '#166534' : '#1e293b');
+                                const weight = (isAlert || isCredit) ? '700' : '400';
+                                rowsHtml += `
+                                <tr>
+                                  <td style="padding:5px 8px; border:1px solid #222; font-size:11.5px; color:${color}; font-weight:${weight}; padding-left:${isFamily ? '16px' : '8px'};">${p.name}</td>
+                                  <td style="padding:5px 8px; border:1px solid #222; font-size:11.5px; text-align:right; color:${color}; font-weight:700;">PKR ${Number(p.amount || 0).toLocaleString()}</td>
+                                </tr>`;
+                            }
                         });
 
                         const logoImgTag = cachedLogoBase64 ? `<img src="${cachedLogoBase64}" style="max-width:100%; max-height:100%; object-fit:contain;">` : '';
+
+                        let studentInfoHtml = '';
+                        if (isFamily) {
+                            studentInfoHtml = `
+                            <table class="info-table">
+                              <tr><td class="info-label" style="width:70px;">Father:</td><td class="info-value">${payload.father_name || 'Parent'}</td></tr>
+                              <tr><td class="info-label" style="width:70px;">Students:</td><td class="info-value">${payload.student_name}</td></tr>
+                              <tr><td class="info-label" style="width:70px;">Classes:</td><td class="info-value">${payload.class_name}</td></tr>
+                            </table>`;
+                        } else {
+                            studentInfoHtml = `
+                            <table class="info-table">
+                              <tr><td class="info-label">Name:</td><td class="info-value">${payload.student_name}</td></tr>
+                              <tr><td class="info-label">Roll:</td><td class="info-value">${payload.roll}</td></tr>
+                              <tr><td class="info-label">Class:</td><td class="info-value">${payload.class_name}</td></tr>
+                            </table>`;
+                        }
+
+                        const badgeTitle = isFamily ? 'FAMILY CHALLAN' : 'FEE CHALLAN';
 
                         const html = `
                         <!DOCTYPE html>
@@ -199,7 +234,7 @@ async function processQueue() {
                             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
                           }
                           .card {
-                            width: 360px;
+                            width: ${cardWidth}px;
                             background: #ffffff;
                             border: 2px solid #000;
                             border-radius: 14px;
@@ -268,7 +303,7 @@ async function processQueue() {
                           .fee-table {
                             width: 100%;
                             border-collapse: collapse;
-                            margin-bottom: 38px;
+                            margin-bottom: 24px;
                           }
                           .fee-table th {
                             border: 1px solid #222;
@@ -286,9 +321,9 @@ async function processQueue() {
                           .fee-table tr.total-row th {
                             background: #f0fdf4;
                             color: #166534;
-                            font-size: 12.5px;
+                            font-size: 13px;
                             font-weight: 900;
-                            padding: 7px 8px;
+                            padding: 8px 8px;
                           }
                           .signatures {
                             display: flex;
@@ -312,15 +347,11 @@ async function processQueue() {
                               <div class="logo-wrap">${logoImgTag}</div>
                               <div class="title-wrap">
                                 <div class="school-name">${payload.school_name || 'OXFORD EXCELLENCE ACADEMY'}</div>
-                                <div class="challan-badge-wrap">FEE CHALLAN - <span class="challan-badge">${payload.month_label}</span></div>
+                                <div class="challan-badge-wrap">${badgeTitle} - <span class="challan-badge">${payload.month_label}</span></div>
                               </div>
                             </div>
 
-                            <table class="info-table">
-                              <tr><td class="info-label">Name:</td><td class="info-value">${payload.student_name}</td></tr>
-                              <tr><td class="info-label">Roll:</td><td class="info-value">${payload.roll}</td></tr>
-                              <tr><td class="info-label">Class:</td><td class="info-value">${payload.class_name}</td></tr>
-                            </table>
+                            ${studentInfoHtml}
 
                             <table class="fee-table">
                               <thead>
@@ -334,7 +365,7 @@ async function processQueue() {
                               </tbody>
                               <tfoot>
                                 <tr class="total-row">
-                                  <th style="text-align:left;">TOTAL PAYABLE</th>
+                                  <th style="text-align:left;">${isFamily ? 'TOTAL FAMILY PAYABLE' : 'TOTAL PAYABLE'}</th>
                                   <th style="text-align:right;">PKR ${Number(payload.total_payable || 0).toLocaleString()}</th>
                                 </tr>
                               </tfoot>

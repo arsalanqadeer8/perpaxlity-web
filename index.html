@@ -9320,23 +9320,58 @@ function printFeeReportArea() {
     async function broadcastNoticeAPI(obj) {
       const isAuto = DB.settings?.waAuto !== false;
       if (!isAuto) return;
-      const stus = allStus().filter(s => getStudentWA(s) && (obj.target === 'All' || s.classId === obj.target));
+      const target = obj.target || 'All';
+      const stus = allStus().filter(s => getStudentWA(s) && (target === 'All' || s.classId === target));
       if (!stus.length) return showToast('No students with WhatsApp found for this target.', 'tw2');
-      showToast(`Broadcasting to ${stus.length} students...`, 'ts');
-      const msg = `📢 *${obj.title}*
+
+      // Group students by parent phone to avoid sending duplicate messages to the same parent
+      const parentGroups = {};
+      stus.forEach(s => {
+        const phone = getStudentWA(s);
+        if (!phone) return;
+        if (!parentGroups[phone]) parentGroups[phone] = [];
+        parentGroups[phone].push(s);
+      });
+
+      const phoneEntries = Object.entries(parentGroups);
+      if (!phoneEntries.length) return showToast('No valid WhatsApp numbers found.', 'tw2');
+
+      showToast(`Queueing broadcast for ${phoneEntries.length} parents (${stus.length} students)...`, 'ts');
+
+      const msgHeader = `📢 *${obj.title}*
 
 ${obj.body}
 
 ${DB.school.name}`;
-      let sent = 0;
-      for (const s of stus) {
-        try {
-          await openWhatsAppMessage(s.whatsapp, msg);
-          sent++;
-          await new Promise(r => setTimeout(r, 2500));
-        } catch(e){}
+
+      const outboxRows = [];
+      phoneEntries.forEach(([phone, kids]) => {
+        outboxRows.push({
+          recipient_phone: phone,
+          message_body: msgHeader,
+          status: 'pending'
+        });
+      });
+
+      try {
+        if (_sb) {
+          // Batch insert in chunks of 50 to guarantee instant delivery to whatsapp_outbox
+          for (let i = 0; i < outboxRows.length; i += 50) {
+            const chunk = outboxRows.slice(i, i + 50);
+            await _sb.from('whatsapp_outbox').insert(chunk);
+          }
+          showToast(`✅ Queued broadcast for ${outboxRows.length} parents (${stus.length} students)!`, 'ts', 5000);
+        } else {
+          // Fallback if offline
+          for (const row of outboxRows) {
+            sendWhatsAppAPI(row.recipient_phone, row.message_body);
+          }
+          showToast(`Queued ${outboxRows.length} messages to local outbox.`, 'ts', 4000);
+        }
+      } catch (err) {
+        console.error('Broadcast queueing error:', err);
+        showToast('Error queueing broadcast: ' + (err.message || 'Check connection'), 'te');
       }
-      showToast(`Broadcast Complete: Sent to ${sent} students.`, 'ts', 5000);
     }
 
     /* ------------------------------- TIMETABLE ------------------------------- */
@@ -12896,21 +12931,168 @@ function bulkPrintPreFeeVouchers(classId, targetMonth = null) {
     closeModal();
 }
 
+function generateFamilyVoucherPayload(familyStudents, targetMonth = null) {
+    if (!familyStudents || !familyStudents.length) return null;
+    if (familyStudents.length === 1) return generateVoucherPayload(familyStudents[0].id, targetMonth);
+
+    const tm = targetMonth || getNextMonth(monthKey());
+    const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const dParts = tm.split('-');
+    const mIdx = parseInt(dParts[1], 10) - 1;
+    const targetMonthName = mNames[mIdx] || tm;
+
+    const fatherName = familyStudents[0].father || 'Parent';
+    const combinedParticulars = [];
+    let grandTotal = 0;
+
+    familyStudents.forEach(s => {
+        const payload = generateVoucherPayload(s.id, tm);
+        if (!payload) return;
+        const cls = DB.classes.find(c => c.id === s.classId);
+        const clsName = cls?.name || 'Class';
+
+        combinedParticulars.push({
+            name: `👤 ${s.name} (${clsName}, Roll: ${s.roll || '-'})`,
+            amount: 0,
+            isHeader: true
+        });
+
+        (payload.particulars || []).forEach(p => {
+            combinedParticulars.push(p);
+        });
+
+        grandTotal += num(payload.total_payable || 0);
+    });
+
+    const studentNames = familyStudents.map(s => s.name).join(', ');
+    const studentClasses = familyStudents.map(s => {
+        const c = DB.classes.find(cl => cl.id === s.classId);
+        return c?.name || 'Class';
+    }).join(', ');
+
+    return {
+        type: 'fee_voucher_image',
+        is_family: true,
+        father_name: fatherName,
+        students: familyStudents.map(s => ({ id: s.id, name: s.name, roll: s.roll })),
+        student_name: studentNames,
+        roll: familyStudents.map(s => s.roll || '-').join(', '),
+        class_name: studentClasses,
+        month_label: `${targetMonthName} ${dParts[0]}`,
+        school_name: DB.school?.name || 'OXFORD EXCELLENCE ACADEMY',
+        particulars: combinedParticulars,
+        total_payable: grandTotal,
+        caption: `👨‍👩‍👧‍👦 Combined Family Fee Challan - ${targetMonthName} ${dParts[0]}\nFather: ${fatherName}\nStudents: ${studentNames}\nTotal Payable: PKR ${num(grandTotal).toLocaleString()}\n${DB.school?.name || 'Oxford Excellence Academy'}`
+    };
+}
+
+function generateFamilyVoucherMsg(familyStudents, targetMonth = null) {
+    if (!familyStudents || !familyStudents.length) return '';
+    if (familyStudents.length === 1) return generateVoucherMsg(familyStudents[0].id, targetMonth);
+
+    const tm = targetMonth || getNextMonth(monthKey());
+    const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const dParts = tm.split('-');
+    const mIdx = parseInt(dParts[1], 10) - 1;
+    const targetMonthName = mNames[mIdx] || tm;
+
+    let msg = `👨‍👩‍👧‍👦 *COMBINED FAMILY FEE CHALLAN - ${targetMonthName.toUpperCase()} ${dParts[0]}*\n`;
+    msg += `*${DB.school?.name || 'Oxford Excellence Academy'}*\n\n`;
+    msg += `*Father:* ${familyStudents[0].father || 'Parent'}\n`;
+    msg += `*Total Enrolled Siblings:* ${familyStudents.length}\n`;
+    msg += `*Due Date:* 10th ${targetMonthName} ${dParts[0]}\n`;
+    msg += `------------------------------------\n\n`;
+
+    let grandTotal = 0;
+    familyStudents.forEach((s, idx) => {
+        const payload = generateVoucherPayload(s.id, tm);
+        const cls = DB.classes.find(c => c.id === s.classId);
+        const sTotal = payload ? num(payload.total_payable || 0) : 0;
+        grandTotal += sTotal;
+
+        msg += `*${idx + 1}. ${s.name}* (${cls?.name || 'Class'}, Roll: ${s.roll || '-'})\n`;
+        if (payload && payload.particulars) {
+            payload.particulars.forEach(p => {
+                msg += `   • ${p.name}: Rs ${num(p.amount).toLocaleString()}\n`;
+            });
+        }
+        msg += `   👉 *Student Subtotal: Rs ${num(sTotal).toLocaleString()}*\n\n`;
+    });
+
+    msg += `------------------------------------\n`;
+    msg += `*COMBINED TOTAL PAYABLE: Rs ${num(grandTotal).toLocaleString()}*\n`;
+    msg += `------------------------------------\n\n`;
+    msg += `Please submit the due amount before the 10th. Thank you!\n`;
+    msg += `${DB.school?.name || 'Oxford Excellence Academy'}`;
+
+    return msg;
+}
+
 function bulkWhatsappPreFeeVouchers(classId, targetMonth = null) {
     const cm = targetMonth || getNextMonth(monthKey());
     const stus = allStus().filter(s => classId === 'All' || s.classId === classId);
-    if (!stus.length) return showToast('No students found');
-    if (!confirm('Queue Photo Vouchers for ' + stus.length + ' students for ' + cm + ' to WhatsApp Outbox?')) return;
-    let queued = 0;
-    stus.forEach(s => { 
-        if (s.whatsapp) { 
-            const payload = generateVoucherPayload(s.id, cm);
-            const body = payload ? JSON.stringify(payload) : generateVoucherMsg(s.id, cm);
-            sendWhatsAppAPI(getStudentWA(s), body); 
-            queued++; 
-        } 
+    if (!stus.length) return showToast('No students found', 'te');
+
+    // Group students by parent contact phone (or family)
+    const familyGroups = {};
+    stus.forEach(s => {
+        const phone = getStudentWA(s);
+        if (!phone) return;
+        if (!familyGroups[phone]) familyGroups[phone] = [];
+        familyGroups[phone].push(s);
     });
-    showToast('Queued ' + queued + ' Photo Vouchers to WhatsApp for ' + cm, 'ts');
+
+    const phoneEntries = Object.entries(familyGroups);
+    if (!phoneEntries.length) return showToast('No students with WhatsApp numbers found', 'tw2');
+
+    const multiCount = phoneEntries.filter(([p, list]) => list.length > 1).length;
+    const confirmPrompt = multiCount > 0
+        ? `Queue Fee Vouchers for ${phoneEntries.length} families (${stus.length} students) for ${cm}?\n\n• ${multiCount} families with multiple kids will receive 1 COMBINED FAMILY VOUCHER.\n• Single-student families will receive their regular voucher.`
+        : `Queue Fee Vouchers for ${stus.length} students for ${cm} to WhatsApp Outbox?`;
+
+    if (!confirm(confirmPrompt)) return;
+
+    showToast(`Queueing vouchers for ${phoneEntries.length} families...`, 'ts');
+
+    const outboxRows = [];
+    phoneEntries.forEach(([phone, kids]) => {
+        let body = '';
+        if (kids.length > 1) {
+            const famPayload = generateFamilyVoucherPayload(kids, cm);
+            body = famPayload ? JSON.stringify(famPayload) : generateFamilyVoucherMsg(kids, cm);
+        } else {
+            const singlePayload = generateVoucherPayload(kids[0].id, cm);
+            body = singlePayload ? JSON.stringify(singlePayload) : generateVoucherMsg(kids[0].id, cm);
+        }
+
+        outboxRows.push({
+            recipient_phone: phone,
+            message_body: body,
+            status: 'pending'
+        });
+    });
+
+    // Batch insert directly into Supabase outbox
+    if (_sb) {
+        (async () => {
+            try {
+                for (let i = 0; i < outboxRows.length; i += 50) {
+                    const chunk = outboxRows.slice(i, i + 50);
+                    await _sb.from('whatsapp_outbox').insert(chunk);
+                }
+                showToast(`✅ Queued ${outboxRows.length} vouchers (${stus.length} students) to WhatsApp!`, 'ts', 5000);
+            } catch (err) {
+                console.error('Voucher bulk queue error:', err);
+                showToast('Error queueing vouchers to cloud', 'te');
+            }
+        })();
+    } else {
+        outboxRows.forEach(row => {
+            sendWhatsAppAPI(row.recipient_phone, row.message_body);
+        });
+        showToast(`Queued ${outboxRows.length} vouchers locally.`, 'ts', 4000);
+    }
+
     closeModal();
 }
 // --- END PRE FEE VOUCHER ---
