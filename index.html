@@ -3563,27 +3563,29 @@ window.addEventListener('unhandledrejection', function(e) {
 
 .fee-row-btn {
   font-size: 0.72rem;
-  font-weight: 600;
-  padding: 4px 10px;
+  font-weight: 500;
+  padding: 5px 10px;
   border-radius: 6px;
   cursor: pointer;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #e2e8f0;
   background: #ffffff;
   color: #334155;
   transition: all 0.12s ease;
   display: inline-flex;
   align-items: center;
-  line-height: 1.2;
+  gap: 4px;
+  line-height: 1;
 }
 .fee-row-btn:hover {
   background: #f8fafc;
-  border-color: #94a3b8;
+  border-color: #cbd5e1;
   color: #0f172a;
 }
 .fee-row-btn-p {
   background: #0f172a;
   border-color: #0f172a;
   color: #ffffff;
+  font-weight: 600;
 }
 .fee-row-btn-p:hover {
   background: #1e293b;
@@ -3591,46 +3593,124 @@ window.addEventListener('unhandledrejection', function(e) {
   color: #ffffff;
 }
 .fee-row-btn-sib {
-  background: #f0f7ff;
+  background: #ffffff;
   border-color: #bfdbfe;
-  color: #1d4ed8;
-  font-weight: 700;
+  color: #2563eb;
+  font-weight: 600;
 }
 .fee-row-btn-sib:hover {
-  background: #dbeafe;
+  background: #eff6ff;
   border-color: #93c5fd;
-  color: #1e40af;
+  color: #1d4ed8;
 }
 .fee-row-btn-wa {
-  background: #f0fdf4;
+  background: #ffffff;
   border-color: #bbf7d0;
-  color: #15803d;
-  font-weight: 700;
+  color: #16a34a;
+  font-weight: 600;
 }
 .fee-row-btn-wa:hover {
-  background: #dcfce7;
+  background: #f0fdf4;
   border-color: #86efac;
-  color: #166534;
+  color: #15803d;
 }
 
+/* shadcn-inspired table action group */
+.fee-act-group {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: #ffffff;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+.fee-act-group .fee-grp-item {
+  border: none;
+  border-right: 1px solid #e2e8f0;
+  background: transparent;
+  color: #334155;
+  font-size: 0.72rem;
+  font-weight: 500;
+  padding: 6px 11px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.12s ease;
+  line-height: 1;
+  text-decoration: none;
+}
+.fee-act-group .fee-grp-item:last-child {
+  border-right: none;
+}
+.fee-act-group .fee-grp-item:hover {
+  background: #f8fafc;
+  color: #0f172a;
+}
+.fee-act-group .fee-grp-primary {
+  background: #0f172a;
+  color: #ffffff;
+  font-weight: 600;
+}
+.fee-act-group .fee-grp-primary:hover {
+  background: #1e293b;
+  color: #ffffff;
+}
+.fee-act-group .fee-grp-wa {
+  color: #16a34a;
+  font-weight: 600;
+}
+.fee-act-group .fee-grp-wa:hover {
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+/* Subtle, clean status badges */
 .fee-status-badge {
   font-size: 0.65rem;
-  font-weight: 700;
-  padding: 2px 7px;
+  font-weight: 600;
+  padding: 1.5px 6px;
   border-radius: 4px;
-  letter-spacing: 0.04em;
-  display: inline-block;
+  letter-spacing: 0.03em;
+  display: inline-flex;
+  align-items: center;
   line-height: 1.2;
 }
 .fee-status-badge.paid {
   background: #f0fdf4;
-  color: #15803d;
+  color: #16a34a;
   border: 1px solid #bbf7d0;
 }
 .fee-status-badge.unpaid {
   background: #fef2f2;
-  color: #b91c1c;
+  color: #dc2626;
   border: 1px solid #fecaca;
+}
+
+/* Student mini avatar pill */
+.stu-table-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  font-weight: 700;
+  font-size: 0.72rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.fee-table-row {
+  border-bottom: 1px solid #f1f5f9;
+  transition: background-color 0.12s ease;
+}
+.fee-table-row:hover {
+  background-color: #f8fafc;
 }
 </style>
 
@@ -7767,37 +7847,55 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
       const augPaid = augRow ? augRow.paid : false;
       const sepPaid = sepRow ? sepRow.paid : false;
       const mFee = monthlyFeeAmount(s) + num(s.vanFee || 0);
-      return `<tr data-aug="${augPaid ? 'paid' : 'unpaid'}" data-sep="${sepPaid ? 'paid' : 'unpaid'}" data-arrears="${sum.pendingArrears > 0 ? 'yes' : 'no'}" style="border-bottom:1px solid #f1f5f9;">
-        <td style="padding:12px 16px;">
-          <div style="font-weight:700; font-size:0.84rem; color:#0f172a;">${escHtml(s.name)}</div>
-          <div style="font-size:0.72rem; color:#64748b; margin-top:2px;">Roll: <span style="color:#334155; font-weight:600;">${escHtml(s.roll || '-')}</span></div>
-        </td>
-        <td style="padding:12px 16px; font-size:0.78rem; color:#475569; font-weight:500;">${escHtml(cls?.name || '-')}</td>
-        <td style="padding:12px 16px; white-space:nowrap;">
-          <div style="font-weight:700; font-size:0.85rem; color:#0f172a;">${fmtMoney(mFee)} <span style="font-size:0.7rem; color:#64748b; font-weight:normal;">/mo</span></div>
-          <div style="margin-top:4px; display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
-            <span style="font-size:0.7rem; color:#64748b; font-weight:600;">Aug</span>
-            <span class="fee-status-badge ${augPaid ? 'paid' : 'unpaid'}">${augPaid ? 'PAID' : 'UNPAID'}</span>
-            <span style="font-size:0.7rem; color:#64748b; font-weight:600; margin-left:4px;">Sep</span>
-            <span class="fee-status-badge ${sepPaid ? 'paid' : 'unpaid'}">${sepPaid ? 'PAID' : 'UNPAID'}</span>
+      const sibs = getFamilySiblings(s);
+      const hasSiblings = sibs && sibs.length > 1;
+      const initials = (s.name || '').split(' ').map(n => n[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'ST';
+
+      return `<tr class="fee-table-row" data-aug="${augPaid ? 'paid' : 'unpaid'}" data-sep="${sepPaid ? 'paid' : 'unpaid'}" data-arrears="${sum.pendingArrears > 0 ? 'yes' : 'no'}">
+        <td style="padding:13px 16px;">
+          <div style="display:flex; align-items:center; gap:11px;">
+            <div class="stu-table-avatar">${initials}</div>
+            <div>
+              <div style="font-weight:700; font-size:0.86rem; color:#0f172a; line-height:1.2;">${escHtml(s.name)}</div>
+              <div style="font-size:0.72rem; color:#64748b; margin-top:3px; display:flex; align-items:center; gap:8px;">
+                <span>Roll: <b style="color:#334155;">${escHtml(s.roll || '-')}</b></span>
+                ${s.father ? `<span style="color:#cbd5e1;">&bull;</span> <span>${escHtml(s.father)}</span>` : ''}
+              </div>
+            </div>
           </div>
         </td>
-        <td style="padding:12px 16px; white-space:nowrap;">
-          <div style="font-weight:800; color:${sum.dueAmount > 0 ? '#b91c1c' : '#15803d'}; font-size:0.92rem;">${fmtMoney(sum.dueAmount)}</div>
-          ${sum.pendingArrears > 0 ? `<div style="font-size:0.7rem; color:#dc2626; margin-top:2px; font-weight:500;">Arrears: ${fmtMoney(sum.pendingArrears)}</div>` : ''}
+        <td style="padding:13px 16px; font-size:0.78rem; color:#475569; font-weight:500;">
+          <span style="background:#f1f5f9; color:#334155; font-size:0.72rem; font-weight:600; padding:3px 8px; border-radius:5px; border:1px solid #e2e8f0;">${escHtml(cls?.name || '-')}</span>
         </td>
-        <td style="padding:12px 20px 12px 10px; text-align:right; white-space:nowrap;">
+        <td style="padding:13px 16px; white-space:nowrap;">
+          <div style="font-weight:700; font-size:0.86rem; color:#0f172a;">${fmtMoney(mFee)} <span style="font-size:0.7rem; color:#64748b; font-weight:400;">/mo</span></div>
+          <div style="margin-top:5px; display:inline-flex; gap:6px; align-items:center;">
+            <span class="fee-status-badge ${augPaid ? 'paid' : 'unpaid'}">Aug: ${augPaid ? 'PAID' : 'DUE'}</span>
+            <span class="fee-status-badge ${sepPaid ? 'paid' : 'unpaid'}">Sep: ${sepPaid ? 'PAID' : 'DUE'}</span>
+          </div>
+        </td>
+        <td style="padding:13px 16px; white-space:nowrap;">
+          <div style="font-weight:800; color:${sum.dueAmount > 0 ? '#dc2626' : '#16a34a'}; font-size:0.92rem;">
+            ${fmtMoney(sum.dueAmount)}
+          </div>
+          ${sum.pendingArrears > 0 
+            ? `<div style="font-size:0.7rem; color:#ef4444; margin-top:3px; font-weight:500;">Arrears: PKR ${num(sum.pendingArrears).toLocaleString()}</div>` 
+            : `<div style="font-size:0.68rem; color:#94a3b8; margin-top:3px;">No past arrears</div>`}
+        </td>
+        <td style="padding:13px 20px 13px 10px; text-align:right; white-space:nowrap;">
           <div style="display:inline-flex; gap:6px; justify-content:flex-end; align-items:center;">
-            ${(function() {
-                const sibs = getFamilySiblings(s);
-                if (sibs && sibs.length > 1) {
-                    return `<button class="fee-row-btn fee-row-btn-sib" title="Family Checkout (${sibs.length} siblings)" onclick="openFamilyFeeModal('${s.id}')">Siblings (${sibs.length})</button>`;
-                }
-                return '';
-            })()}
-            <button class="fee-row-btn fee-row-btn-p" onclick="openStudentFeeModal('${s.id}')">Manage</button>
-            <button class="fee-row-btn" onclick="openVoucherModal('${s.id}')">Voucher</button>
-            ${getStudentWA(s) && sum.dueAmount > 0 ? `<button class="fee-row-btn fee-row-btn-wa" onclick="openFeeReminderModal('${s.id}')">WhatsApp</button>` : ''}
+            ${hasSiblings ? `
+              <button class="fee-row-btn fee-row-btn-sib" title="Family Checkout (${sibs.length} siblings)" onclick="openFamilyFeeModal('${s.id}')">
+                Siblings (${sibs.length})
+              </button>
+            ` : ''}
+            <div class="fee-act-group">
+              <button class="fee-grp-item fee-grp-primary" onclick="openStudentFeeModal('${s.id}')">Manage</button>
+              <button class="fee-grp-item" onclick="openVoucherModal('${s.id}')">Voucher</button>
+              ${getStudentWA(s) && sum.dueAmount > 0 ? `
+                <button class="fee-grp-item fee-grp-wa" onclick="openFeeReminderModal('${s.id}')">WhatsApp</button>
+              ` : ''}
+            </div>
           </div>
         </td>
       </tr>`;
