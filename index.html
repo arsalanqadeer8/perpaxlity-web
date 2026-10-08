@@ -11781,13 +11781,90 @@ function generateVoucherMsg(sid, targetMonth = null) {
     return msg;
 }
 
+function generateVoucherPayload(sid, targetMonth = null) {
+    const s = allStus().find(x => x.id === sid);
+    if (!s) return null;
+    const cls = DB.classes.find(c => c.id === s.classId);
+    const tm = targetMonth || getNextMonth(monthKey());
+    
+    const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const shortMNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const dParts = tm.split('-');
+    const mIdx = parseInt(dParts[1], 10) - 1;
+    const targetMonthName = mNames[mIdx] || tm;
+    
+    const tuition = monthlyFeeAmount(s);
+    const van = num(s.vanFee || 0);
+    const initialArrears = getTrueInitialArrears(sid);
+    
+    let particulars = [];
+    let currentCharges = tuition + van;
+    
+    particulars.push({ name: `${targetMonthName} Tuition Fee`, amount: tuition, isUnpaid: false });
+    if (van > 0) {
+        particulars.push({ name: `Transport / Van Fee`, amount: van, isUnpaid: false });
+    }
+    
+    (DB.fees.items || []).forEach(f => {
+        if (f.id === 'f1') return;
+        if (f.applyMonth && f.applyMonth !== 'All' && f.applyMonth.toLowerCase() !== targetMonthName.toLowerCase()) return;
+        const amt = num(f.amount);
+        currentCharges += amt;
+        particulars.push({ name: f.name, amount: amt, isUnpaid: false });
+    });
+    
+    let priorUnpaidSum = 0;
+    let curP = '2026-08';
+    while (curP < tm) {
+        const pmIdx = parseInt(curP.split('-')[1], 10) - 1;
+        const pmName = shortMNames[pmIdx] || curP;
+        const mRow = DB.fees.monthlyLedger?.[sid]?.[curP];
+        const isPaid = mRow ? mRow.paid : false;
+        
+        let pmItems = 0;
+        (DB.fees.items || []).forEach(f => {
+            if (f.id === 'f1') return;
+            if (f.applyMonth && f.applyMonth !== 'All' && f.applyMonth.toLowerCase() !== (mNames[pmIdx] || '').toLowerCase()) return;
+            pmItems += num(f.amount);
+        });
+        const pmTotal = tuition + van + pmItems;
+        if (!isPaid) {
+            priorUnpaidSum += pmTotal;
+            particulars.push({ name: `${pmName} Fee (Unpaid)`, amount: pmTotal, isUnpaid: true });
+        }
+        curP = getNextMonth(curP);
+    }
+    
+    if (initialArrears > 0) {
+        particulars.push({ name: `Previous Balance (Admission / Old Arrears)`, amount: initialArrears, isUnpaid: true });
+    } else if (initialArrears < 0) {
+        particulars.push({ name: `Advance Credit`, amount: initialArrears, isCredit: true });
+    }
+    
+    const totalPayable = Math.max(0, currentCharges + priorUnpaidSum + initialArrears);
+    
+    return {
+        type: 'fee_voucher_image',
+        student_id: s.id,
+        student_name: s.name,
+        roll: s.roll || '-',
+        class_name: cls?.name || '-',
+        month_label: `${targetMonthName} ${dParts[0]}`,
+        school_name: DB.school?.name || 'OXFORD EXCELLENCE ACADEMY',
+        particulars: particulars,
+        total_payable: totalPayable,
+        caption: `📄 Fee Challan - ${s.name} (${targetMonthName} ${dParts[0]})\nTotal Payable: PKR ${num(totalPayable).toLocaleString()}\n${DB.school?.name || 'Oxford Excellence Academy'}`
+    };
+}
+
 function sendVoucherWhatsApp(sid, targetMonth = null) {
     const tm = targetMonth || getNextMonth(monthKey());
-    const msg = generateVoucherMsg(sid, tm);
+    const payload = generateVoucherPayload(sid, tm);
     const s = allStus().find(x => x.id === sid);
     if (!getStudentWA(s)) return showToast('No WhatsApp number');
-    sendWhatsAppAPI(getStudentWA(s), msg);
-    showToast('Voucher queued for WhatsApp (' + tm + ')', 'ts');
+    const body = payload ? JSON.stringify(payload) : generateVoucherMsg(sid, tm);
+    sendWhatsAppAPI(getStudentWA(s), body);
+    showToast('Photo Voucher queued for WhatsApp (' + tm + ')', 'ts');
     closeModal();
 }
 
@@ -12000,10 +12077,17 @@ function bulkWhatsappPreFeeVouchers(classId, targetMonth = null) {
     const cm = targetMonth || getNextMonth(monthKey());
     const stus = allStus().filter(s => classId === 'All' || s.classId === classId);
     if (!stus.length) return showToast('No students found');
-    if (!confirm('Queue vouchers for ' + stus.length + ' students for ' + cm + ' to WhatsApp Outbox?')) return;
+    if (!confirm('Queue Photo Vouchers for ' + stus.length + ' students for ' + cm + ' to WhatsApp Outbox?')) return;
     let queued = 0;
-    stus.forEach(s => { if (s.whatsapp) { sendWhatsAppAPI(getStudentWA(s), generateVoucherMsg(s.id, cm)); queued++; } });
-    showToast('Queued ' + queued + ' vouchers to WhatsApp for ' + cm, 'ts');
+    stus.forEach(s => { 
+        if (s.whatsapp) { 
+            const payload = generateVoucherPayload(s.id, cm);
+            const body = payload ? JSON.stringify(payload) : generateVoucherMsg(s.id, cm);
+            sendWhatsAppAPI(getStudentWA(s), body); 
+            queued++; 
+        } 
+    });
+    showToast('Queued ' + queued + ' Photo Vouchers to WhatsApp for ' + cm, 'ts');
     closeModal();
 }
 // --- END PRE FEE VOUCHER ---
