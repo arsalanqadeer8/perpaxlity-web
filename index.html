@@ -7525,6 +7525,7 @@ If the arrears sum is lower than you expect, please check your CSV file to ensur
   <div><div class="ph-tag"> Fees</div><h1>Fee Management</h1><div class="ph-sub">Year ${DB.settings?.schoolYear || ''} - all fee items per student</div></div>
   <div class="ph-acts">
     <button class="btn btn-g btn-sm" onclick="goPage('feereports')">Fee Reports</button>
+    <button class="btn btn-gh btn-sm" onclick="openFamilyFeeModal()">👨‍👩‍👧 Family Checkout</button>
     <button class="btn btn-gh btn-sm" onclick="openFeeStructModal()"> Structure</button>
     <button class="btn btn-gh btn-sm" onclick="openFeeReminderModal()"> Manual Reminder</button>
     <button class="btn btn-wa btn-sm" onclick="sendBulkFeeReminder()"> Bulk Reminder</button>
@@ -7657,6 +7658,13 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
         </td>
         <td style="padding:10px 20px 10px 10px;text-align:right;white-space:nowrap;">
           <div style="display:inline-flex;gap:5px;justify-content:flex-end;align-items:center;">
+            ${(function() {
+                const sibs = getFamilySiblings(s);
+                if (sibs && sibs.length > 1) {
+                    return `<button class="btn btn-xs btn-gh" style="background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; font-weight:700;" title="Open Family Checkout (${sibs.length} siblings)" onclick="openFamilyFeeModal('${s.id}')">👨‍👩‍👧 Family (${sibs.length})</button>`;
+                }
+                return '';
+            })()}
             <button class="btn btn-xs btn-p" onclick="openStudentFeeModal('${s.id}')">Manage</button>
             <button class="btn btn-xs btn-gh" onclick="openVoucherModal('${s.id}')">Voucher</button>
             ${getStudentWA(s) && sum.dueAmount > 0 ? `<button class="btn btn-xs btn-wa" onclick="openFeeReminderModal('${s.id}')">WA</button>` : ''}
@@ -8182,6 +8190,495 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
         } else {
             console.warn('Popup blocked for receipt');
         }
+    }
+
+    // ==========================================
+    // FAMILY FEE MANAGEMENT & UNIFIED CHECKOUT
+    // ==========================================
+    function getFamilySiblings(studentOrId) {
+        const s = typeof studentOrId === 'string' ? allStus().find(x => x.id === studentOrId) : studentOrId;
+        if (!s) return [];
+        const all = allStus();
+        
+        // 1. Check direct familyId
+        if (s.familyId) {
+            const matches = all.filter(o => o.familyId === s.familyId);
+            if (matches.length > 0) return matches;
+        }
+        
+        // 2. Fallback: match by father's name (if at least 3 letters)
+        if (s.father && s.father.trim().length >= 3) {
+            const normF = s.father.trim().toUpperCase();
+            const matches = all.filter(o => (o.father || '').trim().toUpperCase() === normF);
+            if (matches.length > 1) return matches;
+        }
+        
+        // 3. Fallback: match by phone / WhatsApp
+        const p = normalizePhone(s.whatsapp || s.phone || '');
+        if (p && p.length >= 9) {
+            const matches = all.filter(o => {
+                const op = normalizePhone(o.whatsapp || o.phone || '');
+                return op === p;
+            });
+            if (matches.length > 1) return matches;
+        }
+        
+        return [s];
+    }
+
+    function openFamilyFeeModal(seedStudentId = null, selectedMonth = null) {
+        const all = allStus();
+        const activeMonth = selectedMonth || monthKey();
+        
+        let initialStudents = [];
+        if (seedStudentId) {
+            initialStudents = getFamilySiblings(seedStudentId);
+        } else {
+            // Find all families that have > 1 student
+            const byFam = {};
+            all.forEach(s => {
+                const fid = s.familyId || (s.father && s.father.trim().length >= 3 ? 'FATHER_' + s.father.trim().toUpperCase() : null);
+                if (fid) {
+                    if (!byFam[fid]) byFam[fid] = [];
+                    byFam[fid].push(s);
+                }
+            });
+            const firstMulti = Object.values(byFam).find(list => list.length > 1);
+            if (firstMulti) initialStudents = firstMulti;
+            else if (all.length > 0) initialStudents = [all[0]];
+        }
+
+        const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const curM = monthKey();
+        const nextM = getNextMonth(curM);
+        const prevM = '2026-08';
+
+        openModal(`
+          <div style="margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+            <div>
+              <h3 style="margin:0 0 4px 0; color:#0f172a; display:flex; align-items:center; gap:8px;">
+                <span>👨‍👩‍👧‍👦</span> Family Fee Checkout
+              </h3>
+              <div style="font-size:0.82rem; color:#64748b;">
+                Pay and issue combined vouchers for siblings in one place
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <label style="font-size:0.8rem; font-weight:700; color:#334155;">Billing Month:</label>
+              <select class="fi" id="fam-fee-month" onchange="refreshFamilyFeeModalContent()" style="padding:5px 8px; font-size:0.85rem; font-weight:600;">
+                <option value="${nextM}" ${activeMonth === nextM ? 'selected' : ''}>Upcoming: October 2026</option>
+                <option value="${curM}" ${activeMonth === curM ? 'selected' : ''}>Current: September 2026</option>
+                <option value="${prevM}" ${activeMonth === prevM ? 'selected' : ''}>Previous: August 2026</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Family Quick Search Bar -->
+          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:10px 12px; margin-bottom:14px; display:flex; gap:10px; align-items:center;">
+            <span class="material-symbols-outlined" style="color:#64748b; font-size:20px;">search</span>
+            <input type="text" class="fi" id="fam-search-input" placeholder="Search by Father Name, Student Name, or Phone..." style="flex:1; border:none; background:transparent; outline:none; font-size:0.88rem;" oninput="onFamilyFeeSearchInput(this.value)">
+          </div>
+          <div id="fam-search-results" style="display:none; max-height:160px; overflow-y:auto; margin-top:-8px; margin-bottom:14px; background:#fff; border:1px solid #cbd5e1; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.08); z-index:10; position:relative;"></div>
+
+          <div id="fam-modal-body"></div>
+        `);
+
+        window._currentFamStus = initialStudents;
+        renderFamilyFeeModalBody(initialStudents, activeMonth);
+    }
+
+    function onFamilyFeeSearchInput(query) {
+        const q = (query || '').trim().toLowerCase();
+        const resultsEl = document.getElementById('fam-search-results');
+        if (!resultsEl) return;
+        if (!q || q.length < 2) {
+            resultsEl.style.display = 'none';
+            resultsEl.innerHTML = '';
+            return;
+        }
+
+        const all = allStus();
+        // Group by father
+        const familiesMap = new Map();
+        all.forEach(s => {
+            const fName = (s.father || 'Unknown Father').trim();
+            const phone = s.whatsapp || s.phone || '';
+            const key = s.familyId || (fName.toUpperCase() + '_' + phone);
+            if (!familiesMap.has(key)) {
+                familiesMap.set(key, { father: fName, phone, students: [] });
+            }
+            familiesMap.get(key).students.push(s);
+        });
+
+        const matches = [];
+        for (const [key, fam] of familiesMap.entries()) {
+            const matchFather = fam.father.toLowerCase().includes(q);
+            const matchPhone = fam.phone.toLowerCase().includes(q);
+            const matchStu = fam.students.some(s => s.name.toLowerCase().includes(q) || (s.roll && s.roll.toLowerCase().includes(q)));
+            if (matchFather || matchPhone || matchStu) {
+                matches.push(fam);
+            }
+        }
+
+        if (matches.length === 0) {
+            resultsEl.innerHTML = `<div style="padding:10px; font-size:0.82rem; color:#94a3b8; text-align:center;">No matching family found</div>`;
+            resultsEl.style.display = 'block';
+            return;
+        }
+
+        resultsEl.innerHTML = matches.slice(0, 8).map((fam, idx) => `
+          <div style="padding:8px 12px; border-bottom:1px solid #f1f5f9; cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#fff'" onclick="selectFamilyForFee(${idx})">
+            <div>
+              <div style="font-weight:700; font-size:0.86rem; color:#0f172a;">${escHtml(fam.father)} <span style="font-size:0.75rem; color:#64748b; font-weight:normal;">(${fam.students.length} Student${fam.students.length > 1 ? 's' : ''})</span></div>
+              <div style="font-size:0.75rem; color:#64748b;">${fam.students.map(s => escHtml(s.name)).join(', ')}</div>
+            </div>
+            <span style="font-size:0.72rem; background:#eff6ff; color:#1d4ed8; font-weight:700; padding:2px 8px; border-radius:6px;">Select</span>
+          </div>
+        `).join('');
+        resultsEl.style.display = 'block';
+        window._famSearchResults = matches;
+    }
+
+    function selectFamilyForFee(idx) {
+        const resultsEl = document.getElementById('fam-search-results');
+        if (resultsEl) resultsEl.style.display = 'none';
+        const searchInput = document.getElementById('fam-search-input');
+        const fam = window._famSearchResults?.[idx];
+        if (!fam) return;
+        if (searchInput) searchInput.value = fam.father;
+        window._currentFamStus = fam.students;
+        const m = document.getElementById('fam-fee-month')?.value || monthKey();
+        renderFamilyFeeModalBody(fam.students, m);
+    }
+
+    function refreshFamilyFeeModalContent() {
+        const m = document.getElementById('fam-fee-month')?.value || monthKey();
+        if (window._currentFamStus) {
+            renderFamilyFeeModalBody(window._currentFamStus, m);
+        }
+    }
+
+    function renderFamilyFeeModalBody(students, month) {
+        const bodyEl = document.getElementById('fam-modal-body');
+        if (!bodyEl) return;
+        if (!students || students.length === 0) {
+            bodyEl.innerHTML = '<div style="padding:20px; text-align:center; color:#64748b;">No students in this family.</div>';
+            return;
+        }
+
+        const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const dParts = month.split('-');
+        const mIdx = parseInt(dParts[1], 10) - 1;
+        const monthName = mNames[mIdx] || month;
+
+        let totalFamilyDue = 0;
+        let totalCurrentCharges = 0;
+        let totalArrears = 0;
+
+        const studentsData = students.map(s => {
+            const cls = DB.classes.find(c => c.id === s.classId);
+            const tuition = monthlyFeeAmount(s);
+            const van = num(s.vanFee || 0);
+            const initialArrears = getTrueInitialArrears(s.id);
+
+            let itemsTotal = 0;
+            (DB.fees.items || []).forEach(f => {
+                if (f.id === 'f1') return;
+                if (f.applyMonth && f.applyMonth !== 'All' && f.applyMonth.toLowerCase() !== monthName.toLowerCase()) return;
+                itemsTotal += num(f.amount);
+            });
+
+            const currentCharges = tuition + van + itemsTotal;
+
+            // Prior Unpaid Months
+            let priorUnpaid = 0;
+            let curP = '2026-08';
+            while (curP < month) {
+                const mRow = DB.fees.monthlyLedger?.[s.id]?.[curP];
+                if (!mRow || !mRow.paid) {
+                    let pmItems = 0;
+                    (DB.fees.items || []).forEach(f => {
+                        if (f.id === 'f1') return;
+                        const pIdx = parseInt(curP.split('-')[1], 10) - 1;
+                        if (f.applyMonth && f.applyMonth !== 'All' && f.applyMonth.toLowerCase() !== (mNames[pIdx] || '').toLowerCase()) return;
+                        pmItems += num(f.amount);
+                    });
+                    priorUnpaid += (tuition + van + pmItems);
+                }
+                curP = getNextMonth(curP);
+            }
+
+            const mRow = DB.fees.monthlyLedger?.[s.id]?.[month];
+            const isPaid = mRow ? mRow.paid : false;
+            const stuTotalDue = Math.max(0, (isPaid ? 0 : currentCharges) + priorUnpaid + initialArrears);
+
+            totalFamilyDue += stuTotalDue;
+            totalCurrentCharges += (isPaid ? 0 : currentCharges);
+            totalArrears += (priorUnpaid + initialArrears);
+
+            return { s, cls, tuition, van, itemsTotal, currentCharges, priorUnpaid, initialArrears, isPaid, stuTotalDue };
+        });
+
+        const fatherName = students[0]?.father || 'Parent';
+        const contactPhone = students[0]?.whatsapp || students[0]?.phone || '';
+
+        bodyEl.innerHTML = `
+          <!-- Family Banner -->
+          <div style="background:#f1f5f9; border-radius:10px; padding:10px 14px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+            <div>
+              <div style="font-weight:800; font-size:0.92rem; color:#0f172a;">${escHtml(fatherName)}</div>
+              <div style="font-size:0.76rem; color:#64748b;">${students.length} Child${students.length > 1 ? 'ren' : ''} enrolled &bull; Phone: ${contactPhone ? escHtml(contactPhone) : 'Not recorded'}</div>
+            </div>
+            <div style="text-align:right;">
+              <span style="font-size:0.7rem; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.04em;">Family Total Due:</span>
+              <div style="font-size:1.35rem; font-weight:800; color:${totalFamilyDue > 0 ? '#ef4444' : '#10b981'}; line-height:1.1;">
+                PKR ${num(totalFamilyDue).toLocaleString()}
+              </div>
+            </div>
+          </div>
+
+          <!-- Students List Cards -->
+          <div style="max-height:360px; overflow-y:auto; padding-right:4px; margin-bottom:14px;">
+            ${studentsData.map(({ s, cls, tuition, van, itemsTotal, currentCharges, priorUnpaid, initialArrears, isPaid, stuTotalDue }) => `
+              <div style="background:#ffffff; border:1px solid ${isPaid ? '#e2e8f0' : '#fecaca'}; border-radius:10px; padding:12px 14px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                <div style="flex:1; min-width:180px;">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <input type="checkbox" class="fam-stu-chk" data-sid="${s.id}" data-due="${stuTotalDue}" ${isPaid ? '' : 'checked'} style="width:16px; height:16px; cursor:pointer;" onchange="updateFamilyPaymentCalculations()">
+                    <span style="font-weight:700; font-size:0.9rem; color:#0f172a;">${escHtml(s.name)}</span>
+                    <span style="font-size:0.74rem; color:#64748b;">(${escHtml(cls?.name || 'Class')} &bull; Roll ${escHtml(s.roll || '-')})</span>
+                    ${isPaid 
+                      ? `<span style="background:#dcfce7; color:#15803d; font-size:0.68rem; font-weight:700; padding:1px 6px; border-radius:4px;">✓ PAID</span>` 
+                      : `<span style="background:#fee2e2; color:#b91c1c; font-size:0.68rem; font-weight:700; padding:1px 6px; border-radius:4px;">● UNPAID</span>`}
+                  </div>
+                  <div style="font-size:0.75rem; color:#64748b; margin-top:4px; line-height:1.4;">
+                    <span>${monthName} Fee: <b>PKR ${num(currentCharges).toLocaleString()}</b></span>
+                    ${(priorUnpaid + initialArrears) > 0 ? ` &bull; <span style="color:#b91c1c; font-weight:600;">Arrears: PKR ${num(priorUnpaid + initialArrears).toLocaleString()}</span>` : ''}
+                  </div>
+                </div>
+
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <div style="text-align:right;">
+                    <div style="font-size:0.7rem; color:#64748b;">Total Due</div>
+                    <div style="font-weight:800; font-size:0.95rem; color:${stuTotalDue > 0 ? '#b91c1c' : '#15803d'};">
+                      PKR ${num(stuTotalDue).toLocaleString()}
+                    </div>
+                  </div>
+                  ${isPaid ? `
+                    <button class="btn btn-xs" style="background:#fff; color:#dc2626; border:1px solid #fecaca; font-weight:600; padding:4px 10px; border-radius:6px; cursor:pointer;" onclick="toggleMonthPayment('${s.id}', '${month}', false); refreshFamilyFeeModalContent();">Unmark</button>
+                  ` : `
+                    <button class="btn btn-xs" style="background:#10b981; color:#fff; border:none; font-weight:700; padding:5px 12px; border-radius:6px; cursor:pointer;" onclick="toggleMonthPayment('${s.id}', '${month}', true); refreshFamilyFeeModalContent();">✓ Pay</button>
+                  `}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+
+          <!-- Bottom Action Deck -->
+          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:12px 14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:0.82rem; font-weight:700; color:#334155;">Selected Payable:</span>
+                <span id="fam-selected-total" style="font-size:1.15rem; font-weight:800; color:#0f172a;">PKR ${num(totalFamilyDue).toLocaleString()}</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <button class="btn btn-xs btn-gh" onclick="toggleAllFamilyCheckboxes(true)">Select All</button>
+                <button class="btn btn-xs btn-gh" onclick="toggleAllFamilyCheckboxes(false)">Deselect All</button>
+              </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <button class="btn btn-p" style="background:#10b981; color:#fff; font-weight:700; padding:8px 16px; border-radius:8px;" onclick="executeFamilyPayment('${month}')">
+                  ✓ Pay Selected Siblings
+                </button>
+                <button class="btn btn-gh" style="font-weight:600; padding:8px 14px; border-radius:8px;" onclick="printFamilyReceipt('${month}')">
+                  🖶 Family Receipt
+                </button>
+                <button class="btn btn-wa" style="font-weight:600; padding:8px 14px; border-radius:8px;" onclick="sendFamilyVoucherWhatsApp('${month}')">
+                  💬 WhatsApp Bill
+                </button>
+              </div>
+              <button class="btn btn-gh" onclick="closeModal()">Close</button>
+            </div>
+          </div>
+        `;
+    }
+
+    function toggleAllFamilyCheckboxes(val) {
+        document.querySelectorAll('.fam-stu-chk').forEach(chk => chk.checked = val);
+        updateFamilyPaymentCalculations();
+    }
+
+    function updateFamilyPaymentCalculations() {
+        let sum = 0;
+        document.querySelectorAll('.fam-stu-chk').forEach(chk => {
+            if (chk.checked) sum += num(chk.dataset.due || 0);
+        });
+        const el = document.getElementById('fam-selected-total');
+        if (el) el.textContent = 'PKR ' + num(sum).toLocaleString();
+    }
+
+    async function executeFamilyPayment(month) {
+        const checked = Array.from(document.querySelectorAll('.fam-stu-chk:checked'));
+        if (!checked.length) return showToast('Please select at least one sibling to mark paid', 'tw');
+
+        const sids = checked.map(c => c.dataset.sid);
+        if (!confirm(`Mark ${sids.length} siblings as PAID for ${month}?`)) return;
+
+        sids.forEach(sid => {
+            toggleMonthPayment(sid, month, true);
+        });
+
+        showToast(`Successfully recorded payment for ${sids.length} siblings!`, 'ts');
+        refreshFamilyFeeModalContent();
+    }
+
+    function printFamilyReceipt(month) {
+        const stus = window._currentFamStus;
+        if (!stus || !stus.length) return showToast('No family loaded to print', 'te');
+
+        const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const dParts = month.split('-');
+        const mIdx = parseInt(dParts[1], 10) - 1;
+        const monthName = mNames[mIdx] || month;
+
+        const schoolName = escHtml(DB.school?.name || 'Oxford Excellence Academy');
+        const fatherName = escHtml(stus[0]?.father || 'Parent');
+
+        let grandTotal = 0;
+        let rowsHtml = '';
+
+        stus.forEach(s => {
+            const cls = DB.classes.find(c => c.id === s.classId);
+            const bill = calcStudentFeeBill(s.id, month);
+            grandTotal += bill.totalDue;
+
+            rowsHtml += `
+            <tr style="background:#f8fafc; font-weight:700;">
+              <td colspan="2" style="border:1px solid #cbd5e1; padding:6px 10px; color:#0f172a;">
+                ${escHtml(s.name)} &bull; ${escHtml(cls?.name || 'Class')} (Roll: ${escHtml(s.roll || '-')})
+              </td>
+              <td style="border:1px solid #cbd5e1; padding:6px 10px; text-align:right; color:#0f172a;">
+                PKR ${num(bill.totalDue).toLocaleString()}
+              </td>
+            </tr>
+            `;
+            if (bill.tuition > 0) {
+                rowsHtml += `<tr><td style="padding:4px 12px; border:1px solid #e2e8f0; font-size:11px;" colspan="2">&bull; ${monthName} Tuition Fee</td><td style="padding:4px 10px; border:1px solid #e2e8f0; text-align:right; font-size:11px;">PKR ${num(bill.tuition).toLocaleString()}</td></tr>`;
+            }
+            if (bill.van > 0) {
+                rowsHtml += `<tr><td style="padding:4px 12px; border:1px solid #e2e8f0; font-size:11px;" colspan="2">&bull; Transport / Van Fee</td><td style="padding:4px 10px; border:1px solid #e2e8f0; text-align:right; font-size:11px;">PKR ${num(bill.van).toLocaleString()}</td></tr>`;
+            }
+            if (bill.applicableItems && bill.applicableItems.length > 0) {
+                bill.applicableItems.forEach(item => {
+                    rowsHtml += `<tr><td style="padding:4px 12px; border:1px solid #e2e8f0; font-size:11px;" colspan="2">&bull; ${escHtml(item.name)}</td><td style="padding:4px 10px; border:1px solid #e2e8f0; text-align:right; font-size:11px;">PKR ${num(item.amount).toLocaleString()}</td></tr>`;
+                });
+            }
+            if (bill.arrearsDetail && bill.arrearsDetail.total > 0) {
+                rowsHtml += `<tr><td style="padding:4px 12px; border:1px solid #e2e8f0; font-size:11px; color:#b91c1c;" colspan="2">&bull; Arrears & Prior Dues</td><td style="padding:4px 10px; border:1px solid #e2e8f0; text-align:right; font-size:11px; color:#b91c1c; font-weight:700;">PKR ${num(bill.arrearsDetail.total).toLocaleString()}</td></tr>`;
+            }
+        });
+
+        const receiptHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Family Fee Receipt - ${fatherName}</title>
+          <style>
+            body { font-family: -apple-system, system-ui, sans-serif; padding: 24px; color: #0f172a; }
+            .receipt { max-width: 500px; margin: 0 auto; border: 2px solid #000; border-radius: 12px; padding: 20px; }
+            .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 12px; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
+            .footer { display: flex; justify-content: space-between; margin-top: 30px; }
+            .sig-line { width: 40%; text-align: center; border-top: 1px solid #000; font-size: 10px; padding-top: 4px; }
+          </style>
+        </head>
+        <body>
+          <div class="receipt">
+            <div class="header">
+              <h2 style="margin:0; font-size:18px; text-transform:uppercase;">${schoolName}</h2>
+              <div style="font-size:12px; font-weight:700; margin-top:3px;">COMBINED FAMILY FEE RECEIPT - ${monthName} ${dParts[0]}</div>
+            </div>
+            <div style="margin-bottom:12px; font-size:12px;">
+              <div><b>Father:</b> ${fatherName}</div>
+              <div><b>Siblings:</b> ${stus.length} students</div>
+              <div><b>Date:</b> ${today()}</div>
+            </div>
+            <table>
+              <thead>
+                <tr style="background:#e2e8f0;">
+                  <th colspan="2" style="border:1px solid #cbd5e1; padding:6px; text-align:left;">Student / Particulars</th>
+                  <th style="border:1px solid #cbd5e1; padding:6px; text-align:right;">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rowsHtml}
+              </tbody>
+              <tfoot>
+                <tr style="background:#f0fdf4; font-size:13px; font-weight:900; color:#166534;">
+                  <th colspan="2" style="border:1px solid #222; padding:8px 10px; text-align:left;">COMBINED FAMILY TOTAL</th>
+                  <th style="border:1px solid #222; padding:8px 10px; text-align:right;">PKR ${num(grandTotal).toLocaleString()}</th>
+                </tr>
+              </tfoot>
+            </table>
+            <div class="footer">
+              <div class="sig-line">Cashier Signature</div>
+              <div class="sig-line">Principal Signature</div>
+            </div>
+          </div>
+          <script>window.onload=function(){setTimeout(function(){window.print();},400);};</script>
+        </body>
+        </html>
+        `;
+
+        let printWindow = window.open('', '', 'width=600,height=800');
+        if (printWindow) {
+            printWindow.document.write(receiptHtml);
+            printWindow.document.close();
+        } else {
+            showToast('Popup blocked', 'te');
+        }
+    }
+
+    function sendFamilyVoucherWhatsApp(month) {
+        const stus = window._currentFamStus;
+        if (!stus || !stus.length) return showToast('No family loaded', 'te');
+
+        const phone = normalizePhone(stus[0]?.whatsapp || stus[0]?.phone || '');
+        if (!phone) return showToast('No WhatsApp number recorded for this family', 'tw');
+
+        const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const dParts = month.split('-');
+        const mIdx = parseInt(dParts[1], 10) - 1;
+        const monthName = mNames[mIdx] || month;
+
+        let msg = `👨‍👩‍👧‍👦 *COMBINED FAMILY FEE CHALLAN - ${monthName.toUpperCase()} ${dParts[0]}*\n`;
+        msg += `*${DB.school?.name || 'Oxford Excellence Academy'}*\n\n`;
+        msg += `*Father:* ${stus[0].father || 'Parent'}\n`;
+        msg += `*Total Students:* ${stus.length}\n`;
+        msg += `------------------------------------\n`;
+
+        let grandTotal = 0;
+        stus.forEach((s, i) => {
+            const cls = DB.classes.find(c => c.id === s.classId);
+            const bill = calcStudentFeeBill(s.id, month);
+            grandTotal += bill.totalDue;
+            msg += `*${i + 1}. ${s.name}* (${cls?.name || 'Class'}, Roll: ${s.roll || '-'})\n`;
+            msg += `   • Current Fee: PKR ${num(bill.tuition + bill.van + (bill.itemsTotal || 0)).toLocaleString()}\n`;
+            if (bill.arrearsDetail && bill.arrearsDetail.total > 0) {
+                msg += `   • Arrears: PKR ${num(bill.arrearsDetail.total).toLocaleString()}\n`;
+            }
+            msg += `   • *Subtotal:* PKR ${num(bill.totalDue).toLocaleString()}\n\n`;
+        });
+
+        msg += `------------------------------------\n`;
+        msg += `*COMBINED FAMILY TOTAL: PKR ${num(grandTotal).toLocaleString()}*\n`;
+        msg += `------------------------------------\n\n`;
+        msg += `Please submit the due amount before the 10th. Thank you!\n`;
+        msg += `${DB.school?.name || 'Oxford Excellence Academy'}`;
+
+        sendWhatsAppAPI(phone, msg);
+        showToast('Family bill sent to WhatsApp: ' + phone, 'ts');
     }
 
     function feeReminderText(sid, fid, dueDate, note = '') {
