@@ -8252,32 +8252,41 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
         const prevM = '2026-08';
 
         openModal(`
-          <div style="margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-            <div>
-              <h3 style="margin:0 0 4px 0; color:#0f172a; display:flex; align-items:center; gap:8px;">
-                <span>👨‍👩‍👧‍👦</span> Family Fee Checkout
-              </h3>
-              <div style="font-size:0.82rem; color:#64748b;">
-                Pay and issue combined vouchers for siblings in one place
+          <div style="font-family:'Inter', -apple-system, sans-serif;">
+            <!-- Modal Header -->
+            <div style="margin-bottom:18px; padding-bottom:14px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+              <div>
+                <div style="display:inline-flex; align-items:center; gap:6px; font-size:0.7rem; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:4px;">
+                  <span>ACCOUNTS &bull; SIBLING BILLING</span>
+                </div>
+                <h3 style="margin:0; font-size:1.25rem; font-weight:800; color:#0f172a; letter-spacing:-0.02em;">
+                  Family Fee Checkout
+                </h3>
+                <div style="font-size:0.8rem; color:#64748b; margin-top:2px;">
+                  Consolidated tuition and arrears ledger for enrolled siblings
+                </div>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:0.75rem; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:0.03em;">Billing Period</span>
+                <select class="fi" id="fam-fee-month" onchange="refreshFamilyFeeModalContent()" style="padding:7px 12px; font-size:0.82rem; font-weight:600; border:1px solid #cbd5e1; border-radius:8px; background:#ffffff; color:#0f172a; cursor:pointer;">
+                  <option value="${nextM}" ${activeMonth === nextM ? 'selected' : ''}>Upcoming: October 2026</option>
+                  <option value="${curM}" ${activeMonth === curM ? 'selected' : ''}>Current: September 2026</option>
+                  <option value="${prevM}" ${activeMonth === prevM ? 'selected' : ''}>Previous: August 2026</option>
+                </select>
               </div>
             </div>
-            <div style="display:flex; align-items:center; gap:8px;">
-              <label style="font-size:0.8rem; font-weight:700; color:#334155;">Billing Month:</label>
-              <select class="fi" id="fam-fee-month" onchange="refreshFamilyFeeModalContent()" style="padding:5px 8px; font-size:0.85rem; font-weight:600;">
-                <option value="${nextM}" ${activeMonth === nextM ? 'selected' : ''}>Upcoming: October 2026</option>
-                <option value="${curM}" ${activeMonth === curM ? 'selected' : ''}>Current: September 2026</option>
-                <option value="${prevM}" ${activeMonth === prevM ? 'selected' : ''}>Previous: August 2026</option>
-              </select>
+
+            <!-- Executive Search Bar -->
+            <div style="position:relative; margin-bottom:16px;">
+              <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:10px; padding:10px 14px; display:flex; gap:10px; align-items:center; box-shadow:0 1px 2px rgba(0,0,0,0.03); transition:border-color 0.2s;">
+                <span style="font-size:0.82rem; color:#94a3b8; font-weight:700;">SEARCH</span>
+                <input type="text" class="fi" id="fam-search-input" placeholder="Type father's name, student name, or phone number..." style="flex:1; border:none; background:transparent; outline:none; font-size:0.88rem; color:#0f172a;" oninput="onFamilyFeeSearchInput(this.value)">
+              </div>
+              <div id="fam-search-results" style="display:none; max-height:180px; overflow-y:auto; position:absolute; top:calc(100% + 4px); left:0; right:0; background:#ffffff; border:1px solid #cbd5e1; border-radius:10px; box-shadow:0 10px 25px -5px rgba(0,0,0,0.1); z-index:50;"></div>
             </div>
-          </div>
 
-          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:10px 12px; margin-bottom:14px; display:flex; gap:10px; align-items:center;">
-            <span class="material-symbols-outlined" style="color:#64748b; font-size:20px;">search</span>
-            <input type="text" class="fi" id="fam-search-input" placeholder="Search by Father Name, Student Name, or Phone..." style="flex:1; border:none; background:transparent; outline:none; font-size:0.88rem;" oninput="onFamilyFeeSearchInput(this.value)">
+            <div id="fam-modal-body"></div>
           </div>
-          <div id="fam-search-results" style="display:none; max-height:160px; overflow-y:auto; margin-top:-8px; margin-bottom:14px; background:#fff; border:1px solid #cbd5e1; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.08); z-index:10; position:relative;"></div>
-
-          <div id="fam-modal-body"></div>
         `);
 
         window._currentFamStus = initialStudents;
@@ -8317,18 +8326,18 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
         }
 
         if (matches.length === 0) {
-            resultsEl.innerHTML = `<div style="padding:10px; font-size:0.82rem; color:#94a3b8; text-align:center;">No matching family found</div>`;
+            resultsEl.innerHTML = `<div style="padding:14px; font-size:0.82rem; color:#94a3b8; text-align:center;">No matching family record found</div>`;
             resultsEl.style.display = 'block';
             return;
         }
 
         resultsEl.innerHTML = matches.slice(0, 8).map((fam, idx) => `
-          <div style="padding:8px 12px; border-bottom:1px solid #f1f5f9; cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#fff'" onclick="selectFamilyForFee(${idx})">
+          <div style="padding:10px 14px; border-bottom:1px solid #f1f5f9; cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='#fff'" onclick="selectFamilyForFee(${idx})">
             <div>
-              <div style="font-weight:700; font-size:0.86rem; color:#0f172a;">${escHtml(fam.father)} <span style="font-size:0.75rem; color:#64748b; font-weight:normal;">(${fam.students.length} Student${fam.students.length > 1 ? 's' : ''})</span></div>
-              <div style="font-size:0.75rem; color:#64748b;">${fam.students.map(s => escHtml(s.name)).join(', ')}</div>
+              <div style="font-weight:700; font-size:0.88rem; color:#0f172a;">${escHtml(fam.father)} <span style="font-size:0.75rem; color:#64748b; font-weight:normal;">(${fam.students.length} Student${fam.students.length > 1 ? 's' : ''})</span></div>
+              <div style="font-size:0.75rem; color:#64748b; margin-top:2px;">${fam.students.map(s => escHtml(s.name)).join(', ')}</div>
             </div>
-            <span style="font-size:0.72rem; background:#eff6ff; color:#1d4ed8; font-weight:700; padding:2px 8px; border-radius:6px;">Select</span>
+            <span style="font-size:0.72rem; background:#f1f5f9; color:#0f172a; font-weight:700; padding:4px 10px; border-radius:6px; border:1px solid #e2e8f0;">Select</span>
           </div>
         `).join('');
         resultsEl.style.display = 'block';
@@ -8358,7 +8367,7 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
         const bodyEl = document.getElementById('fam-modal-body');
         if (!bodyEl) return;
         if (!students || students.length === 0) {
-            bodyEl.innerHTML = '<div style="padding:20px; text-align:center; color:#64748b;">No students in this family.</div>';
+            bodyEl.innerHTML = '<div style="padding:24px; text-align:center; color:#64748b; font-size:0.85rem;">No registered students found for this profile.</div>';
             return;
         }
 
@@ -8418,79 +8427,89 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
         const contactPhone = students[0]?.whatsapp || students[0]?.phone || '';
 
         bodyEl.innerHTML = `
-          <div style="background:#f1f5f9; border-radius:10px; padding:10px 14px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <!-- Family Executive Summary Card -->
+          <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:16px 18px; margin-bottom:16px; box-shadow:0 1px 3px rgba(15,23,42,0.03); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
             <div>
-              <div style="font-weight:800; font-size:0.92rem; color:#0f172a;">${escHtml(fatherName)}</div>
-              <div style="font-size:0.76rem; color:#64748b;">${students.length} Child${students.length > 1 ? 'ren' : ''} enrolled &bull; Phone: ${contactPhone ? escHtml(contactPhone) : 'Not recorded'}</div>
+              <div style="font-size:0.68rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:3px;">HEAD OF FAMILY</div>
+              <div style="font-size:1.1rem; font-weight:800; color:#0f172a; letter-spacing:-0.01em;">${escHtml(fatherName)}</div>
+              <div style="font-size:0.75rem; color:#64748b; margin-top:2px;">
+                ${students.length} Sibling${students.length > 1 ? 's' : ''} enrolled &bull; Contact: <b>${contactPhone ? escHtml(contactPhone) : 'None'}</b>
+              </div>
             </div>
             <div style="text-align:right;">
-              <span style="font-size:0.7rem; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.04em;">Family Total Due:</span>
-              <div style="font-size:1.35rem; font-weight:800; color:${totalFamilyDue > 0 ? '#ef4444' : '#10b981'}; line-height:1.1;">
-                PKR ${num(totalFamilyDue).toLocaleString()}
+              <div style="font-size:0.68rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:2px;">TOTAL PAYABLE</div>
+              <div style="font-size:1.45rem; font-weight:800; color:${totalFamilyDue > 0 ? '#0f172a' : '#15803d'}; letter-spacing:-0.02em;">
+                <span style="font-size:0.75rem; font-weight:600; color:#64748b;">PKR</span> ${num(totalFamilyDue).toLocaleString()}
               </div>
             </div>
           </div>
 
-          <div style="max-height:360px; overflow-y:auto; padding-right:4px; margin-bottom:14px;">
+          <!-- Students Ledger List -->
+          <div style="max-height:340px; overflow-y:auto; padding-right:2px; margin-bottom:18px;">
             ${studentsData.map(({ s, cls, tuition, van, itemsTotal, currentCharges, priorUnpaid, initialArrears, isPaid, stuTotalDue }) => `
-              <div style="background:#ffffff; border:1px solid ${isPaid ? '#e2e8f0' : '#fecaca'}; border-radius:10px; padding:12px 14px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-                <div style="flex:1; min-width:180px;">
-                  <div style="display:flex; align-items:center; gap:8px;">
-                    <input type="checkbox" class="fam-stu-chk" data-sid="${s.id}" data-due="${stuTotalDue}" ${isPaid ? '' : 'checked'} style="width:16px; height:16px; cursor:pointer;" onchange="updateFamilyPaymentCalculations()">
-                    <span style="font-weight:700; font-size:0.9rem; color:#0f172a;">${escHtml(s.name)}</span>
-                    <span style="font-size:0.74rem; color:#64748b;">(${escHtml(cls?.name || 'Class')} &bull; Roll ${escHtml(s.roll || '-')})</span>
-                    ${isPaid 
-                      ? `<span style="background:#dcfce7; color:#15803d; font-size:0.68rem; font-weight:700; padding:1px 6px; border-radius:4px;">✓ PAID</span>` 
-                      : `<span style="background:#fee2e2; color:#b91c1c; font-size:0.68rem; font-weight:700; padding:1px 6px; border-radius:4px;">● UNPAID</span>`}
-                  </div>
-                  <div style="font-size:0.75rem; color:#64748b; margin-top:4px; line-height:1.4;">
-                    <span>${monthName} Fee: <b>PKR ${num(currentCharges).toLocaleString()}</b></span>
-                    ${(priorUnpaid + initialArrears) > 0 ? ` &bull; <span style="color:#b91c1c; font-weight:600;">Arrears: PKR ${num(priorUnpaid + initialArrears).toLocaleString()}</span>` : ''}
+              <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:14px 16px; margin-bottom:10px; box-shadow:0 1px 2px rgba(0,0,0,0.02); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; transition:border-color 0.15s;">
+                <div style="display:flex; align-items:center; gap:12px; flex:1; min-width:200px;">
+                  <input type="checkbox" class="fam-stu-chk" data-sid="${s.id}" data-due="${stuTotalDue}" ${isPaid ? '' : 'checked'} style="width:17px; height:17px; accent-color:#0f172a; cursor:pointer;" onchange="updateFamilyPaymentCalculations()">
+                  <div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                      <span style="font-weight:700; font-size:0.92rem; color:#0f172a;">${escHtml(s.name)}</span>
+                      <span style="font-size:0.75rem; color:#64748b; font-weight:500;">${escHtml(cls?.name || 'Class')} &bull; Roll ${escHtml(s.roll || '-')}</span>
+                      ${isPaid 
+                        ? `<span style="border:1px solid #bbf7d0; background:#f0fdf4; color:#15803d; font-size:0.65rem; font-weight:700; padding:2px 7px; border-radius:4px; letter-spacing:0.04em;">PAID</span>` 
+                        : `<span style="border:1px solid #fecaca; background:#fef2f2; color:#b91c1c; font-size:0.65rem; font-weight:700; padding:2px 7px; border-radius:4px; letter-spacing:0.04em;">UNPAID</span>`}
+                    </div>
+                    <div style="font-size:0.75rem; color:#64748b; margin-top:4px;">
+                      <span>Monthly Fee: <b style="color:#334155;">PKR ${num(currentCharges).toLocaleString()}</b></span>
+                      ${(priorUnpaid + initialArrears) > 0 ? ` &bull; <span style="color:#ef4444; font-weight:600;">Arrears: PKR ${num(priorUnpaid + initialArrears).toLocaleString()}</span>` : ''}
+                    </div>
                   </div>
                 </div>
 
-                <div style="display:flex; align-items:center; gap:10px;">
+                <div style="display:flex; align-items:center; gap:14px;">
                   <div style="text-align:right;">
-                    <div style="font-size:0.7rem; color:#64748b;">Total Due</div>
-                    <div style="font-weight:800; font-size:0.95rem; color:${stuTotalDue > 0 ? '#b91c1c' : '#15803d'};">
+                    <div style="font-size:0.65rem; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:0.04em;">Due Amount</div>
+                    <div style="font-weight:800; font-size:0.98rem; color:${stuTotalDue > 0 ? '#0f172a' : '#15803d'};">
                       PKR ${num(stuTotalDue).toLocaleString()}
                     </div>
                   </div>
                   ${isPaid ? `
-                    <button class="btn btn-xs" style="background:#fff; color:#dc2626; border:1px solid #fecaca; font-weight:600; padding:4px 10px; border-radius:6px; cursor:pointer;" onclick="toggleMonthPayment('${s.id}', '${month}', false); refreshFamilyFeeModalContent();">Unmark</button>
+                    <button class="btn btn-xs" style="background:#ffffff; color:#dc2626; border:1px solid #e2e8f0; font-weight:600; padding:6px 12px; border-radius:6px; cursor:pointer;" onclick="toggleMonthPayment('${s.id}', '${month}', false); refreshFamilyFeeModalContent();">Unmark</button>
                   ` : `
-                    <button class="btn btn-xs" style="background:#10b981; color:#fff; border:none; font-weight:700; padding:5px 12px; border-radius:6px; cursor:pointer;" onclick="toggleMonthPayment('${s.id}', '${month}', true); refreshFamilyFeeModalContent();">✓ Pay</button>
+                    <button class="btn btn-xs" style="background:#0f172a; color:#ffffff; border:none; font-weight:600; padding:6px 14px; border-radius:6px; cursor:pointer;" onclick="toggleMonthPayment('${s.id}', '${month}', true); refreshFamilyFeeModalContent();">Receive</button>
                   `}
                 </div>
               </div>
             `).join('')}
           </div>
 
-          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:12px 14px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
-              <div style="display:flex; align-items:center; gap:8px;">
-                <span style="font-size:0.82rem; font-weight:700; color:#334155;">Selected Payable:</span>
-                <span id="fam-selected-total" style="font-size:1.15rem; font-weight:800; color:#0f172a;">PKR ${num(totalFamilyDue).toLocaleString()}</span>
+          <!-- Bottom Action Deck -->
+          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:16px 18px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px; padding-bottom:12px; border-bottom:1px solid #e2e8f0;">
+              <div>
+                <span style="font-size:0.72rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.04em;">Selected For Settlement:</span>
+                <div id="fam-selected-total" style="font-size:1.2rem; font-weight:800; color:#0f172a; margin-top:2px;">
+                  <span style="font-size:0.75rem; font-weight:600; color:#64748b;">PKR</span> ${num(totalFamilyDue).toLocaleString()}
+                </div>
               </div>
               <div style="display:flex; align-items:center; gap:6px;">
-                <button class="btn btn-xs btn-gh" onclick="toggleAllFamilyCheckboxes(true)">Select All</button>
-                <button class="btn btn-xs btn-gh" onclick="toggleAllFamilyCheckboxes(false)">Deselect All</button>
+                <button class="btn btn-xs btn-gh" style="font-size:0.72rem; padding:4px 8px; border-radius:6px;" onclick="toggleAllFamilyCheckboxes(true)">Select All</button>
+                <button class="btn btn-xs btn-gh" style="font-size:0.72rem; padding:4px 8px; border-radius:6px;" onclick="toggleAllFamilyCheckboxes(false)">Deselect All</button>
               </div>
             </div>
 
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
               <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                <button class="btn btn-p" style="background:#10b981; color:#fff; font-weight:700; padding:8px 16px; border-radius:8px;" onclick="executeFamilyPayment('${month}')">
-                  ✓ Pay Selected Siblings
+                <button class="btn btn-p" style="background:#0f172a; color:#ffffff; font-weight:600; font-size:0.82rem; padding:8px 18px; border-radius:8px;" onclick="executeFamilyPayment('${month}')">
+                  Confirm Payment
                 </button>
-                <button class="btn btn-gh" style="font-weight:600; padding:8px 14px; border-radius:8px;" onclick="printFamilyReceipt('${month}')">
-                  🖶 Family Receipt
+                <button class="btn btn-gh" style="background:#ffffff; border:1px solid #cbd5e1; font-weight:600; font-size:0.82rem; padding:8px 14px; border-radius:8px;" onclick="printFamilyReceipt('${month}')">
+                  Print Family Receipt
                 </button>
-                <button class="btn btn-wa" style="font-weight:600; padding:8px 14px; border-radius:8px;" onclick="sendFamilyVoucherWhatsApp('${month}')">
-                  💬 WhatsApp Bill
+                <button class="btn btn-wa" style="font-weight:600; font-size:0.82rem; padding:8px 14px; border-radius:8px;" onclick="sendFamilyVoucherWhatsApp('${month}')">
+                  Send WhatsApp Bill
                 </button>
               </div>
-              <button class="btn btn-gh" onclick="closeModal()">Close</button>
+              <button class="btn btn-gh" style="border:1px solid #cbd5e1; background:#ffffff; font-weight:500; font-size:0.82rem; padding:8px 14px; border-radius:8px;" onclick="closeModal()">Close</button>
             </div>
           </div>
         `;
