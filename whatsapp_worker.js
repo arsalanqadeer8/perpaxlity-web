@@ -388,15 +388,21 @@ async function processQueue() {
                     }
                 }
 
-                // Check if message is a JSON Fee Voucher Image payload
+                // Check if message is a JSON payload (Fee Voucher Image or Notice Photo)
                 let isVoucherPayload = false;
                 let voucherData = null;
+                let isNoticePhotoPayload = false;
+                let noticePhotoData = null;
+
                 if (typeof msg.message_body === 'string' && msg.message_body.trim().startsWith('{')) {
                     try {
                         const parsed = JSON.parse(msg.message_body);
                         if (parsed && parsed.type === 'fee_voucher_image') {
                             isVoucherPayload = true;
                             voucherData = parsed;
+                        } else if (parsed && parsed.type === 'notice_photo') {
+                            isNoticePhotoPayload = true;
+                            noticePhotoData = parsed;
                         }
                     } catch (e) {
                         // Not JSON, normal text message
@@ -409,6 +415,23 @@ async function processQueue() {
                     const media = new MessageMedia('image/png', b64, `Fee_Challan_${voucherData.roll || 'voucher'}.png`);
                     await client.sendMessage(chatId, media, { caption: voucherData.caption || '' });
                     console.log(`[✅ Sent Photo Voucher] to ${cleanPhone} for ${voucherData.student_name}`);
+                } else if (isNoticePhotoPayload && noticePhotoData) {
+                    console.log(`[Notice Photo] Preparing photo broadcast for ${cleanPhone}...`);
+                    let media = null;
+                    if (noticePhotoData.photo && noticePhotoData.photo.startsWith('data:')) {
+                        const mime = noticePhotoData.photo.split(';')[0].slice(5);
+                        const b64 = noticePhotoData.photo.split(',')[1];
+                        media = new MessageMedia(mime, b64, 'notice.png');
+                    } else if (noticePhotoData.photo) {
+                        media = await MessageMedia.fromUrl(noticePhotoData.photo, { unsafeMime: true });
+                    }
+                    if (media) {
+                        await client.sendMessage(chatId, media, { caption: noticePhotoData.caption || '' });
+                        console.log(`[✅ Sent Notice Photo] to ${cleanPhone}`);
+                    } else {
+                        await client.sendMessage(chatId, noticePhotoData.caption || '');
+                        console.log(`[✅ Sent Notice Text Fallback] to ${cleanPhone}`);
+                    }
                 } else {
                     // Normal text message
                     await client.sendMessage(chatId, msg.message_body);
