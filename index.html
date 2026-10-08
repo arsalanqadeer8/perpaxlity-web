@@ -7846,20 +7846,20 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
     </div>
   </div>
   <div class="tw" style="border:none; overflow-x:auto;">
-    <table style="width:100%; border-collapse:collapse; table-layout:fixed;">
+    <table style="width:100%; border-collapse:collapse; table-layout:fixed; min-width:980px;">
     <colgroup>
-      <col style="width: 28%;">
-      <col style="width: 14%;">
-      <col style="width: 20%;">
+      <col style="width: 25%;">
+      <col style="width: 12%;">
+      <col style="width: 18%;">
       <col style="width: 16%;">
-      <col style="width: 22%;">
+      <col style="width: 29%;">
     </colgroup>
     <thead><tr>
       <th style="padding:12px 16px; text-align:left; font-size:0.70rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.06em; background:#f8fafc; border-bottom:1px solid #e2e8f0;">Student</th>
       <th style="padding:12px 14px; text-align:left; font-size:0.70rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.06em; background:#f8fafc; border-bottom:1px solid #e2e8f0;">Class</th>
       <th style="padding:12px 14px; text-align:left; font-size:0.70rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.06em; background:#f8fafc; border-bottom:1px solid #e2e8f0;">Fee Status</th>
       <th style="padding:12px 14px; text-align:left; font-size:0.70rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.06em; background:#f8fafc; border-bottom:1px solid #e2e8f0;">Payable Due</th>
-      <th style="padding:12px 18px; text-align:right; font-size:0.70rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.06em; background:#f8fafc; border-bottom:1px solid #e2e8f0;">Actions</th>
+      <th style="padding:12px 20px; text-align:right; font-size:0.70rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.06em; background:#f8fafc; border-bottom:1px solid #e2e8f0;">Actions</th>
     </tr></thead>
     <tbody id="fees-tbody">${all.map(s => {
       const sum = studentFeeSummary(s.id);
@@ -7872,6 +7872,7 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
       const sibs = getFamilySiblings(s);
       const hasSiblings = sibs && sibs.length > 1;
       const initials = (s.name || '').split(' ').map(n => n[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'ST';
+      const stuWA = getStudentWA(s);
 
       return `<tr class="fee-table-row" data-aug="${augPaid ? 'paid' : 'unpaid'}" data-sep="${sepPaid ? 'paid' : 'unpaid'}" data-arrears="${sum.pendingArrears > 0 ? 'yes' : 'no'}">
         <td style="padding:12px 16px; vertical-align:middle;">
@@ -7904,7 +7905,7 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
             ? `<div style="font-size:0.70rem; color:#dc2626; margin-top:2px; font-weight:500;">Arrears: PKR ${num(sum.pendingArrears).toLocaleString()}</div>` 
             : `<div style="font-size:0.68rem; color:#94a3b8; margin-top:2px;">No past arrears</div>`}
         </td>
-        <td style="padding:12px 18px 12px 10px; vertical-align:middle; text-align:right; white-space:nowrap;">
+        <td style="padding:12px 20px 12px 10px; vertical-align:middle; text-align:right; white-space:nowrap;">
           <div style="display:inline-flex; gap:6px; justify-content:flex-end; align-items:center;">
             ${hasSiblings ? `
               <button class="fee-row-btn fee-row-btn-sib" title="Family Checkout (${sibs.length} siblings)" onclick="openFamilyFeeModal('${s.id}')">
@@ -7914,9 +7915,11 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
             <div class="fee-act-group">
               <button class="fee-grp-item fee-grp-primary" onclick="openStudentFeeModal('${s.id}')">Manage</button>
               <button class="fee-grp-item" onclick="openVoucherModal('${s.id}')">Voucher</button>
-              ${getStudentWA(s) && sum.dueAmount > 0 ? `
+              ${stuWA && sum.dueAmount > 0 ? `
                 <button class="fee-grp-item fee-grp-wa" onclick="openFeeReminderModal('${s.id}')">WhatsApp</button>
-              ` : ''}
+              ` : `
+                <button class="fee-grp-item" style="color:#94a3b8; cursor:not-allowed;" title="${!stuWA ? 'No WhatsApp/Phone registered' : 'No balance due'}" onclick="showToast('${!stuWA ? 'Please update phone number in student profile first' : 'Student has zero pending fee'}', 'tw')">WhatsApp</button>
+              `}
             </div>
           </div>
         </td>
