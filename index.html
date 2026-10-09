@@ -7558,6 +7558,13 @@ If the arrears sum is lower than you expect, please check your CSV file to ensur
         return `${yy}-${String(mm).padStart(2, '0')}`;
     }
 
+    function getPrevMonth(m) {
+        let [yy, mm] = m.split('-').map(Number);
+        mm--;
+        if (mm < 1) { mm = 12; yy--; }
+        return `${yy}-${String(mm).padStart(2, '0')}`;
+    }
+
     function getTrueInitialArrears(sid) {
         const s = allStus().find(x => x.id === sid);
         if (!s) return 0;
@@ -12776,7 +12783,7 @@ function generateVoucherHTML(sid, targetMonth = null) {
     const s = allStus().find(x => x.id === sid);
     if (!s) return '';
     const cls = DB.classes.find(c => c.id === s.classId);
-    const tm = targetMonth || getNextMonth(monthKey()); // Defaults to upcoming month e.g. '2026-10'
+    const tm = targetMonth || monthKey(); // Defaults to current active month e.g. '2026-10'
     
     const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     const shortMNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -12891,7 +12898,7 @@ function generateVoucherHTML(sid, targetMonth = null) {
 }
 
 function printPreFeeVoucher(sid, targetMonth = null) {
-    const tm = targetMonth || getNextMonth(monthKey());
+    const tm = targetMonth || monthKey();
     const html = '<html><head><title>Fee Voucher - ' + tm + '</title><style>' +
       'body { font-family: sans-serif; color:#000; margin:0; padding:20px; } ' +
       '.page-layout { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 20px; height: 260mm; box-sizing:border-box; margin-bottom:20mm; } ' +
@@ -12912,7 +12919,7 @@ function generateVoucherMsg(sid, targetMonth = null) {
     const s = allStus().find(x => x.id === sid);
     if (!s) return '';
     const cls = DB.classes.find(c => c.id === s.classId);
-    const tm = targetMonth || getNextMonth(monthKey());
+    const tm = targetMonth || monthKey();
     
     const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     const dParts = tm.split('-');
@@ -12996,7 +13003,7 @@ function generateVoucherPayload(sid, targetMonth = null) {
     const s = allStus().find(x => x.id === sid);
     if (!s) return null;
     const cls = DB.classes.find(c => c.id === s.classId);
-    const tm = targetMonth || getNextMonth(monthKey());
+    const tm = targetMonth || monthKey();
     
     const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     const shortMNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -13068,8 +13075,18 @@ function generateVoucherPayload(sid, targetMonth = null) {
     };
 }
 
+function getVoucherMonthLabel(mKey) {
+    const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const [yy, mm] = mKey.split('-');
+    const mIdx = parseInt(mm, 10) - 1;
+    const name = mNames[mIdx] || mKey;
+    const items = (DB.fees.items || []).filter(f => f.id !== 'f1' && num(f.amount) > 0 && (!f.applyMonth || f.applyMonth === 'All' || f.applyMonth.toLowerCase() === name.toLowerCase()));
+    const itemNames = items.map(f => f.name).join(', ');
+    return `${name} ${yy}${itemNames ? ` (Includes ${itemNames})` : ''}`;
+}
+
 function sendVoucherWhatsApp(sid, targetMonth = null) {
-    const tm = targetMonth || getNextMonth(monthKey());
+    const tm = targetMonth || monthKey();
     const payload = generateVoucherPayload(sid, tm);
     const s = allStus().find(x => x.id === sid);
     if (!getStudentWA(s)) return showToast('No WhatsApp number');
@@ -13082,7 +13099,7 @@ function sendVoucherWhatsApp(sid, targetMonth = null) {
 function updateSingleVoucherPreview(sid, targetMonth) {
     const s = allStus().find(x => x.id === sid);
     if (!s) return;
-    const tm = targetMonth || getNextMonth(monthKey());
+    const tm = targetMonth || monthKey();
     const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     const dParts = tm.split('-');
     const mIdx = parseInt(dParts[1], 10) - 1;
@@ -13099,7 +13116,7 @@ function updateSingleVoucherPreview(sid, targetMonth) {
         if (f.applyMonth && f.applyMonth !== 'All' && f.applyMonth.toLowerCase() !== targetMonthName.toLowerCase()) return;
         const amt = num(f.amount);
         itemsTotal += amt;
-        itemBadges.push(`${f.name} (PKR ${fmtMoney(amt)})`);
+        itemBadges.push(`${f.name} (${fmtMoney(amt)})`);
     });
     
     let priorUnpaidSum = 0;
@@ -13131,11 +13148,11 @@ function updateSingleVoucherPreview(sid, targetMonth) {
       <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:12px 14px; margin-top:10px;">
         <div style="font-weight:700; font-size:0.85rem; color:#0f172a; margin-bottom:8px; display:flex; justify-content:space-between;">
           <span>${targetMonthName} ${dParts[0]} Charges:</span>
-          <span>PKR ${fmtMoney(currentMonthCharges)}</span>
+          <span>${fmtMoney(currentMonthCharges)}</span>
         </div>
         <div style="font-size:0.78rem; color:#64748b; line-height:1.5;">
-          <div>&bull; Monthly Tuition: <b>PKR ${fmtMoney(tuition)}</b></div>
-          ${van > 0 ? `<div>&bull; Transport / Van: <b>PKR ${fmtMoney(van)}</b></div>` : ''}
+          <div>&bull; Monthly Tuition: <b>${fmtMoney(tuition)}</b></div>
+          ${van > 0 ? `<div>&bull; Transport / Van: <b>${fmtMoney(van)}</b></div>` : ''}
           ${itemBadges.map(b => `<div style="color:#b45309; font-weight:600;">&bull; ${escHtml(b)}</div>`).join('')}
         </div>
         
@@ -13143,14 +13160,14 @@ function updateSingleVoucherPreview(sid, targetMonth) {
         
         <div style="font-size:0.78rem; color:#64748b; display:flex; justify-content:space-between;">
           <span>Prior Arrears & Unpaid Months:</span>
-          <b>PKR ${fmtMoney(priorUnpaidSum + initialArrears)}</b>
+          <b>${fmtMoney(priorUnpaidSum + initialArrears)}</b>
         </div>
         
         <div style="border-top:1px solid #e2e8f0; margin:8px 0;"></div>
         
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <span style="font-weight:800; font-size:0.92rem; color:#0f172a;">Challan Total Payable:</span>
-          <span style="font-weight:900; font-size:1.15rem; color:#dc2626;">PKR ${fmtMoney(totalPayable)}</span>
+          <span style="font-weight:900; font-size:1.15rem; color:#dc2626;">${fmtMoney(totalPayable)}</span>
         </div>
       </div>
     `;
@@ -13159,25 +13176,27 @@ function updateSingleVoucherPreview(sid, targetMonth) {
 function openVoucherModal(sid) {
     const s = allStus().find(x => x.id === sid);
     if (!s) return;
-    const nextM = getNextMonth(monthKey()); // e.g. '2026-10'
-    const curM = monthKey(); // e.g. '2026-09'
-    const thirdM = getNextMonth(nextM); // e.g. '2026-11'
+    const curM = monthKey(); // Current active month, e.g. '2026-10'
+    const nextM = getNextMonth(curM); // Upcoming month, e.g. '2026-11'
+    const prevM = getPrevMonth(curM); // Previous month, e.g. '2026-09'
+    const thirdM = getNextMonth(nextM); // Advance month, e.g. '2026-12'
     
     openModal(`
       <div style="margin-bottom:12px;">
-        <h3 style="margin:0 0 4px 0;">📄 Issue Fee Challan</h3>
-        <div style="font-size:0.85rem; color:#64748b;">
+        <h3 style="margin:0 0 4px 0; font-size:1.1rem; font-weight:800; color:#0f172a;">Issue Fee Challan</h3>
+        <div style="font-size:0.82rem; color:#64748b;">
           Issue fee voucher for <b>${escHtml(s.name)}</b> (Roll: ${escHtml(s.roll || '-')})
         </div>
       </div>
 
       <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:14px; margin-bottom:14px;">
         <div class="fg" style="margin-bottom:10px;">
-          <label class="fl" style="font-weight:700; color:#0f172a;">Select Challan Billing Month</label>
-          <select class="fi" id="single-voucher-month" onchange="updateSingleVoucherPreview('${sid}', this.value)" style="font-weight:600; padding:8px 10px;">
-            <option value="${nextM}" selected>Upcoming Month: October 2026 (Includes Exam Fee)</option>
-            <option value="${curM}">Current Month: September 2026</option>
-            <option value="${thirdM}">Advance Month: November 2026</option>
+          <label class="fl" style="font-weight:700; color:#0f172a; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">Select Challan Billing Month</label>
+          <select class="fi" id="single-voucher-month" onchange="updateSingleVoucherPreview('${sid}', this.value)" style="font-weight:600; padding:8px 10px; font-size:0.85rem; border-radius:8px;">
+            <option value="${curM}" selected>Current Month: ${getVoucherMonthLabel(curM)}</option>
+            <option value="${nextM}">Upcoming Month: ${getVoucherMonthLabel(nextM)}</option>
+            <option value="${prevM}">Previous Month: ${getVoucherMonthLabel(prevM)}</option>
+            <option value="${thirdM}">Advance Month: ${getVoucherMonthLabel(thirdM)}</option>
           </select>
         </div>
 
@@ -13186,72 +13205,74 @@ function openVoucherModal(sid) {
 
       <div class="m-btns" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
         <div style="display:flex; gap:8px;">
-          <button class="btn btn-p" style="background:#0f172a; color:#fff;" onclick="printPreFeeVoucher('${sid}', document.getElementById('single-voucher-month').value)">
-            🖶 Print Fee Voucher
+          <button type="button" class="btn btn-p" style="outline:none; background:#0f172a; color:#fff; font-weight:600; font-size:0.8rem; padding:8px 14px; border-radius:8px; display:inline-flex; align-items:center; gap:6px; cursor:pointer;" onclick="printPreFeeVoucher('${sid}', document.getElementById('single-voucher-month').value)">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Print Fee Voucher
           </button>
           ${getStudentWA(s) ? `
-          <button class="btn btn-wa" style="background:#15803d; color:#fff;" onclick="sendVoucherWhatsApp('${sid}', document.getElementById('single-voucher-month').value)">
-            💬 WhatsApp Voucher
+          <button type="button" class="btn btn-wa" style="outline:none; background:#15803d; color:#fff; font-weight:600; font-size:0.8rem; padding:8px 14px; border-radius:8px; display:inline-flex; align-items:center; gap:6px; cursor:pointer;" onclick="sendVoucherWhatsApp('${sid}', document.getElementById('single-voucher-month').value)">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg> WhatsApp Voucher
           </button>
           ` : ''}
         </div>
-        <button class="btn btn-gh" onclick="closeModal()">Cancel</button>
+        <button type="button" class="btn btn-gh" style="outline:none; font-size:0.8rem; padding:8px 14px; border-radius:8px;" onclick="closeModal()">Cancel</button>
       </div>
     `);
     
-    updateSingleVoucherPreview(sid, nextM);
+    updateSingleVoucherPreview(sid, curM);
 }
 
 function openBulkFeeVoucherModal() {
-    const nextM = getNextMonth(monthKey()); // '2026-10'
-    const curM = monthKey(); // '2026-09'
-    const thirdM = getNextMonth(nextM); // '2026-11'
+    const curM = monthKey(); // Current active month, e.g. '2026-10'
+    const nextM = getNextMonth(curM); // Upcoming month, e.g. '2026-11'
+    const prevM = getPrevMonth(curM); // Previous month, e.g. '2026-09'
+    const thirdM = getNextMonth(nextM); // Advance month, e.g. '2026-12'
 
     openModal(`
       <div style="margin-bottom:12px;">
-        <h3 style="margin:0 0 4px 0;">📄 Bulk Issue Fee Challans</h3>
-        <div style="font-size:0.85rem; color:#64748b;">
-          Issue fee vouchers for upcoming month with examination fees and previous arrears
+        <h3 style="margin:0 0 4px 0; font-size:1.1rem; font-weight:800; color:#0f172a;">Bulk Issue Fee Challans</h3>
+        <div style="font-size:0.82rem; color:#64748b;">
+          Issue fee vouchers for selected month with examination fees and previous arrears
         </div>
       </div>
 
       <div class="fg" style="margin-bottom:12px;">
-        <label class="fl" style="font-weight:700;">Select Billing Month</label>
-        <select class="fi" id="bulk-voucher-month" style="font-weight:600; padding:8px 10px;">
-          <option value="${nextM}" selected>Upcoming Month: October 2026 (Includes Examination Fee)</option>
-          <option value="${curM}">Current Month: September 2026</option>
-          <option value="${thirdM}">Advance Month: November 2026</option>
+        <label class="fl" style="font-weight:700; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">Select Billing Month</label>
+        <select class="fi" id="bulk-voucher-month" style="font-weight:600; padding:8px 10px; font-size:0.85rem; border-radius:8px;">
+          <option value="${curM}" selected>Current Month: ${getVoucherMonthLabel(curM)}</option>
+          <option value="${nextM}">Upcoming Month: ${getVoucherMonthLabel(nextM)}</option>
+          <option value="${prevM}">Previous Month: ${getVoucherMonthLabel(prevM)}</option>
+          <option value="${thirdM}">Advance Month: ${getVoucherMonthLabel(thirdM)}</option>
         </select>
       </div>
 
       <div class="fg" style="margin-bottom:14px;">
-        <label class="fl" style="font-weight:700;">Select Class</label>
-        <select class="fi" id="bulk-voucher-class" style="padding:8px 10px;">
+        <label class="fl" style="font-weight:700; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">Select Class</label>
+        <select class="fi" id="bulk-voucher-class" style="padding:8px 10px; font-size:0.85rem; border-radius:8px;">
           <option value="All">All Classes (Entire School)</option>
           ${DB.classes.map(c => `<option value="${c.id}">${escHtml(c.name)}</option>`).join('')}
         </select>
       </div>
 
-      <div style="background:#f1f5f9; border-radius:8px; padding:10px 12px; margin-bottom:16px; font-size:0.8rem; color:#475569; line-height:1.4;">
-        ℹ️ Each voucher will include the selected month's tuition, van fee, applicable examination/annual charges, and real-time previous arrears.
+      <div style="background:#f1f5f9; border-radius:8px; padding:10px 12px; margin-bottom:16px; font-size:0.78rem; color:#475569; line-height:1.4;">
+        Each voucher includes the selected month's tuition, van fee, applicable examination/annual charges, and real-time previous arrears.
       </div>
 
       <div class="m-btns" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
         <div style="display:flex; gap:8px;">
-          <button class="btn btn-p" style="background:#0f172a; color:#fff;" onclick="bulkPrintPreFeeVouchers(document.getElementById('bulk-voucher-class').value, document.getElementById('bulk-voucher-month').value)">
-            🖶 Print All Vouchers
+          <button type="button" class="btn btn-p" style="outline:none; background:#0f172a; color:#fff; font-weight:600; font-size:0.8rem; padding:8px 14px; border-radius:8px; display:inline-flex; align-items:center; gap:6px; cursor:pointer;" onclick="bulkPrintPreFeeVouchers(document.getElementById('bulk-voucher-class').value, document.getElementById('bulk-voucher-month').value)">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Print All Vouchers
           </button>
-          <button class="btn btn-wa" style="background:#15803d; color:#fff;" onclick="bulkWhatsappPreFeeVouchers(document.getElementById('bulk-voucher-class').value, document.getElementById('bulk-voucher-month').value)">
-            💬 WhatsApp All
+          <button type="button" class="btn btn-wa" style="outline:none; background:#15803d; color:#fff; font-weight:600; font-size:0.8rem; padding:8px 14px; border-radius:8px; display:inline-flex; align-items:center; gap:6px; cursor:pointer;" onclick="bulkWhatsappPreFeeVouchers(document.getElementById('bulk-voucher-class').value, document.getElementById('bulk-voucher-month').value)">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg> WhatsApp All
           </button>
         </div>
-        <button class="btn btn-gh" onclick="closeModal()">Cancel</button>
+        <button type="button" class="btn btn-gh" style="outline:none; font-size:0.8rem; padding:8px 14px; border-radius:8px;" onclick="closeModal()">Cancel</button>
       </div>
     `);
 }
 
 function bulkPrintPreFeeVouchers(classId, targetMonth = null) {
-    const cm = targetMonth || getNextMonth(monthKey());
+    const cm = targetMonth || monthKey();
     const stus = allStus().filter(s => classId === 'All' || s.classId === classId);
     if (!stus.length) return showToast('No students found');
     
@@ -13288,7 +13309,7 @@ function generateFamilyVoucherPayload(familyStudents, targetMonth = null) {
     if (!familyStudents || !familyStudents.length) return null;
     if (familyStudents.length === 1) return generateVoucherPayload(familyStudents[0].id, targetMonth);
 
-    const tm = targetMonth || getNextMonth(monthKey());
+    const tm = targetMonth || monthKey();
     const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     const dParts = tm.split('-');
     const mIdx = parseInt(dParts[1], 10) - 1;
@@ -13343,7 +13364,7 @@ function generateFamilyVoucherMsg(familyStudents, targetMonth = null) {
     if (!familyStudents || !familyStudents.length) return '';
     if (familyStudents.length === 1) return generateVoucherMsg(familyStudents[0].id, targetMonth);
 
-    const tm = targetMonth || getNextMonth(monthKey());
+    const tm = targetMonth || monthKey();
     const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     const dParts = tm.split('-');
     const mIdx = parseInt(dParts[1], 10) - 1;
@@ -13382,7 +13403,7 @@ function generateFamilyVoucherMsg(familyStudents, targetMonth = null) {
 }
 
 function bulkWhatsappPreFeeVouchers(classId, targetMonth = null) {
-    const cm = targetMonth || getNextMonth(monthKey());
+    const cm = targetMonth || monthKey();
     const stus = allStus().filter(s => classId === 'All' || s.classId === classId);
     if (!stus.length) return showToast('No students found', 'te');
 
