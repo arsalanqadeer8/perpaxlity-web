@@ -1449,6 +1449,13 @@
       max-width: 780px;
       max-height: 94vh;
     }
+    .modal.modal-glass {
+      background: rgba(255, 255, 255, 0.92) !important;
+      backdrop-filter: blur(28px) saturate(190%) !important;
+      -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.8) !important;
+      box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.7) inset !important;
+    }
     .m-close {
       position: absolute;
       top: 14px;
@@ -7974,6 +7981,54 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
         return { tuition, van, arrears, arrearsDetail, itemsTotal, applicableItems, totalDue, isPaid, amountPaid, mRow, breakdownHtml };
     }
 
+    function toggleFeeDropdown(event, menuId) {
+      if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+      }
+      const allMenus = document.querySelectorAll('.glass-fee-dropdown-menu');
+      allMenus.forEach(m => {
+        if (m.id !== menuId) {
+          m.style.display = 'none';
+          const p = m.closest('.glass-month-card');
+          if (p) p.style.zIndex = '5';
+        }
+      });
+      const menu = document.getElementById(menuId);
+      if (menu) {
+        const isHidden = (menu.style.display === 'none' || !menu.style.display);
+        if (isHidden) {
+          const rect = menu.parentElement.getBoundingClientRect();
+          const modalRect = document.querySelector('.modal')?.getBoundingClientRect();
+          if (modalRect && (rect.bottom + 210 > modalRect.bottom)) {
+            menu.style.top = 'auto';
+            menu.style.bottom = 'calc(100% + 6px)';
+          } else {
+            menu.style.top = 'calc(100% + 6px)';
+            menu.style.bottom = 'auto';
+          }
+          menu.style.display = 'block';
+          const p = menu.closest('.glass-month-card');
+          if (p) p.style.zIndex = '150';
+        } else {
+          menu.style.display = 'none';
+          const p = menu.closest('.glass-month-card');
+          if (p) p.style.zIndex = '5';
+        }
+      }
+    }
+
+    if (!window._feeDropdownOutsideAttached) {
+      window._feeDropdownOutsideAttached = true;
+      document.addEventListener('click', function(e) {
+        if (!e.target.closest('.glass-dropdown-wrapper')) {
+          document.querySelectorAll('.glass-fee-dropdown-menu').forEach(m => {
+            m.style.display = 'none';
+          });
+        }
+      });
+    }
+
     function openStudentFeeModal(sid, targetMonth = null) {
       const s = allStus().find(x => x.id === sid); if (!s) return;
       const cls = DB.classes.find(c => c.id === s.classId);
@@ -8033,35 +8088,35 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
         const examAmt = examItem ? examItem.amount : 0;
 
         return `
-          <div style="background:#ffffff; border:1px solid ${isPaid ? (isPartial ? '#fed7aa' : '#e2e8f0') : '#fee2e2'}; border-radius:14px; padding:15px 18px; margin-bottom:12px; box-shadow:0 1px 3px rgba(15,23,42,0.04); transition:all 0.15s ease;">
+          <div class="glass-month-card" style="position:relative; z-index:5; background:rgba(255,255,255,0.75); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border:1px solid ${isPaid ? (isPartial ? 'rgba(245,158,11,0.45)' : 'rgba(16,185,129,0.3)') : 'rgba(239,68,68,0.25)'}; border-radius:14px; padding:15px 18px; margin-bottom:12px; box-shadow:0 4px 16px -2px rgba(15,23,42,0.04); transition:all 0.15s ease;">
             <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
               <div style="flex:1; min-width:240px;">
                 <div style="display:flex; align-items:center; gap:9px; flex-wrap:wrap;">
                   <span style="font-weight:800; font-size:1rem; color:#0f172a; letter-spacing:-0.2px;">${mName}</span>
                   ${isPaid 
                     ? (isPartial
-                        ? `<span style="background:#fff7ed; color:#c2410c; border:1px solid #ffedd5; font-size:0.7rem; font-weight:700; padding:3px 9px; border-radius:9999px; display:inline-flex; align-items:center; gap:4px;">
-                             <span>◐</span> PARTIAL (${fmtMoney(paidAmt)})
+                        ? `<span style="background:rgba(245,158,11,0.1); color:#92400e; border:1px solid rgba(245,158,11,0.25); font-size:0.71rem; font-weight:700; padding:3px 10px; border-radius:9999px; display:inline-flex; align-items:center; gap:5px;">
+                             <span style="width:6px; height:6px; border-radius:50%; background:#d97706; display:inline-block;"></span> PARTIAL (${fmtMoney(paidAmt)})
                            </span>`
-                        : `<span style="background:#ecfdf5; color:#059669; border:1px solid #d1fae5; font-size:0.7rem; font-weight:700; padding:3px 9px; border-radius:9999px; display:inline-flex; align-items:center; gap:4px;">
-                             <span>✓</span> PAID (${fmtMoney(paidAmt || monthlyTotal)})
+                        : `<span style="background:rgba(16,185,129,0.1); color:#065f46; border:1px solid rgba(16,185,129,0.25); font-size:0.71rem; font-weight:700; padding:3px 10px; border-radius:9999px; display:inline-flex; align-items:center; gap:5px;">
+                             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> PAID (${fmtMoney(paidAmt || monthlyTotal)})
                            </span>`)
-                    : `<span style="background:#fef2f2; color:#b91c1c; border:1px solid #fee2e2; font-size:0.7rem; font-weight:700; padding:3px 9px; border-radius:9999px; display:inline-flex; align-items:center; gap:4px;">
-                         <span>●</span> UNPAID
+                    : `<span style="background:rgba(239,68,68,0.08); color:#991b1b; border:1px solid rgba(239,68,68,0.2); font-size:0.71rem; font-weight:700; padding:3px 10px; border-radius:9999px; display:inline-flex; align-items:center; gap:5px;">
+                         <span style="width:6px; height:6px; border-radius:50%; background:#dc2626; display:inline-block;"></span> UNPAID
                        </span>`}
                 </div>
 
                 <!-- Breakdown row -->
                 <div style="font-size:0.82rem; color:#64748b; margin-top:6px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                   <span>Monthly Fee: <b style="color:#0f172a; font-weight:700;">${fmtMoney(monthlyTotal)}</b></span>
-                  ${tuition > 0 && applicableItems.length > 0 ? `<span style="background:#f1f5f9; color:#475569; font-size:0.72rem; padding:1px 6px; border-radius:4px;">Tuition: ${fmtMoney(tuition)}</span>` : ''}
-                  ${applicableItems.map(it => `<span style="background:#fef3c7; color:#92400e; font-size:0.72rem; font-weight:600; padding:1px 7px; border-radius:4px; border:1px solid #fde68a;">${escHtml(it.name)}: ${fmtMoney(it.amount)}</span>`).join(' ')}
-                  ${van > 0 ? `<span style="background:#e0e7ff; color:#3730a3; font-size:0.72rem; font-weight:600; padding:1px 6px; border-radius:4px;">Van: ${fmtMoney(van)}</span>` : ''}
+                  ${tuition > 0 && applicableItems.length > 0 ? `<span style="background:rgba(241,245,249,0.85); color:#475569; font-size:0.72rem; padding:1px 6px; border-radius:4px;">Tuition: ${fmtMoney(tuition)}</span>` : ''}
+                  ${applicableItems.map(it => `<span style="background:rgba(254,243,199,0.8); color:#92400e; font-size:0.72rem; font-weight:600; padding:1px 7px; border-radius:4px; border:1px solid rgba(253,230,138,0.9);">${escHtml(it.name)}: ${fmtMoney(it.amount)}</span>`).join(' ')}
+                  ${van > 0 ? `<span style="background:rgba(224,231,255,0.8); color:#3730a3; font-size:0.72rem; font-weight:600; padding:1px 6px; border-radius:4px;">Van: ${fmtMoney(van)}</span>` : ''}
                 </div>
 
                 ${isPaid && paidOn ? `
                   <div style="font-size:0.74rem; color:#059669; font-weight:600; margin-top:5px; display:flex; align-items:center; gap:5px;">
-                    <span>✓</span> Received on ${fmtDate(paidOn)} ${isPartial ? `&bull; Balance Pending: <b style="color:#b91c1c;">${fmtMoney(remainingDues)}</b>` : ''}
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Received on ${fmtDate(paidOn)} ${isPartial ? `&bull; Balance Pending: <b style="color:#b91c1c;">${fmtMoney(remainingDues)}</b>` : ''}
                   </div>
                 ` : ''}
               </div>
@@ -8069,36 +8124,69 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
               <!-- Action Controls -->
               <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
                 ${isPaid ? `
-                  <button class="btn btn-xs" style="background:#f8fafc; color:#1e293b; border:1px solid #cbd5e1; font-weight:600; padding:6px 13px; border-radius:8px; font-size:0.76rem; cursor:pointer; display:inline-flex; align-items:center; gap:5px;" onclick="printFeeReceipt('${sid}', '${m}')">
-                    <span>🖶</span> Receipt
+                  <button class="btn btn-xs" style="background:rgba(255,255,255,0.8); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); color:#1e293b; border:1px solid rgba(203,213,225,0.85); font-weight:600; padding:6px 12px; border-radius:8px; font-size:0.76rem; cursor:pointer; display:inline-flex; align-items:center; gap:5px;" onclick="printFeeReceipt('${sid}', '${m}')">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Receipt
                   </button>
-                  <button class="btn btn-xs" style="background:#ffffff; color:#dc2626; border:1px solid #fecaca; font-weight:600; padding:6px 12px; border-radius:8px; font-size:0.76rem; cursor:pointer;" onclick="toggleMonthPayment('${sid}', '${m}', false)">
+                  <button class="btn btn-xs" style="background:rgba(255,255,255,0.8); color:#dc2626; border:1px solid rgba(254,202,202,0.85); font-weight:600; padding:6px 12px; border-radius:8px; font-size:0.76rem; cursor:pointer;" onclick="toggleMonthPayment('${sid}', '${m}', false)">
                     Mark Unpaid
                   </button>
                 ` : `
-                  <button class="btn btn-xs" style="background:#059669; color:#ffffff; border:none; font-weight:700; padding:7px 15px; border-radius:8px; font-size:0.78rem; cursor:pointer; box-shadow:0 2px 4px rgba(5,150,105,0.25); display:inline-flex; align-items:center; gap:4px;" onclick="toggleMonthPayment('${sid}', '${m}', true, ${monthlyTotal})">
-                    <span>✓</span> Mark Full Paid
+                  <button class="btn btn-xs" style="background:#059669; color:#ffffff; border:none; font-weight:700; padding:7px 14px; border-radius:8px; font-size:0.78rem; cursor:pointer; box-shadow:0 2px 6px rgba(5,150,105,0.25); display:inline-flex; align-items:center; gap:5px;" onclick="toggleMonthPayment('${sid}', '${m}', true, ${monthlyTotal})">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Mark Full Paid
                   </button>
                 `}
 
-                <!-- Payment Options Dropdown Selector -->
-                <div style="position:relative; display:inline-block;">
-                  <select 
-                    style="background:#f8fafc; color:#334155; border:1px solid #cbd5e1; font-weight:600; font-size:0.75rem; padding:6px 10px; border-radius:8px; cursor:pointer; outline:none;" 
-                    onchange="handleFeeOptionSelect('${sid}', '${m}', ${monthlyTotal}, ${baseMonthly}, ${examAmt}, this.value); this.selectedIndex=0;"
-                  >
-                    <option value="" disabled selected>⚡ Payment Options ▾</option>
+                <!-- Glassmorphism Dropdown Menu Wrapper -->
+                <div class="glass-dropdown-wrapper" style="position:relative; display:inline-block;">
+                  <button type="button" class="btn btn-xs" style="background:rgba(255,255,255,0.8); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); color:#334155; border:1px solid rgba(203,213,225,0.85); font-weight:600; font-size:0.76rem; padding:6px 12px; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; box-shadow:0 1px 2px rgba(15,23,42,0.03);" onclick="toggleFeeDropdown(event, 'fee-menu-${m}')">
+                    <span>Payment Options</span>
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                  </button>
+
+                  <div id="fee-menu-${m}" class="glass-fee-dropdown-menu" style="display:none; position:absolute; right:0; top:calc(100% + 6px); min-width:250px; background:rgba(255,255,255,0.96); backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px); border:1px solid rgba(226,232,240,0.95); border-radius:12px; box-shadow:0 14px 35px -4px rgba(15,23,42,0.15), 0 0 0 1px rgba(0,0,0,0.03); padding:6px; z-index:100; text-align:left;">
+                    <div style="padding:6px 10px 4px 10px; font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; color:#94a3b8;">
+                      Payment Options
+                    </div>
+
                     ${!isPaid || isPartial ? `
-                      <option value="full">✓ Mark Full Paid (${fmtMoney(monthlyTotal)})</option>
-                      ${applicableItems.length > 0 ? `<option value="tuition">💳 Mark Monthly Tuition Only (${fmtMoney(baseMonthly)})</option>` : ''}
-                      ${hasExamItem ? `<option value="exam">📝 Mark Exam Fee Only (${fmtMoney(examAmt)})</option>` : ''}
-                      <option value="custom">✍️ Custom Amount Received...</option>
+                      <button type="button" style="width:100%; display:flex; align-items:center; justify-content:space-between; padding:8px 10px; border-radius:8px; border:none; background:transparent; cursor:pointer; font-size:0.78rem; font-weight:600; color:#0f172a; text-align:left; transition:background 0.12s;" onmouseover="this.style.background='rgba(241,245,249,0.9)'" onmouseout="this.style.background='transparent'" onclick="handleFeeOptionSelect('${sid}', '${m}', ${monthlyTotal}, ${baseMonthly}, ${examAmt}, 'full'); toggleFeeDropdown(event, 'fee-menu-${m}')">
+                        <span>Mark Full Paid</span>
+                        <span style="font-weight:700; color:#059669; font-size:0.74rem;">${fmtMoney(monthlyTotal)}</span>
+                      </button>
+
+                      ${applicableItems.length > 0 ? `
+                      <button type="button" style="width:100%; display:flex; align-items:center; justify-content:space-between; padding:8px 10px; border-radius:8px; border:none; background:transparent; cursor:pointer; font-size:0.78rem; font-weight:600; color:#0f172a; text-align:left; transition:background 0.12s;" onmouseover="this.style.background='rgba(241,245,249,0.9)'" onmouseout="this.style.background='transparent'" onclick="handleFeeOptionSelect('${sid}', '${m}', ${monthlyTotal}, ${baseMonthly}, ${examAmt}, 'tuition'); toggleFeeDropdown(event, 'fee-menu-${m}')">
+                        <span>Monthly Tuition Only</span>
+                        <span style="font-weight:700; color:#2563eb; font-size:0.74rem;">${fmtMoney(baseMonthly)}</span>
+                      </button>
+                      ` : ''}
+
+                      ${hasExamItem ? `
+                      <button type="button" style="width:100%; display:flex; align-items:center; justify-content:space-between; padding:8px 10px; border-radius:8px; border:none; background:transparent; cursor:pointer; font-size:0.78rem; font-weight:600; color:#0f172a; text-align:left; transition:background 0.12s;" onmouseover="this.style.background='rgba(241,245,249,0.9)'" onmouseout="this.style.background='transparent'" onclick="handleFeeOptionSelect('${sid}', '${m}', ${monthlyTotal}, ${baseMonthly}, ${examAmt}, 'exam'); toggleFeeDropdown(event, 'fee-menu-${m}')">
+                        <span>Examination Fee Only</span>
+                        <span style="font-weight:700; color:#7c3aed; font-size:0.74rem;">${fmtMoney(examAmt)}</span>
+                      </button>
+                      ` : ''}
+
+                      <div style="height:1px; background:#f1f5f9; margin:4px 0;"></div>
+
+                      <button type="button" style="width:100%; display:flex; align-items:center; justify-content:space-between; padding:8px 10px; border-radius:8px; border:none; background:transparent; cursor:pointer; font-size:0.78rem; font-weight:600; color:#475569; text-align:left; transition:background 0.12s;" onmouseover="this.style.background='rgba(241,245,249,0.9)'" onmouseout="this.style.background='transparent'" onclick="handleFeeOptionSelect('${sid}', '${m}', ${monthlyTotal}, ${baseMonthly}, ${examAmt}, 'custom'); toggleFeeDropdown(event, 'fee-menu-${m}')">
+                        <span>Custom Amount Received...</span>
+                      </button>
                     ` : ''}
+
                     ${isPaid ? `
-                      <option value="unpaid">✕ Mark as Unpaid</option>
-                      <option value="custom">✍️ Edit Received Amount...</option>
+                      <button type="button" style="width:100%; display:flex; align-items:center; justify-content:space-between; padding:8px 10px; border-radius:8px; border:none; background:transparent; cursor:pointer; font-size:0.78rem; font-weight:600; color:#475569; text-align:left; transition:background 0.12s;" onmouseover="this.style.background='rgba(241,245,249,0.9)'" onmouseout="this.style.background='transparent'" onclick="handleFeeOptionSelect('${sid}', '${m}', ${monthlyTotal}, ${baseMonthly}, ${examAmt}, 'custom'); toggleFeeDropdown(event, 'fee-menu-${m}')">
+                        <span>Edit Received Amount...</span>
+                      </button>
+
+                      <div style="height:1px; background:#f1f5f9; margin:4px 0;"></div>
+
+                      <button type="button" style="width:100%; display:flex; align-items:center; justify-content:space-between; padding:8px 10px; border-radius:8px; border:none; background:transparent; cursor:pointer; font-size:0.78rem; font-weight:600; color:#dc2626; text-align:left; transition:background 0.12s;" onmouseover="this.style.background='rgba(254,242,242,0.9)'" onmouseout="this.style.background='transparent'" onclick="handleFeeOptionSelect('${sid}', '${m}', ${monthlyTotal}, ${baseMonthly}, ${examAmt}, 'unpaid'); toggleFeeDropdown(event, 'fee-menu-${m}')">
+                        <span>Reset to Unpaid</span>
+                      </button>
                     ` : ''}
-                  </select>
+                  </div>
                 </div>
               </div>
             </div>
@@ -8108,7 +8196,7 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
       
       openModal(`
         <!-- Student Header -->
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; margin-bottom:18px; padding-bottom:14px; border-bottom:1px solid #e2e8f0;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; margin-bottom:18px; padding-bottom:14px; border-bottom:1px solid rgba(226,232,240,0.8);">
           <div style="display:flex; gap:12px; align-items:center;">
             <div style="width:46px; height:46px; border-radius:12px; background:linear-gradient(135deg, #1e293b, #0f172a); color:#ffffff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.05rem; letter-spacing:0.5px; box-shadow:0 3px 8px rgba(15,23,42,0.18); flex-shrink:0;">
               ${initials}
@@ -8118,18 +8206,18 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
                 ${escHtml(s.name)}
               </div>
               <div style="display:flex; gap:7px; align-items:center; margin-top:4px; flex-wrap:wrap;">
-                <span style="background:#f1f5f9; color:#475569; font-size:0.75rem; font-weight:600; padding:2px 8px; border-radius:6px;">${escHtml(cls?.name || 'Class')}</span>
-                <span style="background:#f1f5f9; color:#475569; font-size:0.75rem; font-weight:600; padding:2px 8px; border-radius:6px;">Roll: ${escHtml(s.roll || '-')}</span>
+                <span style="background:rgba(241,245,249,0.85); color:#475569; font-size:0.75rem; font-weight:600; padding:2px 8px; border-radius:6px; border:1px solid rgba(226,232,240,0.8);">${escHtml(cls?.name || 'Class')}</span>
+                <span style="background:rgba(241,245,249,0.85); color:#475569; font-size:0.75rem; font-weight:600; padding:2px 8px; border-radius:6px; border:1px solid rgba(226,232,240,0.8);">Roll: ${escHtml(s.roll || '-')}</span>
                 <span style="font-size:0.75rem; color:#64748b; margin-left:2px;">Standard Monthly: <b style="color:#0f172a;">${fmtMoney(tuition + van)}</b></span>
               </div>
             </div>
           </div>
           <div style="display:flex; gap:8px; align-items:center;">
-            <button class="btn btn-xs" style="background:#ecfdf5; color:#059669; border:1px solid #a7f3d0; font-weight:700; padding:6px 13px; border-radius:8px; display:inline-flex; align-items:center; gap:5px; font-size:0.76rem; cursor:pointer;" onclick="markAllMonths('${sid}', true)">
-              <span>✓</span> Mark All Paid
+            <button class="btn btn-xs" style="background:rgba(236,253,245,0.85); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); color:#059669; border:1px solid rgba(167,243,208,0.9); font-weight:700; padding:6px 13px; border-radius:8px; display:inline-flex; align-items:center; gap:5px; font-size:0.76rem; cursor:pointer;" onclick="markAllMonths('${sid}', true)">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Mark All Paid
             </button>
-            <button class="btn btn-xs" style="background:#fef2f2; color:#dc2626; border:1px solid #fecaca; font-weight:700; padding:6px 13px; border-radius:8px; display:inline-flex; align-items:center; gap:5px; font-size:0.76rem; cursor:pointer;" onclick="markAllMonths('${sid}', false)">
-              <span>✕</span> Mark All Unpaid
+            <button class="btn btn-xs" style="background:rgba(254,242,242,0.85); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); color:#dc2626; border:1px solid rgba(254,202,202,0.9); font-weight:700; padding:6px 13px; border-radius:8px; display:inline-flex; align-items:center; gap:5px; font-size:0.76rem; cursor:pointer;" onclick="markAllMonths('${sid}', false)">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Mark All Unpaid
             </button>
           </div>
         </div>
@@ -8142,7 +8230,7 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
         ${monthsHtml}
         
         <!-- Summary Box -->
-        <div style="background:linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%); border:1px solid #e2e8f0; border-radius:14px; padding:16px 20px; margin:16px 0 18px 0; box-shadow:inset 0 1px 0 rgba(255,255,255,0.6);">
+        <div style="position:relative; z-index:1; background:rgba(248,250,252,0.72); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border:1px solid rgba(226,232,240,0.85); border-radius:14px; padding:16px 20px; margin:16px 0 18px 0; box-shadow:0 4px 16px -2px rgba(15,23,42,0.03);">
           <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; color:#475569; margin-bottom:7px;">
             <span>Previous Arrears (Opening Balance):</span>
             <span style="font-weight:700; color:${initialArrears > 0 ? '#b91c1c' : '#334155'}; font-size:0.92rem;">
@@ -8157,7 +8245,7 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
             </span>
           </div>
           ` : ''}
-          <div style="border-top:1px solid #cbd5e1; margin:10px 0;"></div>
+          <div style="border-top:1px solid rgba(203,213,225,0.8); margin:10px 0;"></div>
           <div style="display:flex; justify-content:space-between; align-items:center;">
             <div>
               <div style="font-weight:800; font-size:0.96rem; color:#0f172a; letter-spacing:-0.2px;">Total Net Balance Due</div>
@@ -8167,28 +8255,31 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
               <div style="font-size:1.45rem; font-weight:900; letter-spacing:-0.5px; color:${totalDue > 0 ? '#dc2626' : '#059669'};">
                 ${fmtMoney(totalDue)}
               </div>
-              ${totalDue <= 0 ? `<div style="font-size:0.72rem; color:#059669; font-weight:700; text-transform:uppercase; margin-top:2px;">Fully Cleared ✓</div>` : ''}
+              ${totalDue <= 0 ? `<div style="font-size:0.72rem; color:#059669; font-weight:700; text-transform:uppercase; margin-top:2px; display:inline-flex; align-items:center; gap:4px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Fully Cleared</div>` : ''}
             </div>
           </div>
         </div>
 
         <!-- Footer Buttons -->
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; padding-top:14px; border-top:1px solid #f1f5f9;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; padding-top:14px; border-top:1px solid rgba(241,245,249,0.9);">
           <div style="display:flex; gap:8px;">
-            <button class="btn" style="background:#0f172a; color:#ffffff; font-weight:600; font-size:0.84rem; padding:9px 18px; border-radius:9px; border:none; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 5px rgba(15,23,42,0.14); cursor:pointer;" onclick="openVoucherModal('${sid}')">
-              <span>🖶</span> Issue Fee Challan
+            <button class="btn" style="background:#0f172a; color:#ffffff; font-weight:600; font-size:0.84rem; padding:9px 18px; border-radius:9px; border:none; display:inline-flex; align-items:center; gap:7px; box-shadow:0 2px 6px rgba(15,23,42,0.16); cursor:pointer;" onclick="openVoucherModal('${sid}')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Issue Fee Challan
             </button>
             ${getStudentWA(s) ? `
-            <button class="btn" style="background:#15803d; color:#ffffff; font-weight:600; font-size:0.84rem; padding:9px 18px; border-radius:9px; border:none; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 5px rgba(21,128,61,0.18); cursor:pointer;" onclick="sendVoucherWhatsApp('${sid}', '2026-10')">
-              <span>💬</span> WhatsApp Oct Challan
+            <button class="btn" style="background:#15803d; color:#ffffff; font-weight:600; font-size:0.84rem; padding:9px 18px; border-radius:9px; border:none; display:inline-flex; align-items:center; gap:7px; box-shadow:0 2px 6px rgba(21,128,61,0.2); cursor:pointer;" onclick="sendVoucherWhatsApp('${sid}', '2026-10')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg> WhatsApp Oct Challan
             </button>
             ` : ''}
           </div>
-          <button class="btn" style="background:#ffffff; color:#475569; border:1px solid #cbd5e1; font-weight:600; font-size:0.84rem; padding:9px 20px; border-radius:9px; cursor:pointer;" onclick="closeModal()">
+          <button class="btn" style="background:rgba(255,255,255,0.9); color:#475569; border:1px solid rgba(203,213,225,0.9); font-weight:600; font-size:0.84rem; padding:9px 20px; border-radius:9px; cursor:pointer;" onclick="closeModal()">
             Close
           </button>
         </div>
       `);
+
+      const modalEl = document.querySelector('.modal');
+      if (modalEl) modalEl.classList.add('modal-glass');
     }
 
     function handleFeeOptionSelect(sid, month, monthlyTotal, baseMonthly, examAmt, selectedVal) {
@@ -12204,7 +12295,10 @@ ${DB.school.name}`;
       const bg = document.getElementById('modal-bg');
       if (bg) bg.classList.remove('open');
       const m = document.querySelector('.modal');
-      if (m) m.classList.remove('modal-wide');
+      if (m) {
+        m.classList.remove('modal-wide');
+        m.classList.remove('modal-glass');
+      }
       const body = document.getElementById('modal-body');
       if (body) body.innerHTML = '';
     }
