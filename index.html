@@ -7990,156 +7990,220 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
       }
 
       let unpaidMonthsSum = 0;
+      const totalDue = getLedgerArrears(sid, getNextMonth('2026-10'));
+      const initials = s.name.split(' ').map(n => n[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'ST';
       
       let monthsHtml = months.map(m => {
         const dParts = m.split('-');
         const mIdx = parseInt(dParts[1], 10) - 1;
         const mName = (mNames[mIdx] || m) + ' ' + dParts[0];
         
+        let applicableItems = [];
         let itemsTotal = 0;
-        let itemNames = [];
         (DB.fees.items || []).forEach(f => {
           if (f.id === 'f1') return;
           if (f.applyMonth && f.applyMonth !== 'All' && f.applyMonth.toLowerCase() !== (mNames[mIdx] || '').toLowerCase()) return;
           const amt = num(f.amount);
-          itemsTotal += amt;
-          itemNames.push(`${f.name}: ${fmtMoney(amt)}`);
+          if (amt > 0) {
+            applicableItems.push({ id: f.id, name: f.name, amount: amt });
+            itemsTotal += amt;
+          }
         });
-        const monthlyTotal = tuition + van + itemsTotal;
+
+        const baseMonthly = tuition + van;
+        const monthlyTotal = baseMonthly + itemsTotal;
         
         const mRow = DB.fees.monthlyLedger?.[sid]?.[m];
         const isPaid = mRow ? mRow.paid : false;
         const paidAmt = mRow ? num(mRow.amountPaid || mRow.amount || 0) : 0;
         const paidOn = mRow?.paidOn;
         
-        if (!isPaid) unpaidMonthsSum += monthlyTotal;
+        const isPartial = isPaid && paidAmt > 0 && paidAmt < monthlyTotal;
+        const remainingDues = Math.max(0, monthlyTotal - (isPaid ? paidAmt : 0));
         
+        if (!isPaid) {
+          unpaidMonthsSum += monthlyTotal;
+        } else if (isPartial) {
+          unpaidMonthsSum += remainingDues;
+        }
+
+        // Action Menu Options
+        const hasExamItem = applicableItems.some(i => i.name.toLowerCase().includes('exam'));
+        const examItem = applicableItems.find(i => i.name.toLowerCase().includes('exam'));
+        const examAmt = examItem ? examItem.amount : 0;
+
         return `
-          <div style="background:#ffffff; border:1px solid ${isPaid ? '#e2e8f0' : '#fecaca'}; border-radius:12px; padding:13px 16px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; box-shadow:0 1px 3px rgba(0,0,0,0.03);">
-            <div>
-              <div style="display:flex; align-items:center; gap:8px;">
-                <span style="font-weight:700; font-size:0.95rem; color:#0f172a;">${mName}</span>
-                ${isPaid 
-                  ? `<span style="background:#dcfce7; color:#15803d; font-size:0.7rem; font-weight:700; padding:2px 8px; border-radius:6px; display:inline-flex; align-items:center; gap:3px;">
-                       <span>✓</span> PAID
-                     </span>` 
-                  : `<span style="background:#fee2e2; color:#b91c1c; font-size:0.7rem; font-weight:700; padding:2px 8px; border-radius:6px; display:inline-flex; align-items:center; gap:3px;">
-                       <span>●</span> UNPAID
-                     </span>`}
+          <div style="background:#ffffff; border:1px solid ${isPaid ? (isPartial ? '#fed7aa' : '#e2e8f0') : '#fee2e2'}; border-radius:14px; padding:15px 18px; margin-bottom:12px; box-shadow:0 1px 3px rgba(15,23,42,0.04); transition:all 0.15s ease;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+              <div style="flex:1; min-width:240px;">
+                <div style="display:flex; align-items:center; gap:9px; flex-wrap:wrap;">
+                  <span style="font-weight:800; font-size:1rem; color:#0f172a; letter-spacing:-0.2px;">${mName}</span>
+                  ${isPaid 
+                    ? (isPartial
+                        ? `<span style="background:#fff7ed; color:#c2410c; border:1px solid #ffedd5; font-size:0.7rem; font-weight:700; padding:3px 9px; border-radius:9999px; display:inline-flex; align-items:center; gap:4px;">
+                             <span>◐</span> PARTIAL (${fmtMoney(paidAmt)})
+                           </span>`
+                        : `<span style="background:#ecfdf5; color:#059669; border:1px solid #d1fae5; font-size:0.7rem; font-weight:700; padding:3px 9px; border-radius:9999px; display:inline-flex; align-items:center; gap:4px;">
+                             <span>✓</span> PAID (${fmtMoney(paidAmt || monthlyTotal)})
+                           </span>`)
+                    : `<span style="background:#fef2f2; color:#b91c1c; border:1px solid #fee2e2; font-size:0.7rem; font-weight:700; padding:3px 9px; border-radius:9999px; display:inline-flex; align-items:center; gap:4px;">
+                         <span>●</span> UNPAID
+                       </span>`}
+                </div>
+
+                <!-- Breakdown row -->
+                <div style="font-size:0.82rem; color:#64748b; margin-top:6px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                  <span>Monthly Fee: <b style="color:#0f172a; font-weight:700;">${fmtMoney(monthlyTotal)}</b></span>
+                  ${tuition > 0 && applicableItems.length > 0 ? `<span style="background:#f1f5f9; color:#475569; font-size:0.72rem; padding:1px 6px; border-radius:4px;">Tuition: ${fmtMoney(tuition)}</span>` : ''}
+                  ${applicableItems.map(it => `<span style="background:#fef3c7; color:#92400e; font-size:0.72rem; font-weight:600; padding:1px 7px; border-radius:4px; border:1px solid #fde68a;">${escHtml(it.name)}: ${fmtMoney(it.amount)}</span>`).join(' ')}
+                  ${van > 0 ? `<span style="background:#e0e7ff; color:#3730a3; font-size:0.72rem; font-weight:600; padding:1px 6px; border-radius:4px;">Van: ${fmtMoney(van)}</span>` : ''}
+                </div>
+
+                ${isPaid && paidOn ? `
+                  <div style="font-size:0.74rem; color:#059669; font-weight:600; margin-top:5px; display:flex; align-items:center; gap:5px;">
+                    <span>✓</span> Received on ${fmtDate(paidOn)} ${isPartial ? `&bull; Balance Pending: <b style="color:#b91c1c;">${fmtMoney(remainingDues)}</b>` : ''}
+                  </div>
+                ` : ''}
               </div>
-              <div style="font-size:0.8rem; color:#64748b; margin-top:3px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                <span>Monthly Fee: <b style="color:#0f172a;">${fmtMoney(monthlyTotal)}</b></span>
-                ${itemNames.length > 0 ? `<span style="background:#fef3c7; color:#92400e; font-size:0.7rem; font-weight:600; padding:1px 6px; border-radius:4px;">Includes ${itemNames.join(', ')}</span>` : ''}
-                ${van > 0 ? `<span style="color:#94a3b8;">&bull;</span> <span>Van: ${fmtMoney(van)}</span>` : ''}
-                ${isPaid && paidOn ? `<span style="color:#94a3b8;">&bull;</span> <span style="color:#059669; font-weight:600;">Paid on ${fmtDate(paidOn)}</span>` : ''}
+
+              <!-- Action Controls -->
+              <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                ${isPaid ? `
+                  <button class="btn btn-xs" style="background:#f8fafc; color:#1e293b; border:1px solid #cbd5e1; font-weight:600; padding:6px 13px; border-radius:8px; font-size:0.76rem; cursor:pointer; display:inline-flex; align-items:center; gap:5px;" onclick="printFeeReceipt('${sid}', '${m}')">
+                    <span>🖶</span> Receipt
+                  </button>
+                  <button class="btn btn-xs" style="background:#ffffff; color:#dc2626; border:1px solid #fecaca; font-weight:600; padding:6px 12px; border-radius:8px; font-size:0.76rem; cursor:pointer;" onclick="toggleMonthPayment('${sid}', '${m}', false)">
+                    Mark Unpaid
+                  </button>
+                ` : `
+                  <button class="btn btn-xs" style="background:#059669; color:#ffffff; border:none; font-weight:700; padding:7px 15px; border-radius:8px; font-size:0.78rem; cursor:pointer; box-shadow:0 2px 4px rgba(5,150,105,0.25); display:inline-flex; align-items:center; gap:4px;" onclick="toggleMonthPayment('${sid}', '${m}', true, ${monthlyTotal})">
+                    <span>✓</span> Mark Full Paid
+                  </button>
+                `}
+
+                <!-- Payment Options Dropdown Selector -->
+                <div style="position:relative; display:inline-block;">
+                  <select 
+                    style="background:#f8fafc; color:#334155; border:1px solid #cbd5e1; font-weight:600; font-size:0.75rem; padding:6px 10px; border-radius:8px; cursor:pointer; outline:none;" 
+                    onchange="handleFeeOptionSelect('${sid}', '${m}', ${monthlyTotal}, ${baseMonthly}, ${examAmt}, this.value); this.selectedIndex=0;"
+                  >
+                    <option value="" disabled selected>⚡ Payment Options ▾</option>
+                    ${!isPaid || isPartial ? `
+                      <option value="full">✓ Mark Full Paid (${fmtMoney(monthlyTotal)})</option>
+                      ${applicableItems.length > 0 ? `<option value="tuition">💳 Mark Monthly Tuition Only (${fmtMoney(baseMonthly)})</option>` : ''}
+                      ${hasExamItem ? `<option value="exam">📝 Mark Exam Fee Only (${fmtMoney(examAmt)})</option>` : ''}
+                      <option value="custom">✍️ Custom Amount Received...</option>
+                    ` : ''}
+                    ${isPaid ? `
+                      <option value="unpaid">✕ Mark as Unpaid</option>
+                      <option value="custom">✍️ Edit Received Amount...</option>
+                    ` : ''}
+                  </select>
+                </div>
               </div>
-            </div>
-            <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
-              ${isPaid ? `
-                <button class="btn btn-xs" style="background:#ffffff; color:#dc2626; border:1px solid #fecaca; font-weight:600; padding:5px 12px; border-radius:7px; font-size:0.75rem; cursor:pointer;" onclick="toggleMonthPayment('${sid}', '${m}', false)">
-                  Mark Unpaid
-                </button>
-                <button class="btn btn-xs" style="background:#f8fafc; color:#334155; border:1px solid #e2e8f0; font-weight:600; padding:5px 12px; border-radius:7px; font-size:0.75rem; cursor:pointer;" onclick="printFeeReceipt('${sid}', '${m}')">
-                  Receipt
-                </button>
-              ` : `
-                <button class="btn btn-xs" style="background:#10b981; color:#ffffff; border:none; font-weight:700; padding:6px 14px; border-radius:7px; font-size:0.78rem; cursor:pointer; box-shadow:0 1px 3px rgba(16,185,129,0.3);" onclick="toggleMonthPayment('${sid}', '${m}', true)">
-                  ✓ Mark Paid
-                </button>
-                <button class="btn btn-xs" style="background:#f8fafc; color:#64748b; border:1px solid #e2e8f0; font-weight:600; padding:5px 10px; border-radius:7px; font-size:0.72rem; cursor:pointer;" onclick="promptCustomMonthPayment('${sid}', '${m}', ${monthlyTotal})">
-                  Custom Amt
-                </button>
-              `}
             </div>
           </div>
         `;
       }).join('');
       
-      const totalDue = getLedgerArrears(sid, getNextMonth('2026-09'));
-      const initials = s.name.split(' ').map(n => n[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'ST';
-      
       openModal(`
         <!-- Student Header -->
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:16px; padding-bottom:14px; border-bottom:1px solid #e2e8f0;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; margin-bottom:18px; padding-bottom:14px; border-bottom:1px solid #e2e8f0;">
           <div style="display:flex; gap:12px; align-items:center;">
-            <div style="width:42px; height:42px; border-radius:10px; background:linear-gradient(135deg, #1e293b, #0f172a); color:#ffffff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1rem; letter-spacing:0.5px; box-shadow:0 2px 6px rgba(15,23,42,0.15); flex-shrink:0;">
+            <div style="width:46px; height:46px; border-radius:12px; background:linear-gradient(135deg, #1e293b, #0f172a); color:#ffffff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.05rem; letter-spacing:0.5px; box-shadow:0 3px 8px rgba(15,23,42,0.18); flex-shrink:0;">
               ${initials}
             </div>
             <div>
-              <div style="font-weight:800; font-size:1.12rem; color:#0f172a; line-height:1.2;">
+              <div style="font-weight:800; font-size:1.15rem; color:#0f172a; line-height:1.2; letter-spacing:-0.2px;">
                 ${escHtml(s.name)}
               </div>
-              <div style="display:flex; gap:6px; align-items:center; margin-top:4px; flex-wrap:wrap;">
-                <span style="background:#f1f5f9; color:#475569; font-size:0.74rem; font-weight:600; padding:2px 7px; border-radius:5px;">${escHtml(cls?.name || 'Class')}</span>
-                <span style="background:#f1f5f9; color:#475569; font-size:0.74rem; font-weight:600; padding:2px 7px; border-radius:5px;">Roll: ${escHtml(s.roll || '-')}</span>
-                <span style="font-size:0.74rem; color:#64748b; margin-left:2px;">Monthly Fee: <b style="color:#0f172a;">${fmtMoney(tuition + van)}</b></span>
+              <div style="display:flex; gap:7px; align-items:center; margin-top:4px; flex-wrap:wrap;">
+                <span style="background:#f1f5f9; color:#475569; font-size:0.75rem; font-weight:600; padding:2px 8px; border-radius:6px;">${escHtml(cls?.name || 'Class')}</span>
+                <span style="background:#f1f5f9; color:#475569; font-size:0.75rem; font-weight:600; padding:2px 8px; border-radius:6px;">Roll: ${escHtml(s.roll || '-')}</span>
+                <span style="font-size:0.75rem; color:#64748b; margin-left:2px;">Standard Monthly: <b style="color:#0f172a;">${fmtMoney(tuition + van)}</b></span>
               </div>
             </div>
           </div>
-          <div style="display:flex; gap:6px; align-items:center;">
-            <button class="btn btn-xs" style="background:#ecfdf5; color:#059669; border:1px solid #a7f3d0; font-weight:700; padding:5px 11px; border-radius:7px; display:inline-flex; align-items:center; gap:4px; font-size:0.75rem; cursor:pointer;" onclick="markAllMonths('${sid}', true)">
-              <span>✓</span> Mark Both Paid
+          <div style="display:flex; gap:8px; align-items:center;">
+            <button class="btn btn-xs" style="background:#ecfdf5; color:#059669; border:1px solid #a7f3d0; font-weight:700; padding:6px 13px; border-radius:8px; display:inline-flex; align-items:center; gap:5px; font-size:0.76rem; cursor:pointer;" onclick="markAllMonths('${sid}', true)">
+              <span>✓</span> Mark All Paid
             </button>
-            <button class="btn btn-xs" style="background:#fef2f2; color:#dc2626; border:1px solid #fecaca; font-weight:700; padding:5px 11px; border-radius:7px; display:inline-flex; align-items:center; gap:4px; font-size:0.75rem; cursor:pointer;" onclick="markAllMonths('${sid}', false)">
-              <span>✕</span> Mark Both Unpaid
+            <button class="btn btn-xs" style="background:#fef2f2; color:#dc2626; border:1px solid #fecaca; font-weight:700; padding:6px 13px; border-radius:8px; display:inline-flex; align-items:center; gap:5px; font-size:0.76rem; cursor:pointer;" onclick="markAllMonths('${sid}', false)">
+              <span>✕</span> Mark All Unpaid
             </button>
           </div>
         </div>
 
-        <div style="font-weight:700; font-size:0.78rem; color:#64748b; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.6px; display:flex; align-items:center; gap:6px;">
-          <span>Session Months Ledger</span>
+        <div style="font-weight:700; font-size:0.76rem; color:#64748b; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.8px; display:flex; align-items:center; justify-content:space-between;">
+          <span>Session Months Fee Ledger</span>
+          <span style="font-size:0.72rem; color:#94a3b8; font-weight:500; text-transform:none;">Real-time ledger entries</span>
         </div>
         
         ${monthsHtml}
         
         <!-- Summary Box -->
-        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:14px 18px; margin:14px 0 16px 0;">
-          <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.84rem; color:#475569; margin-bottom:7px;">
-            <span>Previous Arrears (Admission / Opening Balance):</span>
+        <div style="background:linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%); border:1px solid #e2e8f0; border-radius:14px; padding:16px 20px; margin:16px 0 18px 0; box-shadow:inset 0 1px 0 rgba(255,255,255,0.6);">
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; color:#475569; margin-bottom:7px;">
+            <span>Previous Arrears (Opening Balance):</span>
             <span style="font-weight:700; color:${initialArrears > 0 ? '#b91c1c' : '#334155'}; font-size:0.92rem;">
               ${fmtMoney(initialArrears)}
             </span>
           </div>
           ${unpaidMonthsSum > 0 ? `
-          <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.84rem; color:#475569; margin-bottom:7px;">
-            <span>Unpaid Months Dues:</span>
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; color:#475569; margin-bottom:7px;">
+            <span>Unpaid Months Remaining Dues:</span>
             <span style="font-weight:700; color:#dc2626; font-size:0.92rem;">
               + ${fmtMoney(unpaidMonthsSum)}
             </span>
           </div>
           ` : ''}
-          <div style="border-top:1px solid #e2e8f0; margin:9px 0;"></div>
+          <div style="border-top:1px solid #cbd5e1; margin:10px 0;"></div>
           <div style="display:flex; justify-content:space-between; align-items:center;">
             <div>
-              <div style="font-weight:800; font-size:0.92rem; color:#0f172a;">Total Net Balance Due</div>
-              <div style="font-size:0.72rem; color:#94a3b8; margin-top:1px;">Live balance after all received payments</div>
+              <div style="font-weight:800; font-size:0.96rem; color:#0f172a; letter-spacing:-0.2px;">Total Net Balance Due</div>
+              <div style="font-size:0.74rem; color:#64748b; margin-top:2px;">Live calculated balance across all billing cycles</div>
             </div>
             <div style="text-align:right;">
-              <div style="font-size:1.35rem; font-weight:900; letter-spacing:-0.5px; color:${totalDue > 0 ? '#dc2626' : '#10b981'};">
+              <div style="font-size:1.45rem; font-weight:900; letter-spacing:-0.5px; color:${totalDue > 0 ? '#dc2626' : '#059669'};">
                 ${fmtMoney(totalDue)}
               </div>
-              ${totalDue <= 0 ? `<div style="font-size:0.7rem; color:#10b981; font-weight:700; text-transform:uppercase;">Fully Cleared ✓</div>` : ''}
+              ${totalDue <= 0 ? `<div style="font-size:0.72rem; color:#059669; font-weight:700; text-transform:uppercase; margin-top:2px;">Fully Cleared ✓</div>` : ''}
             </div>
           </div>
         </div>
 
         <!-- Footer Buttons -->
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; padding-top:12px; border-top:1px solid #f1f5f9;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; padding-top:14px; border-top:1px solid #f1f5f9;">
           <div style="display:flex; gap:8px;">
-            <button class="btn" style="background:#0f172a; color:#ffffff; font-weight:600; font-size:0.82rem; padding:8px 16px; border-radius:8px; border:none; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 4px rgba(15,23,42,0.12); cursor:pointer;" onclick="openVoucherModal('${sid}')">
+            <button class="btn" style="background:#0f172a; color:#ffffff; font-weight:600; font-size:0.84rem; padding:9px 18px; border-radius:9px; border:none; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 5px rgba(15,23,42,0.14); cursor:pointer;" onclick="openVoucherModal('${sid}')">
               <span>🖶</span> Issue Fee Challan
             </button>
             ${getStudentWA(s) ? `
-            <button class="btn" style="background:#15803d; color:#ffffff; font-weight:600; font-size:0.82rem; padding:8px 16px; border-radius:8px; border:none; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 4px rgba(21,128,61,0.15); cursor:pointer;" onclick="sendVoucherWhatsApp('${sid}', '2026-10')">
+            <button class="btn" style="background:#15803d; color:#ffffff; font-weight:600; font-size:0.84rem; padding:9px 18px; border-radius:9px; border:none; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 5px rgba(21,128,61,0.18); cursor:pointer;" onclick="sendVoucherWhatsApp('${sid}', '2026-10')">
               <span>💬</span> WhatsApp Oct Challan
             </button>
             ` : ''}
           </div>
-          <button class="btn" style="background:#ffffff; color:#64748b; border:1px solid #cbd5e1; font-weight:600; font-size:0.82rem; padding:8px 18px; border-radius:8px; cursor:pointer;" onclick="closeModal()">
+          <button class="btn" style="background:#ffffff; color:#475569; border:1px solid #cbd5e1; font-weight:600; font-size:0.84rem; padding:9px 20px; border-radius:9px; cursor:pointer;" onclick="closeModal()">
             Close
           </button>
         </div>
       `);
+    }
+
+    function handleFeeOptionSelect(sid, month, monthlyTotal, baseMonthly, examAmt, selectedVal) {
+      if (!selectedVal) return;
+      if (selectedVal === 'full') {
+        toggleMonthPayment(sid, month, true, monthlyTotal);
+      } else if (selectedVal === 'tuition') {
+        toggleMonthPayment(sid, month, true, baseMonthly);
+      } else if (selectedVal === 'exam') {
+        toggleMonthPayment(sid, month, true, examAmt);
+      } else if (selectedVal === 'unpaid') {
+        toggleMonthPayment(sid, month, false);
+      } else if (selectedVal === 'custom') {
+        promptCustomMonthPayment(sid, month, monthlyTotal);
+      }
     }
 
     function toggleMonthPayment(sid, month, isPaid, customAmount = null) {
@@ -8186,7 +8250,7 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
         delete DB.fees.payments[sid].f1;
       }
       
-      s.fees = getLedgerArrears(sid, getNextMonth('2026-09')) <= 0 ? 'Paid' : 'Pending';
+      s.fees = getLedgerArrears(sid, getNextMonth('2026-10')) <= 0 ? 'Paid' : 'Pending';
       
       saveDB();
       showToast(isPaid ? `${monthName} marked as PAID` : `${monthName} marked as UNPAID`);
@@ -8207,7 +8271,7 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
       if (!DB.fees.monthlyLedger) DB.fees.monthlyLedger = {};
       if (!DB.fees.monthlyLedger[sid]) DB.fees.monthlyLedger[sid] = {};
       
-      const months = ['2026-08', '2026-09'];
+      const months = ['2026-08', '2026-09', '2026-10'];
       const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
       const initialArrears = getTrueInitialArrears(sid);
       
@@ -8244,10 +8308,10 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
         }
       });
       
-      s.fees = getLedgerArrears(sid, getNextMonth('2026-09')) <= 0 ? 'Paid' : 'Pending';
+      s.fees = getLedgerArrears(sid, getNextMonth('2026-10')) <= 0 ? 'Paid' : 'Pending';
       
       saveDB();
-      showToast(isPaid ? 'Both August & September marked as PAID' : 'Both August & September marked as UNPAID');
+      showToast(isPaid ? 'All session months marked as PAID' : 'All session months marked as UNPAID');
       goPage('fees');
       openStudentFeeModal(sid);
     }
