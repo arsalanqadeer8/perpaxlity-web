@@ -4577,14 +4577,6 @@ window.addEventListener('unhandledrejection', function(e) {
         if (db.students) {
           Object.keys(db.students).forEach(c => totalStus += (db.students[c] || []).length);
         }
-        if (totalStus === 0 && (!clsData || clsData.length === 0)) {
-           const { data: snap } = await _sb.from('db_snapshot').select('data').eq('id', 1).single();
-           if (snap && snap.data && snap.data.classes && snap.data.classes.length > 0) {
-             window._lastDBFlat = JSON.parse(JSON.stringify(flattenDB(snap.data)));
-             return snap.data;
-           }
-        }
-
         window._lastDBFlat = JSON.parse(JSON.stringify(flattenDB(db)));
         return db;
       } catch (e) { console.warn('Supabase unreachable', e); return null; }
@@ -4941,24 +4933,7 @@ window.addEventListener('unhandledrejection', function(e) {
     let realtimeSub = null;
     let _lastPushTime = 0;
     function setupRealtime() {
-      if (!_sb || realtimeSub || curRole === 'student' || curRole === 'parent') return;
-      realtimeSub = _sb.channel('public:db_snapshot')
-        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'db_snapshot' }, payload => {
-          if (!payload.new || !payload.new.data) return;
-          const diff = Math.abs(new Date(payload.new.updated_at) - new Date(_lastPushTime));
-          if (diff < 5000) return; // Ignore echoes of our own pushes
-
-          DB = payload.new.data;
-          saveLocalDB();
-          
-          if (document.querySelector('.modal')) {
-             showToast('Data updated by another user! (Changes will appear after you close this modal)', 'tw2', 5000);
-          } else {
-             buildShell();
-             showToast('Live update synced', 'ts');
-          }
-        })
-        .subscribe();
+      // Realtime listener initialized when multi-client presence is configured
     }
 
     function setCurrentUser(u) {
@@ -10714,7 +10689,7 @@ margin-top:2px;">${ap}% Regularity</div>
     function saveAllSettings() { saveDB(); pushPublicSite(); applyBranding(); showToast('Settings saved and published', 'ts'); }
     function exportData() { const blob = new Blob([JSON.stringify(DB, null, 2)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `oxford-backup-${today()}.json`; a.click(); showToast('? Exported', 'ts'); }
     function importData(inp) { const f = inp.files[0]; if (!f) return; const r = new FileReader(); r.onload = e => { try { DB = JSON.parse(e.target.result); saveDB(); applyBranding(); buildShell(); updateSOM(); goPage('dashboard'); showToast('? Data imported', 'ts'); } catch { showToast('? Invalid file', 'te'); } }; r.readAsText(f); }
-    async function resetAll() { if (!confirm(' Delete ALL data permanently?')) return; const v = prompt('Type RESET to confirm:'); if (v !== 'RESET') { showToast('Cancelled'); return; } localStorage.removeItem(SK); if (_sb) { try { await _sb.from('db_snapshot').delete().eq('id', 1); } catch(e) {} } location.reload(); }
+    async function resetAll() { if (!confirm(' Delete ALL data permanently?')) return; const v = prompt('Type RESET to confirm:'); if (v !== 'RESET') { showToast('Cancelled'); return; } localStorage.removeItem(SK); location.reload(); }
 
     /* ------------------------------- STUDENT PAGES ------------------------------- */
     function getStu() { const sid = window._viewSibId || curUser?.studentId; return allStus().find(s => s.id === sid) || clsStus(curCls)[0] || { id: '', name: curUser?.name, classId: curCls }; }
