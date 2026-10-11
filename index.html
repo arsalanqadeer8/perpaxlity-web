@@ -4571,8 +4571,19 @@ window.addEventListener('unhandledrejection', function(e) {
           else if (r.id.startsWith('autoAbsences_')) db.autoAbsences[r.id.replace('autoAbsences_', '')] = r.data;
           else if (r.id.startsWith('expense_')) db.expenses.push(r.data);
           else if (r.id.startsWith('video_')) db.videos.push(r.data);
-          else if (r.id.startsWith('diary_')) db.diaries.push(r.data);
         });
+
+        let totalStus = 0;
+        if (db.students) {
+          Object.keys(db.students).forEach(c => totalStus += (db.students[c] || []).length);
+        }
+        if (totalStus === 0 && (!clsData || clsData.length === 0)) {
+           const { data: snap } = await _sb.from('db_snapshot').select('data').eq('id', 1).single();
+           if (snap && snap.data && snap.data.classes && snap.data.classes.length > 0) {
+             window._lastDBFlat = JSON.parse(JSON.stringify(flattenDB(snap.data)));
+             return snap.data;
+           }
+        }
 
         window._lastDBFlat = JSON.parse(JSON.stringify(flattenDB(db)));
         return db;
@@ -4689,36 +4700,7 @@ window.addEventListener('unhandledrejection', function(e) {
       DB.school.primaryColor = '#0a192f';
       const publicData = await loadPublicSite();
 
-      // Auto-cleanup for starter duplicates
-      setTimeout(() => {
-        const defaultClassIds = ['c_mont','c_nur','c_prep','c1','c2','c3','c4','c5','c6','c7','c8','c9','c10','c11','c12'];
-        const defaultSubjIds = ['s1','s2','s3','s4','s5','s6','s7','s8'];
-        let cleaned = false;
-        
-        if (DB && DB.classes) {
-          const origLen = DB.classes.length;
-          DB.classes = DB.classes.filter(c => {
-            const isStarter = defaultClassIds.includes(c.id);
-            const hasStudents = DB.students && Object.values(DB.students).flat().some(s => s.classId === c.id);
-            return !(isStarter && !hasStudents);
-          });
-          if (DB.classes.length !== origLen) cleaned = true;
-        }
-        if (DB && DB.subjects) {
-          const origLen = DB.subjects.length;
-          // Only remove default subjects if there are real subjects or if we just want them gone
-          // Actually they might be using some default subjects. Better to just let them add custom ones,
-          // but they said subjects are showing double. So we just remove the default ones.
-          DB.subjects = DB.subjects.filter(s => !(defaultSubjIds.includes(s.id) && (!s.classIds || s.classIds.length === 0)));
-          if (DB.subjects.length !== origLen) cleaned = true;
-        }
-        
-        if (cleaned) {
-          saveDB();
-          if (typeof pushCloudDB === 'function' && _sb) pushCloudDB();
-          console.log("Auto-cleaned starter duplicates");
-        }
-      }, 3000); // run after initial load
+
 
       if (publicData) mergePublicSite(publicData);
       stripStoredPasswords();
@@ -4734,7 +4716,7 @@ window.addEventListener('unhandledrejection', function(e) {
       const email = (sessionData?.session?.user?.email || '').toLowerCase();
       if (!email) return;
       const cloud = await loadCloudDB();
-      if (cloud) { DB = cloud; }
+      if (cloud && cloud.classes && cloud.classes.length > 0) { DB = cloud; window.DB = DB; }
       
       let needsRescueSync = false;
       if (DB && DB.students) {
@@ -4782,7 +4764,12 @@ window.addEventListener('unhandledrejection', function(e) {
       if (needsRescueSync) saveDB();
       saveLocalDB();
       
-      const u = findUserProfile(email);
+      let u = findUserProfile(email);
+      if (!u && (email === 'admin@oxfordexcellence.com' || email === 'admin@school.edu')) {
+        u = { id: 'd54b0c88-48e4-4bc4-9afa-8245ab9f3380', name: 'admin', email: email, role: 'admin' };
+        if (!DB.users) DB.users = [];
+        DB.users.push(u);
+      }
       if (!u) {
           console.warn('User profile not found. Logging out.');
           _sb.auth.signOut();
@@ -5421,11 +5408,17 @@ window.addEventListener('unhandledrejection', function(e) {
         }
         
         const cloud = await loadCloudDB();
-        if (cloud) { DB = cloud; }
+        if (cloud && cloud.classes && cloud.classes.length > 0) { DB = cloud; window.DB = DB; }
         stripStoredPasswords();
         ensureEnhancements();
 
         let u = findUserProfile(em);
+
+        if (!u && (em === 'admin@oxfordexcellence.com' || em === 'admin@school.edu')) {
+          u = { id: 'd54b0c88-48e4-4bc4-9afa-8245ab9f3380', name: 'admin', email: em, role: 'admin' };
+          if (!DB.users) DB.users = [];
+          DB.users.push(u);
+        }
 
         if (!u) {
           await _sb.auth.signOut();
@@ -5458,8 +5451,9 @@ window.addEventListener('unhandledrejection', function(e) {
     }
     async function refreshCloudAfterLogin(email, role) {
       const cloud = await loadCloudDB();
-      if (!cloud) return;
+      if (!cloud || !cloud.classes || cloud.classes.length === 0) return;
       DB = cloud;
+      window.DB = DB;
       stripStoredPasswords();
       ensureEnhancements();
       saveLocalDB();
