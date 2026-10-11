@@ -5735,8 +5735,13 @@ window.addEventListener('unhandledrejection', function(e) {
       setText('land-copy', s.tagline || 'Learn • Grow • Excel');
       ['tb-ico', 'lp-logo', 'land-mark', 'foot-logo'].forEach(id => {
         const el = document.getElementById(id); if (!el) return;
-        el.innerHTML = s.logo ? `<img src="${s.logo}" alt="logo" style="width:100%;height:100%;object-fit:contain;"/>` : `<img src="favicon.png" alt="logo" style="width:100%;height:100%;object-fit:contain;"/>`;
-        el.style.background = 'transparent';
+        el.innerHTML = s.logo ? `<img src="${s.logo}" alt="logo" style="width:100%;height:100%;object-fit:contain;display:block;"/>` : `<img src="oxford_logo.svg" alt="logo" style="width:100%;height:100%;object-fit:contain;display:block;"/>`;
+        el.style.background = '#ffffff';
+        el.style.border = id === 'foot-logo' ? '2px solid #c89a40' : '1.5px solid rgba(200,154,64,0.6)';
+        el.style.boxShadow = '0 4px 16px rgba(0,0,0,0.4)';
+        el.style.borderRadius = '50%';
+        el.style.padding = '3px';
+        el.style.flexShrink = '0';
       });
       document.documentElement.style.setProperty('--p', s.primaryColor || '#ff8a00');
       renderLandingSlides();
