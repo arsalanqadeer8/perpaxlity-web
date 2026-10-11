@@ -1,0 +1,32 @@
+name: Automated School Database Backup
+
+on:
+  schedule:
+    # Runs every day at 02:00 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub Actions UI anytime
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run Automated Database Backup
+        run: node scripts/automated_backup.js
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL || 'https://iprqtkmtelgdhlenlsrc.supabase.co' }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY || 'sb_publishable_DX0GG-V6vp9ey7_FxbvLdw_ql-E8nEt' }}
+
+      - name: Archive Backup as GitHub Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: school-database-backup
+          path: backups/oxford_backup_*.json
+          retention-days: 90
