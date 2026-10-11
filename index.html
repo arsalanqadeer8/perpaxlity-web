@@ -4559,6 +4559,12 @@ window.addEventListener('unhandledrejection', function(e) {
           else if (r.id === 'periods') db.periods = r.data;
         });
 
+        if (!db.settings) db.settings = {};
+        if (!Array.isArray(db.settings.terms) || db.settings.terms.length === 0) {
+          db.settings.terms = [{ id: 't1', name: 'Midterm' }, { id: 't2', name: 'Final Term' }];
+          db.settings.activeTerm = db.settings.activeTerm || 't1';
+        }
+
         if (mscData) mscData.forEach(r => {
           if (r.id.startsWith('admission_')) db.admissions.push(r.data);
           else if (r.id.startsWith('notice_')) db.notices.push(r.data);
@@ -5001,7 +5007,7 @@ window.addEventListener('unhandledrejection', function(e) {
           { id: 'u4', name: 'Mr. Raza Sr.', email: 'parent@school.edu', role: 'parent', photo: '', phone: '', familyId: 'fam1' },
         ],
         families: { fam1: { id: 'fam1', parentName: 'Raza Family', phone: '03001234567', email: 'parent@school.edu', address: '', studentIds: [], whatsapp: '923001234567' } },
-        settings: { currency: 'PKR', schoolYear: '2025-26', theme: 'light', defaultFeeDueDay: '5th of month' },
+        settings: { currency: 'PKR', schoolYear: '2025-26', theme: 'light', defaultFeeDueDay: '5th of month', terms: [{ id: 't1', name: 'Midterm' }, { id: 't2', name: 'Final Term' }], activeTerm: 't1' },
       };
     }
 
@@ -5289,7 +5295,9 @@ window.addEventListener('unhandledrejection', function(e) {
       DB.settings.currency = DB.settings.currency || 'PKR';
       DB.settings.schoolYear = DB.settings.schoolYear || '2025-26';
       DB.settings.defaultFeeDueDay = DB.settings.defaultFeeDueDay || '5th of month';
-      DB.settings.terms = DB.settings.terms || [{id:'t1', name:'Midterm'}, {id:'t2', name:'Final Term'}];
+      if (!Array.isArray(DB.settings.terms) || DB.settings.terms.length === 0) {
+        DB.settings.terms = [{id:'t1', name:'Midterm'}, {id:'t2', name:'Final Term'}];
+      }
       DB.settings.activeTerm = DB.settings.activeTerm || 't1';
       DB.grades = DB.grades || {};
       Object.keys(DB.grades).forEach(k => {
