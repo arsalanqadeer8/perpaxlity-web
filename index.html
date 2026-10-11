@@ -5048,6 +5048,13 @@ window.addEventListener('unhandledrejection', function(e) {
     function today() { const p = new Date().toLocaleString('en-US', { timeZone: 'Asia/Karachi', year: 'numeric', month: '2-digit', day: '2-digit' }).split('/'); return p[2] + '-' + p[0] + '-' + p[1]; }
     function monthKey(d = today()) { return String(d || today()).slice(0, 7); }
     function fmtDate(d) { if (!d) return '-'; const p = d.split('-'); if(p.length === 3) return p[2]+'/'+p[1]+'/'+p[0]; return d; }
+    function formatMonthDisplay(mKey) {
+      if (!mKey) return '';
+      const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      const p = mKey.split('-');
+      const idx = parseInt(p[1], 10) - 1;
+      return `${mNames[idx] || mKey} ${p[0]}`;
+    }
     function allStus() { return Object.values(DB.students).flat(); }
     function clsStus(cid) { return DB.students[cid] || []; }
     function getClsSubjects(cid) {
@@ -7711,9 +7718,10 @@ If the arrears sum is lower than you expect, please check your CSV file to ensur
             const matchesClass = !classQ || classCellText === classQ;
             const matchesText = !textQ || rowText.includes(textQ);
             let matchesStatus = true;
-            if (statusQ === 'both-paid') matchesStatus = tr.dataset.aug === 'paid' && tr.dataset.sep === 'paid';
+            if (statusQ === 'oct-unpaid') matchesStatus = tr.dataset.oct === 'unpaid';
+            else if (statusQ === 'oct-paid') matchesStatus = tr.dataset.oct === 'paid';
             else if (statusQ === 'sep-unpaid') matchesStatus = tr.dataset.sep === 'unpaid';
-            else if (statusQ === 'aug-unpaid') matchesStatus = tr.dataset.aug === 'unpaid';
+            else if (statusQ === 'both-paid') matchesStatus = tr.dataset.sep === 'paid' && tr.dataset.oct === 'paid';
             else if (statusQ === 'arrears') matchesStatus = tr.dataset.arrears === 'yes';
             tr.style.display = (matchesClass && matchesText && matchesStatus) ? '' : 'none';
         });
@@ -7845,9 +7853,10 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
       </select>
       <select id="fee-status-filter" class="fi" onchange="filterFeeTable()" style="padding:7px 10px; width:145px; font-size:0.78rem; font-weight:600; border-radius:8px; border:1px solid #cbd5e1; background-color:#ffffff;">
         <option value="">All Status</option>
-        <option value="both-paid">Aug & Sep Paid</option>
+        <option value="oct-unpaid">Oct Unpaid</option>
+        <option value="oct-paid">Oct Paid</option>
         <option value="sep-unpaid">Sep Unpaid</option>
-        <option value="aug-unpaid">Aug Unpaid</option>
+        <option value="both-paid">Sep & Oct Paid</option>
         <option value="arrears">Has Arrears</option>
       </select>
       <input type="text" id="fee-search-filter" class="fi" placeholder="Search student or roll..." onkeyup="filterFeeTable()" style="width:180px; padding:7px 12px; font-size:0.78rem; border-radius:8px; border:1px solid #cbd5e1; background-color:#ffffff;"/>
@@ -7874,15 +7883,17 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
       const cls = DB.classes.find(c => c.id === s.classId);
       const augRow = DB.fees.monthlyLedger?.[s.id]?.['2026-08'];
       const sepRow = DB.fees.monthlyLedger?.[s.id]?.['2026-09'];
+      const octRow = DB.fees.monthlyLedger?.[s.id]?.['2026-10'];
       const augPaid = augRow ? augRow.paid : false;
       const sepPaid = sepRow ? sepRow.paid : false;
+      const octPaid = octRow ? octRow.paid : false;
       const mFee = monthlyFeeAmount(s) + num(s.vanFee || 0);
       const sibs = getFamilySiblings(s);
       const hasSiblings = sibs && sibs.length > 1;
       const initials = (s.name || '').split(' ').map(n => n[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'ST';
       const stuWA = getStudentWA(s);
 
-      return `<tr class="fee-table-row" data-aug="${augPaid ? 'paid' : 'unpaid'}" data-sep="${sepPaid ? 'paid' : 'unpaid'}" data-arrears="${sum.pendingArrears > 0 ? 'yes' : 'no'}">
+      return `<tr class="fee-table-row" data-aug="${augPaid ? 'paid' : 'unpaid'}" data-sep="${sepPaid ? 'paid' : 'unpaid'}" data-oct="${octPaid ? 'paid' : 'unpaid'}" data-arrears="${sum.pendingArrears > 0 ? 'yes' : 'no'}">
         <td style="padding:12px 16px; vertical-align:middle;">
           <div style="display:flex; align-items:center; gap:10px;">
             <div class="stu-table-avatar">${initials}</div>
@@ -7901,8 +7912,8 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
         <td style="padding:12px 14px; vertical-align:middle; white-space:nowrap;">
           <div style="font-weight:700; font-size:0.84rem; color:#0f172a;">${fmtMoney(mFee)} <span style="font-size:0.68rem; color:#64748b; font-weight:400;">/mo</span></div>
           <div style="margin-top:4px; display:flex; gap:5px; align-items:center;">
-            <span class="fee-status-badge ${augPaid ? 'paid' : 'unpaid'}">Aug: ${augPaid ? 'PAID' : 'DUE'}</span>
             <span class="fee-status-badge ${sepPaid ? 'paid' : 'unpaid'}">Sep: ${sepPaid ? 'PAID' : 'DUE'}</span>
+            <span class="fee-status-badge ${octPaid ? 'paid' : 'unpaid'}">Oct: ${octPaid ? 'PAID' : 'DUE'}</span>
           </div>
         </td>
         <td style="padding:12px 14px; vertical-align:middle; white-space:nowrap;">
@@ -8046,7 +8057,7 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
       }
 
       let unpaidMonthsSum = 0;
-      const totalDue = getLedgerArrears(sid, getNextMonth('2026-10'));
+      const totalDue = getLedgerArrears(sid, getNextMonth(monthKey()));
       const initials = s.name.split(' ').map(n => n[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'ST';
       
       let monthsHtml = months.map(m => {
@@ -8259,8 +8270,8 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Issue Fee Challan
             </button>
             ${getStudentWA(s) ? `
-            <button type="button" class="btn" style="outline:none; background:#16a34a; color:#ffffff; font-weight:600; font-size:0.78rem; padding:7px 14px; border-radius:7px; border:none; display:inline-flex; align-items:center; gap:5px; box-shadow:0 1px 3px rgba(22,163,74,0.22); cursor:pointer;" onclick="sendVoucherWhatsApp('${sid}', '2026-10')">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg> WhatsApp Oct Challan
+            <button type="button" class="btn" style="outline:none; background:#16a34a; color:#ffffff; font-weight:600; font-size:0.78rem; padding:7px 14px; border-radius:7px; border:none; display:inline-flex; align-items:center; gap:5px; box-shadow:0 1px 3px rgba(22,163,74,0.22); cursor:pointer;" onclick="sendVoucherWhatsApp('${sid}', '${monthKey()}')">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg> WhatsApp ${formatMonthDisplay(monthKey()).split(' ')[0]} Challan
             </button>
             ` : ''}
           </div>
@@ -8336,7 +8347,7 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
         delete DB.fees.payments[sid].f1;
       }
       
-      s.fees = getLedgerArrears(sid, getNextMonth('2026-10')) <= 0 ? 'Paid' : 'Pending';
+      s.fees = getLedgerArrears(sid, getNextMonth(monthKey())) <= 0 ? 'Paid' : 'Pending';
       
       saveDB();
       showToast(isPaid ? `${monthName} marked as PAID` : `${monthName} marked as UNPAID`);
@@ -8394,7 +8405,7 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
         }
       });
       
-      s.fees = getLedgerArrears(sid, getNextMonth('2026-10')) <= 0 ? 'Paid' : 'Pending';
+      s.fees = getLedgerArrears(sid, getNextMonth(monthKey())) <= 0 ? 'Paid' : 'Pending';
       
       saveDB();
       showToast(isPaid ? 'All session months marked as PAID' : 'All session months marked as UNPAID');
@@ -8652,7 +8663,8 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
 
         const curM = monthKey();
         const nextM = getNextMonth(curM);
-        const prevM = '2026-08';
+        const prevM = getPrevMonth(curM);
+        const prevM2 = getPrevMonth(prevM);
 
         openModal(`
           <div style="font-family:'Inter', -apple-system, sans-serif;">
@@ -8672,9 +8684,10 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
               <div style="display:flex; align-items:center; gap:8px;">
                 <span style="font-size:0.75rem; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:0.03em;">Billing Period</span>
                 <select class="fi" id="fam-fee-month" onchange="refreshFamilyFeeModalContent()" style="padding:7px 12px; font-size:0.82rem; font-weight:600; border:1px solid #cbd5e1; border-radius:8px; background:#ffffff; color:#0f172a; cursor:pointer;">
-                  <option value="${nextM}" ${activeMonth === nextM ? 'selected' : ''}>Upcoming: October 2026</option>
-                  <option value="${curM}" ${activeMonth === curM ? 'selected' : ''}>Current: September 2026</option>
-                  <option value="${prevM}" ${activeMonth === prevM ? 'selected' : ''}>Previous: August 2026</option>
+                  <option value="${curM}" ${activeMonth === curM ? 'selected' : ''}>Current: ${formatMonthDisplay(curM)}</option>
+                  <option value="${nextM}" ${activeMonth === nextM ? 'selected' : ''}>Upcoming: ${formatMonthDisplay(nextM)}</option>
+                  <option value="${prevM}" ${activeMonth === prevM ? 'selected' : ''}>Previous: ${formatMonthDisplay(prevM)}</option>
+                  <option value="${prevM2}" ${activeMonth === prevM2 ? 'selected' : ''}>Earlier: ${formatMonthDisplay(prevM2)}</option>
                 </select>
               </div>
             </div>
