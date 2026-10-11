@@ -3320,7 +3320,7 @@
   font-family: 'Inter', system-ui, sans-serif;
 }
     .ox-brand { font-size: 1rem; font-weight: 700; color: var(--ox-primary); letter-spacing: -0.3px; display: flex; align-items: center; gap: 10px; z-index: 1001; flex-shrink: 0; font-family: var(--ox-heading); }
-    .ox-brand-icon { width: 40px; height: 40px; background: #0a192f; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border-radius: 50%; overflow: hidden; padding: 4px; }
+    .ox-brand-icon { width: 44px; height: 44px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(212, 175, 55, 0.3); display: flex; align-items: center; justify-content: center; flex-shrink: 0; border-radius: 10px; overflow: hidden; padding: 2px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3); }
     
     /* Navigation styling (Hamburger by default on all screens) */
     .ox-nav-links { display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: var(--ox-surface); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); flex-direction: column; justify-content: center; align-items: center; gap: 40px; transform: translateY(-100%); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); opacity: 0; pointer-events: none; z-index: 1000; }
@@ -4162,9 +4162,14 @@ window.addEventListener('unhandledrejection', function(e) {
     <footer class="ox-footer" id="footer">
         <div class="ox-footer-grid">
             <div>
-                <div class="ox-brand" style="color:white; margin-bottom:20px;">
-                    <div class="ox-brand-icon" id="foot-logo" style="background:transparent; color:#0a192f; width:70px; height:70px;"><img src="oxford_logo.svg" style="width:100%; height:100%; object-fit:contain;" alt="logo" /></div>
-                    Oxford Excellence
+                <div class="ox-brand" style="color:white; margin-bottom:20px; display:flex; align-items:center; gap:16px;">
+                    <div id="foot-logo" style="width:68px; height:68px; border-radius:14px; background:rgba(255,255,255,0.04); border:1px solid rgba(212,175,55,0.35); padding:4px; box-shadow:0 6px 24px rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                        <img src="oxford_logo.svg" style="width:100%; height:100%; object-fit:contain;" alt="Oxford Excellence Academy Crest" />
+                    </div>
+                    <div>
+                        <div style="font-family:'Cinzel', serif; font-size:1.25rem; font-weight:700; letter-spacing:0.5px; color:#ffffff; line-height:1.2;">Oxford Excellence</div>
+                        <div style="font-size:0.72rem; color:#c89a40; text-transform:uppercase; letter-spacing:2px; font-weight:600; margin-top:3px;">Academy • Karachi</div>
+                    </div>
                 </div>
                 <p>Empowering the leaders of tomorrow through rigorous academics, profound character development, and a commitment to global excellence.</p>
                 <div class="ox-socials">
