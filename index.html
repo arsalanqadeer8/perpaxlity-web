@@ -3340,6 +3340,10 @@
     /* Hero Section */
     .ox-hero { padding: 120px 5%; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; text-align: left; min-height: 90vh; position: relative; overflow: hidden; background-color: #0a192f; }
     .ox-hero::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(10, 25, 47, 0.92) 0%, rgba(10, 25, 47, 0.72) 40%, rgba(10, 25, 47, 0.25) 80%, rgba(10, 25, 47, 0.15) 100%); z-index: 1; pointer-events: none; }
+    #ox-hero-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center right; z-index: 0; transform: scale(1.035) translate3d(0, 0, 0); transform-origin: center right; will-change: transform; pointer-events: none; }
+    @media (prefers-reduced-motion: reduce) {
+        #ox-hero-img { transform: scale(1) translate3d(0, 0, 0) !important; transition: none !important; }
+    }
     .ox-hero-content { position: relative; z-index: 2; max-width: 800px; }
     .ox-badge { display: inline-block; background: rgba(212, 175, 55, 0.2); color: var(--ox-gold); padding: 8px 24px; border-radius: 30px; font-size: 0.85rem; font-weight: 700; margin-bottom: 24px; letter-spacing: 1px; text-transform: uppercase; border: 1px solid rgba(212, 175, 55, 0.4); }
     .ox-hero h1 { font-size: clamp(3rem, 6vw, 5.5rem); line-height: 1.1; color: #ffffff; margin-bottom: 24px; font-weight: 800; letter-spacing: -2px; }
@@ -3838,11 +3842,11 @@ window.addEventListener('unhandledrejection', function(e) {
         </div>
     </nav>
 
-    <header class="ox-hero">
-        <picture style="position:absolute; inset:0; width:100%; height:100%; z-index:0; pointer-events:none;">
+    <header class="ox-hero" id="ox-hero">
+        <picture style="position:absolute; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; overflow:hidden;">
             <source srcset="hero_image.webp?v=4" type="image/webp">
             <source srcset="hero_image.jpg?v=4" type="image/jpeg">
-            <img src="hero_image.png?v=4" loading="eager" fetchpriority="high" decoding="sync" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center right; z-index:0;" alt="Oxford Excellence Academy Campus">
+            <img src="hero_image.png?v=4" id="ox-hero-img" loading="eager" fetchpriority="high" decoding="sync" alt="Oxford Excellence Academy Campus">
         </picture>
         <div class="ox-hero-content gs-anim-up" style="position:relative; z-index:2;">
             <div class="ox-badge">Admissions Open</div>
@@ -4298,7 +4302,8 @@ window.addEventListener('unhandledrejection', function(e) {
                 gsap.from(".gs-anim-up", { y: 50, opacity: 0, duration: 1, delay: 0.2, ease: "power3.out" });
                 gsap.from(".gs-anim-in", { x: 50, opacity: 0, duration: 1.5, delay: 0.4, ease: "power3.out" });
 
-                // (Hero Image Slider Removed)
+                // Interactive Mouse Parallax on Hero Image (Fine Pointers & Motion Enabled only)
+                initHeroParallax();
 
                 // Stats Counters
                 ScrollTrigger.create({
@@ -4345,6 +4350,71 @@ window.addEventListener('unhandledrejection', function(e) {
                 });
             }
         });
+
+        // Mouse Parallax for Hero Image
+        function initHeroParallax() {
+            const hero = document.getElementById('ox-hero');
+            const img = document.getElementById('ox-hero-img');
+            if (!hero || !img) return;
+
+            // Accessibility & device capability guards: fine mouse pointers only, no reduced motion
+            const hasFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (!hasFinePointer || prefersReducedMotion) return;
+
+            let rect = hero.getBoundingClientRect();
+            const updateRect = () => { rect = hero.getBoundingClientRect(); };
+            window.addEventListener('resize', updateRect, { passive: true });
+            window.addEventListener('scroll', updateRect, { passive: true });
+
+            const maxTranslateX = 12; // Maximum horizontal shift in px
+            const maxTranslateY = 10; // Maximum vertical shift in px
+            const baseScale = 1.035;  // Scale factor to eliminate edge gaps
+
+            function onPointerMove(e) {
+                if (!rect.width || !rect.height) updateRect();
+                // Normalized relative position from center of hero [-0.5, 0.5]
+                const relX = (e.clientX - rect.left) / rect.width - 0.5;
+                const relY = (e.clientY - rect.top) / rect.height - 0.5;
+
+                const clampedX = Math.max(-0.5, Math.min(0.5, relX));
+                const clampedY = Math.max(-0.5, Math.min(0.5, relY));
+
+                const targetX = -clampedX * maxTranslateX * 2;
+                const targetY = -clampedY * maxTranslateY * 2;
+
+                if (typeof gsap !== 'undefined') {
+                    gsap.to(img, {
+                        x: targetX,
+                        y: targetY,
+                        scale: baseScale,
+                        duration: 0.7,
+                        ease: "power2.out",
+                        overwrite: "auto"
+                    });
+                } else {
+                    img.style.transform = `scale(${baseScale}) translate3d(${targetX.toFixed(2)}px, ${targetY.toFixed(2)}px, 0)`;
+                }
+            }
+
+            function onPointerLeave() {
+                if (typeof gsap !== 'undefined') {
+                    gsap.to(img, {
+                        x: 0,
+                        y: 0,
+                        scale: baseScale,
+                        duration: 0.9,
+                        ease: "power2.out",
+                        overwrite: "auto"
+                    });
+                } else {
+                    img.style.transform = `scale(${baseScale}) translate3d(0, 0, 0)`;
+                }
+            }
+
+            hero.addEventListener('pointermove', onPointerMove, { passive: true });
+            hero.addEventListener('pointerleave', onPointerLeave, { passive: true });
+        }
     
 </script>
 </div>
