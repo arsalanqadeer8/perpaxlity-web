@@ -6762,15 +6762,58 @@ ${(() => {
       if (rollEl && !rollEl.dataset.manual) rollEl.value = nextRoll(cid);
     }
 
-    function prevStuPhoto(inp) {
+    function compressImage(fileOrDataUrl, maxDim = 400, quality = 0.82) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          let w = img.width;
+          let h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) {
+              h = Math.round((h * maxDim) / w);
+              w = maxDim;
+            } else {
+              w = Math.round((w * maxDim) / h);
+              h = maxDim;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = () => {
+          resolve(typeof fileOrDataUrl === 'string' ? fileOrDataUrl : '');
+        };
+        if (typeof fileOrDataUrl === 'string') {
+          img.src = fileOrDataUrl;
+        } else {
+          const reader = new FileReader();
+          reader.onload = e => { img.src = e.target.result; };
+          reader.onerror = () => resolve('');
+          reader.readAsDataURL(fileOrDataUrl);
+        }
+      });
+    }
+
+    async function prevStuPhoto(inp) {
       const f = inp.files[0]; if (!f) return;
-      const r = new FileReader();
-      r.onload = e => {
-        document.getElementById('m-pd').value = e.target.result;
+      try {
+        const compressed = await compressImage(f, 400, 0.82);
+        document.getElementById('m-pd').value = compressed;
         const p = document.getElementById('m-pup');
-        if (p) p.innerHTML = `<img src="${e.target.result}"/>`;
-      };
-      r.readAsDataURL(f);
+        if (p) p.innerHTML = `<img src="${compressed}"/>`;
+      } catch (e) {
+        const r = new FileReader();
+        r.onload = ev => {
+          document.getElementById('m-pd').value = ev.target.result;
+          const p = document.getElementById('m-pup');
+          if (p) p.innerHTML = `<img src="${ev.target.result}"/>`;
+        };
+        r.readAsDataURL(f);
+      }
     }
     function clearStuPhoto() { document.getElementById('m-pd').value = ''; const p = document.getElementById('m-pup'); if (p) p.innerHTML = '<div class="pup-ic"></div><div class="pup-tx">Add Photo</div>'; }
 
@@ -6786,12 +6829,14 @@ ${(() => {
            showToast('Uploading photo...', 'ts');
            const r = await fetch(photo);
            const blob = await r.blob();
-           const file = new File([blob], `stu_${Date.now()}.png`, { type: blob.type });
+           const file = new File([blob], `stu_${Date.now()}.jpg`, { type: 'image/jpeg' });
            photo = await uploadToStorage(file);
          } catch(e) { 
-           showToast('Photo upload failed: ' + e.message, 'te');
-           alert('Error: Photo upload failed. Details: ' + e.message + '\\n\\nPlease fix Supabase Storage permissions (RLS) if needed. The student was NOT saved.');
-           return; // Prevent saving the massive base64 string!
+           console.warn('Supabase storage upload failed, using optimized photo:', e);
+           if (photo.length > 70000) {
+             photo = await compressImage(photo, 300, 0.75);
+           }
+           showToast('Photo optimized and saved locally', 'tw2', 4000);
          }
       }
 
