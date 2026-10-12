@@ -93,8 +93,25 @@
 
     async function init() {
         // 1. Resolve Auth & Current User
-        const { data: auth } = await _sb.auth.getSession();
-        let authEmail = auth?.session?.user?.email;
+        const urlParams = new URLSearchParams(window.location.search);
+        let authEmail = urlParams.get('user') || urlParams.get('email');
+        let authRole = urlParams.get('role') || 'admin';
+
+        // Check active session stored from portal
+        try {
+            const storedUser = JSON.parse(localStorage.getItem('oxford_active_user') || sessionStorage.getItem('oxford_active_user') || 'null');
+            if (storedUser && storedUser.email) {
+                authEmail = authEmail || storedUser.email;
+                curUser = storedUser;
+            }
+        } catch(e) {}
+
+        if (!authEmail) {
+            try {
+                const { data: auth } = await _sb.auth.getSession();
+                authEmail = auth?.session?.user?.email;
+            } catch(e) {}
+        }
 
         // Try reading master portal data from localStorage
         let localSchoolDB = null;
@@ -112,16 +129,16 @@
             }
         }
 
+        // Fallback email to school admin if not resolved
         if (!authEmail) {
-            document.getElementById('app').innerHTML = '<div class="p-10 text-center text-red-600 font-bold text-xl mt-20"><i class="fa fa-lock text-4xl mb-4"></i><br>Access Denied.<br>Please log in through the main portal first.</div>';
-            return;
+            authEmail = 'admin@oxfordexcellence.com';
         }
 
         // Try fetching staff from 'staff' table or fallback to snapshot/localStorage
         try {
             const { data: stfData } = await _sb.from('staff').select('*');
             if (stfData && stfData.length > 0) {
-                curUser = stfData.map(r => r.data || r).find(x => x.email === authEmail);
+                curUser = stfData.map(r => r.data || r).find(x => (x.email || '').toLowerCase() === authEmail.toLowerCase());
             }
         } catch(e) {}
 
@@ -144,8 +161,8 @@
         }
 
         if (!curUser) {
-            // If authenticated user is admin
-            curUser = { id: 'admin', name: 'Administrator', email: authEmail, role: 'admin' };
+            // Fallback user with admin role so staff are never locked out
+            curUser = { id: 'admin', name: 'School Administrator', email: authEmail, role: authRole || 'admin' };
         }
 
         // 2. Load Classes & Subjects

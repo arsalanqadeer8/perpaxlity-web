@@ -5082,6 +5082,10 @@ window.addEventListener('unhandledrejection', function(e) {
     function setCurrentUser(u) {
       setupRealtime();
       curUser = u; curRole = u.role;
+      try {
+        localStorage.setItem('oxford_active_user', JSON.stringify(u));
+        sessionStorage.setItem('oxford_active_user', JSON.stringify(u));
+      } catch (e) {}
       if (u.role === 'teacher') curCls = (u.classIds || [])[0] || DB.classes[0]?.id;
       else if (u.role === 'student') curCls = u.classId || DB.classes[0]?.id;
       else if (u.role === 'parent') { const fam = DB.families[u.familyId]; const sid = (fam?.studentIds || [])[0]; curCls = allStus().find(s => s.id === sid)?.classId || DB.classes[0]?.id; }
@@ -5597,6 +5601,10 @@ window.addEventListener('unhandledrejection', function(e) {
     }
     async function logout() {
       if (_sb) { try { await _sb.auth.signOut(); } catch (e) {} }
+      try {
+        localStorage.removeItem('oxford_active_user');
+        sessionStorage.removeItem('oxford_active_user');
+      } catch (e) {}
       const app = document.getElementById('app');
       if (app) app.style.setProperty('display', 'none', 'important');
       const logp = document.getElementById('login-page');
@@ -5868,7 +5876,9 @@ window.addEventListener('unhandledrejection', function(e) {
         myfees: '<circle cx="12" cy="12" r="9"/><path d="M12 7v10"/><path d="M8 10c0-1.7 1.8-3 4-3s4 1.3 4 3-1.8 2-4 2-4 .3-4 2 1.8 3 4 3 4-1.3 4-3"/>',
         video: '<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>',
         diary: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/>',
-        logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/>'
+        logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/>',
+        filealt: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/>',
+        exammaker: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/>'
       };
       const svg = icons[key] || icons.dashboard;
       return `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${svg}</svg>`;
@@ -5952,7 +5962,6 @@ window.addEventListener('unhandledrejection', function(e) {
 
     function goPage(p) {
       if (p === 'scanner') { openScanner(); return; }
-      if (p === 'exam_maker') { window.open('exam-maker.html', '_blank'); return; }
       curPage = p;
       sessionStorage.setItem('lastPage', p);
       document.querySelectorAll('[data-page]').forEach(el => el.classList.toggle('active', el.dataset.page === p));
@@ -5968,7 +5977,7 @@ window.addEventListener('unhandledrejection', function(e) {
       const map = {
         dashboard: () => curRole === 'admin' ? pgAdminDash() : curRole === 'teacher' ? pgTeacherDash() : curRole === 'scanner' ? pgScannerDash() : pgStudentDash(),
         students: pgStudents, admissions: pgAdmissions, classes: pgClasses, attendance: pgAttendance, grades: pgGrades,
-        fees: pgFees, expenses: pgExpenses, feereports: pgFeeReports, exams: pgExams, notices: pgNotices, timetable: pgTimetable,
+        fees: pgFees, expenses: pgExpenses, feereports: pgFeeReports, exams: pgExams, exam_maker: pgExamMaker, notices: pgNotices, timetable: pgTimetable,
         teachers: pgTeachers, payroll: pgPayroll, teacheratt: pgTeacherAtt, subjects: pgSubjects,
         reportcards: pgReportCards, idcards: pgClassIdCards, families: pgFamilies, settings: pgSettings,
         mygrades: pgMyGrades, myattend: pgMyAttend, qrcard: pgQRCard, myfees: pgMyFees, profile: pgProfile, mypayroll: pgMyPayroll, videos: pgVideoHub, diary: pgDiary,
@@ -9611,7 +9620,37 @@ function printFeeReportArea() {
     WinPrint.document.close();
     WinPrint.focus();
     setTimeout(() => { WinPrint.print(); WinPrint.close(); }, 250);
-}
+  }
+
+  function pgExamMaker() {
+      const userParam = encodeURIComponent(curUser?.email || curUser?.id || 'admin');
+      const roleParam = encodeURIComponent(curRole || 'admin');
+      const nameParam = encodeURIComponent(curUser?.name || 'School Staff');
+      const targetUrl = `exam-maker.html?user=${userParam}&role=${roleParam}&name=${nameParam}`;
+      return `
+<div class="ph ph-row fu" style="align-items:center;margin-bottom:12px;">
+  <div>
+    <div class="ph-tag">Examination Suite</div>
+    <h1 style="display:flex;align-items:center;gap:8px;margin-top:2px;">
+      <span style="font-size:1.5rem;">📝</span> Exam Paper Maker
+    </h1>
+    <p style="margin:4px 0 0;font-size:0.84rem;color:var(--text-sub, #64748b);">Draft, format, and print standard school examination question papers with bilingual Nastaliq and Math formula tools.</p>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <a href="${targetUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-p" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;padding:8px 14px;font-weight:600;box-shadow:0 2px 8px rgba(10,25,47,0.15);">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+      Open in Fullscreen Tab
+    </a>
+    <button class="btn btn-gh" onclick="const f=document.getElementById('examMakerIframe');if(f)f.src=f.src;" style="display:inline-flex;align-items:center;gap:6px;padding:8px 12px;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+      Reload
+    </button>
+  </div>
+</div>
+<div class="card fu" style="padding:0;overflow:hidden;border:1px solid rgba(0,0,0,0.08);border-radius:12px;background:#f8fafc;box-shadow:0 4px 16px rgba(0,0,0,0.04);">
+  <iframe id="examMakerIframe" src="${targetUrl}" style="width:100%;height:calc(100vh - 180px);min-height:720px;border:none;display:block;" title="Exam Paper Maker"></iframe>
+</div>`;
+    }
 
     function pgExams() {
       return `
