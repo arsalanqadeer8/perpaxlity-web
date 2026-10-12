@@ -948,6 +948,97 @@
       letter-spacing: .2px;
     }
 
+    /* MOBILE NAVIGATION DRAWER */
+    .mn-drawer-bg {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 999;
+      opacity: 0;
+      transition: opacity .22s ease;
+    }
+    .mn-drawer-bg.open {
+      display: flex;
+      opacity: 1;
+      align-items: flex-end;
+    }
+    .mn-drawer {
+      width: 100%;
+      max-height: 82vh;
+      background: var(--card);
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+      box-shadow: 0 -10px 30px rgba(0, 0, 0, .25);
+      display: flex;
+      flex-direction: column;
+      transform: translateY(100%);
+      transition: transform .26s cubic-bezier(.16, 1, .3, 1);
+      padding-bottom: calc(16px + env(safe-area-inset-bottom));
+      overflow: hidden;
+    }
+    .mn-drawer-bg.open .mn-drawer {
+      transform: translateY(0);
+    }
+    .mn-drawer-header {
+      padding: 12px 18px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+    .mn-drawer-handle {
+      width: 38px;
+      height: 4px;
+      background: var(--border2);
+      border-radius: 99px;
+      margin: 0 auto 6px;
+    }
+    .mn-drawer-body {
+      overflow-y: auto;
+      padding: 14px;
+    }
+    .mn-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+    .mn-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: .8rem;
+      font-weight: 600;
+      color: var(--ink);
+      cursor: pointer;
+      min-height: 44px;
+      transition: all .15s ease;
+    }
+    .mn-item:active {
+      background: var(--pl);
+      border-color: var(--pl2);
+      transform: scale(.98);
+    }
+    .mn-item .mn-ico {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      color: var(--p);
+      flex-shrink: 0;
+    }
+
+    .is-invalid {
+      border-color: var(--r) !important;
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2) !important;
+    }
+
     /* -- COMPONENTS -- */
     .ph {
       margin-bottom: 20px;
@@ -2117,6 +2208,14 @@
 
     .ac:active {
       transform: scale(.95);
+    }
+
+    @media(max-width:767px) {
+      .ac {
+        min-width: 34px;
+        min-height: 34px;
+        font-size: .8rem;
+      }
     }
 
     .acP {
@@ -4469,6 +4568,20 @@ window.addEventListener('unhandledrejection', function(e) {
   <nav class="bn" id="bn-nav"></nav>
 </div>
 
+<!-- MOBILE NAVIGATION DRAWER -->
+<div class="mn-drawer-bg" id="mn-drawer-bg" onclick="if(event.target===this)closeMobileNavDrawer()">
+  <div class="mn-drawer">
+    <div style="padding-top:8px;">
+      <div class="mn-drawer-handle"></div>
+    </div>
+    <div class="mn-drawer-header">
+      <div style="font-weight:700;font-size:.9rem;color:var(--ink);">All Portal Services</div>
+      <button type="button" class="btn btn-gh btn-sm" onclick="closeMobileNavDrawer()" style="padding:4px 10px;font-size:.75rem;">Close ✕</button>
+    </div>
+    <div class="mn-drawer-body" id="mn-drawer-body"></div>
+  </div>
+</div>
+
 <!-- QR SCANNER -->
 <div class="scan-ov" id="scan-ov">
   <div class="scan-box">
@@ -6133,8 +6246,50 @@ window.addEventListener('unhandledrejection', function(e) {
       }).join('')}</div>
   <button class="sb-out" onclick="logout()"><span class="ni-ic">${iconMarkup('logout')}</span> Sign Out</button>`;
       const bn = document.getElementById('bn-nav');
-      if (bn) bn.innerHTML = nav.filter(n => n.p !== '---').slice(0, 5).map(n => `<button class="bn-it" data-page="${n.p}" onclick="goPage('${n.p}')"><div class="bn-ic">${iconMarkup(n.i && n.i !== '?' ? n.i : n.p)}</div><div class="bn-lb">${n.s}</div></button>`).join('');
+      if (bn) {
+        let primaryKeys = [];
+        if (curRole === 'admin') primaryKeys = ['dashboard', 'students', 'attendance', 'fees'];
+        else if (curRole === 'teacher') primaryKeys = ['dashboard', 'grades', 'students', 'diary'];
+        else primaryKeys = ['dashboard', 'mygrades', 'myattend', 'myfees'];
+
+        const primaryItems = primaryKeys.map(k => nav.find(n => n.p === k)).filter(Boolean);
+        let bnHtml = primaryItems.map(n => `<button class="bn-it" data-page="${n.p}" onclick="goPage('${n.p}')"><div class="bn-ic">${iconMarkup(n.i && n.i !== '?' ? n.i : n.p)}</div><div class="bn-lb">${n.s}</div></button>`).join('');
+        bnHtml += `<button class="bn-it" id="bn-more-btn" onclick="openMobileNavDrawer()"><div class="bn-ic"><span class="material-symbols-outlined" style="font-size:1.15rem;">menu</span></div><div class="bn-lb">More</div></button>`;
+        bn.innerHTML = bnHtml;
+      }
+      buildMobileNavDrawer(nav);
       buildNotifPanel();
+    }
+
+    function openMobileNavDrawer() {
+      const bg = document.getElementById('mn-drawer-bg');
+      if (bg) bg.classList.add('open');
+    }
+    function closeMobileNavDrawer() {
+      const bg = document.getElementById('mn-drawer-bg');
+      if (bg) bg.classList.remove('open');
+    }
+    function buildMobileNavDrawer(nav) {
+      const body = document.getElementById('mn-drawer-body');
+      if (!body) return;
+      const validItems = nav.filter(n => n.p !== '---');
+      let html = '<div class="mn-grid">';
+      validItems.forEach(n => {
+        html += `
+          <div class="mn-item" onclick="closeMobileNavDrawer(); goPage('${n.p}')">
+            <span class="mn-ico">${iconMarkup(n.i && n.i !== '?' ? n.i : n.p)}</span>
+            <span>${n.l}</span>
+          </div>
+        `;
+      });
+      html += `
+        <div class="mn-item" style="color:var(--r);" onclick="closeMobileNavDrawer(); logout()">
+          <span class="mn-ico" style="color:var(--r);">${iconMarkup('logout')}</span>
+          <span>Sign Out</span>
+        </div>
+      `;
+      html += '</div>';
+      body.innerHTML = html;
     }
 
     function goPage(p) {
@@ -12735,6 +12890,11 @@ ${DB.school.name}`;
     // Global keyboard Escape dismiss handler for modals, scanners, and panels
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') {
+        const md = document.getElementById('mn-drawer-bg');
+        if (md && md.classList.contains('open')) {
+          if (typeof closeMobileNavDrawer === 'function') closeMobileNavDrawer();
+          return;
+        }
         const bg = document.getElementById('modal-bg');
         if (bg && bg.classList.contains('open')) {
           closeModal();
