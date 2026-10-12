@@ -120,8 +120,8 @@
       --yl: #fffbe6;
       --ink: #0f172a;
       --ink2: #1e293b;
-      --ink3: #64748b;
-      --ink4: #94a3b8;
+      --ink3: #475569;
+      --ink4: #64748b;
       --ink5: #cbd5e1;
       --bg: #f8fafc;
       --card: #ffffff;
@@ -137,6 +137,11 @@
       --sh3: 0 8px 32px rgba(0,0,0,.10), 0 20px 48px rgba(0,0,0,.07);
       --font: 'Inter', system-ui, sans-serif;
       --head: 'Inter', system-ui, sans-serif;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--o) !important;
+      outline-offset: 2px !important;
     }
 
     html {
@@ -12726,6 +12731,27 @@ ${DB.school.name}`;
       const body = document.getElementById('modal-body');
       if (body) body.innerHTML = '';
     }
+
+    // Global keyboard Escape dismiss handler for modals, scanners, and panels
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        const bg = document.getElementById('modal-bg');
+        if (bg && bg.classList.contains('open')) {
+          closeModal();
+          return;
+        }
+        const scan = document.getElementById('scan-ov');
+        if (scan && scan.classList.contains('open')) {
+          if (typeof stopScanner === 'function') stopScanner();
+          return;
+        }
+        const np = document.getElementById('np');
+        if (np && np.classList.contains('open')) {
+          if (typeof closeNotif === 'function') closeNotif();
+          return;
+        }
+      }
+    });
 
     let _toastTimer = null;
     function showToast(msg, type = '', dur = 2800) {
