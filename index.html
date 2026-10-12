@@ -4517,6 +4517,17 @@ window.addEventListener('unhandledrejection', function(e) {
       : null;
 
     /* ------------------------------- DATA ------------------------------- */
+    function escapeHTML(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+    window.escapeHTML = escapeHTML;
+
     const SK = 'oxford_v1';
     let DB = null;
     let _sbPending = false;
@@ -12126,7 +12137,7 @@ function playBeep(t){try{const x=new(window.AudioContext||window.webkitAudioCont
             // Friendly notice if scanned too soon rather than an error buzzer
             if (fb) {
               fb.className = 'scan-fb show';
-              fb.innerHTML = `<b>Already Checked In</b>: <b>${stu.name}</b><br/><span style="font-size:.7rem;opacity:.75;">Logged at ${log.in}. Checkout available after 5 min.</span>`;
+              fb.innerHTML = `<b>Already Checked In</b>: <b>${escapeHTML(stu.name)}</b><br/><span style="font-size:.7rem;opacity:.75;">Logged at ${escapeHTML(log.in)}. Checkout available after 5 min.</span>`;
             }
             playBeep('ok');
             setTimeout(() => { _scanActive = true; requestAnimationFrame(scanTick); }, 1600);
@@ -12142,7 +12153,7 @@ function playBeep(t){try{const x=new(window.AudioContext||window.webkitAudioCont
         } else {
           if (fb) {
             fb.className = 'scan-fb show';
-            fb.innerHTML = `<b>Already Complete</b>: <b>${stu.name}</b><br/><span style="font-size:.7rem;opacity:.75;">Check-In: ${log.in} | Check-Out: ${log.out}</span>`;
+            fb.innerHTML = `<b>Already Complete</b>: <b>${escapeHTML(stu.name)}</b><br/><span style="font-size:.7rem;opacity:.75;">Check-In: ${escapeHTML(log.in)} | Check-Out: ${escapeHTML(log.out)}</span>`;
           }
           playBeep('ok');
           setTimeout(() => { _scanActive = true; requestAnimationFrame(scanTick); }, 1600);
@@ -12193,9 +12204,9 @@ ${DB.school.name}`;
 
         playBeep('ok');
 
-        if (fb) { fb.className = 'scan-fb show'; fb.innerHTML = `<b>${action}</b>: <b>${stu.name}</b> - ${cls.name}${cls.section ? ' ' + cls.section : ''}<br/><span style="font-size:.7rem;opacity:.75;">${action} at ${tStr}</span>`; }
+        if (fb) { fb.className = 'scan-fb show'; fb.innerHTML = `<b>${escapeHTML(action)}</b>: <b>${escapeHTML(stu.name)}</b> - ${escapeHTML(cls.name)}${cls.section ? ' ' + escapeHTML(cls.section) : ''}<br/><span style="font-size:.7rem;opacity:.75;">${escapeHTML(action)} at ${escapeHTML(tStr)}</span>`; }
         const lb = document.getElementById('scan-log-box');
-        if (lb) { lb.className = 'scan-log show'; lb.innerHTML = `<div class="sl-it"><span class="sl-ok">OK</span><span class="sl-nm">${stu.name}</span><span class="sl-cl">${cls.name}</span><span class="sl-t">${t}</span></div>` + lb.innerHTML; }
+        if (lb) { lb.className = 'scan-log show'; lb.innerHTML = `<div class="sl-it"><span class="sl-ok">OK</span><span class="sl-nm">${escapeHTML(stu.name)}</span><span class="sl-cl">${escapeHTML(cls.name)}</span><span class="sl-t">${escapeHTML(t)}</span></div>` + lb.innerHTML; }
         setTimeout(() => { _scanActive = true; requestAnimationFrame(scanTick); }, 1600);
 
       } catch (e) {

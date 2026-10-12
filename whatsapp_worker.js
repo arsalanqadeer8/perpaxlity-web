@@ -117,6 +117,22 @@ function checkGlobalRateLimit() {
 }
 
 // Database Cache Store (60-second TTL to accelerate lookups & protect Supabase quota)
+// Database Authentication Session Helper (Ensures RLS Authenticated Access)
+async function ensureSupabaseAuth() {
+    try {
+        const { data: authData } = await supabase.auth.getSession();
+        if (!authData?.session) {
+            const email = process.env.ADMIN_EMAIL || 'admin@oxfordexcellence.com';
+            const password = process.env.ADMIN_PASSWORD || 'Password123!';
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            if (error) console.error('[Worker Supabase Auth Error]', error.message);
+            else console.log('[Worker Supabase] Authenticated as:', email);
+        }
+    } catch (e) {
+        console.error('[Worker Supabase Auth Exception]', e.message);
+    }
+}
+
 const dbCache = {
     students: { data: null, lastFetch: 0 },
     staff: { data: null, lastFetch: 0 }
@@ -128,6 +144,7 @@ async function getCachedStudents() {
         return dbCache.students.data;
     }
     try {
+        await ensureSupabaseAuth();
         const { data } = await supabase.from('students').select('*');
         if (data && data.length > 0) {
             dbCache.students.data = data;
@@ -145,6 +162,7 @@ async function getCachedStaff() {
         return dbCache.staff.data;
     }
     try {
+        await ensureSupabaseAuth();
         const { data } = await supabase.from('staff').select('*');
         if (data && data.length > 0) {
             dbCache.staff.data = data;
@@ -316,6 +334,7 @@ async function processOutboxQueue() {
     isProcessingOutbox = true;
 
     try {
+        await ensureSupabaseAuth();
         const { data: messages, error } = await supabase
             .from('whatsapp_outbox')
             .select('*')
