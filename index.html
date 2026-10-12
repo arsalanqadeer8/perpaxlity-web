@@ -5962,6 +5962,16 @@ window.addEventListener('unhandledrejection', function(e) {
 
     function goPage(p) {
       if (p === 'scanner') { openScanner(); return; }
+      if (p === 'exam_maker') {
+        try {
+          if (curUser) {
+            localStorage.setItem('oxford_active_user', JSON.stringify(curUser));
+            sessionStorage.setItem('oxford_active_user', JSON.stringify(curUser));
+          }
+        } catch (e) {}
+        window.location.href = 'exam-maker.html';
+        return;
+      }
       curPage = p;
       sessionStorage.setItem('lastPage', p);
       document.querySelectorAll('[data-page]').forEach(el => el.classList.toggle('active', el.dataset.page === p));

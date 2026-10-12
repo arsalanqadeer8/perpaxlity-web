@@ -252,11 +252,16 @@
         }
         
         let html = `
-            <div class="max-w-5xl mx-auto mt-10 p-5 bg-white rounded shadow">
+            <div class="max-w-5xl mx-auto mt-6 mb-10 p-5 bg-white rounded-xl shadow border border-gray-100">
                 ${draftBanner}
-                <div class="flex justify-between items-center mb-6 border-b pb-4">
-                    <h1 class="text-2xl font-bold text-gray-800"><i class="fa fa-file-alt text-blue-600 mr-2"></i> Exam Paper Maker</h1>
-                    ${curUser.role !== 'student' ? `<button onclick="startNewExam()" class="bg-blue-600 text-white px-4 py-2 rounded font-bold hover:bg-blue-700 shadow"><i class="fa fa-plus mr-1"></i> Draft New Exam</button>` : ''}
+                <div class="flex flex-wrap gap-3 justify-between items-center mb-6 border-b pb-4">
+                    <div class="flex items-center gap-3">
+                        <a href="index.html" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3.5 py-2 rounded-lg font-bold text-sm border flex items-center gap-2 transition shadow-sm">
+                            <i class="fa fa-arrow-left"></i> Back to Portal
+                        </a>
+                        <h1 class="text-2xl font-extrabold text-gray-800 flex items-center"><i class="fa fa-file-alt text-blue-600 mr-2"></i> Exam Paper Maker</h1>
+                    </div>
+                    ${curUser.role !== 'student' ? `<button onclick="startNewExam()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 shadow transition flex items-center gap-1.5"><i class="fa fa-plus"></i> Draft New Exam</button>` : ''}
                 </div>
                 
                 <h2 class="text-lg font-bold mb-3 text-gray-700">Saved Exam Papers</h2>
@@ -330,8 +335,13 @@
         
         let html = `
             <div class="max-w-4xl mx-auto mt-5 mb-10 p-5 bg-white rounded shadow">
-                <div class="flex justify-between items-center border-b pb-4 mb-4">
-                    <h2 class="text-xl font-bold"><i class="fa fa-pen text-blue-600 mr-2"></i> Draft Exam</h2>
+                <div class="flex flex-wrap gap-2 justify-between items-center border-b pb-4 mb-4">
+                    <div class="flex items-center gap-3">
+                        <a href="index.html" class="px-3 py-1.5 bg-gray-100 border text-gray-700 rounded-lg font-bold text-sm hover:bg-gray-200 flex items-center gap-1.5 transition">
+                            <i class="fa fa-arrow-left"></i> Portal
+                        </a>
+                        <h2 class="text-xl font-bold flex items-center"><i class="fa fa-pen text-blue-600 mr-2"></i> Draft Exam</h2>
+                    </div>
                     <div class="space-x-2 flex items-center">
                         ${marksCount !== Number(curExam.totalMarks) ? `<span class="text-xs text-red-600 font-bold mr-3 hidden sm:inline"><i class="fa fa-exclamation-triangle"></i> Marks mismatch!</span>` : ''}
                         <button onclick="curView='list'; renderApp()" class="px-3 py-1.5 bg-gray-200 rounded font-bold text-sm hover:bg-gray-300">Cancel</button>
@@ -544,7 +554,12 @@
         const rtl = curExam.lang === 'ur';
         let html = `
             <div class="no-print bg-gray-900 text-white p-3 flex justify-between items-center fixed top-0 w-full z-50 shadow-lg">
-                <div class="font-bold flex items-center"><i class="fa fa-print mr-3 text-blue-400"></i> Print Mode: ${curExam.title}</div>
+                <div class="font-bold flex items-center gap-3">
+                    <a href="index.html" class="bg-gray-800 hover:bg-gray-700 text-gray-200 px-3 py-1.5 rounded-lg text-xs font-bold border border-gray-700 flex items-center gap-1.5 transition">
+                        <i class="fa fa-arrow-left"></i> Portal
+                    </a>
+                    <div class="flex items-center"><i class="fa fa-print mr-2 text-blue-400"></i> Print Mode: ${curExam.title}</div>
+                </div>
                 <div class="flex items-center gap-5">
                     <label class="text-sm font-bold flex items-center gap-1 cursor-pointer hover:text-blue-300"><input type="radio" name="pm" ${printMode==='worksheet'?'checked':''} onchange="printMode='worksheet';renderApp()"> <i class="fa fa-align-justify ml-1"></i> Worksheet Mode</label>
                     <label class="text-sm font-bold flex items-center gap-1 cursor-pointer hover:text-blue-300"><input type="radio" name="pm" ${printMode==='compact'?'checked':''} onchange="printMode='compact';renderApp()"> <i class="fa fa-compress-alt ml-1"></i> Compact Mode</label>
