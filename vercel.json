@@ -6,12 +6,20 @@
       "source": "/(.*)",
       "headers": [
         { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+        { "key": "Content-Security-Policy", "value": "frame-ancestors 'self' https://oxfordexcellenceacademy.com https://*.oxfordexcellenceacademy.com;" },
         { "key": "X-XSS-Protection", "value": "1; mode=block" },
         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
         { "key": "Permissions-Policy", "value": "camera=(self), microphone=(), geolocation=()" },
         { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
         { "key": "X-DNS-Prefetch-Control", "value": "on" }
+      ]
+    },
+    {
+      "source": "/exam-maker(.*)",
+      "headers": [
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+        { "key": "Content-Security-Policy", "value": "frame-ancestors 'self' https://oxfordexcellenceacademy.com https://*.oxfordexcellenceacademy.com;" }
       ]
     },
     {
@@ -23,6 +31,8 @@
     }
   ],
   "rewrites": [
+    { "source": "/exam-maker", "destination": "/exam-maker.html" },
+    { "source": "/exam_maker", "destination": "/exam-maker.html" },
     { "source": "/((?!.*\\.).*)", "destination": "/index.html" }
   ]
 }
