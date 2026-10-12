@@ -4848,7 +4848,13 @@ window.addEventListener('unhandledrejection', function(e) {
       try {
       if (!_sb) return;
       const { data: sessionData } = await _sb.auth.getSession();
-      const email = (sessionData?.session?.user?.email || '').toLowerCase();
+      let email = (sessionData?.session?.user?.email || '').toLowerCase();
+      if (!email) {
+        try {
+          const stored = JSON.parse(localStorage.getItem('oxford_active_user') || 'null');
+          if (stored && stored.email) email = stored.email.toLowerCase();
+        } catch(e) {}
+      }
       if (!email) return;
       const cloud = await loadCloudDB();
       if (cloud && cloud.classes && cloud.classes.length > 0) { DB = cloud; window.DB = DB; }
@@ -4871,7 +4877,6 @@ window.addEventListener('unhandledrejection', function(e) {
       if (DB && DB.users) {
         const hasAdmin = DB.users.some(u => u && u.role === 'admin' && u.email === 'admin@school.edu');
         if (!hasAdmin) {
-           // needsRescueSync = true; DO NOT PUSH BLINDLY
            // needsRescueSync = true; DO NOT PUSH BLINDLY
         }
       }
@@ -4900,22 +4905,20 @@ window.addEventListener('unhandledrejection', function(e) {
       saveLocalDB();
       
       let u = findUserProfile(email);
-      if (!u && (email === 'admin@oxfordexcellence.com' || email === 'admin@school.edu')) {
-        u = { id: 'd54b0c88-48e4-4bc4-9afa-8245ab9f3380', name: 'admin', email: email, role: 'admin' };
+      if (!u && (email === 'admin@oxfordexcellence.com' || email === 'admin@school.edu' || email === 'admin')) {
+        u = { id: 'd54b0c88-48e4-4bc4-9afa-8245ab9f3380', name: 'School Admin', email: email, role: 'admin' };
         if (!DB.users) DB.users = [];
         DB.users.push(u);
       }
       if (!u) {
-          console.warn('User profile not found. Logging out.');
-          _sb.auth.signOut();
-          sessionStorage.clear();
-          for(let i=0; i<localStorage.length; i++) {
-              if (localStorage.key(i).startsWith('sb-') && localStorage.key(i).endsWith('-auth-token')) {
-                  localStorage.removeItem(localStorage.key(i));
-              }
-          }
-          location.reload();
-          return;
+        try {
+          const stored = JSON.parse(localStorage.getItem('oxford_active_user') || 'null');
+          if (stored && stored.role) u = stored;
+        } catch(e) {}
+      }
+      if (!u) {
+        console.warn('User profile not found in database.');
+        return;
       }
       
       loginRole = u.role;
@@ -5159,7 +5162,15 @@ window.addEventListener('unhandledrejection', function(e) {
       ensureEnhancements();
       saveLocalDB(); // don't re-trigger cloud push here
       applyBranding();
-      restoreSession();
+      restoreSession().then(() => {
+        try {
+          const uParam = new URLSearchParams(window.location.search);
+          if (uParam.get('portal') === '1' || sessionStorage.getItem('openPortal') === '1') {
+            sessionStorage.removeItem('openPortal');
+            if (typeof window.openLogin === 'function') window.openLogin('admin');
+          }
+        } catch(e) {}
+      });
     });
 
     /* ------------------------------- UTILS ------------------------------- */
@@ -5671,6 +5682,26 @@ window.addEventListener('unhandledrejection', function(e) {
     }
 
     window.openLogin = function(prefillRole = 'admin') {
+      let stored = curUser;
+      if (!stored) {
+        try { stored = JSON.parse(localStorage.getItem('oxford_active_user') || 'null'); } catch(e) {}
+      }
+      if (stored && stored.role) {
+        setCurrentUser(stored);
+        const lp = document.getElementById('landing-page');
+        if (lp) lp.style.setProperty('display', 'none', 'important');
+        const logp = document.getElementById('login-page');
+        if (logp) logp.style.setProperty('display', 'none', 'important');
+        const app = document.getElementById('app');
+        if (app) {
+          app.style.setProperty('display', 'flex', 'important');
+          app.style.flexDirection = 'column';
+        }
+        buildShell();
+        goPage(curPage || 'dashboard');
+        applyBranding();
+        return;
+      }
       const lp = document.getElementById('landing-page');
       if (lp) lp.style.setProperty('display', 'none', 'important');
       const logp = document.getElementById('login-page');
@@ -10839,6 +10870,10 @@ margin-top:2px;">${ap}% Regularity</div>
       const aCtx = document.getElementById('attChart');
       
       if (fCtx) {
+        try {
+          const oldF = Chart.getChart(fCtx);
+          if (oldF) oldF.destroy();
+        } catch(e) {}
         const labels = []; const data = [];
         for (let i=5; i>=0; i--) {
           const d = new Date(); d.setMonth(d.getMonth() - i);
@@ -10888,6 +10923,10 @@ margin-top:2px;">${ap}% Regularity</div>
       }
       
       if (aCtx) {
+        try {
+          const oldA = Chart.getChart(aCtx);
+          if (oldA) oldA.destroy();
+        } catch(e) {}
         const tKey = today();
         let p=0, a=0, l=0;
         Object.values(DB.attendance || {}).forEach(cObj => {
