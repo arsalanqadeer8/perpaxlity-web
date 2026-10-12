@@ -4804,6 +4804,139 @@ window.addEventListener('unhandledrejection', function(e) {
       _sbTimer = setTimeout(pushCloudDB, 2000);
     }
 
+    // -- REAL-TIME CONCURRENCY & MULTI-USER SYNCHRONIZATION ---------------
+    let _realtimeChannel = null;
+
+    function initRealtimeSync() {
+      if (!_sb || _realtimeChannel) return;
+      try {
+        _realtimeChannel = _sb.channel('oxford-live-portal-sync')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'attendance' }, payload => {
+            if (!DB || !DB.attendance) return;
+            const r = payload.new;
+            if (!r || !r.class_id || !r.id) return;
+            const cid = r.class_id;
+            const sid = r.id.substring(cid.length + 1);
+            if (!DB.attendance[cid]) DB.attendance[cid] = {};
+            DB.attendance[cid][sid] = r.data || {};
+            
+            // Sync with local flat cache to prevent delta conflicts
+            if (window._lastDBFlat && window._lastDBFlat.attendance) {
+              const ex = window._lastDBFlat.attendance.find(x => x.id === r.id);
+              if (ex) ex.data = r.data;
+              else window._lastDBFlat.attendance.push({ id: r.id, class_id: cid, data: r.data });
+            }
+            saveLocalDB();
+
+            // Live DOM update if viewing this class attendance
+            if (curPage === 'attendance' && curCls === cid && r.data) {
+              Object.keys(r.data).forEach(d => {
+                const el = document.getElementById(`ac-${sid}-${d}`);
+                if (el) {
+                  const v = r.data[d];
+                  el.className = `ac ${v === 'P' ? 'acP' : (v === 'L' ? 'acL' : (v === 'O' ? 'acO' : 'acA'))}`;
+                  el.textContent = v;
+                }
+              });
+              showSyncBadge('Live: Attendance updated', '#10b981');
+            }
+          })
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'students' }, payload => {
+            if (!DB || !DB.students) return;
+            if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+              const r = payload.new;
+              if (!r || !r.class_id || !r.data) return;
+              const cid = r.class_id;
+              if (!DB.students[cid]) DB.students[cid] = [];
+              const idx = DB.students[cid].findIndex(s => s && s.id === r.id);
+              if (idx >= 0) DB.students[cid][idx] = r.data;
+              else DB.students[cid].push(r.data);
+              
+              if (window._lastDBFlat && window._lastDBFlat.students) {
+                const ex = window._lastDBFlat.students.find(x => x.id === r.id);
+                if (ex) ex.data = r.data;
+                else window._lastDBFlat.students.push({ id: r.id, class_id: cid, data: r.data });
+              }
+              saveLocalDB();
+              if (curPage === 'students' && curCls === cid && typeof renderStudents === 'function') {
+                renderStudents();
+                showSyncBadge('Live: Student list updated', '#10b981');
+              }
+            } else if (payload.eventType === 'DELETE') {
+              const r = payload.old;
+              if (!r || !r.id) return;
+              Object.keys(DB.students).forEach(cid => {
+                DB.students[cid] = (DB.students[cid] || []).filter(s => s && s.id !== r.id);
+              });
+              if (window._lastDBFlat && window._lastDBFlat.students) {
+                window._lastDBFlat.students = window._lastDBFlat.students.filter(x => x.id !== r.id);
+              }
+              saveLocalDB();
+              if (curPage === 'students' && typeof renderStudents === 'function') renderStudents();
+            }
+          })
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'fees' }, payload => {
+            if (!DB || !DB.fees) return;
+            if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+              const r = payload.new;
+              if (!r || !r.id) return;
+              if (r.type === 'payment') {
+                const pid = r.id.replace('payment_', '');
+                if (!DB.fees.payments) DB.fees.payments = {};
+                DB.fees.payments[pid] = r.data;
+              } else if (r.type === 'ledger') {
+                const parts = r.id.split('_');
+                const sid = parts[1];
+                const mon = parts.slice(2).join('_');
+                if (!DB.fees.monthlyLedger) DB.fees.monthlyLedger = {};
+                if (!DB.fees.monthlyLedger[sid]) DB.fees.monthlyLedger[sid] = {};
+                DB.fees.monthlyLedger[sid][mon] = r.data;
+              } else if (r.type === 'item') {
+                if (!DB.fees.items) DB.fees.items = [];
+                const idx = DB.fees.items.findIndex(i => i.id === r.data?.id);
+                if (idx >= 0) DB.fees.items[idx] = r.data;
+                else DB.fees.items.push(r.data);
+              }
+              if (window._lastDBFlat && window._lastDBFlat.fees) {
+                const ex = window._lastDBFlat.fees.find(x => x.id === r.id);
+                if (ex) ex.data = r.data;
+                else window._lastDBFlat.fees.push({ id: r.id, type: r.type, data: r.data });
+              }
+              saveLocalDB();
+              if (curPage === 'fees' && typeof renderFees === 'function') {
+                renderFees();
+                showSyncBadge('Live: Fee records updated', '#10b981');
+              }
+            }
+          })
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'grades' }, payload => {
+            if (!DB || !DB.grades) return;
+            if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+              const r = payload.new;
+              if (!r || !r.id) return;
+              DB.grades[r.id] = r.data;
+              if (window._lastDBFlat && window._lastDBFlat.grades) {
+                const ex = window._lastDBFlat.grades.find(x => x.id === r.id);
+                if (ex) ex.data = r.data;
+                else window._lastDBFlat.grades.push({ id: r.id, class_id: r.class_id, data: r.data });
+              }
+              saveLocalDB();
+              if (curPage === 'grades' && typeof renderGrades === 'function') {
+                renderGrades();
+                showSyncBadge('Live: Grades updated', '#10b981');
+              }
+            }
+          })
+          .subscribe((status) => {
+            if (status === 'SUBSCRIBED') {
+              console.log('[Realtime] Live school multi-user sync connected ✅');
+            }
+          });
+      } catch (err) {
+        console.warn('Realtime sync initialization error:', err);
+      }
+    }
+
     // -- sync status badge ------------------------------------------------
     function showSyncBadge(msg, color) {
       let b = document.getElementById('sync-badge');
@@ -4947,6 +5080,7 @@ window.addEventListener('unhandledrejection', function(e) {
       goPage(curPage || 'dashboard');
       if (curRole === 'admin') refreshAdmissionApplications(true);
       applyBranding();
+      initRealtimeSync();
     }
     function stripStoredPasswords() {
       if (!DB) return;
@@ -5611,8 +5745,13 @@ window.addEventListener('unhandledrejection', function(e) {
       goPage(curPage || 'dashboard');
       applyBranding();
       showSyncBadge('Cloud data refreshed', '#4caf50');
+      initRealtimeSync();
     }
     async function logout() {
+      if (_realtimeChannel && _sb) {
+        try { _sb.removeChannel(_realtimeChannel); } catch (e) {}
+        _realtimeChannel = null;
+      }
       if (_sb) { try { await _sb.auth.signOut(); } catch (e) {} }
       try {
         localStorage.removeItem('oxford_active_user');
