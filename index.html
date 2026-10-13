@@ -78,7 +78,28 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+  (function() {
+    try {
+      var u = localStorage.getItem('oxford_active_user') || sessionStorage.getItem('oxford_active_user');
+      if (u) {
+        var p = JSON.parse(u);
+        if (p && (p.role || p.email)) {
+          document.documentElement.classList.add('ox-has-session');
+        }
+      }
+    } catch(e) {}
+  })();
+</script>
 <style>
+    /* Instant Session Router: Prevent Landing Page Flash on Dashboard / Portal Refresh */
+    html.ox-has-session #landing-page {
+      display: none !important;
+    }
+    html.ox-has-session #app {
+      display: flex !important;
+      flex-direction: column;
+    }
 
     /* Disable Number Input Spinners & Scroll */
     input[type=number]::-webkit-inner-spin-button, 
@@ -4719,6 +4740,14 @@ window.addEventListener('unhandledrejection', function(e) {
     let _sbPending = false;
     let _sbTimer   = null;
 
+    function getHashPage() {
+      const h = (window.location.hash || '').replace(/^#\/?/, '').trim();
+      return h || null;
+    }
+    let curRole = 'admin', curUser = null, curCls = null, curTerm = 't1';
+    let curPage = getHashPage() || ((sessionStorage.getItem('lastPage') && sessionStorage.getItem('lastPage') !== 'exam_maker') ? sessionStorage.getItem('lastPage') : 'dashboard');
+    let loginRole = 'admin', _toastT = null;
+
     // -- local read / write ----------------------------------------------
     function loadDB() {
       try { const d = localStorage.getItem(SK); return d ? JSON.parse(d) : null; } catch { return null; }
@@ -5169,108 +5198,158 @@ window.addEventListener('unhandledrejection', function(e) {
     }
 
 
-    async function restoreSession() {
+    function restoreLocalSessionFast() {
       try {
-      if (!_sb) return;
-      const { data: sessionData } = await _sb.auth.getSession();
-      let email = (sessionData?.session?.user?.email || '').toLowerCase();
-      if (!email) {
+        let stored = null;
         try {
-          const stored = JSON.parse(localStorage.getItem('oxford_active_user') || 'null');
-          if (stored && stored.email) email = stored.email.toLowerCase();
+          stored = JSON.parse(localStorage.getItem('oxford_active_user') || sessionStorage.getItem('oxford_active_user') || 'null');
         } catch(e) {}
-      }
-      if (!email) return;
-      const cloud = await loadCloudDB();
-      if (cloud && cloud.classes && cloud.classes.length > 0) { DB = cloud; window.DB = DB; }
-      
-      let needsRescueSync = false;
-      if (DB && DB.students) {
-        Object.keys(DB.students).forEach(k => {
-          if (Array.isArray(DB.students[k])) {
-            DB.students[k].forEach(stu => {
-              if (stu && stu.photo && stu.photo.startsWith('data:image/') && stu.photo.length > 50000) {
-                console.warn('Scrubbing giant base64 photo');
-                stu.photo = '';
-                needsRescueSync = true;
-              }
-            });
-          }
-        });
-      }
+        if (!stored || !stored.role) return false;
 
-      if (DB && DB.users) {
-        const hasAdmin = DB.users.some(u => u && u.role === 'admin' && u.email === 'admin@school.edu');
-        if (!hasAdmin) {
-           // needsRescueSync = true; DO NOT PUSH BLINDLY
-        }
-      }
-      
-      if (DB && DB.students) {
-        Object.keys(DB.students).forEach(cid => {
-          if (Array.isArray(DB.students[cid])) {
-            DB.students[cid].forEach(s => {
-              if (s && s.name && s.roll) {
-                const cleanName = s.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-                const expectedEmail = cleanName + '.' + s.roll + '@oxford.com';
-                if (s.loginEmail !== expectedEmail) {
-                  s.loginEmail = expectedEmail;
-                  needsRescueSync = true;
-                }
-              }
-            });
-          }
-        });
-      }
-      
-      stripStoredPasswords();
-      ensureEnhancements();
-      
-      if (needsRescueSync) saveDB();
-      saveLocalDB();
-      
-      let u = findUserProfile(email);
-      if (!u && (email === 'admin@oxfordexcellence.com' || email === 'admin@school.edu' || email === 'admin')) {
-        u = { id: 'd54b0c88-48e4-4bc4-9afa-8245ab9f3380', name: 'School Admin', email: email, role: 'admin' };
-        if (!DB.users) DB.users = [];
-        DB.users.push(u);
-      }
-      if (!u) {
-        try {
-          const stored = JSON.parse(localStorage.getItem('oxford_active_user') || 'null');
-          if (stored && stored.role) u = stored;
-        } catch(e) {}
-      }
-      if (!u) {
-        console.warn('User profile not found in database.');
-        return;
-      }
-      
-      loginRole = u.role;
-      setCurrentUser(u);
-      
-      const lp = document.getElementById('landing-page');
-      if (lp) lp.style.setProperty('display', 'none', 'important');
-      
-      const logp = document.getElementById('login-page');
-      if (logp) logp.style.display = 'none';
-      
-      const app = document.getElementById('app');
-      if (app) {
+        DB = loadDB() || defaultDB();
+        window.DB = DB;
+        ensureEnhancements();
+
+        let u = findUserProfile(stored.email, stored.role) || stored;
+        if (!u) return false;
+
+        document.documentElement.classList.add('ox-has-session');
+        loginRole = u.role;
+        setCurrentUser(u);
+
+        const lp = document.getElementById('landing-page');
+        if (lp) lp.style.setProperty('display', 'none', 'important');
+        const logp = document.getElementById('login-page');
+        if (logp) logp.style.display = 'none';
+        const app = document.getElementById('app');
+        if (app) {
           app.style.setProperty('display', 'flex', 'important');
           app.style.flexDirection = 'column';
-      }
-      
-      buildShell();
+        }
+
+        buildShell();
+        goPage(curPage || 'dashboard', false);
+        applyBranding();
+        return true;
       } catch (err) {
-          console.error('Session restore failed:', err);
+        console.warn('Fast local restore failed:', err);
+        return false;
+      }
+    }
+
+    async function restoreSession() {
+      try {
+        if (!_sb) return;
+        const { data: sessionData } = await _sb.auth.getSession();
+        let email = (sessionData?.session?.user?.email || '').toLowerCase();
+        let stored = null;
+        try {
+          stored = JSON.parse(localStorage.getItem('oxford_active_user') || 'null');
+          if (!email && stored && stored.email) email = stored.email.toLowerCase();
+        } catch(e) {}
+        
+        if (!email) {
+          if (!stored) {
+            document.documentElement.classList.remove('ox-has-session');
+            const lp = document.getElementById('landing-page');
+            if (lp) lp.style.setProperty('display', 'block', 'important');
+            const app = document.getElementById('app');
+            if (app) app.style.setProperty('display', 'none', 'important');
+          }
+          return;
+        }
+
+        const cloud = await loadCloudDB();
+        if (cloud && cloud.classes && cloud.classes.length > 0) { 
+          DB = cloud; 
+          window.DB = DB; 
+          ensureEnhancements();
+          saveLocalDB();
+        }
+        
+        let needsRescueSync = false;
+        if (DB && DB.students) {
+          Object.keys(DB.students).forEach(k => {
+            if (Array.isArray(DB.students[k])) {
+              DB.students[k].forEach(stu => {
+                if (stu && stu.photo && stu.photo.startsWith('data:image/') && stu.photo.length > 50000) {
+                  console.warn('Scrubbing giant base64 photo');
+                  stu.photo = '';
+                  needsRescueSync = true;
+                }
+              });
+            }
+          });
+        }
+
+        if (DB && DB.students) {
+          Object.keys(DB.students).forEach(cid => {
+            if (Array.isArray(DB.students[cid])) {
+              DB.students[cid].forEach(s => {
+                if (s && s.name && s.roll) {
+                  const cleanName = s.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+                  const expectedEmail = cleanName + '.' + s.roll + '@oxford.com';
+                  if (s.loginEmail !== expectedEmail) {
+                    s.loginEmail = expectedEmail;
+                    needsRescueSync = true;
+                  }
+                }
+              });
+            }
+          });
+        }
+        
+        stripStoredPasswords();
+        ensureEnhancements();
+        
+        if (needsRescueSync) saveDB();
+        saveLocalDB();
+        
+        let u = findUserProfile(email);
+        if (!u && (email === 'admin@oxfordexcellence.com' || email === 'admin@school.edu' || email === 'admin')) {
+          u = { id: 'd54b0c88-48e4-4bc4-9afa-8245ab9f3380', name: 'School Admin', email: email, role: 'admin' };
+          if (!DB.users) DB.users = [];
+          DB.users.push(u);
+        }
+        if (!u && stored && stored.role) {
+          u = stored;
+        }
+        if (!u) {
+          console.warn('User profile not found in database.');
+          return;
+        }
+        
+        document.documentElement.classList.add('ox-has-session');
+        loginRole = u.role;
+        setCurrentUser(u);
+        
+        const lp = document.getElementById('landing-page');
+        if (lp) lp.style.setProperty('display', 'none', 'important');
+        
+        const logp = document.getElementById('login-page');
+        if (logp) logp.style.display = 'none';
+        
+        const app = document.getElementById('app');
+        if (app) {
+          app.style.setProperty('display', 'flex', 'important');
+          app.style.flexDirection = 'column';
+        }
+        
+        buildShell();
+        goPage(curPage || 'dashboard', false);
+        if (curRole === 'admin') refreshAdmissionApplications(true);
+        applyBranding();
+        initRealtimeSync();
+      } catch (err) {
+        console.error('Session restore failed:', err);
+        if (!localStorage.getItem('oxford_active_user')) {
+          document.documentElement.classList.remove('ox-has-session');
           const lp = document.getElementById('landing-page');
           if (lp) lp.style.setProperty('display', 'block', 'important');
+          const app = document.getElementById('app');
+          if (app) app.style.setProperty('display', 'none', 'important');
+        }
       }
-      goPage(curPage || 'dashboard');
-      if (curRole === 'admin') refreshAdmissionApplications(true);
-      applyBranding();
-      initRealtimeSync();
     }
     function stripStoredPasswords() {
       if (!DB) return;
@@ -5409,6 +5488,7 @@ window.addEventListener('unhandledrejection', function(e) {
     }
 
     function setCurrentUser(u) {
+      if (u) document.documentElement.classList.add('ox-has-session');
       setupRealtime();
       curUser = u; curRole = u.role;
       try {
@@ -5483,6 +5563,9 @@ window.addEventListener('unhandledrejection', function(e) {
         settings: { currency: 'PKR', schoolYear: '2025-26', theme: 'light', defaultFeeDueDay: '5th of month', terms: [{ id: 't1', name: 'Midterm' }, { id: 't2', name: 'Final Term' }], activeTerm: 't1' },
       };
     }
+
+    // Execute instant local session restore (0ms layout shift / zero landing page flash on refresh)
+    restoreLocalSessionFast();
 
     initDB().then(() => {
       ensureEnhancements();
@@ -5810,13 +5893,6 @@ window.addEventListener('unhandledrejection', function(e) {
     }
 
     /* ------------------------------- AUTH ------------------------------- */
-    function getHashPage() {
-      const h = (window.location.hash || '').replace(/^#\/?/, '').trim();
-      return h || null;
-    }
-    let curRole = 'admin', curUser = null, curCls = null, curTerm = 't1';
-    let curPage = getHashPage() || ((sessionStorage.getItem('lastPage') && sessionStorage.getItem('lastPage') !== 'exam_maker') ? sessionStorage.getItem('lastPage') : 'dashboard');
-    let loginRole = 'admin', _toastT = null;
 
     window.addEventListener('hashchange', () => {
       const p = getHashPage();
@@ -5955,9 +6031,12 @@ window.addEventListener('unhandledrejection', function(e) {
         _realtimeChannel = null;
       }
       if (_sb) { try { await _sb.auth.signOut(); } catch (e) {} }
+      document.documentElement.classList.remove('ox-has-session');
       try {
         localStorage.removeItem('oxford_active_user');
         sessionStorage.removeItem('oxford_active_user');
+        sessionStorage.removeItem('lastPage');
+        localStorage.removeItem('lastPage');
       } catch (e) {}
       const app = document.getElementById('app');
       if (app) app.style.setProperty('display', 'none', 'important');
@@ -5966,6 +6045,7 @@ window.addEventListener('unhandledrejection', function(e) {
       const lp = document.getElementById('landing-page');
       if (lp) lp.style.setProperty('display', 'block', 'important');
       curUser = null;
+      window.location.hash = '';
       if (document.getElementById('l-email')) document.getElementById('l-email').value = '';
       if (document.getElementById('l-pass')) document.getElementById('l-pass').value = '';
     }
