@@ -543,11 +543,11 @@
     }
 
     .tb-ico {
-      width: 30px;
-      height: 30px;
-      border-radius: 8px;
-      background: var(--card2);
-      border: 1px solid var(--border);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 1.5px solid rgba(200, 154, 64, 0.6);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -555,13 +555,16 @@
       overflow: hidden;
       flex-shrink: 0;
       cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      padding: 2px;
     }
 
     .tb-ico img {
       width: 100%;
       height: 100%;
       object-fit: contain;
-      border-radius: 0;
+      border-radius: 50%;
+      display: block;
     }
 
     .tb-sname {
@@ -2959,21 +2962,25 @@
     .land-mark {
       width: 52px;
       height: 52px;
-      border-radius: 18px;
-      background: linear-gradient(135deg, var(--p), var(--p2));
+      border-radius: 50% !important;
+      background: #ffffff;
+      border: 1.5px solid rgba(200, 154, 64, 0.7);
       color: #fff;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 1.5rem;
-      box-shadow: var(--sh2);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
       overflow: hidden;
+      padding: 3px;
     }
 
     .land-mark img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
+      border-radius: 50%;
+      display: block;
     }
 
     .land-name {
@@ -3449,8 +3456,34 @@
   z-index: 100;
   font-family: 'Inter', system-ui, sans-serif;
 }
-    .ox-brand { font-size: 1rem; font-weight: 700; color: var(--ox-primary); letter-spacing: -0.3px; display: flex; align-items: center; gap: 10px; z-index: 1001; flex-shrink: 0; font-family: var(--ox-heading); }
-    .ox-brand-icon { width: 44px; height: 44px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(212, 175, 55, 0.3); display: flex; align-items: center; justify-content: center; flex-shrink: 0; border-radius: 10px; overflow: hidden; padding: 2px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3); }
+    .ox-brand { font-size: 1.05rem; font-weight: 700; color: var(--ox-primary); letter-spacing: -0.3px; display: flex; align-items: center; gap: 12px; z-index: 1001; flex-shrink: 0; font-family: var(--ox-heading); }
+    .ox-brand-icon { 
+      width: 46px; 
+      height: 46px; 
+      background: #ffffff; 
+      border: 1.5px solid rgba(200, 154, 64, 0.7); 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      flex-shrink: 0; 
+      border-radius: 50% !important; 
+      overflow: hidden; 
+      padding: 3px; 
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25), 0 0 0 2px rgba(255, 255, 255, 0.1); 
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .ox-brand-icon:hover {
+      transform: scale(1.05);
+      border-color: rgba(200, 154, 64, 1);
+      box-shadow: 0 6px 20px rgba(200, 154, 64, 0.35);
+    }
+    .ox-brand-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      border-radius: 50%;
+    }
     
     /* Navigation styling (Hamburger by default on all screens) */
     .ox-nav-links { display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: var(--ox-surface); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); flex-direction: column; justify-content: center; align-items: center; gap: 40px; transform: translateY(-100%); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); opacity: 0; pointer-events: none; z-index: 1000; }
@@ -3952,7 +3985,7 @@ window.addEventListener('unhandledrejection', function(e) {
 
     <nav class="ox-nav gs-anim">
         <div class="ox-brand">
-            <div class="ox-brand-icon" id="land-mark"><img src="oxford_logo.svg" style="width:100%; height:100%; object-fit:contain;" alt="logo" /></div>
+            <div class="ox-brand-icon" id="land-mark"><img src="oxford_logo.svg" style="width:100%; height:100%; object-fit:contain; border-radius:50%;" alt="logo" /></div>
             <span id="land-name">Oxford Excellence Academy</span>
         </div>
         <div class="ox-nav-links" id="oxNavLinks">
@@ -4297,8 +4330,8 @@ window.addEventListener('unhandledrejection', function(e) {
         <div class="ox-footer-grid">
             <div>
                 <div class="ox-brand" style="color:white; margin-bottom:20px; display:flex; align-items:center; gap:16px;">
-                    <div id="foot-logo" style="width:68px; height:68px; border-radius:14px; background:rgba(255,255,255,0.04); border:1px solid rgba(212,175,55,0.35); padding:4px; box-shadow:0 6px 24px rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                        <img src="oxford_logo.svg" style="width:100%; height:100%; object-fit:contain;" alt="Oxford Excellence Academy Crest" />
+                    <div id="foot-logo" style="width:68px; height:68px; border-radius:50%; background:#ffffff; border:2px solid #c89a40; padding:4px; box-shadow:0 6px 24px rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                        <img src="oxford_logo.svg" style="width:100%; height:100%; object-fit:contain; border-radius:50%;" alt="Oxford Excellence Academy Crest" />
                     </div>
                     <div>
                         <div style="font-family:'Cinzel', serif; font-size:1.25rem; font-weight:700; letter-spacing:0.5px; color:#ffffff; line-height:1.2;">Oxford Excellence</div>
