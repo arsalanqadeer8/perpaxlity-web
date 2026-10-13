@@ -6294,7 +6294,8 @@ window.addEventListener('unhandledrejection', function(e) {
   <div class="nb">${nav.map(n => {
         if (n.p === '---') return '<div class="sb-sep"></div>';
         const href = n.p === 'exam_maker' ? '/exam-maker' : `#${n.p}`;
-        return `<a class="ni" href="${href}" data-page="${n.p}" onclick="return handleNavClick(event, '${n.p}')"><span class="ni-ic">${iconMarkup(n.i && n.i !== '?' ? n.i : n.p)}</span><span>${n.l}</span></a>`;
+        const isActive = n.p === curPage ? ' active' : '';
+        return `<a class="ni${isActive}" href="${href}" data-page="${n.p}" onclick="return handleNavClick(event, '${n.p}')"><span class="ni-ic">${iconMarkup(n.i && n.i !== '?' ? n.i : n.p)}</span><span>${n.l}</span></a>`;
       }).join('')}</div>
   <button class="sb-out" onclick="logout()"><span class="ni-ic">${iconMarkup('logout')}</span> Sign Out</button>`;
       const bn = document.getElementById('bn-nav');
@@ -6307,7 +6308,8 @@ window.addEventListener('unhandledrejection', function(e) {
         const primaryItems = primaryKeys.map(k => nav.find(n => n.p === k)).filter(Boolean);
         let bnHtml = primaryItems.map(n => {
           const href = n.p === 'exam_maker' ? '/exam-maker' : `#${n.p}`;
-          return `<a class="bn-it" href="${href}" data-page="${n.p}" onclick="return handleNavClick(event, '${n.p}')"><div class="bn-ic">${iconMarkup(n.i && n.i !== '?' ? n.i : n.p)}</div><div class="bn-lb">${n.s}</div></a>`;
+          const isActive = n.p === curPage ? ' active' : '';
+          return `<a class="bn-it${isActive}" href="${href}" data-page="${n.p}" onclick="return handleNavClick(event, '${n.p}')"><div class="bn-ic">${iconMarkup(n.i && n.i !== '?' ? n.i : n.p)}</div><div class="bn-lb">${n.s}</div></a>`;
         }).join('');
         bnHtml += `<button class="bn-it" id="bn-more-btn" onclick="openMobileNavDrawer()"><div class="bn-ic"><span class="material-symbols-outlined" style="font-size:1.15rem;">menu</span></div><div class="bn-lb">More</div></button>`;
         bn.innerHTML = bnHtml;
