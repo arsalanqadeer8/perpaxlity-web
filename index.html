@@ -5742,8 +5742,20 @@ window.addEventListener('unhandledrejection', function(e) {
     }
 
     /* ------------------------------- AUTH ------------------------------- */
-    let curRole = 'admin', curUser = null, curCls = null, curTerm = 't1', curPage = (sessionStorage.getItem('lastPage') && sessionStorage.getItem('lastPage') !== 'exam_maker') ? sessionStorage.getItem('lastPage') : 'dashboard';
+    function getHashPage() {
+      const h = (window.location.hash || '').replace(/^#\/?/, '').trim();
+      return h || null;
+    }
+    let curRole = 'admin', curUser = null, curCls = null, curTerm = 't1';
+    let curPage = getHashPage() || ((sessionStorage.getItem('lastPage') && sessionStorage.getItem('lastPage') !== 'exam_maker') ? sessionStorage.getItem('lastPage') : 'dashboard');
     let loginRole = 'admin', _toastT = null;
+
+    window.addEventListener('hashchange', () => {
+      const p = getHashPage();
+      if (p && p !== curPage && typeof goPage === 'function') {
+        goPage(p, false);
+      }
+    });
 
     function togglePassword(id, btn) {
       const input = document.getElementById(id);
@@ -6246,7 +6258,8 @@ window.addEventListener('unhandledrejection', function(e) {
   <div class="sb-sep"></div>
   <div class="nb">${nav.map(n => {
         if (n.p === '---') return '<div class="sb-sep"></div>';
-        return `<button class="ni" data-page="${n.p}" onclick="goPage('${n.p}')"><span class="ni-ic">${iconMarkup(n.i && n.i !== '?' ? n.i : n.p)}</span><span>${n.l}</span></button>`;
+        const href = n.p === 'exam_maker' ? '/exam-maker' : `#${n.p}`;
+        return `<a class="ni" href="${href}" data-page="${n.p}" onclick="return handleNavClick(event, '${n.p}')"><span class="ni-ic">${iconMarkup(n.i && n.i !== '?' ? n.i : n.p)}</span><span>${n.l}</span></a>`;
       }).join('')}</div>
   <button class="sb-out" onclick="logout()"><span class="ni-ic">${iconMarkup('logout')}</span> Sign Out</button>`;
       const bn = document.getElementById('bn-nav');
@@ -6257,7 +6270,10 @@ window.addEventListener('unhandledrejection', function(e) {
         else primaryKeys = ['dashboard', 'mygrades', 'myattend', 'myfees'];
 
         const primaryItems = primaryKeys.map(k => nav.find(n => n.p === k)).filter(Boolean);
-        let bnHtml = primaryItems.map(n => `<button class="bn-it" data-page="${n.p}" onclick="goPage('${n.p}')"><div class="bn-ic">${iconMarkup(n.i && n.i !== '?' ? n.i : n.p)}</div><div class="bn-lb">${n.s}</div></button>`).join('');
+        let bnHtml = primaryItems.map(n => {
+          const href = n.p === 'exam_maker' ? '/exam-maker' : `#${n.p}`;
+          return `<a class="bn-it" href="${href}" data-page="${n.p}" onclick="return handleNavClick(event, '${n.p}')"><div class="bn-ic">${iconMarkup(n.i && n.i !== '?' ? n.i : n.p)}</div><div class="bn-lb">${n.s}</div></a>`;
+        }).join('');
         bnHtml += `<button class="bn-it" id="bn-more-btn" onclick="openMobileNavDrawer()"><div class="bn-ic"><span class="material-symbols-outlined" style="font-size:1.15rem;">menu</span></div><div class="bn-lb">More</div></button>`;
         bn.innerHTML = bnHtml;
       }
@@ -6279,15 +6295,16 @@ window.addEventListener('unhandledrejection', function(e) {
       const validItems = nav.filter(n => n.p !== '---');
       let html = '<div class="mn-grid">';
       validItems.forEach(n => {
+        const href = n.p === 'exam_maker' ? '/exam-maker' : `#${n.p}`;
         html += `
-          <div class="mn-item" onclick="closeMobileNavDrawer(); goPage('${n.p}')">
+          <a class="mn-item" href="${href}" onclick="closeMobileNavDrawer(); return handleNavClick(event, '${n.p}')" style="text-decoration:none; color:inherit;">
             <span class="mn-ico">${iconMarkup(n.i && n.i !== '?' ? n.i : n.p)}</span>
             <span>${n.l}</span>
-          </div>
+          </a>
         `;
       });
       html += `
-        <div class="mn-item" style="color:var(--r);" onclick="closeMobileNavDrawer(); logout()">
+        <div class="mn-item" style="color:var(--r); cursor:pointer;" onclick="closeMobileNavDrawer(); logout()">
           <span class="mn-ico" style="color:var(--r);">${iconMarkup('logout')}</span>
           <span>Sign Out</span>
         </div>
@@ -6296,7 +6313,16 @@ window.addEventListener('unhandledrejection', function(e) {
       body.innerHTML = html;
     }
 
-    function goPage(p) {
+    function handleNavClick(e, p) {
+      if (e && (e.ctrlKey || e.metaKey || e.shiftKey || e.which === 2 || e.button === 1)) {
+        return true; // Allow browser to open in new tab natively
+      }
+      if (e) e.preventDefault();
+      goPage(p);
+      return false;
+    }
+
+    function goPage(p, updateHash = true) {
       if (p === 'scanner') { openScanner(); return; }
       if (p === 'exam_maker') {
         try {
@@ -6310,6 +6336,9 @@ window.addEventListener('unhandledrejection', function(e) {
       }
       curPage = p;
       sessionStorage.setItem('lastPage', p);
+      if (updateHash && window.location.hash !== `#${p}`) {
+        history.pushState(null, '', `#${p}`);
+      }
       document.querySelectorAll('[data-page]').forEach(el => el.classList.toggle('active', el.dataset.page === p));
       document.getElementById('page-root').innerHTML = `<div class="pw fu">${renderPage(p)}</div>`;
       updatePill();
