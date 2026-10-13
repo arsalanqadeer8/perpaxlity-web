@@ -4,10 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Exam Paper Maker - Oxford Excellence Academy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://iprqtkmtelgdhlenlsrc.supabase.co">
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" media="print" onload="this.media='all'">
     <style>
         body { font-family: system-ui, -apple-system, sans-serif; background: #f3f4f6; }
         .urdu { font-family: 'Noto Nastaliq Urdu', serif; direction: rtl; text-align: right; }
@@ -21,7 +25,6 @@
             body { background: white; }
         }
         
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&display=swap');
         .urdu { font-family: 'Noto Nastaliq Urdu', serif; direction: rtl; text-align: right; }
         .urdu-left { text-align: left; }
         
@@ -92,12 +95,17 @@
     let printSpacing = 'tight'; // tight, normal, relaxed
 
     async function init() {
-        // 1. Resolve Auth & Current User
+        // 1. Resolve Auth & Current User from local storage instantly
         const urlParams = new URLSearchParams(window.location.search);
         let authEmail = urlParams.get('user') || urlParams.get('email');
         let authRole = urlParams.get('role') || 'admin';
 
-        // Check active session stored from portal
+        let localSchoolDB = null;
+        try {
+            const raw = localStorage.getItem('oxford_v1');
+            if (raw) localSchoolDB = JSON.parse(raw);
+        } catch(e) {}
+
         try {
             const storedUser = JSON.parse(localStorage.getItem('oxford_active_user') || sessionStorage.getItem('oxford_active_user') || 'null');
             if (storedUser && storedUser.email) {
@@ -106,115 +114,66 @@
             }
         } catch(e) {}
 
-        if (!authEmail) {
-            try {
-                const { data: auth } = await _sb.auth.getSession();
-                authEmail = auth?.session?.user?.email;
-            } catch(e) {}
-        }
-
-        // Try reading master portal data from localStorage
-        let localSchoolDB = null;
-        try {
-            const raw = localStorage.getItem('oxford_v1');
-            if (raw) localSchoolDB = JSON.parse(raw);
-        } catch(e) {}
-
-        // If no auth session, check if logged into portal in current browser tab/storage
         if (!authEmail && localSchoolDB?.users?.length) {
-            // Find an admin or teacher user in local DB as fallback
             const staffUser = localSchoolDB.users.find(u => u.role === 'admin' || u.role === 'teacher');
-            if (staffUser) {
-                authEmail = staffUser.email;
-            }
+            if (staffUser) authEmail = staffUser.email;
         }
+        if (!authEmail) authEmail = 'admin@oxfordexcellence.com';
 
-        // Fallback email to school admin if not resolved
-        if (!authEmail) {
-            authEmail = 'admin@oxfordexcellence.com';
-        }
-
-        // Try fetching staff from 'staff' table or fallback to snapshot/localStorage
-        try {
-            const { data: stfData } = await _sb.from('staff').select('*');
-            if (stfData && stfData.length > 0) {
-                curUser = stfData.map(r => r.data || r).find(x => (x.email || '').toLowerCase() === authEmail.toLowerCase());
-            }
-        } catch(e) {}
-
-        // Fallback curUser from localSchoolDB or db_snapshot
         if (!curUser && localSchoolDB?.users) {
             curUser = localSchoolDB.users.find(x => (x.email || '').toLowerCase() === authEmail.toLowerCase());
         }
-
-        // Cloud snapshot fallback if still missing
-        if (!curUser || !localSchoolDB) {
-            try {
-                const { data: snap } = await _sb.from('db_snapshot').select('data').eq('id', 1).maybeSingle();
-                if (snap?.data) {
-                    localSchoolDB = snap.data;
-                    if (!curUser && snap.data.users) {
-                        curUser = snap.data.users.find(x => (x.email || '').toLowerCase() === authEmail.toLowerCase());
-                    }
-                }
-            } catch(e) {}
-        }
-
         if (!curUser) {
-            // Fallback user with admin role so staff are never locked out
             curUser = { id: 'admin', name: 'School Administrator', email: authEmail, role: authRole || 'admin' };
         }
 
-        // 2. Load Classes & Subjects
-        let classesList = [];
-        let subjectsList = [];
-
-        try {
-            const { data: cData } = await _sb.from('classes').select('*');
-            if (cData && cData.length > 0) classesList = cData.map(r => r.data || r);
-        } catch(e) {}
-
-        try {
-            const { data: mData } = await _sb.from('miscellaneous').select('*').like('id', 'subject_%');
-            if (mData && mData.length > 0) subjectsList = mData.map(r => r.data || r);
-        } catch(e) {}
-
-        if (classesList.length === 0 && localSchoolDB?.classes) {
-            classesList = localSchoolDB.classes;
-        }
-        if (subjectsList.length === 0 && localSchoolDB?.subjects) {
-            subjectsList = localSchoolDB.subjects;
-        }
-
-        mainDB = {
-            classes: classesList,
-            subjects: subjectsList
-        };
-
-        // 3. Load Papers / Exams
+        // 2. INSTANT CACHE HYDRATION (0ms - Render UI immediately!)
+        let classesList = localSchoolDB?.classes || [];
+        let subjectsList = localSchoolDB?.subjects || [];
         let loadedExams = [];
         try {
-            const { data: pData } = await _sb.from('miscellaneous').select('*').like('id', 'paper_%');
-            if (pData && pData.length > 0) loadedExams = pData.map(r => r.data || r);
+            const localExams = JSON.parse(localStorage.getItem('oxford_exams_cache') || '[]');
+            if (Array.isArray(localExams) && localExams.length > 0) loadedExams = localExams;
         } catch(e) {}
 
-        // Fallback exams from db_snapshot id: 2 or localStorage
-        if (loadedExams.length === 0) {
-            try {
-                const { data: snap2 } = await _sb.from('db_snapshot').select('data').eq('id', 2).maybeSingle();
-                if (snap2?.data?.exams) loadedExams = snap2.data.exams;
-            } catch(e) {}
-        }
-
-        if (loadedExams.length === 0) {
-            try {
-                const localExams = JSON.parse(localStorage.getItem('oxford_exams_cache') || '[]');
-                if (Array.isArray(localExams) && localExams.length > 0) loadedExams = localExams;
-            } catch(e) {}
-        }
-
+        mainDB = { classes: classesList, subjects: subjectsList };
         examDB.exams = loadedExams;
-        renderApp();
+
+        // If we have cached data or user, render immediately without waiting for network!
+        if (curUser) {
+            renderApp();
+        }
+
+        // 3. FAST PARALLEL BACKGROUND SYNC (Promise.all instead of waterfall)
+        try {
+            const [cRes, mSubRes, pRes] = await Promise.allSettled([
+                _sb.from('classes').select('*'),
+                _sb.from('miscellaneous').select('*').like('id', 'subject_%'),
+                _sb.from('miscellaneous').select('*').like('id', 'paper_%')
+            ]);
+
+            let changed = false;
+
+            if (cRes.status === 'fulfilled' && cRes.value?.data?.length > 0) {
+                mainDB.classes = cRes.value.data.map(r => r.data || r);
+                changed = true;
+            }
+            if (mSubRes.status === 'fulfilled' && mSubRes.value?.data?.length > 0) {
+                mainDB.subjects = mSubRes.value.data.map(r => r.data || r);
+                changed = true;
+            }
+            if (pRes.status === 'fulfilled' && pRes.value?.data?.length > 0) {
+                examDB.exams = pRes.value.data.map(r => r.data || r);
+                localStorage.setItem('oxford_exams_cache', JSON.stringify(examDB.exams));
+                changed = true;
+            }
+
+            if (changed && curView === 'list') {
+                renderApp();
+            }
+        } catch (err) {
+            console.warn('Background sync note:', err);
+        }
     }
     
     function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 5); }
