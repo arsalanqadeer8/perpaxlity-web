@@ -6348,9 +6348,37 @@ window.addEventListener('unhandledrejection', function(e) {
       return name.toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
     }
 
+    function getClassOrderWeight(name) {
+      if (!name) return 999;
+      const n = String(name).toLowerCase().trim();
+      if (n.includes('montessori')) return 10;
+      if (n.includes('nursery')) return 20;
+      if (n.includes('prep one') || n.includes('prep 1')) return 30;
+      if (n.includes('prep two') || n.includes('prep 2')) return 40;
+      if (n.includes('prep')) return 45;
+      if (n.includes('training') || n.includes('kg') || n.includes('kindergarten')) return 50;
+
+      const numMatch = n.match(/(?:class|grade)\s*(\d+)/i) || n.match(/\b(\d+)(?:st|nd|rd|th)?\b/);
+      if (numMatch && numMatch[1]) {
+        return 100 + parseInt(numMatch[1], 10);
+      }
+      return 500;
+    }
+
+    function sortClassesList(arr) {
+      if (!Array.isArray(arr)) return [];
+      return [...arr].sort((a, b) => {
+        const wa = getClassOrderWeight(a?.name || '');
+        const wb = getClassOrderWeight(b?.name || '');
+        if (wa !== wb) return wa - wb;
+        return (a?.name || '').localeCompare(b?.name || '');
+      });
+    }
+
     function clsBar(fn = 'switchCls') {
-      const classes = curRole === 'teacher' ? (curUser?.classIds || []).map(id => DB.classes.find(c => c.id === id)).filter(Boolean) : DB.classes;
-      if (!classes || classes.length === 0) return '';
+      const rawClasses = curRole === 'teacher' ? (curUser?.classIds || []).map(id => DB.classes.find(c => c.id === id)).filter(Boolean) : DB.classes;
+      if (!rawClasses || rawClasses.length === 0) return '';
+      const classes = sortClassesList(rawClasses);
       return `<div class="cls-selector-bar fu" style="margin-bottom:16px;">
   <div class="cpb-pills" style="display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;align-items:center;">
     <span style="font-size:0.7rem;font-weight:700;color:var(--ink4);text-transform:uppercase;letter-spacing:.05em;margin-right:4px;white-space:nowrap;">Class:</span>
