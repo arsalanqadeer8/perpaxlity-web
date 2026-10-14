@@ -8974,25 +8974,251 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
       });
     }
 
+    function setFeeQuickAmount(val, mode = 'custom') {
+      const amtInp = document.getElementById('fee-input-amount');
+      if (amtInp) {
+        amtInp.value = Math.max(0, Math.round(val));
+        if (typeof updateFeeCalculationRealtime === 'function') updateFeeCalculationRealtime();
+        amtInp.focus();
+      }
+      document.querySelectorAll('.fee-quick-card').forEach(c => {
+        const isTarget = c.dataset.mode === mode;
+        c.style.borderColor = isTarget ? '#7c3aed' : '#e2e8f0';
+        c.style.background = isTarget ? '#f5f3ff' : '#ffffff';
+      });
+    }
+
+    function updateFeeCalculationRealtime() {
+      const amtInp = document.getElementById('fee-input-amount');
+      const discInp = document.getElementById('fee-input-discount');
+      if (!amtInp) return;
+      
+      const amountPaid = num(amtInp.value || 0);
+      const discount = num(discInp?.value || 0);
+      
+      const totalGrossDue = num(amtInp.dataset.totalGrossDue || 0);
+      const arrears = num(amtInp.dataset.prevArrears || 0);
+      const monthDue = num(amtInp.dataset.monthDue || 0);
+      
+      const netDue = Math.max(0, totalGrossDue - discount);
+      const remBalance = netDue - amountPaid;
+      
+      // Real-time FIFO allocation
+      const allocArrears = Math.min(amountPaid, arrears);
+      const remCashForMonth = Math.max(0, amountPaid - allocArrears);
+      const allocMonth = Math.min(remCashForMonth, monthDue);
+      
+      const remArrears = Math.max(0, arrears - allocArrears);
+      const remMonth = Math.max(0, monthDue - allocMonth);
+      
+      const remEl = document.getElementById('fee-realtime-remaining');
+      if (remEl) {
+        if (remBalance > 0) {
+          remEl.style.color = '#dc2626';
+          remEl.textContent = fmtMoney(remBalance);
+        } else if (remBalance === 0) {
+          remEl.style.color = '#059669';
+          remEl.textContent = 'PKR 0 (Fully Cleared ✓)';
+        } else {
+          remEl.style.color = '#2563eb';
+          remEl.textContent = `+ ${fmtMoney(Math.abs(remBalance))} (Advance Credit)`;
+        }
+      }
+      
+      const recAmtEl = document.getElementById('fee-realtime-received');
+      if (recAmtEl) recAmtEl.textContent = fmtMoney(amountPaid);
+      
+      const allocArrearsEl = document.getElementById('fee-alloc-arrears-tag');
+      if (allocArrearsEl) {
+        if (arrears <= 0) {
+          allocArrearsEl.innerHTML = `<span style="color:#64748b; font-size:0.75rem;">No past arrears</span>`;
+        } else if (remArrears === 0) {
+          allocArrearsEl.innerHTML = `<span style="color:#059669; font-weight:700; font-size:0.75rem;">✓ Arrears 100% Cleared (${fmtMoney(allocArrears)})</span>`;
+        } else {
+          allocArrearsEl.innerHTML = `<span style="color:#d97706; font-weight:600; font-size:0.75rem;">${fmtMoney(allocArrears)} paid • <b style="color:#dc2626;">${fmtMoney(remArrears)} remaining</b></span>`;
+        }
+      }
+      
+      const allocMonthEl = document.getElementById('fee-alloc-month-tag');
+      if (allocMonthEl) {
+        if (remMonth === 0) {
+          allocMonthEl.innerHTML = `<span style="color:#059669; font-weight:700; font-size:0.75rem;">✓ Month Fully Paid (${fmtMoney(allocMonth)})</span>`;
+        } else if (allocMonth > 0) {
+          allocMonthEl.innerHTML = `<span style="color:#d97706; font-weight:600; font-size:0.75rem;">${fmtMoney(allocMonth)} paid • <b style="color:#dc2626;">${fmtMoney(remMonth)} remaining</b></span>`;
+        } else {
+          allocMonthEl.innerHTML = `<span style="color:#94a3b8; font-size:0.75rem;">PKR 0 paid • <b style="color:#dc2626;">${fmtMoney(monthDue)} unpaid</b></span>`;
+        }
+      }
+      
+      const btnTextEl = document.getElementById('btn-record-fee-text');
+      if (btnTextEl) {
+        if (remBalance <= 0 && amountPaid > 0) {
+          btnTextEl.textContent = 'Record Full Payment';
+        } else if (amountPaid > 0) {
+          btnTextEl.textContent = 'Record Partial Payment';
+        } else {
+          btnTextEl.textContent = 'Record Payment';
+        }
+      }
+    }
+
+    function submitCustomFeePayment(sid, activeMonth) {
+      const s = allStus().find(x => x.id === sid);
+      if (!s) return;
+      
+      const amtInp = document.getElementById('fee-input-amount');
+      const methodInp = document.getElementById('fee-input-method');
+      const dateInp = document.getElementById('fee-input-date');
+      const refInp = document.getElementById('fee-input-ref');
+      const notesInp = document.getElementById('fee-input-notes');
+      const discInp = document.getElementById('fee-input-discount');
+      
+      const amountPaid = num(amtInp?.value || 0);
+      const discount = num(discInp?.value || 0);
+      const paymentMethod = methodInp?.value || 'Cash';
+      const paymentDate = dateInp?.value || today();
+      const reference = (refInp?.value || '').trim();
+      const notes = (notesInp?.value || '').trim();
+      
+      if (amountPaid <= 0 && discount <= 0) {
+        showToast('Please enter an amount or discount to record', 'tw2');
+        return;
+      }
+      
+      if (!DB.fees.monthlyLedger) DB.fees.monthlyLedger = {};
+      if (!DB.fees.monthlyLedger[sid]) DB.fees.monthlyLedger[sid] = {};
+      
+      const bill = calcStudentFeeBill(sid, activeMonth);
+      const monthDue = bill.tuition + bill.van + bill.itemsTotal;
+      const prevArrears = Math.max(0, bill.arrears);
+      
+      // FIFO Arrears Waterfall Allocation
+      let remainingCash = amountPaid;
+      let arrearsPaid = 0;
+      if (prevArrears > 0) {
+        arrearsPaid = Math.min(remainingCash, prevArrears);
+        remainingCash -= arrearsPaid;
+        
+        let remToClear = arrearsPaid + discount;
+        if (s.arrears && num(s.arrears) > 0) {
+          const clearedFromInitial = Math.min(remToClear, num(s.arrears));
+          s.arrears = Math.max(0, num(s.arrears) - clearedFromInitial);
+          remToClear -= clearedFromInitial;
+        }
+        
+        if (remToClear > 0) {
+          const sessionMonths = ['2026-08', '2026-09', '2026-10'];
+          for (let m of sessionMonths) {
+            if (m < activeMonth && DB.fees.monthlyLedger[sid][m] && !DB.fees.monthlyLedger[sid][m].paid) {
+              const mDue = num(DB.fees.monthlyLedger[sid][m].amount || 0);
+              const mPaidSoFar = num(DB.fees.monthlyLedger[sid][m].amountPaid || 0);
+              const mRem = Math.max(0, mDue - mPaidSoFar);
+              const canPay = Math.min(remToClear, mRem);
+              if (canPay > 0) {
+                DB.fees.monthlyLedger[sid][m].amountPaid = mPaidSoFar + canPay;
+                DB.fees.monthlyLedger[sid][m].paid = (DB.fees.monthlyLedger[sid][m].amountPaid >= mDue);
+                DB.fees.monthlyLedger[sid][m].paidOn = paymentDate;
+                remToClear -= canPay;
+              }
+            }
+          }
+        }
+      }
+      
+      // Current Month Allocation
+      const currentMonthPaid = remainingCash;
+      const existingMonthPaid = bill.mRow?.paid ? num(bill.mRow.amountPaid || 0) : 0;
+      const newTotalMonthPaid = existingMonthPaid + currentMonthPaid;
+      const isMonthFullyPaid = newTotalMonthPaid >= monthDue;
+      
+      const existingInstallments = DB.fees.monthlyLedger[sid][activeMonth]?.installments || [];
+      existingInstallments.push({
+        id: uid(),
+        amount: amountPaid,
+        arrearsAllocated: arrearsPaid,
+        monthAllocated: currentMonthPaid,
+        discount: discount,
+        date: paymentDate,
+        method: paymentMethod,
+        reference: reference,
+        notes: notes,
+        recordedAt: new Date().toISOString()
+      });
+      
+      DB.fees.monthlyLedger[sid][activeMonth] = {
+        month: activeMonth,
+        paid: isMonthFullyPaid,
+        paidOn: paymentDate,
+        amount: monthDue,
+        amountPaid: newTotalMonthPaid,
+        totalDue: monthDue,
+        paymentMethod: paymentMethod,
+        reference: reference,
+        notes: notes,
+        installments: existingInstallments,
+        arrearsSnapshot: getTrueInitialArrears(sid)
+      };
+      
+      s.fees = getLedgerArrears(sid, getNextMonth(monthKey())) <= 0 ? 'Paid' : 'Pending';
+      saveDB();
+      pushCloudDB();
+      
+      showToast(`Payment of ${fmtMoney(amountPaid)} recorded successfully!`, 'ts');
+      openStudentFeeModal(sid, activeMonth);
+    }
+
     function openStudentFeeModal(sid, targetMonth = null) {
       const s = allStus().find(x => x.id === sid); if (!s) return;
       const cls = DB.classes.find(c => c.id === s.classId);
-      const initialArrears = getTrueInitialArrears(sid);
       const tuition = monthlyFeeAmount(s);
       const van = num(s.vanFee || 0);
       
       const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
       
       let months = ['2026-08', '2026-09', '2026-10'];
-      if (targetMonth && !months.includes(targetMonth)) {
-        months.push(targetMonth);
-        months.sort();
-      }
+      const cMonth = monthKey();
+      if (!months.includes(cMonth)) months.push(cMonth);
+      if (targetMonth && !months.includes(targetMonth)) months.push(targetMonth);
+      months.sort();
 
-      let unpaidMonthsSum = 0;
-      const totalDue = getLedgerArrears(sid, getNextMonth(monthKey()));
+      // Determine active target month for cashier processing
+      let activeMonth = targetMonth;
+      if (!activeMonth) {
+        // Find latest unpaid month or fallback to current month
+        const unpaidM = months.find(m => {
+          const row = DB.fees.monthlyLedger?.[sid]?.[m];
+          return !row || !row.paid;
+        });
+        activeMonth = unpaidM || months[months.length - 1];
+      }
+      
+      const activeParts = activeMonth.split('-');
+      const activeIdx = parseInt(activeParts[1], 10) - 1;
+      const activeMonthName = (mNames[activeIdx] || activeMonth) + ' ' + activeParts[0];
+
+      // Calculate bill details for active month
+      const activeBill = calcStudentFeeBill(sid, activeMonth);
+      const activeApplicableItems = activeBill.applicableItems || [];
+      const activeItemsTotal = activeBill.itemsTotal || 0;
+      const activeMonthDue = tuition + van + activeItemsTotal;
+      const activePaidAmt = activeBill.mRow?.paid ? num(activeBill.mRow.amountPaid || activeBill.mRow.amount || 0) : 0;
+      const activeIsPaid = activeBill.mRow?.paid || false;
+      const activeIsPartial = activeIsPaid && activePaidAmt > 0 && activePaidAmt < activeMonthDue;
+      const activeMonthRemDue = Math.max(0, activeMonthDue - activePaidAmt);
+      
+      // Calculate Previous Arrears strictly prior to active month
+      const arrearsDetail = getDetailedLedgerArrears(sid, activeMonth);
+      const prevArrears = Math.max(0, arrearsDetail.total);
+      const totalGrossDue = prevArrears + activeMonthRemDue;
+      const totalStudentNetDue = getLedgerArrears(sid, getNextMonth(cMonth));
+      
       const initials = s.name.split(' ').map(n => n[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'ST';
       
+      // Find Exam fee item if present
+      const examItem = activeApplicableItems.find(i => i.name.toLowerCase().includes('exam'));
+      const examAmt = examItem ? num(examItem.amount) : 0;
+
+      // Render Left Column: Fee Ledger Month Cards
       let monthsHtml = months.map(m => {
         const dParts = m.split('-');
         const mIdx = parseInt(dParts[1], 10) - 1;
@@ -9010,205 +9236,415 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
           }
         });
 
-        const baseMonthly = tuition + van;
-        const monthlyTotal = baseMonthly + itemsTotal;
-        
+        const mTotal = tuition + van + itemsTotal;
         const mRow = DB.fees.monthlyLedger?.[sid]?.[m];
         const isPaid = mRow ? mRow.paid : false;
         const paidAmt = mRow ? num(mRow.amountPaid || mRow.amount || 0) : 0;
         const paidOn = mRow?.paidOn;
-        
-        const isPartial = isPaid && paidAmt > 0 && paidAmt < monthlyTotal;
-        const remainingDues = Math.max(0, monthlyTotal - (isPaid ? paidAmt : 0));
-        
-        if (!isPaid) {
-          unpaidMonthsSum += monthlyTotal;
-        } else if (isPartial) {
-          unpaidMonthsSum += remainingDues;
-        }
-
-        // Action Menu Options
-        const hasExamItem = applicableItems.some(i => i.name.toLowerCase().includes('exam'));
-        const examItem = applicableItems.find(i => i.name.toLowerCase().includes('exam'));
-        const examAmt = examItem ? examItem.amount : 0;
+        const isPartial = isPaid && paidAmt > 0 && paidAmt < mTotal;
+        const remainingDues = Math.max(0, mTotal - paidAmt);
+        const isActive = (m === activeMonth);
 
         const accentBorder = isPaid ? (isPartial ? '#f59e0b' : '#10b981') : '#f43f5e';
+        const cardBg = isActive ? '#faf5ff' : '#ffffff';
+        const cardBorder = isActive ? '1.5px solid #7c3aed' : '1px solid #e2e8f0';
+
         return `
-          <div class="glass-month-card" style="position:relative; z-index:5; background:#ffffff; border:1px solid #e2e8f0; border-left:3.5px solid ${accentBorder}; border-radius:9px; padding:9px 13px; margin-bottom:7px; box-shadow:0 1px 3px rgba(15,23,42,0.03); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-            <div style="flex:1; min-width:220px;">
-              <div style="display:flex; align-items:center; gap:7px; flex-wrap:wrap;">
-                <span style="font-weight:700; font-size:0.88rem; color:#0f172a;">${mName}</span>
+          <div class="glass-month-card" onclick="openStudentFeeModal('${sid}', '${m}')" style="cursor:pointer; position:relative; background:${cardBg}; border:${cardBorder}; border-left:4px solid ${accentBorder}; border-radius:10px; padding:10px 14px; margin-bottom:8px; box-shadow:${isActive ? '0 4px 14px rgba(124,58,237,0.1)' : '0 1px 3px rgba(15,23,42,0.03)'}; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; transition:all 0.15s ease;">
+            <div style="flex:1; min-width:200px;">
+              <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                <span style="font-weight:700; font-size:0.92rem; color:#0f172a;">${mName}</span>
                 ${isPaid 
                   ? (isPartial
-                      ? `<span style="background:#fffbeb; color:#92400e; border:1px solid #fde68a; font-size:0.65rem; font-weight:700; padding:2px 7px; border-radius:9999px; display:inline-flex; align-items:center; gap:4px;">
-                           <span style="width:5px; height:5px; border-radius:50%; background:#d97706; display:inline-block;"></span> PARTIAL (${fmtMoney(paidAmt)})
-                         </span>`
-                      : `<span style="background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; font-size:0.65rem; font-weight:700; padding:2px 7px; border-radius:9999px; display:inline-flex; align-items:center; gap:4px;">
-                           <span style="width:5px; height:5px; border-radius:50%; background:#10b981; display:inline-block;"></span> PAID (${fmtMoney(paidAmt || monthlyTotal)})
-                         </span>`)
-                  : `<span style="background:#fef2f2; color:#991b1b; border:1px solid #fecaca; font-size:0.65rem; font-weight:700; padding:2px 7px; border-radius:9999px; display:inline-flex; align-items:center; gap:4px;">
-                       <span style="width:5px; height:5px; border-radius:50%; background:#ef4444; display:inline-block;"></span> UNPAID
-                     </span>`}
+                      ? `<span style="background:#fffbeb; color:#92400e; border:1px solid #fde68a; font-size:0.68rem; font-weight:700; padding:2px 8px; border-radius:9999px;">PARTIAL (${fmtMoney(paidAmt)})</span>`
+                      : `<span style="background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; font-size:0.68rem; font-weight:700; padding:2px 8px; border-radius:9999px;">PAID</span>`)
+                  : `<span style="background:#fef2f2; color:#991b1b; border:1px solid #fecaca; font-size:0.68rem; font-weight:700; padding:2px 8px; border-radius:9999px;">UNPAID</span>`}
+                ${isActive ? `<span style="background:#7c3aed; color:#fff; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:4px;">ACTIVE</span>` : ''}
               </div>
 
-              <!-- Breakdown row -->
-              <div style="font-size:0.73rem; color:#64748b; margin-top:3px; display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                <span>Monthly Fee: <b style="color:#0f172a; font-weight:600;">${fmtMoney(monthlyTotal)}</b></span>
-                ${tuition > 0 && applicableItems.length > 0 ? `<span style="background:#f1f5f9; color:#475569; font-size:0.67rem; padding:1px 5px; border-radius:4px; border:1px solid #e2e8f0;">Tuition: ${fmtMoney(tuition)}</span>` : ''}
-                ${applicableItems.map(it => `<span style="background:#f5f3ff; color:#6d28d9; font-size:0.67rem; font-weight:600; padding:1px 6px; border-radius:4px; border:1px solid #ddd6fe;">${escHtml(it.name)}: ${fmtMoney(it.amount)}</span>`).join(' ')}
-                ${van > 0 ? `<span style="background:#eff6ff; color:#1d4ed8; font-size:0.67rem; font-weight:600; padding:1px 5px; border-radius:4px; border:1px solid #bfdbfe;">Van: ${fmtMoney(van)}</span>` : ''}
-                ${isPaid && paidOn ? `<span style="font-size:0.71rem; color:#64748b; display:inline-flex; align-items:center; gap:3px;">&bull; Paid on <b style="color:#059669; font-weight:600;">${fmtDate(paidOn)}</b>${isPartial ? ` (Bal: <b style="color:#b91c1c;">${fmtMoney(remainingDues)}</b>)` : ''}</span>` : ''}
+              <div style="font-size:0.75rem; color:#64748b; margin-top:4px; display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                <span>Monthly Fee: <b style="color:#0f172a;">${fmtMoney(mTotal)}</b></span>
+                <span style="color:#cbd5e1;">&bull;</span>
+                <span>Tuition: ${fmtMoney(tuition)}</span>
+                ${applicableItems.map(it => `<span style="background:#f5f3ff; color:#6d28d9; font-size:0.68rem; font-weight:600; padding:1px 6px; border-radius:4px; border:1px solid #ddd6fe;">${escHtml(it.name)}: ${fmtMoney(it.amount)}</span>`).join(' ')}
+                ${isPaid && paidOn ? `<span style="color:#059669; font-weight:600;">&bull; Paid on ${fmtDate(paidOn)}</span>` : ''}
               </div>
             </div>
 
-            <!-- 2-Action Controls -->
-            <div style="display:flex; gap:6px; align-items:center;">
+            <div style="display:flex; gap:6px; align-items:center;" onclick="event.stopPropagation()">
               ${isPaid ? `
-                <button type="button" class="btn btn-xs" style="outline:none; background:#ffffff; color:#334155; border:1px solid #cbd5e1; font-weight:600; padding:4px 9px; border-radius:6px; font-size:0.72rem; cursor:pointer; display:inline-flex; align-items:center; gap:4px; box-shadow:0 1px 2px rgba(15,23,42,0.03);" onclick="printFeeReceipt('${sid}', '${m}')">
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Receipt
+                <button type="button" class="btn btn-xs" style="background:#ffffff; color:#334155; border:1px solid #cbd5e1; font-weight:600; padding:5px 10px; border-radius:7px; font-size:0.73rem; cursor:pointer; display:inline-flex; align-items:center; gap:4px; box-shadow:0 1px 2px rgba(15,23,42,0.03);" onclick="printFeeReceipt('${sid}', '${m}')">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Receipt
                 </button>
               ` : `
-                <button type="button" class="btn btn-xs" style="outline:none; background:#0f172a; color:#ffffff; border:none; font-weight:600; padding:5px 11px; border-radius:6px; font-size:0.73rem; cursor:pointer; box-shadow:0 1px 3px rgba(15,23,42,0.18); display:inline-flex; align-items:center; gap:4px;" onclick="toggleMonthPayment('${sid}', '${m}', true, ${monthlyTotal})">
+                <button type="button" class="btn btn-xs" style="background:#0f172a; color:#ffffff; border:none; font-weight:600; padding:5px 11px; border-radius:7px; font-size:0.73rem; cursor:pointer; box-shadow:0 1px 3px rgba(15,23,42,0.18); display:inline-flex; align-items:center; gap:4px;" onclick="toggleMonthPayment('${sid}', '${m}', true, ${mTotal})">
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Mark Full Paid
                 </button>
               `}
 
-              <!-- Dropdown Menu Wrapper -->
               <div class="glass-dropdown-wrapper" style="position:relative; display:inline-block;">
-                <button type="button" class="btn btn-xs" style="outline:none; background:#ffffff; color:#475569; border:1px solid #cbd5e1; font-weight:600; font-size:0.72rem; padding:4px 9px; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:4px; box-shadow:0 1px 2px rgba(15,23,42,0.03);" onclick="toggleFeeDropdown(event, 'fee-menu-${m}')">
+                <button type="button" class="btn btn-xs" style="background:#ffffff; color:#475569; border:1px solid #cbd5e1; font-weight:600; font-size:0.72rem; padding:5px 9px; border-radius:7px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;" onclick="toggleFeeDropdown(event, 'fee-menu-${m}')">
                   <span>Options</span>
                   <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                 </button>
 
-                <div id="fee-menu-${m}" class="glass-fee-dropdown-menu" style="display:none; position:absolute; right:0; top:calc(100% + 6px); min-width:240px; background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; box-shadow:0 10px 25px -4px rgba(15,23,42,0.15), 0 0 0 1px rgba(0,0,0,0.04); padding:5px; z-index:100; text-align:left;">
-                  <div style="padding:5px 9px 3px 9px; font-size:0.67rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:#94a3b8;">
-                    Payment Options
-                  </div>
-
-                  ${!isPaid || isPartial ? `
-                    <button type="button" style="outline:none; width:100%; display:flex; align-items:center; justify-content:space-between; padding:7px 9px; border-radius:6px; border:none; background:transparent; cursor:pointer; font-size:0.76rem; font-weight:600; color:#0f172a; text-align:left; transition:background 0.12s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'" onclick="handleFeeOptionSelect('${sid}', '${m}', ${monthlyTotal}, ${baseMonthly}, ${examAmt}, 'full'); toggleFeeDropdown(event, 'fee-menu-${m}')">
-                      <span>Mark Full Paid</span>
-                      <span style="font-weight:700; color:#059669; font-size:0.72rem;">${fmtMoney(monthlyTotal)}</span>
-                    </button>
-
-                    ${applicableItems.length > 0 ? `
-                    <button type="button" style="outline:none; width:100%; display:flex; align-items:center; justify-content:space-between; padding:7px 9px; border-radius:6px; border:none; background:transparent; cursor:pointer; font-size:0.76rem; font-weight:600; color:#0f172a; text-align:left; transition:background 0.12s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'" onclick="handleFeeOptionSelect('${sid}', '${m}', ${monthlyTotal}, ${baseMonthly}, ${examAmt}, 'tuition'); toggleFeeDropdown(event, 'fee-menu-${m}')">
-                      <span>Monthly Tuition Only</span>
-                      <span style="font-weight:700; color:#2563eb; font-size:0.72rem;">${fmtMoney(baseMonthly)}</span>
-                    </button>
-                    ` : ''}
-
-                    ${hasExamItem ? `
-                    <button type="button" style="outline:none; width:100%; display:flex; align-items:center; justify-content:space-between; padding:7px 9px; border-radius:6px; border:none; background:transparent; cursor:pointer; font-size:0.76rem; font-weight:600; color:#0f172a; text-align:left; transition:background 0.12s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'" onclick="handleFeeOptionSelect('${sid}', '${m}', ${monthlyTotal}, ${baseMonthly}, ${examAmt}, 'exam'); toggleFeeDropdown(event, 'fee-menu-${m}')">
-                      <span>Examination Fee Only</span>
-                      <span style="font-weight:700; color:#7c3aed; font-size:0.72rem;">${fmtMoney(examAmt)}</span>
-                    </button>
-                    ` : ''}
-
-                    <div style="height:1px; background:#f1f5f9; margin:3px 0;"></div>
-
-                    <button type="button" style="outline:none; width:100%; display:flex; align-items:center; justify-content:space-between; padding:7px 9px; border-radius:6px; border:none; background:transparent; cursor:pointer; font-size:0.76rem; font-weight:600; color:#475569; text-align:left; transition:background 0.12s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'" onclick="handleFeeOptionSelect('${sid}', '${m}', ${monthlyTotal}, ${baseMonthly}, ${examAmt}, 'custom'); toggleFeeDropdown(event, 'fee-menu-${m}')">
-                      <span>Custom Amount Received...</span>
-                    </button>
-                  ` : ''}
-
-                  ${isPaid ? `
-                    <button type="button" style="outline:none; width:100%; display:flex; align-items:center; justify-content:space-between; padding:7px 9px; border-radius:6px; border:none; background:transparent; cursor:pointer; font-size:0.76rem; font-weight:600; color:#475569; text-align:left; transition:background 0.12s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'" onclick="handleFeeOptionSelect('${sid}', '${m}', ${monthlyTotal}, ${baseMonthly}, ${examAmt}, 'custom'); toggleFeeDropdown(event, 'fee-menu-${m}')">
-                      <span>Edit Received Amount...</span>
-                    </button>
-
-                    <div style="height:1px; background:#f1f5f9; margin:3px 0;"></div>
-
-                    <button type="button" style="outline:none; width:100%; display:flex; align-items:center; justify-content:space-between; padding:7px 9px; border-radius:6px; border:none; background:transparent; cursor:pointer; font-size:0.76rem; font-weight:600; color:#dc2626; text-align:left; transition:background 0.12s;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='transparent'" onclick="handleFeeOptionSelect('${sid}', '${m}', ${monthlyTotal}, ${baseMonthly}, ${examAmt}, 'unpaid'); toggleFeeDropdown(event, 'fee-menu-${m}')">
-                      <span>Reset to Unpaid</span>
-                    </button>
-                  ` : ''}
+                <div id="fee-menu-${m}" class="glass-fee-dropdown-menu" style="display:none; position:absolute; right:0; top:calc(100% + 6px); min-width:230px; background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; box-shadow:0 10px 25px -4px rgba(15,23,42,0.15); padding:5px; z-index:100; text-align:left;">
+                  <button type="button" style="width:100%; display:flex; justify-content:space-between; padding:7px 10px; border-radius:6px; border:none; background:transparent; cursor:pointer; font-size:0.75rem; font-weight:600; color:#0f172a;" onclick="toggleMonthPayment('${sid}', '${m}', true, ${mTotal}); toggleFeeDropdown(event, 'fee-menu-${m}')">
+                    <span>Mark Full Paid</span>
+                    <span style="color:#059669;">${fmtMoney(mTotal)}</span>
+                  </button>
+                  <button type="button" style="width:100%; display:flex; justify-content:space-between; padding:7px 10px; border-radius:6px; border:none; background:transparent; cursor:pointer; font-size:0.75rem; font-weight:600; color:#0f172a;" onclick="toggleMonthPayment('${sid}', '${m}', true, ${tuition}); toggleFeeDropdown(event, 'fee-menu-${m}')">
+                    <span>Tuition Only</span>
+                    <span style="color:#2563eb;">${fmtMoney(tuition)}</span>
+                  </button>
+                  <button type="button" style="width:100%; display:flex; justify-content:space-between; padding:7px 10px; border-radius:6px; border:none; background:transparent; cursor:pointer; font-size:0.75rem; font-weight:600; color:#dc2626;" onclick="toggleMonthPayment('${sid}', '${m}', false); toggleFeeDropdown(event, 'fee-menu-${m}')">
+                    <span>Reset to Unpaid</span>
+                  </button>
                 </div>
               </div>
             </div>
           </div>
         `;
       }).join('');
-      
+
       openModal(`
         <!-- Student Header -->
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; padding-bottom:12px; border-bottom:1px solid #e2e8f0; margin-bottom:12px;">
-          <div style="display:flex; gap:10px; align-items:center;">
-            <div style="width:38px; height:38px; border-radius:9px; background:linear-gradient(135deg, #1e293b, #0f172a); color:#ffffff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.92rem; box-shadow:0 2px 4px rgba(15,23,42,0.14); flex-shrink:0;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; padding-bottom:14px; border-bottom:1px solid #e2e8f0; margin-bottom:16px;">
+          <div style="display:flex; gap:12px; align-items:center;">
+            <div style="width:46px; height:46px; border-radius:50%; background:#0f172a; color:#ffffff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.1rem; box-shadow:0 3px 8px rgba(15,23,42,0.22); flex-shrink:0;">
               ${initials}
             </div>
             <div>
-              <div style="font-weight:800; font-size:1.02rem; color:#0f172a; line-height:1.2;">
+              <div style="font-weight:800; font-size:1.12rem; color:#0f172a; line-height:1.2; letter-spacing:-0.2px;">
                 ${escHtml(s.name)}
               </div>
-              <div style="display:flex; gap:6px; align-items:center; margin-top:2px; flex-wrap:wrap;">
-                <span style="background:#f1f5f9; color:#475569; font-size:0.7rem; font-weight:600; padding:1px 6px; border-radius:4px; border:1px solid #e2e8f0;">${escHtml(cls?.name || 'Class')}</span>
-                <span style="background:#f1f5f9; color:#475569; font-size:0.7rem; font-weight:600; padding:1px 6px; border-radius:4px; border:1px solid #e2e8f0;">Roll: ${escHtml(s.roll || '-')}</span>
-                <span style="font-size:0.7rem; color:#64748b; margin-left:2px;">Standard Monthly: <b style="color:#0f172a;">${fmtMoney(tuition + van)}</b></span>
+              <div style="display:flex; gap:8px; align-items:center; margin-top:3px; flex-wrap:wrap;">
+                <span style="color:#64748b; font-size:0.76rem; font-weight:600;">${escHtml(cls?.name || 'Class')}</span>
+                <span style="color:#cbd5e1;">|</span>
+                <span style="color:#64748b; font-size:0.76rem; font-weight:600;">Roll: ${escHtml(s.roll || '-')}</span>
+                <span style="background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; font-size:0.68rem; font-weight:700; padding:1px 8px; border-radius:9999px;">Standard Monthly</span>
+                <span style="font-size:0.82rem; font-weight:700; color:#0f172a; margin-left:2px;">${fmtMoney(tuition + van)}</span>
               </div>
             </div>
           </div>
-          <div style="display:flex; gap:6px; align-items:center;">
-            <button type="button" class="btn btn-xs" style="outline:none; background:#ffffff; color:#059669; border:1px solid #cbd5e1; font-weight:600; padding:4px 9px; border-radius:6px; display:inline-flex; align-items:center; gap:4px; font-size:0.72rem; cursor:pointer;" onclick="markAllMonths('${sid}', true)">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Mark All Paid
+
+          <div style="display:flex; gap:8px; align-items:center;">
+            <button type="button" class="btn btn-xs" style="background:#ffffff; color:#059669; border:1px solid #a7f3d0; font-weight:700; padding:6px 12px; border-radius:8px; display:inline-flex; align-items:center; gap:5px; font-size:0.75rem; cursor:pointer; box-shadow:0 1px 2px rgba(15,23,42,0.03);" onclick="markAllMonths('${sid}', true)">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Mark All Paid
             </button>
-            <button type="button" class="btn btn-xs" style="outline:none; background:#ffffff; color:#64748b; border:1px solid #cbd5e1; font-weight:600; padding:4px 9px; border-radius:6px; display:inline-flex; align-items:center; gap:4px; font-size:0.72rem; cursor:pointer;" onclick="markAllMonths('${sid}', false)">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Mark All Unpaid
+            <button type="button" class="btn btn-xs" style="background:#ffffff; color:#64748b; border:1px solid #cbd5e1; font-weight:700; padding:6px 12px; border-radius:8px; display:inline-flex; align-items:center; gap:5px; font-size:0.75rem; cursor:pointer; box-shadow:0 1px 2px rgba(15,23,42,0.03);" onclick="markAllMonths('${sid}', false)">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Mark All Unpaid
             </button>
           </div>
         </div>
 
-        <div style="font-weight:700; font-size:0.69rem; color:#64748b; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.6px; display:flex; align-items:center; justify-content:space-between;">
-          <span>Session Fee Ledger</span>
-          <span style="font-size:0.67rem; color:#94a3b8; font-weight:500; text-transform:none;">Billing records</span>
-        </div>
-        
-        ${monthsHtml}
-        
-        <!-- Summary Box -->
-        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:11px 15px; margin:10px 0 12px 0; box-shadow:0 1px 3px rgba(15,23,42,0.02);">
-          <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.78rem; color:#475569; margin-bottom:5px;">
-            <span>Previous Arrears (Opening Balance):</span>
-            <span style="font-weight:600; color:#334155; font-size:0.83rem;">
-              ${fmtMoney(initialArrears)}
-            </span>
-          </div>
-          ${unpaidMonthsSum > 0 ? `
-          <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.78rem; color:#475569; margin-bottom:5px;">
-            <span>Unpaid Months Remaining Dues:</span>
-            <span style="font-weight:600; color:#334155; font-size:0.83rem;">
-              + ${fmtMoney(unpaidMonthsSum)}
-            </span>
-          </div>
-          ` : ''}
-          <div style="border-top:1px solid #e2e8f0; margin:6px 0;"></div>
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <div>
-              <div style="font-weight:700; font-size:0.88rem; color:#0f172a;">Total Net Balance Due</div>
-              <div style="font-size:0.68rem; color:#64748b;">Live calculated balance across all billing cycles</div>
+        <!-- 2-Column Responsive Layout -->
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap:22px; align-items:start;">
+          
+          <!-- LEFT COLUMN: FEE LEDGER & BREAKDOWN -->
+          <div>
+            <div style="font-weight:800; font-size:0.74rem; color:#475569; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.8px; display:flex; align-items:center; justify-content:space-between;">
+              <span>Fee Ledger</span>
+              <span style="font-size:0.7rem; color:#94a3b8; font-weight:500; text-transform:none;">Billing Records</span>
             </div>
-            <div style="text-align:right;">
-              <div style="font-size:1.25rem; font-weight:800; color:${totalDue > 0 ? '#b91c1c' : '#059669'};">
-                ${fmtMoney(totalDue)}
+
+            <!-- Month Cards List -->
+            <div style="margin-bottom:16px;">
+              ${monthsHtml}
+            </div>
+
+            <!-- PAYMENT BREAKDOWN -->
+            <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:13px 15px; margin-bottom:14px; box-shadow:0 1px 3px rgba(15,23,42,0.02);">
+              <div style="font-weight:800; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.6px; color:#475569; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                <span>Payment Breakdown (${activeMonthName})</span>
               </div>
-              ${totalDue <= 0 ? `<div style="font-size:0.68rem; color:#059669; font-weight:700; text-transform:uppercase; margin-top:1px; display:inline-flex; align-items:center; gap:4px;"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Fully Cleared</div>` : ''}
+
+              <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:#475569; padding:5px 0;">
+                <span style="display:flex; align-items:center; gap:6px;">
+                  <span style="color:#2563eb;">🏫</span> Tuition Fee (Monthly)
+                </span>
+                <span style="font-weight:700; color:#0f172a;">${fmtMoney(tuition)}</span>
+              </div>
+
+              ${van > 0 ? `
+              <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:#475569; padding:5px 0;">
+                <span style="display:flex; align-items:center; gap:6px;">
+                  <span style="color:#059669;">🚐</span> Van / Transport Fee
+                </span>
+                <span style="font-weight:700; color:#0f172a;">${fmtMoney(van)}</span>
+              </div>
+              ` : ''}
+
+              ${activeApplicableItems.map(it => `
+              <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:#475569; padding:5px 0;">
+                <span style="display:flex; align-items:center; gap:6px;">
+                  <span style="color:#7c3aed;">🪙</span> ${escHtml(it.name)}
+                </span>
+                <span style="font-weight:700; color:#7c3aed;">${fmtMoney(it.amount)}</span>
+              </div>
+              `).join('')}
+
+              <div style="border-top:1px dashed #e2e8f0; margin:8px 0 6px 0;"></div>
+
+              <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.88rem; font-weight:800; color:#0f172a;">
+                <span>Total Due (${activeMonthName.split(' ')[0]})</span>
+                <span style="font-size:0.95rem;">${fmtMoney(activeMonthDue)}</span>
+              </div>
+            </div>
+
+            <!-- PAYMENT STATUS -->
+            <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:13px 15px; margin-bottom:14px; box-shadow:0 1px 3px rgba(15,23,42,0.02);">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <div style="font-weight:800; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.6px; color:#475569;">Payment Status</div>
+                ${activeIsPaid 
+                  ? (activeIsPartial ? `<span style="background:#fffbeb; color:#92400e; border:1px solid #fde68a; font-size:0.68rem; font-weight:700; padding:2px 8px; border-radius:9999px;">PARTIAL</span>` : `<span style="background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; font-size:0.68rem; font-weight:700; padding:2px 8px; border-radius:9999px;">PAID</span>`)
+                  : `<span style="background:#fef2f2; color:#991b1b; border:1px solid #fecaca; font-size:0.68rem; font-weight:700; padding:2px 8px; border-radius:9999px;">UNPAID</span>`}
+              </div>
+
+              <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.8rem; color:#475569; padding:4px 0;">
+                <span style="border-left:3px solid #10b981; padding-left:7px;">Previous Arrears (Opening Balance):</span>
+                <span style="font-weight:700; color:${prevArrears > 0 ? '#dc2626' : '#334155'}; font-size:0.84rem;">
+                  ${fmtMoney(prevArrears)}
+                </span>
+              </div>
+
+              <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.8rem; color:#475569; padding:4px 0;">
+                <span style="border-left:3px solid #0f172a; padding-left:7px;">Payments Received (${activeMonthName.split(' ')[0]}):</span>
+                <span style="font-weight:700; color:#059669; font-size:0.84rem;">
+                  ${fmtMoney(activePaidAmt)}
+                </span>
+              </div>
+
+              <!-- Big Outstanding Card -->
+              <div style="background:${totalGrossDue > 0 ? '#fff1f2' : '#ecfdf5'}; border:1px solid ${totalGrossDue > 0 ? '#fecdd3' : '#a7f3d0'}; border-radius:10px; padding:10px 14px; margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
+                <div style="font-weight:800; font-size:0.88rem; color:#0f172a;">
+                  Total Outstanding
+                  <div style="font-size:0.68rem; font-weight:500; color:#64748b;">Arrears + Current Month Remaining</div>
+                </div>
+                <div style="font-size:1.25rem; font-weight:800; color:${totalGrossDue > 0 ? '#dc2626' : '#059669'};">
+                  ${fmtMoney(totalGrossDue)}
+                </div>
+              </div>
+            </div>
+
+            <!-- Trust Badges -->
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <div style="display:flex; gap:8px; align-items:start; font-size:0.73rem; color:#64748b; background:#f8fafc; border:1px solid #f1f5f9; padding:8px 12px; border-radius:8px;">
+                <span style="color:#0284c7; font-size:0.95rem;">ℹ</span>
+                <div><b>Payment Notes:</b> All payments are recorded with date, method, and transaction reference for complete transparency.</div>
+              </div>
+              <div style="display:flex; gap:8px; align-items:start; font-size:0.73rem; color:#64748b; background:#f8fafc; border:1px solid #f1f5f9; padding:8px 12px; border-radius:8px;">
+                <span style="color:#059669; font-size:0.95rem;">🛡</span>
+                <div><b>Secure & Reliable:</b> School financial records are audited, synced in real-time, and backed up securely.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT COLUMN: CASHIER DESK & REAL-TIME ARREARS CALCULATION -->
+          <div>
+            <div style="font-weight:800; font-size:0.74rem; color:#475569; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.8px; display:flex; align-items:center; gap:6px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+              <span>Payment Options</span>
+            </div>
+
+            <!-- Quick Action Cards -->
+            <div style="display:flex; flex-direction:column; gap:7px; margin-bottom:14px;">
+              <!-- 1. Mark Full Paid -->
+              <div class="fee-quick-card" data-mode="full" onclick="setFeeQuickAmount(${totalGrossDue}, 'full')" style="cursor:pointer; background:#f0fdf4; border:1.5px solid #86efac; border-radius:10px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; transition:all 0.15s ease;">
+                <div style="display:flex; gap:10px; align-items:center;">
+                  <div style="width:24px; height:24px; border-radius:50%; background:#10b981; color:#fff; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800;">✓</div>
+                  <div>
+                    <div style="font-weight:700; font-size:0.84rem; color:#0f172a;">Mark Full Paid</div>
+                    <div style="font-size:0.7rem; color:#15803d;">Pay complete amount (${fmtMoney(totalGrossDue)})</div>
+                  </div>
+                </div>
+                <div style="font-weight:700; color:#059669; font-size:0.88rem;">&rsaquo;</div>
+              </div>
+
+              <!-- 2. Clear Arrears Only (if arrears > 0) -->
+              ${prevArrears > 0 ? `
+              <div class="fee-quick-card" data-mode="arrears" onclick="setFeeQuickAmount(${prevArrears}, 'arrears')" style="cursor:pointer; background:#fffbeb; border:1.5px solid #fde68a; border-radius:10px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; transition:all 0.15s ease;">
+                <div style="display:flex; gap:10px; align-items:center;">
+                  <div style="width:24px; height:24px; border-radius:50%; background:#f59e0b; color:#fff; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800;">!</div>
+                  <div>
+                    <div style="font-weight:700; font-size:0.84rem; color:#0f172a;">Clear Previous Arrears Only</div>
+                    <div style="font-size:0.7rem; color:#b45309;">Overdue balance (${fmtMoney(prevArrears)})</div>
+                  </div>
+                </div>
+                <div style="font-weight:700; color:#d97706; font-size:0.88rem;">&rsaquo;</div>
+              </div>
+              ` : ''}
+
+              <!-- 3. Monthly Tuition Only -->
+              <div class="fee-quick-card" data-mode="tuition" onclick="setFeeQuickAmount(${tuition}, 'tuition')" style="cursor:pointer; background:#ffffff; border:1.5px solid #e2e8f0; border-radius:10px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; transition:all 0.15s ease;">
+                <div style="display:flex; gap:10px; align-items:center;">
+                  <div style="width:24px; height:24px; border-radius:7px; background:#eff6ff; color:#2563eb; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800;">🏫</div>
+                  <div>
+                    <div style="font-weight:700; font-size:0.84rem; color:#0f172a;">Monthly Tuition Only</div>
+                    <div style="font-size:0.7rem; color:#64748b;">${fmtMoney(tuition)}</div>
+                  </div>
+                </div>
+                <div style="font-weight:700; color:#64748b; font-size:0.88rem;">&rsaquo;</div>
+              </div>
+
+              <!-- 4. Examination Fee Only (if exists) -->
+              ${examAmt > 0 ? `
+              <div class="fee-quick-card" data-mode="exam" onclick="setFeeQuickAmount(${examAmt}, 'exam')" style="cursor:pointer; background:#ffffff; border:1.5px solid #e2e8f0; border-radius:10px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; transition:all 0.15s ease;">
+                <div style="display:flex; gap:10px; align-items:center;">
+                  <div style="width:24px; height:24px; border-radius:7px; background:#f5f3ff; color:#7c3aed; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800;">🪙</div>
+                  <div>
+                    <div style="font-weight:700; font-size:0.84rem; color:#0f172a;">Examination Fee Only</div>
+                    <div style="font-size:0.7rem; color:#64748b;">${fmtMoney(examAmt)}</div>
+                  </div>
+                </div>
+                <div style="font-weight:700; color:#64748b; font-size:0.88rem;">&rsaquo;</div>
+              </div>
+              ` : ''}
+
+              <!-- 5. Custom Amount Received -->
+              <div class="fee-quick-card" data-mode="custom" onclick="document.getElementById('fee-input-amount').focus()" style="cursor:pointer; background:#faf5ff; border:1.5px solid #d8b4fe; border-radius:10px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; transition:all 0.15s ease;">
+                <div style="display:flex; gap:10px; align-items:center;">
+                  <div style="width:24px; height:24px; border-radius:7px; background:#f3e8ff; color:#7c3aed; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800;">📝</div>
+                  <div>
+                    <div style="font-weight:700; font-size:0.84rem; color:#0f172a;">Custom Amount Received</div>
+                    <div style="font-size:0.7rem; color:#7c3aed;">Partial payment / flexible entry</div>
+                  </div>
+                </div>
+                <div style="font-weight:700; color:#7c3aed; font-size:0.88rem;">&rsaquo;</div>
+              </div>
+            </div>
+
+            <!-- INTERACTIVE CASHIER DESK FORM -->
+            <div style="background:#fdfcff; border:1.5px solid #ede9fe; border-radius:12px; padding:15px; box-shadow:0 2px 6px rgba(124,58,237,0.04);">
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                <div style="width:28px; height:28px; border-radius:8px; background:#7c3aed; color:#fff; display:flex; align-items:center; justify-content:center; font-size:0.85rem;">💳</div>
+                <div>
+                  <div style="font-weight:800; font-size:0.86rem; color:#0f172a;">Payment Details</div>
+                  <div style="font-size:0.69rem; color:#64748b;">Enter the amount received and payment details.</div>
+                </div>
+              </div>
+
+              <!-- Amount Received Input -->
+              <div style="margin-bottom:11px;">
+                <label style="display:block; font-size:0.75rem; font-weight:700; color:#334155; margin-bottom:4px;">
+                  Amount Received (PKR) <span style="color:#ef4444;">*</span>
+                </label>
+                <div style="position:relative; display:flex; align-items:center;">
+                  <input type="number" id="fee-input-amount" 
+                    data-total-gross-due="${totalGrossDue}" 
+                    data-prev-arrears="${prevArrears}" 
+                    data-month-due="${activeMonthRemDue}" 
+                    value="${totalGrossDue > 0 ? totalGrossDue : activeMonthDue}" 
+                    placeholder="Enter amount" 
+                    oninput="updateFeeCalculationRealtime()" 
+                    style="width:100%; padding:9px 52px 9px 12px; font-size:1.05rem; font-weight:800; color:#0f172a; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; background:#ffffff; transition:border 0.15s;" 
+                    onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#cbd5e1'"/>
+                  <span style="position:absolute; right:10px; font-weight:700; font-size:0.78rem; color:#64748b; background:#f1f5f9; padding:2px 8px; border-radius:5px;">PKR</span>
+                </div>
+              </div>
+
+              <!-- Payment Method & Date in Row -->
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:11px;">
+                <div>
+                  <label style="display:block; font-size:0.73rem; font-weight:700; color:#334155; margin-bottom:4px;">
+                    Payment Method <span style="color:#ef4444;">*</span>
+                  </label>
+                  <select id="fee-input-method" style="width:100%; padding:8px 10px; font-size:0.82rem; font-weight:600; color:#0f172a; border:1px solid #cbd5e1; border-radius:8px; outline:none; background:#ffffff; cursor:pointer;">
+                    <option value="Cash">Cash 💵</option>
+                    <option value="Bank Transfer">Bank Transfer 🏦</option>
+                    <option value="EasyPaisa">EasyPaisa 📱</option>
+                    <option value="JazzCash">JazzCash 📱</option>
+                    <option value="Cheque">Cheque 🧾</option>
+                  </select>
+                </div>
+                <div>
+                  <label style="display:block; font-size:0.73rem; font-weight:700; color:#334155; margin-bottom:4px;">
+                    Payment Date <span style="color:#ef4444;">*</span>
+                  </label>
+                  <input type="date" id="fee-input-date" value="${today()}" style="width:100%; padding:7px 10px; font-size:0.82rem; font-weight:600; color:#0f172a; border:1px solid #cbd5e1; border-radius:8px; outline:none; background:#ffffff;"/>
+                </div>
+              </div>
+
+              <!-- Reference & Notes -->
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:11px;">
+                <div>
+                  <label style="display:block; font-size:0.73rem; font-weight:700; color:#334155; margin-bottom:4px;">
+                    Transaction Reference <span style="font-weight:400; color:#94a3b8;">(Optional)</span>
+                  </label>
+                  <input type="text" id="fee-input-ref" placeholder="e.g. Receipt #123, Trx ID" style="width:100%; padding:7px 10px; font-size:0.8rem; border:1px solid #cbd5e1; border-radius:8px; outline:none; background:#ffffff;"/>
+                </div>
+                <div>
+                  <label style="display:block; font-size:0.73rem; font-weight:700; color:#334155; margin-bottom:4px;">
+                    Notes / Remarks <span style="font-weight:400; color:#94a3b8;">(Optional)</span>
+                  </label>
+                  <input type="text" id="fee-input-notes" placeholder="e.g. Received from father" style="width:100%; padding:7px 10px; font-size:0.8rem; border:1px solid #cbd5e1; border-radius:8px; outline:none; background:#ffffff;"/>
+                </div>
+              </div>
+
+              <!-- Arrears Waiver / Concession Discount (Optional) -->
+              <div style="margin-bottom:13px;">
+                <label style="display:flex; justify-content:space-between; font-size:0.73rem; font-weight:700; color:#334155; margin-bottom:4px;">
+                  <span>Arrears Concession / Waiver <span style="font-weight:400; color:#94a3b8;">(Optional)</span></span>
+                  <span style="font-weight:500; font-size:0.69rem; color:#7c3aed;">Reduces outstanding balance</span>
+                </label>
+                <input type="number" id="fee-input-discount" value="0" placeholder="0" oninput="updateFeeCalculationRealtime()" style="width:100%; padding:7px 10px; font-size:0.85rem; font-weight:600; color:#0f172a; border:1px solid #cbd5e1; border-radius:8px; outline:none; background:#ffffff;"/>
+              </div>
+
+              <!-- REAL-TIME CALCULATION CARD -->
+              <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:11px 13px; margin-bottom:14px; box-shadow:0 1px 3px rgba(15,23,42,0.02);">
+                <div style="display:flex; justify-content:space-between; font-size:0.76rem; color:#64748b; padding:2px 0;">
+                  <span>Total Due (${prevArrears > 0 ? 'Arrears + Month' : activeMonthName.split(' ')[0]}):</span>
+                  <span style="font-weight:700; color:#0f172a;">${fmtMoney(totalGrossDue)}</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:0.76rem; color:#64748b; padding:2px 0;">
+                  <span>Amount Received:</span>
+                  <span style="font-weight:700; color:#059669;" id="fee-realtime-received">${fmtMoney(totalGrossDue > 0 ? totalGrossDue : activeMonthDue)}</span>
+                </div>
+                
+                <div style="border-top:1px dashed #e2e8f0; margin:6px 0;"></div>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.86rem; font-weight:800; color:#0f172a;">
+                  <span>Remaining Balance:</span>
+                  <span id="fee-realtime-remaining" style="color:#059669; font-size:1.05rem;">PKR 0 (Fully Cleared ✓)</span>
+                </div>
+
+                <!-- Waterfall Allocation Preview -->
+                <div style="border-top:1px solid #f1f5f9; margin-top:8px; padding-top:8px;">
+                  <div style="font-size:0.68rem; font-weight:700; color:#94a3b8; text-transform:uppercase; margin-bottom:4px; letter-spacing:0.5px;">Live Allocation Waterfall:</div>
+                  <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.73rem; margin-bottom:2px;">
+                    <span style="color:#475569;">1. Past Arrears (${fmtMoney(prevArrears)}):</span>
+                    <span id="fee-alloc-arrears-tag">${prevArrears > 0 ? `<span style="color:#059669; font-weight:700; font-size:0.75rem;">✓ Arrears 100% Cleared</span>` : `<span style="color:#64748b; font-size:0.75rem;">No past arrears</span>`}</span>
+                  </div>
+                  <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.73rem;">
+                    <span style="color:#475569;">2. ${activeMonthName.split(' ')[0]} Dues (${fmtMoney(activeMonthRemDue)}):</span>
+                    <span id="fee-alloc-month-tag"><span style="color:#059669; font-weight:700; font-size:0.75rem;">✓ Month Fully Paid</span></span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Submit Payment Button -->
+              <button type="button" id="btn-record-fee" onclick="submitCustomFeePayment('${sid}', '${activeMonth}')" style="width:100%; padding:11px 16px; background:linear-gradient(135deg, #7c3aed, #6d28d9); color:#ffffff; font-weight:800; font-size:0.9rem; border:none; border-radius:9px; box-shadow:0 4px 14px rgba(109,40,217,0.35); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:7px; transition:transform 0.1s ease;" onmousedown="this.style.transform='scale(0.99)'" onmouseup="this.style.transform='scale(1)'">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                <span id="btn-record-fee-text">Record Payment</span>
+              </button>
             </div>
           </div>
         </div>
 
         <!-- Footer Buttons -->
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; padding-top:10px; border-top:1px solid #f1f5f9;">
-          <div style="display:flex; gap:6px;">
-            <button type="button" class="btn" style="outline:none; background:#0f172a; color:#ffffff; font-weight:600; font-size:0.78rem; padding:7px 14px; border-radius:7px; border:none; display:inline-flex; align-items:center; gap:5px; box-shadow:0 1px 3px rgba(15,23,42,0.18); cursor:pointer;" onclick="openVoucherModal('${sid}')">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Issue Fee Challan
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; padding-top:16px; border-top:1px solid #f1f5f9; margin-top:18px;">
+          <div style="display:flex; gap:8px;">
+            <button type="button" class="btn" style="background:#0f172a; color:#ffffff; font-weight:700; font-size:0.8rem; padding:8px 16px; border-radius:8px; border:none; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 5px rgba(15,23,42,0.18); cursor:pointer;" onclick="openVoucherModal('${sid}')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Issue Fee Challan
             </button>
             ${getStudentWA(s) ? `
-            <button type="button" class="btn" style="outline:none; background:#16a34a; color:#ffffff; font-weight:600; font-size:0.78rem; padding:7px 14px; border-radius:7px; border:none; display:inline-flex; align-items:center; gap:5px; box-shadow:0 1px 3px rgba(22,163,74,0.22); cursor:pointer;" onclick="sendVoucherWhatsApp('${sid}', '${monthKey()}')">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg> WhatsApp ${formatMonthDisplay(monthKey()).split(' ')[0]} Challan
+            <button type="button" class="btn" style="background:#16a34a; color:#ffffff; font-weight:700; font-size:0.8rem; padding:8px 16px; border-radius:8px; border:none; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 5px rgba(22,163,74,0.24); cursor:pointer;" onclick="sendVoucherWhatsApp('${sid}', '${activeMonth}')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg> WhatsApp ${activeMonthName.split(' ')[0]} Challan
             </button>
             ` : ''}
           </div>
-          <button type="button" class="btn" style="outline:none; background:#f1f5f9; color:#334155; border:1px solid #e2e8f0; font-weight:600; font-size:0.78rem; padding:7px 16px; border-radius:7px; cursor:pointer;" onclick="closeModal()">
+          <button type="button" class="btn" style="background:#f1f5f9; color:#334155; border:1px solid #e2e8f0; font-weight:700; font-size:0.8rem; padding:8px 18px; border-radius:8px; cursor:pointer;" onclick="closeModal()">
             Close
           </button>
         </div>
@@ -9217,22 +9653,23 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
       const modalEl = document.querySelector('.modal');
       if (modalEl) {
         modalEl.classList.add('modal-glass');
-        modalEl.style.maxWidth = '560px';
+        modalEl.style.maxWidth = '1040px';
+        modalEl.style.width = '96%';
+        modalEl.style.maxHeight = '92vh';
+        modalEl.style.display = 'flex';
+        modalEl.style.flexDirection = 'column';
+        modalEl.style.borderRadius = '16px';
       }
-    }
+      const bodyEl = document.getElementById('modal-body');
+      if (bodyEl) {
+        bodyEl.style.maxHeight = 'calc(92vh - 20px)';
+        bodyEl.style.overflowY = 'auto';
+        bodyEl.style.paddingRight = '4px';
+      }
 
-    function handleFeeOptionSelect(sid, month, monthlyTotal, baseMonthly, examAmt, selectedVal) {
-      if (!selectedVal) return;
-      if (selectedVal === 'full') {
-        toggleMonthPayment(sid, month, true, monthlyTotal);
-      } else if (selectedVal === 'tuition') {
-        toggleMonthPayment(sid, month, true, baseMonthly);
-      } else if (selectedVal === 'exam') {
-        toggleMonthPayment(sid, month, true, examAmt);
-      } else if (selectedVal === 'unpaid') {
-        toggleMonthPayment(sid, month, false);
-      } else if (selectedVal === 'custom') {
-        promptCustomMonthPayment(sid, month, monthlyTotal);
+      // Initialize live calculation with default prefilled value
+      if (typeof updateFeeCalculationRealtime === 'function') {
+        updateFeeCalculationRealtime();
       }
     }
 
@@ -9286,14 +9723,6 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
       showToast(isPaid ? `${monthName} marked as PAID` : `${monthName} marked as UNPAID`);
       goPage('fees');
       openStudentFeeModal(sid, month);
-    }
-
-    function promptCustomMonthPayment(sid, month, defaultFee) {
-      const s = allStus().find(x => x.id === sid); if (!s) return;
-      const amtStr = prompt(`Enter received amount for ${month} (${s.name}):`, defaultFee);
-      if (amtStr === null) return;
-      const amt = num(amtStr);
-      toggleMonthPayment(sid, month, true, amt);
     }
 
     function markAllMonths(sid, isPaid) {
