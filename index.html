@@ -10220,24 +10220,41 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
         const prevM = getPrevMonth(curM);
         const prevM2 = getPrevMonth(prevM);
 
+        // ==========================================
+        // UNIFIED FAMILY POS CASHIER ENGINE
+        // ==========================================
+        window._famCashierState = {
+            students: initialStudents,
+            month: activeMonth,
+            siblingPlans: {},
+            paymentMethod: 'Cash',
+            paymentDate: today(),
+            reference: '',
+            notes: '',
+            activePreset: 'all'
+        };
+
         openModal(`
-          <div style="font-family:'Inter', -apple-system, sans-serif;">
+          <div style="display:flex; flex-direction:column; flex:1 1 auto; min-height:0; height:100%; box-sizing:border-box; font-family:'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;">
             <!-- Modal Header -->
-            <div style="margin-bottom:18px; padding-bottom:14px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
-              <div>
-                <div style="display:inline-flex; align-items:center; gap:6px; font-size:0.7rem; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:4px;">
-                  <span>ACCOUNTS &bull; SIBLING BILLING</span>
+            <div style="flex-shrink:0; padding-bottom:12px; border-bottom:1px solid #e2e8f0; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; padding-right:44px;">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <div style="width:40px; height:40px; border-radius:10px; background:#0f172a; color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.15rem; font-weight:800; box-shadow:0 3px 8px rgba(15,23,42,0.25); flex-shrink:0;">
+                  👨‍👩‍👧‍👦
                 </div>
-                <h3 style="margin:0; font-size:1.25rem; font-weight:800; color:#0f172a; letter-spacing:-0.02em;">
-                  Family Fee Checkout
-                </h3>
-                <div style="font-size:0.8rem; color:#64748b; margin-top:2px;">
-                  Consolidated tuition and arrears ledger for enrolled siblings
+                <div>
+                  <div style="display:flex; align-items:center; gap:6px;">
+                    <span style="font-size:0.68rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.06em;">ACCOUNTS &bull; SIBLING BILLING</span>
+                    <span style="font-size:0.65rem; font-weight:700; padding:2px 7px; border-radius:9999px; background:#ecfdf5; color:#047857; border:1px solid #a7f3d0;">UNIFIED POS ACTIVE</span>
+                  </div>
+                  <h3 style="margin:1px 0 0; font-size:1.22rem; font-weight:900; color:#0f172a; letter-spacing:-0.02em;">
+                    Family Fee Checkout
+                  </h3>
                 </div>
               </div>
               <div style="display:flex; align-items:center; gap:8px;">
-                <span style="font-size:0.75rem; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:0.03em;">Billing Period</span>
-                <select class="fi" id="fam-fee-month" onchange="refreshFamilyFeeModalContent()" style="padding:7px 12px; font-size:0.82rem; font-weight:600; border:1px solid #cbd5e1; border-radius:8px; background:#ffffff; color:#0f172a; cursor:pointer;">
+                <span style="font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Billing Period:</span>
+                <select class="fi" id="fam-fee-month" onchange="refreshFamilyFeeModalContent()" style="padding:6px 12px; font-size:0.82rem; font-weight:700; border:1.5px solid #cbd5e1; border-radius:8px; background:#ffffff; color:#0f172a; cursor:pointer; outline:none;">
                   <option value="${curM}" ${activeMonth === curM ? 'selected' : ''}>Current: ${formatMonthDisplay(curM)}</option>
                   <option value="${nextM}" ${activeMonth === nextM ? 'selected' : ''}>Upcoming: ${formatMonthDisplay(nextM)}</option>
                   <option value="${prevM}" ${activeMonth === prevM ? 'selected' : ''}>Previous: ${formatMonthDisplay(prevM)}</option>
@@ -10247,17 +10264,42 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
             </div>
 
             <!-- Executive Search Bar -->
-            <div style="position:relative; margin-bottom:16px;">
-              <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:10px; padding:10px 14px; display:flex; gap:10px; align-items:center; box-shadow:0 1px 2px rgba(0,0,0,0.03); transition:border-color 0.2s;">
-                <span style="font-size:0.82rem; color:#94a3b8; font-weight:700;">SEARCH</span>
-                <input type="text" class="fi" id="fam-search-input" placeholder="Type father's name, student name, or phone number..." style="flex:1; border:none; background:transparent; outline:none; font-size:0.88rem; color:#0f172a;" oninput="onFamilyFeeSearchInput(this.value)">
+            <div style="flex-shrink:0; position:relative; margin-bottom:12px;">
+              <div style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:9px; padding:7px 12px; display:flex; gap:10px; align-items:center; box-shadow:0 1px 2px rgba(0,0,0,0.03);">
+                <span style="font-size:0.75rem; color:#94a3b8; font-weight:800;">SEARCH FAMILY</span>
+                <input type="text" class="fi" id="fam-search-input" placeholder="Type father's name, student name, or phone number..." style="flex:1; border:none; background:transparent; outline:none; font-size:0.85rem; color:#0f172a;" oninput="onFamilyFeeSearchInput(this.value)">
               </div>
               <div id="fam-search-results" style="display:none; max-height:180px; overflow-y:auto; position:absolute; top:calc(100% + 4px); left:0; right:0; background:#ffffff; border:1px solid #cbd5e1; border-radius:10px; box-shadow:0 10px 25px -5px rgba(0,0,0,0.1); z-index:50;"></div>
             </div>
 
-            <div id="fam-modal-body"></div>
+            <div id="fam-modal-body" style="flex:1 1 auto; min-height:0; overflow-y:auto; padding-right:4px;"></div>
           </div>
         `);
+
+        const modalEl = document.querySelector('.modal');
+        if (modalEl) {
+          modalEl.classList.add('modal-glass');
+          modalEl.style.maxWidth = '1020px';
+          modalEl.style.width = '96%';
+          modalEl.style.maxHeight = 'calc(100vh - 28px)';
+          modalEl.style.height = 'auto';
+          modalEl.style.display = 'flex';
+          modalEl.style.flexDirection = 'column';
+          modalEl.style.borderRadius = '16px';
+          modalEl.style.overflow = 'hidden';
+          modalEl.style.margin = 'auto';
+          modalEl.style.boxSizing = 'border-box';
+        }
+        const bodyEl = document.getElementById('modal-body');
+        if (bodyEl) {
+          bodyEl.style.flex = '1 1 auto';
+          bodyEl.style.minHeight = '0';
+          bodyEl.style.display = 'flex';
+          bodyEl.style.flexDirection = 'column';
+          bodyEl.style.overflow = 'hidden';
+          bodyEl.style.padding = '12px 18px 10px';
+          bodyEl.style.boxSizing = 'border-box';
+        }
 
         window._currentFamStus = initialStudents;
         renderFamilyFeeModalBody(initialStudents, activeMonth);
@@ -10333,6 +10375,198 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
         }
     }
 
+    function onSiblingPlanChange(sid, mode) {
+        const state = window._famCashierState;
+        if (!state || !state.siblingPlans[sid]) return;
+        const plan = state.siblingPlans[sid];
+        plan.mode = mode;
+
+        if (mode === 'full') {
+            plan.payingAmount = plan.dueTotal;
+        } else if (mode === 'arrears') {
+            plan.payingAmount = plan.priorArrears;
+        } else if (mode === 'month') {
+            plan.payingAmount = plan.isPaid ? 0 : plan.currentCharges;
+        } else if (mode === 'tuition') {
+            plan.payingAmount = plan.isPaid ? 0 : plan.tuition;
+        } else if (mode === 'none') {
+            plan.payingAmount = 0;
+        } else if (mode === 'custom') {
+            const val = prompt(`Enter custom amount to pay for this child:`, plan.payingAmount || plan.dueTotal);
+            if (val !== null) {
+                plan.customAmount = Math.max(0, num(val));
+                plan.payingAmount = plan.customAmount;
+            }
+        }
+
+        state.activePreset = 'custom';
+        const totalPayable = getFamilyTotalPayable();
+        const amtInp = document.getElementById('fam-input-amount');
+        if (amtInp) {
+            amtInp.value = totalPayable;
+        }
+        updateFamilyCashierUI();
+    }
+
+    function setFamilyPreset(preset) {
+        const state = window._famCashierState;
+        if (!state) return;
+        state.activePreset = preset;
+
+        Object.keys(state.siblingPlans).forEach(sid => {
+            const p = state.siblingPlans[sid];
+            if (preset === 'all') {
+                p.mode = 'full';
+                p.payingAmount = p.dueTotal;
+            } else if (preset === 'arrears') {
+                if (p.priorArrears > 0) {
+                    p.mode = 'arrears';
+                    p.payingAmount = p.priorArrears;
+                } else {
+                    p.mode = 'none';
+                    p.payingAmount = 0;
+                }
+            } else if (preset === 'month') {
+                if (!p.isPaid && p.currentCharges > 0) {
+                    p.mode = 'month';
+                    p.payingAmount = p.currentCharges;
+                } else {
+                    p.mode = 'none';
+                    p.payingAmount = 0;
+                }
+            } else if (preset === 'custom') {
+                const amtInp = document.getElementById('fam-input-amount');
+                if (amtInp) amtInp.focus();
+                return;
+            }
+
+            const sel = document.getElementById(`fam-select-${sid}`);
+            if (sel) sel.value = p.mode;
+        });
+
+        updateFamilyCashierUI();
+    }
+
+    function setFamilyPaymentMethod(method) {
+        const state = window._famCashierState;
+        if (!state) return;
+        state.paymentMethod = method;
+        document.querySelectorAll('.fam-method-pill').forEach(btn => {
+            const isMatch = btn.dataset.method === method;
+            btn.style.background = isMatch ? '#047857' : '#ffffff';
+            btn.style.color = isMatch ? '#ffffff' : '#334155';
+            btn.style.borderColor = isMatch ? '#047857' : '#cbd5e1';
+        });
+    }
+
+    function getFamilyTotalPayable() {
+        const state = window._famCashierState;
+        if (!state) return 0;
+        return Object.values(state.siblingPlans).reduce((acc, p) => acc + (p.payingAmount || 0), 0);
+    }
+
+    function updateFamilyCashierUI() {
+        const state = window._famCashierState;
+        if (!state) return;
+
+        // Update each sibling card visual
+        Object.keys(state.siblingPlans).forEach(sid => {
+            const p = state.siblingPlans[sid];
+            const card = document.getElementById(`fam-sibling-card-${sid}`);
+            const payEl = document.getElementById(`fam-sibling-paying-${sid}`);
+            const statusTag = document.getElementById(`fam-sibling-status-tag-${sid}`);
+
+            if (payEl) payEl.textContent = fmtMoney(p.payingAmount);
+            if (card) {
+                if (p.payingAmount >= p.dueTotal && p.dueTotal > 0) {
+                    card.style.background = '#f0fdf4';
+                    card.style.borderColor = '#059669';
+                } else if (p.payingAmount > 0) {
+                    card.style.background = '#fffbeb';
+                    card.style.borderColor = '#f59e0b';
+                } else {
+                    card.style.background = '#f8fafc';
+                    card.style.borderColor = '#e2e8f0';
+                }
+            }
+            if (statusTag) {
+                if (p.payingAmount >= p.dueTotal && p.dueTotal > 0) {
+                    statusTag.innerHTML = `<span style="color:#059669; font-weight:700;">Full Cleared ✓</span>`;
+                } else if (p.payingAmount > 0) {
+                    statusTag.innerHTML = `<span style="color:#d97706; font-weight:700;">Partial Settlement</span>`;
+                } else {
+                    statusTag.innerHTML = `<span style="color:#94a3b8; font-weight:600;">Skipped</span>`;
+                }
+            }
+        });
+
+        // Update Preset Chips
+        document.querySelectorAll('.fam-preset-chip').forEach(ch => {
+            const isMatch = ch.dataset.preset === state.activePreset;
+            ch.style.background = isMatch ? '#0f172a' : '#ffffff';
+            ch.style.color = isMatch ? '#ffffff' : '#334155';
+            ch.style.borderColor = isMatch ? '#0f172a' : '#cbd5e1';
+        });
+
+        const totalPayable = getFamilyTotalPayable();
+        const amtInp = document.getElementById('fam-input-amount');
+        if (amtInp && state.activePreset !== 'custom') {
+            amtInp.value = totalPayable;
+        }
+
+        const totalPayableDisplay = document.getElementById('fam-total-payable-display');
+        if (totalPayableDisplay) totalPayableDisplay.textContent = fmtMoney(totalPayable);
+
+        const bannerTotalDisplay = document.getElementById('fam-banner-total-payable');
+        if (bannerTotalDisplay) bannerTotalDisplay.innerHTML = `<span style="font-size:0.8rem; font-weight:700; color:#64748b;">PKR</span> ${num(totalPayable).toLocaleString()}`;
+
+        updateFamilyCashierMathLive();
+    }
+
+    function updateFamilyCashierMathLive() {
+        const state = window._famCashierState;
+        if (!state) return;
+
+        const amtInp = document.getElementById('fam-input-amount');
+        const amountReceived = num(amtInp?.value || 0);
+        const totalPayable = getFamilyTotalPayable();
+        const remBalance = totalPayable - amountReceived;
+
+        const recEl = document.getElementById('fam-realtime-received');
+        if (recEl) recEl.textContent = fmtMoney(amountReceived);
+
+        const remEl = document.getElementById('fam-realtime-remaining');
+        if (remEl) {
+            if (remBalance > 0) {
+                remEl.style.color = '#dc2626';
+                remEl.textContent = `${fmtMoney(remBalance)} Remaining`;
+            } else if (remBalance === 0) {
+                remEl.style.color = '#059669';
+                remEl.textContent = 'PKR 0 (Fully Cleared ✓)';
+            } else {
+                remEl.style.color = '#2563eb';
+                remEl.textContent = `+ ${fmtMoney(Math.abs(remBalance))} (Advance Credit)`;
+            }
+        }
+
+        const allocEl = document.getElementById('fam-allocations-preview');
+        if (allocEl) {
+            const tags = [];
+            Object.values(state.siblingPlans).forEach(p => {
+                const s = allStus().find(x => x.id === p.sid);
+                const sName = s?.name?.split(' ')[0] || 'Child';
+                if (p.payingAmount >= p.dueTotal && p.dueTotal > 0) {
+                    tags.push(`<span style="color:#059669; font-weight:700;">✓ ${escHtml(sName)}: ${fmtMoney(p.payingAmount)} (Cleared)</span>`);
+                } else if (p.payingAmount > 0) {
+                    tags.push(`<span style="color:#d97706; font-weight:600;">✓ ${escHtml(sName)}: ${fmtMoney(p.payingAmount)}</span>`);
+                } else {
+                    tags.push(`<span style="color:#94a3b8;">${escHtml(sName)}: Skipped</span>`);
+                }
+            });
+            allocEl.innerHTML = tags.join(' &bull; ');
+        }
+    }
+
     function renderFamilyFeeModalBody(students, month) {
         const bodyEl = document.getElementById('fam-modal-body');
         if (!bodyEl) return;
@@ -10346,9 +10580,8 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
         const mIdx = parseInt(dParts[1], 10) - 1;
         const monthName = mNames[mIdx] || month;
 
-        let totalFamilyDue = 0;
-        let totalCurrentCharges = 0;
-        let totalArrears = 0;
+        let totalFamilyGrossDue = 0;
+        const siblingPlans = {};
 
         const studentsData = students.map(s => {
             const cls = DB.classes.find(c => c.id === s.classId);
@@ -10384,133 +10617,345 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
 
             const mRow = DB.fees.monthlyLedger?.[s.id]?.[month];
             const isPaid = mRow ? mRow.paid : false;
-            const stuTotalDue = Math.max(0, (isPaid ? 0 : currentCharges) + priorUnpaid + initialArrears);
+            const priorArrears = priorUnpaid + initialArrears;
+            const stuTotalDue = Math.max(0, (isPaid ? 0 : currentCharges) + priorArrears);
 
-            totalFamilyDue += stuTotalDue;
-            totalCurrentCharges += (isPaid ? 0 : currentCharges);
-            totalArrears += (priorUnpaid + initialArrears);
+            totalFamilyGrossDue += stuTotalDue;
 
-            return { s, cls, tuition, van, itemsTotal, currentCharges, priorUnpaid, initialArrears, isPaid, stuTotalDue };
+            siblingPlans[s.id] = {
+                sid: s.id,
+                mode: stuTotalDue > 0 ? 'full' : 'none',
+                customAmount: stuTotalDue,
+                dueTotal: stuTotalDue,
+                currentCharges,
+                priorArrears,
+                tuition,
+                van,
+                itemsTotal,
+                isPaid,
+                payingAmount: stuTotalDue
+            };
+
+            return { s, cls, tuition, van, itemsTotal, currentCharges, priorArrears, isPaid, stuTotalDue };
         });
+
+        window._famCashierState.students = students;
+        window._famCashierState.month = month;
+        window._famCashierState.siblingPlans = siblingPlans;
 
         const fatherName = students[0]?.father || 'Parent';
         const contactPhone = students[0]?.whatsapp || students[0]?.phone || '';
+        const totalPayableInitial = Object.values(siblingPlans).reduce((acc, p) => acc + p.payingAmount, 0);
+
+        // Render Sibling Cards with Dropdowns
+        const siblingCardsHtml = studentsData.map(({ s, cls, tuition, van, itemsTotal, currentCharges, priorArrears, isPaid, stuTotalDue }) => {
+            const plan = siblingPlans[s.id];
+            return `
+              <div id="fam-sibling-card-${s.id}" style="background:#f0fdf4; border:1.5px solid #059669; border-radius:10px; padding:11px 13px; margin-bottom:10px; box-shadow:0 1px 3px rgba(5,150,105,0.08); transition:all 0.15s ease;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+                  <div>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                      <span style="font-weight:800; font-size:0.92rem; color:#0f172a;">${escHtml(s.name)}</span>
+                      <span style="background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; font-size:0.67rem; font-weight:700; padding:1px 7px; border-radius:9999px;">${escHtml(cls?.name || 'Class')} &bull; ${escHtml(s.roll || '-')}</span>
+                      ${isPaid ? `<span style="background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; font-size:0.65rem; font-weight:700; padding:1px 6px; border-radius:9999px;">PAID</span>` : ''}
+                    </div>
+                    <div style="font-size:0.71rem; color:#64748b; margin-top:3px; display:flex; gap:6px; flex-wrap:wrap;">
+                      <span>${monthName} Fee: <b>${fmtMoney(currentCharges)}</b></span>
+                      ${priorArrears > 0 ? `<span style="color:#cbd5e1;">&bull;</span><span style="color:#dc2626; font-weight:700; background:#fef2f2; padding:0 5px; border-radius:4px; border:1px solid #fecaca;">Prior Arrears: ${fmtMoney(priorArrears)}</span>` : ''}
+                    </div>
+                  </div>
+                  <div style="text-align:right;">
+                    <div style="font-size:0.62rem; font-weight:700; color:#64748b; text-transform:uppercase;">Paying for Child</div>
+                    <div id="fam-sibling-paying-${s.id}" style="font-size:1.05rem; font-weight:900; color:#059669;">${fmtMoney(plan.payingAmount)}</div>
+                  </div>
+                </div>
+
+                <!-- DROPDOWN SELECTOR FOR SIBLING -->
+                <div style="margin-top:8px; padding-top:8px; border-top:1px dashed #bbf7d0;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
+                    <label style="font-size:0.68rem; font-weight:800; color:#065f46; text-transform:uppercase; letter-spacing:0.04em;">
+                      Select Fee to Pay for ${escHtml(s.name.split(' ')[0])}:
+                    </label>
+                    <span id="fam-sibling-status-tag-${s.id}" style="font-size:0.65rem; color:#047857; font-weight:700;">Full Cleared ✓</span>
+                  </div>
+                  <select id="fam-select-${s.id}" class="sibling-fee-dropdown" onchange="onSiblingPlanChange('${s.id}', this.value)" style="width:100%; padding:6px 10px; font-size:0.77rem; font-weight:700; color:#0f172a; border:1.5px solid #cbd5e1; border-radius:7px; background:#ffffff; cursor:pointer; outline:none;">
+                    <option value="full" selected>✓ Pay Full Dues (Arrears + ${monthName}) — ${fmtMoney(stuTotalDue)}</option>
+                    ${priorArrears > 0 ? `<option value="arrears">Pay Arrears Only — ${fmtMoney(priorArrears)}</option>` : ''}
+                    ${!isPaid && currentCharges > 0 ? `<option value="month">Pay ${monthName} Fee Only — ${fmtMoney(currentCharges)}</option>` : ''}
+                    ${!isPaid && tuition > 0 ? `<option value="tuition">Pay Monthly Tuition Only — ${fmtMoney(tuition)}</option>` : ''}
+                    <option value="custom">Enter Custom Amount...</option>
+                    <option value="none">Do Not Pay (Skip this child)</option>
+                  </select>
+                </div>
+              </div>
+            `;
+        }).join('');
 
         bodyEl.innerHTML = `
-          <!-- Family Executive Summary Card -->
-          <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:16px 18px; margin-bottom:16px; box-shadow:0 1px 3px rgba(15,23,42,0.03); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <!-- Family Head Summary Card -->
+          <div style="background:linear-gradient(135deg, #fafcff, #f1f5f9); border:1.5px solid #e2e8f0; border-radius:12px; padding:12px 16px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
             <div>
-              <div style="font-size:0.68rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:3px;">HEAD OF FAMILY</div>
-              <div style="font-size:1.1rem; font-weight:800; color:#0f172a; letter-spacing:-0.01em;">${escHtml(fatherName)}</div>
-              <div style="font-size:0.75rem; color:#64748b; margin-top:2px;">
-                ${students.length} Sibling${students.length > 1 ? 's' : ''} enrolled &bull; Contact: <b>${contactPhone ? escHtml(contactPhone) : 'None'}</b>
+              <div style="font-size:0.65rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.06em;">HEAD OF FAMILY</div>
+              <div style="font-size:1.08rem; font-weight:900; color:#0f172a; letter-spacing:-0.01em;">${escHtml(fatherName)}</div>
+              <div style="font-size:0.73rem; color:#64748b; margin-top:2px;">
+                ${students.length} Sibling${students.length > 1 ? 's' : ''} enrolled &bull; Contact: <b>${contactPhone ? escHtml(contactPhone) : 'None recorded'}</b>
               </div>
             </div>
             <div style="text-align:right;">
-              <div style="font-size:0.68rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:2px;">TOTAL PAYABLE</div>
-              <div style="font-size:1.45rem; font-weight:800; color:${totalFamilyDue > 0 ? '#0f172a' : '#15803d'}; letter-spacing:-0.02em;">
-                <span style="font-size:0.75rem; font-weight:600; color:#64748b;">PKR</span> ${num(totalFamilyDue).toLocaleString()}
+              <div style="font-size:0.65rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.06em;">TOTAL PAYABLE (SELECTED)</div>
+              <div id="fam-banner-total-payable" style="font-size:1.45rem; font-weight:900; color:#0f172a; letter-spacing:-0.02em;">
+                <span style="font-size:0.8rem; font-weight:700; color:#64748b;">PKR</span> ${num(totalPayableInitial).toLocaleString()}
               </div>
             </div>
           </div>
 
-          <!-- Students Ledger List -->
-          <div style="max-height:340px; overflow-y:auto; padding-right:2px; margin-bottom:18px;">
-            ${studentsData.map(({ s, cls, tuition, van, itemsTotal, currentCharges, priorUnpaid, initialArrears, isPaid, stuTotalDue }) => `
-              <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:14px 16px; margin-bottom:10px; box-shadow:0 1px 2px rgba(0,0,0,0.02); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; transition:border-color 0.15s;">
-                <div style="display:flex; align-items:center; gap:12px; flex:1; min-width:200px;">
-                  <input type="checkbox" class="fam-stu-chk" data-sid="${s.id}" data-due="${stuTotalDue}" ${isPaid ? '' : 'checked'} style="width:17px; height:17px; accent-color:#0f172a; cursor:pointer;" onchange="updateFamilyPaymentCalculations()">
-                  <div>
-                    <div style="display:flex; align-items:center; gap:8px;">
-                      <span style="font-weight:700; font-size:0.92rem; color:#0f172a;">${escHtml(s.name)}</span>
-                      <span style="font-size:0.75rem; color:#64748b; font-weight:500;">${escHtml(cls?.name || 'Class')} &bull; Roll ${escHtml(s.roll || '-')}</span>
-                      ${isPaid 
-                        ? `<span style="border:1px solid #bbf7d0; background:#f0fdf4; color:#15803d; font-size:0.65rem; font-weight:700; padding:2px 7px; border-radius:4px; letter-spacing:0.04em;">PAID</span>` 
-                        : `<span style="border:1px solid #fecaca; background:#fef2f2; color:#b91c1c; font-size:0.65rem; font-weight:700; padding:2px 7px; border-radius:4px; letter-spacing:0.04em;">UNPAID</span>`}
-                    </div>
-                    <div style="font-size:0.75rem; color:#64748b; margin-top:4px;">
-                      <span>Monthly Fee: <b style="color:#334155;">PKR ${num(currentCharges).toLocaleString()}</b></span>
-                      ${(priorUnpaid + initialArrears) > 0 ? ` &bull; <span style="color:#ef4444; font-weight:600;">Arrears: PKR ${num(priorUnpaid + initialArrears).toLocaleString()}</span>` : ''}
+          <!-- 2-Column Responsive Layout -->
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap:16px; align-items:start;">
+            
+            <!-- LEFT COLUMN: SIBLINGS FEE CARDS WITH DROPDOWNS -->
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <div style="font-weight:800; font-size:0.74rem; color:#475569; text-transform:uppercase; letter-spacing:0.06em;">
+                  Enrolled Siblings &amp; Fee Selection
+                </div>
+                <div style="font-size:0.7rem; color:#64748b;">
+                  Choose payment breakdown per child
+                </div>
+              </div>
+
+              <!-- Sibling Cards List -->
+              ${siblingCardsHtml}
+
+              <!-- Ledger Audit Note -->
+              <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:8px 11px; font-size:0.7rem; color:#64748b; display:flex; gap:7px; align-items:center;">
+                <span style="color:#059669; font-size:0.85rem;">🛡</span>
+                <div><b>Granular Flexibility:</b> Change any sibling's dropdown to tailor their payment. The cashier desk calculates total payable instantly.</div>
+              </div>
+            </div>
+
+            <!-- RIGHT COLUMN: UNIFIED FAMILY CASHIER POS DESK -->
+            <div>
+              <!-- Quick Preset Chips -->
+              <div style="display:flex; gap:5px; margin-bottom:8px; flex-wrap:wrap;">
+                <button type="button" class="fam-preset-chip btn btn-xs" data-preset="all" onclick="setFamilyPreset('all')" style="background:#0f172a; color:#ffffff; font-size:0.7rem; font-weight:700; padding:4px 9px; border-radius:6px; cursor:pointer;">
+                  Both Full (${fmtMoney(totalFamilyGrossDue)})
+                </button>
+                <button type="button" class="fam-preset-chip btn btn-xs" data-preset="arrears" onclick="setFamilyPreset('arrears')" style="background:#ffffff; color:#b45309; border:1px solid #fde68a; font-size:0.7rem; font-weight:700; padding:4px 9px; border-radius:6px; cursor:pointer;">
+                  Both Arrears
+                </button>
+                <button type="button" class="fam-preset-chip btn btn-xs" data-preset="month" onclick="setFamilyPreset('month')" style="background:#ffffff; color:#334155; border:1px solid #cbd5e1; font-size:0.7rem; font-weight:700; padding:4px 9px; border-radius:6px; cursor:pointer;">
+                  Both ${monthName.split(' ')[0]}
+                </button>
+                <button type="button" class="fam-preset-chip btn btn-xs" data-preset="custom" onclick="setFamilyPreset('custom')" style="background:#ffffff; color:#7c3aed; border:1px solid #ddd6fe; font-size:0.7rem; font-weight:700; padding:4px 9px; border-radius:6px; cursor:pointer;">
+                  Custom
+                </button>
+              </div>
+
+              <!-- CASHIER POS CARD -->
+              <div style="background:#fdfcff; border:1.5px solid #d1fae5; border-radius:11px; padding:12px; box-shadow:0 3px 10px rgba(5,150,105,0.06);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:9px;">
+                  <div style="display:flex; align-items:center; gap:7px;">
+                    <div style="width:24px; height:24px; border-radius:6px; background:#047857; color:#fff; display:flex; align-items:center; justify-content:center; font-size:0.8rem;">💳</div>
+                    <div>
+                      <div style="font-weight:800; font-size:0.85rem; color:#0f172a;">Family Fast POS Checkout</div>
+                      <div style="font-size:0.65rem; color:#64748b;">Single payment window for all siblings</div>
                     </div>
                   </div>
-                </div>
-
-                <div style="display:flex; align-items:center; gap:14px;">
                   <div style="text-align:right;">
-                    <div style="font-size:0.65rem; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:0.04em;">Due Amount</div>
-                    <div style="font-weight:800; font-size:0.98rem; color:${stuTotalDue > 0 ? '#0f172a' : '#15803d'};">
-                      PKR ${num(stuTotalDue).toLocaleString()}
-                    </div>
+                    <div style="font-size:0.62rem; font-weight:700; color:#64748b; text-transform:uppercase;">Selected Total</div>
+                    <div id="fam-total-payable-display" style="font-size:1.15rem; font-weight:900; color:#0f172a;">${fmtMoney(totalPayableInitial)}</div>
                   </div>
-                  ${isPaid ? `
-                    <button class="btn btn-xs" style="background:#ffffff; color:#dc2626; border:1px solid #e2e8f0; font-weight:600; padding:6px 12px; border-radius:6px; cursor:pointer;" onclick="toggleMonthPayment('${s.id}', '${month}', false); refreshFamilyFeeModalContent();">Unmark</button>
-                  ` : `
-                    <button class="btn btn-xs" style="background:#0f172a; color:#ffffff; border:none; font-weight:600; padding:6px 14px; border-radius:6px; cursor:pointer;" onclick="toggleMonthPayment('${s.id}', '${month}', true); refreshFamilyFeeModalContent();">Receive</button>
-                  `}
                 </div>
+
+                <!-- Amount Received Input -->
+                <div style="margin-bottom:8px;">
+                  <label style="display:block; font-size:0.7rem; font-weight:800; color:#334155; margin-bottom:3px;">
+                    Amount Received from Father (PKR) <span style="color:#ef4444;">*</span>
+                  </label>
+                  <div style="position:relative; display:flex; align-items:center;">
+                    <input type="number" id="fam-input-amount" value="${totalPayableInitial}" oninput="window._famCashierState.activePreset='custom'; updateFamilyCashierMathLive()" style="width:100%; padding:7px 52px 7px 11px; font-size:1.05rem; font-weight:900; color:#0f172a; border:2px solid #059669; border-radius:7px; outline:none; background:#ffffff; box-sizing:border-box;"/>
+                    <span style="position:absolute; right:8px; font-weight:800; font-size:0.74rem; color:#059669; background:#ecfdf5; padding:2px 7px; border-radius:4px;">PKR</span>
+                  </div>
+                </div>
+
+                <!-- Payment Mode Pills -->
+                <div style="margin-bottom:8px;">
+                  <label style="display:block; font-size:0.68rem; font-weight:700; color:#334155; margin-bottom:3px;">
+                    Payment Mode
+                  </label>
+                  <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:5px;">
+                    <button type="button" class="fam-method-pill" data-method="Cash" onclick="setFamilyPaymentMethod('Cash')" style="background:#047857; color:#ffffff; font-weight:700; font-size:0.72rem; padding:5px 0; border-radius:6px; border:1px solid #047857; cursor:pointer;">💵 Cash</button>
+                    <button type="button" class="fam-method-pill" data-method="EasyPaisa" onclick="setFamilyPaymentMethod('EasyPaisa')" style="background:#ffffff; color:#334155; border:1px solid #cbd5e1; font-weight:700; font-size:0.72rem; padding:5px 0; border-radius:6px; cursor:pointer;">📱 EasyPaisa</button>
+                    <button type="button" class="fam-method-pill" data-method="Bank Transfer" onclick="setFamilyPaymentMethod('Bank Transfer')" style="background:#ffffff; color:#334155; border:1px solid #cbd5e1; font-weight:700; font-size:0.72rem; padding:5px 0; border-radius:6px; cursor:pointer;">🏦 Bank</button>
+                    <button type="button" class="fam-method-pill" data-method="Cheque" onclick="setFamilyPaymentMethod('Cheque')" style="background:#ffffff; color:#334155; border:1px solid #cbd5e1; font-weight:700; font-size:0.72rem; padding:5px 0; border-radius:6px; cursor:pointer;">🧾 Cheque</button>
+                  </div>
+                </div>
+
+                <!-- Payment Date & Reference Row -->
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-bottom:8px;">
+                  <div>
+                    <label style="display:block; font-size:0.67rem; font-weight:700; color:#334155; margin-bottom:2px;">Payment Date</label>
+                    <input type="date" id="fam-input-date" value="${today()}" style="width:100%; padding:5px 8px; font-size:0.75rem; font-weight:600; color:#0f172a; border:1px solid #cbd5e1; border-radius:6px; outline:none; background:#ffffff; box-sizing:border-box;"/>
+                  </div>
+                  <div>
+                    <label style="display:block; font-size:0.67rem; font-weight:700; color:#334155; margin-bottom:2px;">Receipt / Ref #</label>
+                    <input type="text" id="fam-input-ref" placeholder="e.g. FAM-2026-10" style="width:100%; padding:5px 8px; font-size:0.75rem; color:#0f172a; border:1px solid #cbd5e1; border-radius:6px; outline:none; background:#ffffff; box-sizing:border-box;"/>
+                  </div>
+                </div>
+
+                <!-- Real-time Waterfall Summary Box -->
+                <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:8px; padding:7px 10px; margin-bottom:9px;">
+                  <div style="display:flex; justify-content:space-between; font-size:0.73rem; color:#64748b; padding:1px 0;">
+                    <span>Amount Received:</span>
+                    <span style="font-weight:700; color:#059669;" id="fam-realtime-received">${fmtMoney(totalPayableInitial)}</span>
+                  </div>
+                  <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.8rem; font-weight:800; color:#0f172a; padding:1px 0;">
+                    <span>Remaining Family Balance:</span>
+                    <span id="fam-realtime-remaining" style="color:#059669; font-size:0.88rem; font-weight:800;">PKR 0 (Fully Cleared ✓)</span>
+                  </div>
+                  <div id="fam-allocations-preview" style="border-top:1px solid #f1f5f9; margin-top:4px; padding-top:3px; font-size:0.67rem; color:#64748b;">
+                    <!-- Sibling Allocation Tags -->
+                  </div>
+                </div>
+
+                <!-- High-Contrast Emerald CTA Button -->
+                <button type="button" class="btn" onclick="submitFamilyCashierPayment('${month}')" style="width:100%; padding:10px 14px; background:linear-gradient(135deg, #059669, #047857); color:#ffffff; font-weight:800; font-size:0.86rem; border:none; border-radius:8px; box-shadow:0 3px 12px rgba(5,150,105,0.35); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:7px; transition:transform 0.1s ease;" onmousedown="this.style.transform='scale(0.99)'" onmouseup="this.style.transform='scale(1)'">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                  <span>Record Family Payment &amp; Print Consolidated Receipt</span>
+                </button>
               </div>
-            `).join('')}
+            </div>
+
           </div>
 
-          <!-- Bottom Action Deck -->
-          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:16px 18px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px; padding-bottom:12px; border-bottom:1px solid #e2e8f0;">
-              <div>
-                <span style="font-size:0.72rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.04em;">Selected For Settlement:</span>
-                <div id="fam-selected-total" style="font-size:1.2rem; font-weight:800; color:#0f172a; margin-top:2px;">
-                  <span style="font-size:0.75rem; font-weight:600; color:#64748b;">PKR</span> ${num(totalFamilyDue).toLocaleString()}
-                </div>
-              </div>
-              <div style="display:flex; align-items:center; gap:6px;">
-                <button class="btn btn-xs btn-gh" style="font-size:0.72rem; padding:4px 8px; border-radius:6px;" onclick="toggleAllFamilyCheckboxes(true)">Select All</button>
-                <button class="btn btn-xs btn-gh" style="font-size:0.72rem; padding:4px 8px; border-radius:6px;" onclick="toggleAllFamilyCheckboxes(false)">Deselect All</button>
-              </div>
+          <!-- Sticky Footer -->
+          <div style="flex-shrink:0; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; padding-top:10px; border-top:1px solid #e2e8f0; margin-top:10px;">
+            <div style="display:flex; gap:8px;">
+              <button type="button" class="btn btn-sm" style="background:#0f172a; color:#fff; font-weight:700; font-size:0.76rem; padding:6px 13px; border-radius:7px; border:none; display:inline-flex; align-items:center; gap:5px; cursor:pointer;" onclick="printFamilyReceipt('${month}')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                Print Family Challan
+              </button>
+              <button type="button" class="btn btn-sm" style="background:#16a34a; color:#fff; font-weight:700; font-size:0.76rem; padding:6px 13px; border-radius:7px; border:none; display:inline-flex; align-items:center; gap:5px; cursor:pointer;" onclick="sendFamilyVoucherWhatsApp('${month}')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
+                Send WhatsApp Family Bill
+              </button>
             </div>
-
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-              <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                <button class="btn btn-p" style="background:#0f172a; color:#ffffff; font-weight:600; font-size:0.82rem; padding:8px 18px; border-radius:8px;" onclick="executeFamilyPayment('${month}')">
-                  Confirm Payment
-                </button>
-                <button class="btn btn-gh" style="background:#ffffff; border:1px solid #cbd5e1; font-weight:600; font-size:0.82rem; padding:8px 14px; border-radius:8px;" onclick="printFamilyReceipt('${month}')">
-                  Print Family Receipt
-                </button>
-                <button class="btn btn-wa" style="font-weight:600; font-size:0.82rem; padding:8px 14px; border-radius:8px;" onclick="sendFamilyVoucherWhatsApp('${month}')">
-                  Send WhatsApp Bill
-                </button>
-              </div>
-              <button class="btn btn-gh" style="border:1px solid #cbd5e1; background:#ffffff; font-weight:500; font-size:0.82rem; padding:8px 14px; border-radius:8px;" onclick="closeModal()">Close</button>
-            </div>
+            <button type="button" class="btn btn-sm" style="background:#ffffff; color:#334155; border:1px solid #cbd5e1; font-weight:700; font-size:0.76rem; padding:6px 14px; border-radius:7px; cursor:pointer;" onclick="closeModal()">
+              Close
+            </button>
           </div>
         `;
+
+        updateFamilyCashierUI();
     }
 
-    function toggleAllFamilyCheckboxes(val) {
-        document.querySelectorAll('.fam-stu-chk').forEach(chk => chk.checked = val);
-        updateFamilyPaymentCalculations();
-    }
+    function submitFamilyCashierPayment(month) {
+        const state = window._famCashierState;
+        if (!state) return;
+        const amtInp = document.getElementById('fam-input-amount');
+        const dateInp = document.getElementById('fam-input-date');
+        const refInp = document.getElementById('fam-input-ref');
 
-    function updateFamilyPaymentCalculations() {
-        let sum = 0;
-        document.querySelectorAll('.fam-stu-chk').forEach(chk => {
-            if (chk.checked) sum += num(chk.dataset.due || 0);
+        const amountReceived = num(amtInp?.value || 0);
+        const paymentDate = dateInp?.value || today();
+        const reference = (refInp?.value || '').trim();
+        const paymentMethod = state.paymentMethod || 'Cash';
+
+        if (amountReceived <= 0) {
+            showToast('Please enter the amount received from the parent', 'tw2');
+            return;
+        }
+
+        if (!DB.fees.monthlyLedger) DB.fees.monthlyLedger = {};
+
+        let remainingCash = amountReceived;
+        let paidSiblingCount = 0;
+
+        // Apply payment across siblings based on their dropdown selection
+        Object.values(state.siblingPlans).forEach(p => {
+            const sid = p.sid;
+            const s = allStus().find(x => x.id === sid);
+            if (!s || p.payingAmount <= 0) return;
+
+            let cashForThisChild = Math.min(remainingCash, p.payingAmount);
+            remainingCash -= cashForThisChild;
+            if (cashForThisChild <= 0) return;
+
+            if (!DB.fees.monthlyLedger[sid]) DB.fees.monthlyLedger[sid] = {};
+
+            // 1. If arrears selected or full dues selected, clear opening arrears first
+            if ((p.mode === 'full' || p.mode === 'arrears' || p.mode === 'custom') && num(s.arrears || 0) > 0) {
+                const arrToPay = Math.min(cashForThisChild, num(s.arrears));
+                s.arrears = Math.max(0, num(s.arrears) - arrToPay);
+                cashForThisChild -= arrToPay;
+            }
+
+            // 2. Clear earlier session unpaid months if any
+            if ((p.mode === 'full' || p.mode === 'arrears') && cashForThisChild > 0) {
+                const pastMonths = ['2026-08', '2026-09'];
+                for (let pm of pastMonths) {
+                    if (pm < month && DB.fees.monthlyLedger[sid][pm] && !DB.fees.monthlyLedger[sid][pm].paid) {
+                        const mDue = num(DB.fees.monthlyLedger[sid][pm].amount || 0);
+                        const mPaid = num(DB.fees.monthlyLedger[sid][pm].amountPaid || 0);
+                        const pmRem = Math.max(0, mDue - mPaid);
+                        const pay = Math.min(cashForThisChild, pmRem);
+                        if (pay > 0) {
+                            DB.fees.monthlyLedger[sid][pm].amountPaid = mPaid + pay;
+                            DB.fees.monthlyLedger[sid][pm].paid = (DB.fees.monthlyLedger[sid][pm].amountPaid >= mDue);
+                            DB.fees.monthlyLedger[sid][pm].paidOn = paymentDate;
+                            cashForThisChild -= pay;
+                        }
+                    }
+                }
+            }
+
+            // 3. Clear target month charges
+            if ((p.mode === 'full' || p.mode === 'month' || p.mode === 'tuition' || p.mode === 'custom') && cashForThisChild > 0) {
+                const mTotal = p.currentCharges;
+                const existingRow = DB.fees.monthlyLedger[sid][month];
+                const existingPaid = existingRow?.paid ? num(existingRow.amountPaid || existingRow.amount || 0) : num(existingRow?.amountPaid || 0);
+                const newPaid = existingPaid + cashForThisChild;
+                const isMonthPaid = newPaid >= mTotal;
+
+                const installments = existingRow?.installments || [];
+                installments.push({
+                    id: uid(),
+                    amount: cashForThisChild,
+                    date: paymentDate,
+                    method: paymentMethod,
+                    reference: reference,
+                    recordedAt: new Date().toISOString()
+                });
+
+                DB.fees.monthlyLedger[sid][month] = {
+                    month,
+                    paid: isMonthPaid,
+                    paidOn: paymentDate,
+                    amount: mTotal,
+                    amountPaid: newPaid,
+                    totalDue: mTotal,
+                    paymentMethod,
+                    reference,
+                    installments,
+                    arrearsSnapshot: getTrueInitialArrears(sid)
+                };
+            }
+
+            s.fees = getLedgerArrears(sid, getNextMonth(monthKey())) <= 0 ? 'Paid' : 'Pending';
+            paidSiblingCount++;
         });
-        const el = document.getElementById('fam-selected-total');
-        if (el) el.textContent = 'PKR ' + num(sum).toLocaleString();
-    }
 
-    async function executeFamilyPayment(month) {
-        const checked = Array.from(document.querySelectorAll('.fam-stu-chk:checked'));
-        if (!checked.length) return showToast('Please select at least one sibling to mark paid', 'tw');
+        saveDB();
+        pushCloudDB();
 
-        const sids = checked.map(c => c.dataset.sid);
-        if (!confirm('Mark ' + sids.length + ' siblings as PAID for ' + month + '?')) return;
+        allStus().forEach(st => updateFeeSectionLive(st.id));
+        showToast(`Family payment of ${fmtMoney(amountReceived)} recorded successfully for ${paidSiblingCount} siblings!`, 'ts');
 
-        sids.forEach(sid => {
-            toggleMonthPayment(sid, month, true);
-        });
+        // Print consolidated family receipt
+        if (typeof printFamilyReceipt === 'function') {
+            printFamilyReceipt(month);
+        }
 
-        showToast('Successfully recorded payment for ' + sids.length + ' siblings!', 'ts');
         refreshFamilyFeeModalContent();
     }
 
