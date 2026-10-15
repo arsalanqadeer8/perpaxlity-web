@@ -8641,6 +8641,9 @@ If the arrears sum is lower than you expect, please check your CSV file to ensur
 
       let totalMonthlyExpected = 0;
       let totalTuitionOnly = 0;
+      let totalVanFee = 0;
+      let totalItemsFee = 0;
+      let vanStudentsCount = 0;
       let curMonthCollected = 0;
       let curMonthFullyPaid = 0;
       let curMonthPartialPaid = 0;
@@ -8661,6 +8664,9 @@ If the arrears sum is lower than you expect, please check your CSV file to ensur
         const grossMonth = tuition + van + itemsTotal;
         totalMonthlyExpected += grossMonth;
         totalTuitionOnly += tuition;
+        totalVanFee += van;
+        if (van > 0) vanStudentsCount++;
+        totalItemsFee += itemsTotal;
 
         const initialArrears = Math.max(0, num(s.arrears || 0));
         let priorUnpaid = 0;
@@ -8715,6 +8721,9 @@ If the arrears sum is lower than you expect, please check your CSV file to ensur
         isBeforeAugust,
         totalMonthlyExpected,
         totalTuitionOnly,
+        totalVanFee,
+        totalItemsFee,
+        vanStudentsCount,
         curMonthCollected,
         curMonthFullyPaid,
         curMonthPartialPaid,
@@ -8733,7 +8742,11 @@ If the arrears sum is lower than you expect, please check your CSV file to ensur
         <div class="lm-card">
           <div class="lm-label">Total Monthly Expected</div>
           <div class="lm-value" style="color:#0f172a;"><span class="lm-currency">PKR</span> ${num(met.totalMonthlyExpected).toLocaleString()}</div>
-          <div class="lm-sub">${met.monthName} tuition + fees (${met.totalCount} students)</div>
+          <div class="lm-sub" style="line-height:1.45;">
+            <span>Tuition: <b>PKR ${num(met.totalTuitionOnly).toLocaleString()}</b></span> &bull; 
+            <span style="${met.totalVanFee > 0 ? 'color:#0284c7; font-weight:700;' : ''}">Van: <b>PKR ${num(met.totalVanFee).toLocaleString()}</b>${met.vanStudentsCount > 0 ? ` (${met.vanStudentsCount})` : ''}</span>
+            ${met.totalItemsFee > 0 ? ` &bull; <span>Exam: <b>PKR ${num(met.totalItemsFee).toLocaleString()}</b></span>` : ''}
+          </div>
         </div>
 
         <div class="lm-card">
@@ -8774,12 +8787,13 @@ If the arrears sum is lower than you expect, please check your CSV file to ensur
       const octPartial = !octPaid && num(octRow?.amountPaid) > 0;
       const sepPartial = !sepPaid && num(sepRow?.amountPaid) > 0;
       const mFee = monthlyFeeAmount(s) + num(s.vanFee || 0);
+      const vanAmt = num(s.vanFee || 0);
       const sibs = getFamilySiblings(s);
       const hasSiblings = sibs && sibs.length > 1;
       const initials = (s.name || '').split(' ').map(n => n[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'ST';
       const stuWA = getStudentWA(s);
 
-      return `<tr id="fee-row-${s.id}" class="fee-table-row" data-aug="${augPaid ? 'paid' : 'unpaid'}" data-sep="${sepPaid ? 'paid' : sepPartial ? 'partial' : 'unpaid'}" data-oct="${octPaid ? 'paid' : octPartial ? 'partial' : 'unpaid'}" data-arrears="${sum.pendingArrears > 0 ? 'yes' : 'no'}">
+      return `<tr id="fee-row-${s.id}" class="fee-table-row" data-aug="${augPaid ? 'paid' : 'unpaid'}" data-sep="${sepPaid ? 'paid' : sepPartial ? 'partial' : 'unpaid'}" data-oct="${octPaid ? 'paid' : octPartial ? 'partial' : 'unpaid'}" data-arrears="${sum.pendingArrears > 0 ? 'yes' : 'no'}" data-van="${vanAmt > 0 ? 'yes' : 'no'}">
         <td style="padding:12px 16px; vertical-align:middle;">
           <div style="display:flex; align-items:center; gap:10px;">
             <div class="stu-table-avatar">${initials}</div>
@@ -8796,7 +8810,10 @@ If the arrears sum is lower than you expect, please check your CSV file to ensur
           <span class="fee-class-badge" title="${escHtml(cls?.name || '-')}">${escHtml(cls?.name || '-')}</span>
         </td>
         <td style="padding:12px 14px; vertical-align:middle; white-space:nowrap;">
-          <div style="font-weight:700; font-size:0.84rem; color:#0f172a;">${fmtMoney(mFee)} <span style="font-size:0.68rem; color:#64748b; font-weight:400;">/mo</span></div>
+          <div style="font-weight:700; font-size:0.84rem; color:#0f172a; display:flex; align-items:center; gap:5px; flex-wrap:wrap;">
+            <span>${fmtMoney(mFee)} <span style="font-size:0.68rem; color:#64748b; font-weight:400;">/mo</span></span>
+            ${vanAmt > 0 ? `<span style="font-size:0.67rem; font-weight:700; color:#0284c7; background:#e0f2fe; padding:1px 6px; border-radius:4px; border:1px solid #bae6fd;">🚐 Van: ${fmtMoney(vanAmt)}</span>` : ''}
+          </div>
           <div style="margin-top:4px; display:flex; gap:5px; align-items:center;">
             <span class="fee-status-badge ${sepPaid ? 'paid' : sepPartial ? 'partial' : 'unpaid'}">Sep: ${sepPaid ? 'PAID' : sepPartial ? 'PARTIAL' : 'DUE'}</span>
             <span class="fee-status-badge ${octPaid ? 'paid' : octPartial ? 'partial' : 'unpaid'}">Oct: ${octPaid ? 'PAID' : octPartial ? 'PARTIAL' : 'DUE'}</span>
@@ -8888,6 +8905,7 @@ If the arrears sum is lower than you expect, please check your CSV file to ensur
             else if (statusQ === 'sep-unpaid') matchesStatus = (tr.dataset.sep === 'unpaid' || tr.dataset.sep === 'partial');
             else if (statusQ === 'both-paid') matchesStatus = tr.dataset.sep === 'paid' && tr.dataset.oct === 'paid';
             else if (statusQ === 'arrears') matchesStatus = tr.dataset.arrears === 'yes';
+            else if (statusQ === 'has-van') matchesStatus = tr.dataset.van === 'yes';
             tr.style.display = (matchesClass && matchesText && matchesStatus) ? '' : 'none';
         });
     }
@@ -8973,13 +8991,14 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
         <option value="">All Classes</option>
         ${DB.classes.map(c => `<option value="${escHtml(c.name)}">${escHtml(c.name)}</option>`).join('')}
       </select>
-      <select id="fee-status-filter" class="fi" onchange="filterFeeTable()" style="padding:7px 10px; width:145px; font-size:0.78rem; font-weight:600; border-radius:8px; border:1px solid #cbd5e1; background-color:#ffffff;">
+      <select id="fee-status-filter" class="fi" onchange="filterFeeTable()" style="padding:7px 10px; width:155px; font-size:0.78rem; font-weight:600; border-radius:8px; border:1px solid #cbd5e1; background-color:#ffffff;">
         <option value="">All Status</option>
         <option value="oct-unpaid">Oct Unpaid / Due</option>
         <option value="oct-paid">Oct Paid</option>
         <option value="sep-unpaid">Sep Unpaid</option>
         <option value="both-paid">Sep & Oct Paid</option>
         <option value="arrears">Has Arrears</option>
+        <option value="has-van">Has Van Fee 🚐</option>
       </select>
       <input type="text" id="fee-search-filter" class="fi" placeholder="Search student or roll..." onkeyup="filterFeeTable()" style="width:180px; padding:7px 12px; font-size:0.78rem; border-radius:8px; border:1px solid #cbd5e1; background-color:#ffffff;"/>
     </div>
