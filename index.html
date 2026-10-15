@@ -1626,12 +1626,14 @@
       align-items: flex-end;
       justify-content: center;
       padding: 0;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     @media(min-width:560px) {
       .modal-bg {
         align-items: center;
-        padding: 20px;
+        padding: 16px;
       }
     }
 
@@ -1644,7 +1646,7 @@
       border: 1px solid var(--border);
       width: 100%;
       max-width: 540px;
-      max-height: 90vh;
+      max-height: calc(100vh - 32px);
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -1652,10 +1654,11 @@
       animation: fadeUp .28s cubic-bezier(.22, 1, .36, 1);
       border-radius: var(--radius-lg) var(--radius-lg) 0 0;
       position: relative;
+      margin: auto;
     }
     .modal.modal-wide {
       max-width: 780px;
-      max-height: 94vh;
+      max-height: calc(100vh - 32px);
     }
     .modal.modal-glass {
       background: rgba(255, 255, 255, 0.92) !important;
@@ -3942,6 +3945,11 @@ window.addEventListener('unhandledrejection', function(e) {
   color: #dc2626;
   border: 1px solid #fecaca;
 }
+.fee-status-badge.partial {
+  background: #fffbeb;
+  color: #d97706;
+  border: 1px solid #fde68a;
+}
 
 /* Class badge */
 .fee-class-badge {
@@ -4747,6 +4755,8 @@ window.addEventListener('unhandledrejection', function(e) {
     let curRole = 'admin', curUser = null, curCls = null, curTerm = 't1';
     let curPage = getHashPage() || ((sessionStorage.getItem('lastPage') && sessionStorage.getItem('lastPage') !== 'exam_maker') ? sessionStorage.getItem('lastPage') : 'dashboard');
     let loginRole = 'admin', _toastT = null;
+    var COLORS = ['#2563eb', '#059669', '#b45309', '#7c3aed', '#dc2626', '#0891b2', '#db2777', '#065f46', '#92400e', '#1e40af'];
+    function gc(s) { return COLORS[(s || '?').charCodeAt(0) % COLORS.length]; }
 
     // -- local read / write ----------------------------------------------
     function loadDB() {
@@ -5583,8 +5593,7 @@ window.addEventListener('unhandledrejection', function(e) {
     });
 
     /* ------------------------------- UTILS ------------------------------- */
-    const COLORS = ['#2563eb', '#059669', '#b45309', '#7c3aed', '#dc2626', '#0891b2', '#db2777', '#065f46', '#92400e', '#1e40af'];
-    function gc(s) { return COLORS[(s || '?').charCodeAt(0) % COLORS.length]; }
+    // COLORS and gc are defined globally above
     function uid() { return 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5); }
     function ini(n) { return (n || '?').split(' ').slice(0, 2).map(x => x[0] || '').join('').toUpperCase(); }
     function sCol(v) { return v >= 80 ? 'var(--g)' : v >= 60 ? 'var(--o)' : 'var(--r)'; }
@@ -6505,12 +6514,12 @@ window.addEventListener('unhandledrejection', function(e) {
       }
       const map = {
         dashboard: () => curRole === 'admin' ? pgAdminDash() : curRole === 'teacher' ? pgTeacherDash() : curRole === 'scanner' ? pgScannerDash() : pgStudentDash(),
-        students: pgStudents, admissions: pgAdmissions, classes: pgClasses, attendance: pgAttendance, grades: pgGrades,
-        fees: pgFees, expenses: pgExpenses, feereports: pgFeeReports, exams: pgExams, notices: pgNotices, timetable: pgTimetable,
-        teachers: pgTeachers, payroll: pgPayroll, teacheratt: pgTeacherAtt, subjects: pgSubjects,
-        reportcards: pgReportCards, idcards: pgClassIdCards, families: pgFamilies, settings: pgSettings,
-        mygrades: pgMyGrades, myattend: pgMyAttend, qrcard: pgQRCard, myfees: pgMyFees, profile: pgProfile, mypayroll: pgMyPayroll, videos: pgVideoHub, diary: pgDiary,
-        mytimetable: pgMyTimetable
+        students: () => pgStudents(), admissions: () => pgAdmissions(), classes: () => pgClasses(), attendance: () => pgAttendance(), grades: () => pgGrades(),
+        fees: () => pgFees(), expenses: () => typeof pgExpenses === 'function' ? pgExpenses() : '', feereports: () => typeof pgFeeReports === 'function' ? pgFeeReports() : '', exams: () => pgExams(), notices: () => pgNotices(), timetable: () => pgTimetable(),
+        teachers: () => pgTeachers(), payroll: () => pgPayroll(), teacheratt: () => pgTeacherAtt(), subjects: () => pgSubjects(),
+        reportcards: () => pgReportCards(), idcards: () => pgClassIdCards(), families: () => pgFamilies(), settings: () => pgSettings(),
+        mygrades: () => pgMyGrades(), myattend: () => pgMyAttend(), qrcard: () => pgQRCard(), myfees: () => pgMyFees(), profile: () => pgProfile(), mypayroll: () => pgMyPayroll(), videos: () => pgVideoHub(), diary: () => pgDiary(),
+        mytimetable: () => pgMyTimetable()
       };
       return (map[p] || pgAdminDash)();
     }
@@ -8502,21 +8511,7 @@ If the arrears sum is lower than you expect, please check your CSV file to ensur
     function getTrueInitialArrears(sid) {
         const s = allStus().find(x => x.id === sid);
         if (!s) return 0;
-        let earliestMonth = null;
-        let earliestSnapshot = null;
-        if (DB.fees.monthlyLedger && DB.fees.monthlyLedger[sid]) {
-            for (let m in DB.fees.monthlyLedger[sid]) {
-                let row = DB.fees.monthlyLedger[sid][m];
-                if (row.paid && row.arrearsSnapshot !== undefined) {
-                    if (!earliestMonth || m < earliestMonth) {
-                        earliestMonth = m;
-                        earliestSnapshot = num(row.arrearsSnapshot);
-                    }
-                }
-            }
-        }
-        if (earliestMonth) return earliestSnapshot;
-        return num(s.arrears || 0);
+        return Math.max(0, num(s.arrears || 0));
     }
 
     function getDetailedLedgerArrears(sid, upToMonth) {
@@ -8542,17 +8537,22 @@ If the arrears sum is lower than you expect, please check your CSV file to ensur
             const mIndex = parseInt(m.split('-')[1], 10) - 1;
             const monthName = mNames[mIndex];
             
-            DB.fees.items.forEach(f => {
+            (DB.fees.items || []).forEach(f => {
                 if (f.id === 'f1') return;
-                if (f.applyMonth && f.applyMonth !== 'All' && f.applyMonth !== monthName) return;
+                if (f.applyMonth && f.applyMonth !== 'All' && f.applyMonth.toLowerCase() !== (monthName || '').toLowerCase()) return;
                 itemsTotal += num(f.amount);
             });
             
             let monthDue = tuition + van + itemsTotal;
             let monthPaid = 0;
             
-            if (DB.fees.monthlyLedger && DB.fees.monthlyLedger[sid] && DB.fees.monthlyLedger[sid][m] && DB.fees.monthlyLedger[sid][m].paid) {
-                monthPaid = num(DB.fees.monthlyLedger[sid][m].amountPaid || 0);
+            const mRow = DB.fees.monthlyLedger?.[sid]?.[m];
+            if (mRow) {
+                if (mRow.paid) {
+                    monthPaid = num(mRow.amountPaid !== undefined ? mRow.amountPaid : monthDue);
+                } else {
+                    monthPaid = num(mRow.amountPaid || 0);
+                }
             }
             
             let monthBalance = monthDue - monthPaid;
@@ -8568,17 +8568,11 @@ If the arrears sum is lower than you expect, please check your CSV file to ensur
             m = getNextMonth(m);
         }
         
-        // Consolidate breakdown if total balance is negative or zero (meaning everything is paid or in advance)
         if (balance <= 0) {
             breakdown = [];
             if (balance < 0) {
                 breakdown.push({ label: 'Advance Credit', amount: balance, month: 'advance' });
             }
-        } else {
-             // If there's a positive balance, but advance credits exist, the logic above naturally sums it into the total balance.
-             // We want the breakdown to visually match the total balance.
-             let breakdownSum = breakdown.reduce((acc, b) => acc + b.amount, 0);
-             // It already matches perfectly because we just track month by month.
         }
 
         return { total: balance, breakdown };
@@ -8590,6 +8584,7 @@ If the arrears sum is lower than you expect, please check your CSV file to ensur
 
     function studentFeeSummary(sid) {
       const s = allStus().find(x => x.id === sid);
+      if (!s) return { payments: {}, mandatory: [], mandatoryPaid: 0, paidAmount: 0, dueAmount: 0, arrears: 0, pendingArrears: 0, pendingMonthly: 0, totalAmount: 0 };
       const allItems = DB.fees.items || [];
       const mandatory = allItems.filter(f => f.mandatory);
       const cm = monthKey();
@@ -8598,7 +8593,11 @@ If the arrears sum is lower than you expect, please check your CSV file to ensur
       let paidAmount = 0;
       if (DB.fees.monthlyLedger && DB.fees.monthlyLedger[sid]) {
         Object.values(DB.fees.monthlyLedger[sid]).forEach(m => {
-           if (m.paid) paidAmount += num(m.amountPaid);
+           if (m.paid) {
+             paidAmount += num(m.amountPaid !== undefined ? m.amountPaid : m.amount);
+           } else {
+             paidAmount += num(m.amountPaid || 0);
+           }
         });
       }
 
@@ -8613,30 +8612,263 @@ If the arrears sum is lower than you expect, please check your CSV file to ensur
           const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
           const mIndex = parseInt(cm.split('-')[1], 10) - 1;
           const monthName = mNames[mIndex];
-          DB.fees.items.forEach(f => {
+          (DB.fees.items || []).forEach(f => {
               if (f.id === 'f1') return;
-              if (f.applyMonth && f.applyMonth !== 'All' && f.applyMonth !== monthName) return;
+              if (f.applyMonth && f.applyMonth !== 'All' && f.applyMonth.toLowerCase() !== (monthName || '').toLowerCase()) return;
               itemsTotal += num(f.amount);
           });
           currentMonthBill = tuition + van + itemsTotal;
       }
 
       const curMonthRow = DB.fees.monthlyLedger?.[sid]?.[cm];
+      const curMonthPaid = curMonthRow ? (curMonthRow.paid ? num(curMonthRow.amountPaid !== undefined ? curMonthRow.amountPaid : currentMonthBill) : num(curMonthRow.amountPaid || 0)) : 0;
       const isCurMonthPaid = curMonthRow ? curMonthRow.paid : false;
 
       let truePendingTotal = Math.max(0, totalDue);
-      let pendingMonthly = 0;
-      let pendingArrears = 0;
+      let pendingMonthly = Math.max(0, currentMonthBill - curMonthPaid);
+      let pendingArrears = Math.max(0, truePendingTotal - pendingMonthly);
 
-      if (isCurMonthPaid) {
-          pendingMonthly = 0;
-          pendingArrears = truePendingTotal;
-      } else {
-          pendingMonthly = Math.min(truePendingTotal, currentMonthBill);
-          pendingArrears = Math.max(0, truePendingTotal - pendingMonthly);
+      return { payments: DB.fees.payments?.[sid] || {}, mandatory, mandatoryPaid: isCurMonthPaid ? 1 : 0, paidAmount, dueAmount: totalDue, arrears, pendingArrears, pendingMonthly, totalAmount: paidAmount + totalDue };
+    }
+
+    function getFeeLedgerMetrics(cm = monthKey()) {
+      ensureMonthlyFeeLedger();
+      const all = allStus();
+      const isBeforeAugust = cm < '2026-08';
+      const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      const mIdx = parseInt(cm.split('-')[1], 10) - 1;
+      const monthName = mNames[mIdx] || 'Current Month';
+
+      let totalMonthlyExpected = 0;
+      let totalTuitionOnly = 0;
+      let curMonthCollected = 0;
+      let curMonthFullyPaid = 0;
+      let curMonthPartialPaid = 0;
+      let totalPendingArrears = 0;
+      let totalPendingMonthly = 0;
+      let overallCollected = 0;
+      let fullyClearedStudents = 0;
+
+      all.forEach(s => {
+        let tuition = monthlyFeeAmount(s);
+        let van = num(s.vanFee || 0);
+        let itemsTotal = 0;
+        (DB.fees.items || []).forEach(f => {
+          if (f.id === 'f1') return;
+          if (f.applyMonth && f.applyMonth !== 'All' && f.applyMonth.toLowerCase() !== monthName.toLowerCase()) return;
+          itemsTotal += num(f.amount);
+        });
+        const grossMonth = tuition + van + itemsTotal;
+        totalMonthlyExpected += grossMonth;
+        totalTuitionOnly += tuition;
+
+        const initialArrears = Math.max(0, num(s.arrears || 0));
+        let priorUnpaid = 0;
+
+        let m = '2026-08';
+        while (m < cm) {
+          const row = DB.fees.monthlyLedger?.[s.id]?.[m];
+          let pItems = 0;
+          const pIdx = parseInt(m.split('-')[1], 10) - 1;
+          const pName = mNames[pIdx] || '';
+          (DB.fees.items || []).forEach(f => {
+            if (f.id === 'f1') return;
+            if (f.applyMonth && f.applyMonth !== 'All' && f.applyMonth.toLowerCase() !== pName.toLowerCase()) return;
+            pItems += num(f.amount);
+          });
+          const mGross = tuition + van + pItems;
+          const mPaid = row && row.paid ? num(row.amountPaid !== undefined ? row.amountPaid : mGross) : num(row?.amountPaid || 0);
+          overallCollected += mPaid;
+          priorUnpaid += Math.max(0, mGross - mPaid);
+          m = getNextMonth(m);
+        }
+
+        const curRow = DB.fees.monthlyLedger?.[s.id]?.[cm];
+        const curPaid = curRow && curRow.paid ? num(curRow.amountPaid !== undefined ? curRow.amountPaid : grossMonth) : num(curRow?.amountPaid || 0);
+        curMonthCollected += curPaid;
+        overallCollected += curPaid;
+
+        if (curRow && curRow.paid) {
+          curMonthFullyPaid++;
+        } else if (curPaid > 0) {
+          curMonthPartialPaid++;
+        }
+
+        const curDue = Math.max(0, grossMonth - curPaid);
+        totalPendingMonthly += curDue;
+        const stuArrears = priorUnpaid + initialArrears;
+        totalPendingArrears += stuArrears;
+
+        if (curDue <= 0 && stuArrears <= 0) {
+          fullyClearedStudents++;
+        }
+      });
+
+      const totalPending = totalPendingMonthly + totalPendingArrears;
+      const collectionRate = (overallCollected + totalPending) > 0 ? Math.round(overallCollected / (overallCollected + totalPending) * 100) : 0;
+
+      return {
+        all,
+        totalCount: all.length,
+        cm,
+        monthName,
+        isBeforeAugust,
+        totalMonthlyExpected,
+        totalTuitionOnly,
+        curMonthCollected,
+        curMonthFullyPaid,
+        curMonthPartialPaid,
+        totalPending,
+        totalPendingMonthly,
+        totalPendingArrears,
+        overallCollected,
+        fullyClearedStudents,
+        collectionRate
+      };
+    }
+
+    function renderFeeMetricsHtml() {
+      const met = getFeeLedgerMetrics();
+      return `
+        <div class="lm-card">
+          <div class="lm-label">Total Monthly Expected</div>
+          <div class="lm-value" style="color:#0f172a;"><span class="lm-currency">PKR</span> ${num(met.totalMonthlyExpected).toLocaleString()}</div>
+          <div class="lm-sub">${met.monthName} tuition + fees (${met.totalCount} students)</div>
+        </div>
+
+        <div class="lm-card">
+          <div class="lm-label">${met.monthName} Collected</div>
+          <div class="lm-value" style="color:#0284c7;"><span class="lm-currency" style="color:#0284c7;">PKR</span> ${num(met.curMonthCollected).toLocaleString()}</div>
+          <div class="lm-sub"><b>${met.curMonthFullyPaid}</b> paid${met.curMonthPartialPaid > 0 ? ` &bull; <b>${met.curMonthPartialPaid}</b> partial` : ''} of ${met.totalCount} for ${met.monthName}</div>
+        </div>
+
+        <div class="lm-card">
+          <div class="lm-label">${met.isBeforeAugust ? 'Prev. Arrears' : 'Total Pending'}</div>
+          <div class="lm-value" style="color:#ef4444;"><span class="lm-currency" style="color:#ef4444;">PKR</span> ${num(met.totalPending).toLocaleString()}</div>
+          <div class="lm-sub">${met.isBeforeAugust ? 'Starts Aug 2026' : `${met.monthName}: <b>PKR ${num(met.totalPendingMonthly).toLocaleString()}</b> &middot; Arrears: <b style="color:#ef4444;">PKR ${num(met.totalPendingArrears).toLocaleString()}</b>`}</div>
+        </div>
+
+        <div class="lm-card">
+          <div class="lm-label">Overall Collection</div>
+          <div class="lm-value" style="color:#0f172a;"><span class="lm-currency">PKR</span> ${num(met.overallCollected).toLocaleString()}</div>
+          <div class="lm-sub">${met.fullyClearedStudents} cleared &middot; ${met.totalCount - met.fullyClearedStudents} pending</div>
+        </div>
+
+        <div class="lm-card">
+          <div class="lm-label">Collection Rate</div>
+          <div class="lm-value" style="color:#10b981;">${met.collectionRate}%</div>
+          <div class="lm-sub">Overall collection efficiency</div>
+        </div>
+      `;
+    }
+
+    function renderFeeTableRow(s) {
+      const sum = studentFeeSummary(s.id);
+      const cls = DB.classes.find(c => c.id === s.classId);
+      const augRow = DB.fees.monthlyLedger?.[s.id]?.['2026-08'];
+      const sepRow = DB.fees.monthlyLedger?.[s.id]?.['2026-09'];
+      const octRow = DB.fees.monthlyLedger?.[s.id]?.['2026-10'];
+      const augPaid = augRow ? augRow.paid : false;
+      const sepPaid = sepRow ? sepRow.paid : false;
+      const octPaid = octRow ? octRow.paid : false;
+      const octPartial = !octPaid && num(octRow?.amountPaid) > 0;
+      const sepPartial = !sepPaid && num(sepRow?.amountPaid) > 0;
+      const mFee = monthlyFeeAmount(s) + num(s.vanFee || 0);
+      const sibs = getFamilySiblings(s);
+      const hasSiblings = sibs && sibs.length > 1;
+      const initials = (s.name || '').split(' ').map(n => n[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'ST';
+      const stuWA = getStudentWA(s);
+
+      return `<tr id="fee-row-${s.id}" class="fee-table-row" data-aug="${augPaid ? 'paid' : 'unpaid'}" data-sep="${sepPaid ? 'paid' : sepPartial ? 'partial' : 'unpaid'}" data-oct="${octPaid ? 'paid' : octPartial ? 'partial' : 'unpaid'}" data-arrears="${sum.pendingArrears > 0 ? 'yes' : 'no'}">
+        <td style="padding:12px 16px; vertical-align:middle;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div class="stu-table-avatar">${initials}</div>
+            <div style="overflow:hidden;">
+              <div style="font-weight:700; font-size:0.86rem; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escHtml(s.name)}</div>
+              <div style="font-size:0.71rem; color:#64748b; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                Roll: <b style="color:#334155;">${escHtml(s.roll || '-')}</b>
+                ${s.father ? ` &bull; <span style="color:#64748b;">${escHtml(s.father)}</span>` : ''}
+              </div>
+            </div>
+          </div>
+        </td>
+        <td style="padding:12px 14px; vertical-align:middle; white-space:nowrap;">
+          <span class="fee-class-badge" title="${escHtml(cls?.name || '-')}">${escHtml(cls?.name || '-')}</span>
+        </td>
+        <td style="padding:12px 14px; vertical-align:middle; white-space:nowrap;">
+          <div style="font-weight:700; font-size:0.84rem; color:#0f172a;">${fmtMoney(mFee)} <span style="font-size:0.68rem; color:#64748b; font-weight:400;">/mo</span></div>
+          <div style="margin-top:4px; display:flex; gap:5px; align-items:center;">
+            <span class="fee-status-badge ${sepPaid ? 'paid' : sepPartial ? 'partial' : 'unpaid'}">Sep: ${sepPaid ? 'PAID' : sepPartial ? 'PARTIAL' : 'DUE'}</span>
+            <span class="fee-status-badge ${octPaid ? 'paid' : octPartial ? 'partial' : 'unpaid'}">Oct: ${octPaid ? 'PAID' : octPartial ? 'PARTIAL' : 'DUE'}</span>
+          </div>
+        </td>
+        <td style="padding:12px 14px; vertical-align:middle; white-space:nowrap;">
+          <div style="font-weight:800; color:${sum.dueAmount > 0 ? '#dc2626' : '#16a34a'}; font-size:0.92rem; letter-spacing:-0.01em;">
+            ${fmtMoney(sum.dueAmount)}
+          </div>
+          ${sum.pendingArrears > 0 
+            ? `<div style="font-size:0.70rem; color:#dc2626; margin-top:2px; font-weight:500;">Arrears: PKR ${num(sum.pendingArrears).toLocaleString()}</div>` 
+            : `<div style="font-size:0.68rem; color:#94a3b8; margin-top:2px;">No past arrears</div>`}
+        </td>
+        <td style="padding:12px 20px 12px 10px; vertical-align:middle; text-align:right; white-space:nowrap;">
+          <div style="display:inline-flex; gap:6px; justify-content:flex-end; align-items:center;">
+            ${hasSiblings ? `
+              <button class="fee-row-btn fee-row-btn-sib" title="Family Checkout (${sibs.length} siblings)" onclick="openFamilyFeeModal('${s.id}')">
+                Siblings (${sibs.length})
+              </button>
+            ` : ''}
+            <div class="fee-act-group">
+              <button class="fee-grp-item fee-grp-primary" onclick="openStudentFeeModal('${s.id}')">Manage</button>
+              <button class="fee-grp-item" onclick="openVoucherModal('${s.id}')">Voucher</button>
+              ${stuWA && sum.dueAmount > 0 ? `
+                <button class="fee-grp-item fee-grp-wa" onclick="openFeeReminderModal('${s.id}')">WhatsApp</button>
+              ` : `
+                <button class="fee-grp-item" style="color:#94a3b8; cursor:not-allowed;" title="${!stuWA ? 'No WhatsApp/Phone registered' : 'No balance due'}" onclick="showToast('${!stuWA ? 'Please update phone number in student profile first' : 'Student has zero pending fee'}', 'tw')">WhatsApp</button>
+              `}
+            </div>
+          </div>
+        </td>
+      </tr>`;
+    }
+
+    function updateFeeSectionLive(targetSid = null) {
+      // 1. Instantly update the 5 stats cards in the DOM if on screen
+      const metricsEl = document.getElementById('fee-ledger-metrics');
+      if (metricsEl) {
+        metricsEl.innerHTML = renderFeeMetricsHtml();
       }
 
-      return { payments: DB.fees.payments[sid] || {}, mandatory, mandatoryPaid: isCurMonthPaid ? 1 : 0, paidAmount, dueAmount: totalDue, arrears, pendingArrears, pendingMonthly, totalAmount: paidAmount + totalDue };
+      // 2. Instantly update the student row or entire table
+      const tbody = document.getElementById('fees-tbody');
+      if (tbody) {
+        if (targetSid) {
+          const rowEl = document.getElementById('fee-row-' + targetSid);
+          const s = allStus().find(x => x.id === targetSid);
+          if (rowEl && s) {
+            const tempDiv = document.createElement('tbody');
+            tempDiv.innerHTML = renderFeeTableRow(s);
+            const newRow = tempDiv.firstElementChild;
+            if (newRow) {
+              rowEl.replaceWith(newRow);
+              if (typeof filterFeeTable === 'function') filterFeeTable();
+              newRow.style.transition = 'background-color 0.4s ease';
+              newRow.style.backgroundColor = '#ecfdf5';
+              setTimeout(() => { newRow.style.backgroundColor = ''; }, 1200);
+            }
+          }
+        } else {
+          tbody.innerHTML = allStus().map(s => renderFeeTableRow(s)).join('');
+          if (typeof filterFeeTable === 'function') filterFeeTable();
+        }
+      }
+
+      // 3. Update dashboard overview if active
+      if (typeof curPage !== 'undefined' && curPage === 'dashboard') {
+        const feeHero = document.querySelector('.fee-hero');
+        if (feeHero && typeof renderAdminCharts === 'function') {
+          renderAdminCharts();
+        }
+      }
     }
 
     function filterFeeTable() {
@@ -8651,9 +8883,9 @@ If the arrears sum is lower than you expect, please check your CSV file to ensur
             const matchesClass = !classQ || classCellText === classQ;
             const matchesText = !textQ || rowText.includes(textQ);
             let matchesStatus = true;
-            if (statusQ === 'oct-unpaid') matchesStatus = tr.dataset.oct === 'unpaid';
+            if (statusQ === 'oct-unpaid') matchesStatus = (tr.dataset.oct === 'unpaid' || tr.dataset.oct === 'partial');
             else if (statusQ === 'oct-paid') matchesStatus = tr.dataset.oct === 'paid';
-            else if (statusQ === 'sep-unpaid') matchesStatus = tr.dataset.sep === 'unpaid';
+            else if (statusQ === 'sep-unpaid') matchesStatus = (tr.dataset.sep === 'unpaid' || tr.dataset.sep === 'partial');
             else if (statusQ === 'both-paid') matchesStatus = tr.dataset.sep === 'paid' && tr.dataset.oct === 'paid';
             else if (statusQ === 'arrears') matchesStatus = tr.dataset.arrears === 'yes';
             tr.style.display = (matchesClass && matchesText && matchesStatus) ? '' : 'none';
@@ -8663,22 +8895,7 @@ If the arrears sum is lower than you expect, please check your CSV file to ensur
     function pgFees() {
       ensureMonthlyFeeLedger();
       const all = allStus();
-      const summaries = all.map(s => studentFeeSummary(s.id));
-      const collected = summaries.reduce((sum, x) => sum + x.paidAmount, 0);
-      const pending = summaries.reduce((sum, x) => sum + Math.max(0, x.dueAmount), 0);
-      const pendingArrears = summaries.reduce((sum, x) => sum + (x.pendingArrears || 0), 0);
-      const pendingMonthly = summaries.reduce((sum, x) => sum + (x.pendingMonthly || 0), 0);
-      const totalArrears = all.reduce((sum, s) => sum + num(s.arrears || 0), 0);
-      const fullyPaid = summaries.filter(x => x.dueAmount <= 0).length;
       const totalAnnual = DB.fees.items.filter(f => f.mandatory).reduce((a, f) => a + Number(f.amount || 0), 0);
-      const cm = monthKey();
-      const isBeforeAugust = cm < '2026-08';
-      const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-      const mIdx = parseInt(cm.split('-')[1], 10) - 1;
-      const monthName = mNames[mIdx] || 'Current Month';
-      const curMonthPaidStus = all.filter(s => DB.fees.monthlyLedger?.[s.id]?.[cm]?.paid);
-      const curMonthIncome = curMonthPaidStus.reduce((sum, s) => sum + num(DB.fees.monthlyLedger[s.id][cm].amountPaid || monthlyFeeAmount(s)), 0);
-      const totalMonthlyFee = all.reduce((sum, s) => sum + num(monthlyFeeAmount(s)), 0);
       return `
 <div class="ph ph-row fu" style="align-items:center; margin-bottom:20px;">
   <div>
@@ -8695,36 +8912,8 @@ If the arrears sum is lower than you expect, please check your CSV file to ensur
     <button class="fee-act-btn" onclick="goPage('feereports')">Reports</button>
   </div>
 </div>
-<div class="ledger-metrics fu">
-  <div class="lm-card">
-    <div class="lm-label">Total Monthly Fee</div>
-    <div class="lm-value" style="color:#0f172a;"><span class="lm-currency">PKR</span> ${num(totalMonthlyFee).toLocaleString()}</div>
-    <div class="lm-sub">Monthly tuition revenue (${all.length} students)</div>
-  </div>
-
-  <div class="lm-card">
-    <div class="lm-label">${monthName} Collected</div>
-    <div class="lm-value" style="color:#0284c7;"><span class="lm-currency" style="color:#0284c7;">PKR</span> ${num(curMonthIncome).toLocaleString()}</div>
-    <div class="lm-sub"><b>${curMonthPaidStus.length}</b> of ${all.length} paid for ${monthName}</div>
-  </div>
-
-  <div class="lm-card">
-    <div class="lm-label">${isBeforeAugust ? 'Prev. Arrears' : 'Total Pending'}</div>
-    <div class="lm-value" style="color:#ef4444;"><span class="lm-currency" style="color:#ef4444;">PKR</span> ${num(isBeforeAugust ? totalArrears : pending).toLocaleString()}</div>
-    <div class="lm-sub">${isBeforeAugust ? 'Starts Aug 2026' : `${monthName}: <b>PKR ${num(pendingMonthly).toLocaleString()}</b> &middot; Arrears: <b style="color:#ef4444;">PKR ${num(pendingArrears).toLocaleString()}</b>`}</div>
-  </div>
-
-  <div class="lm-card">
-    <div class="lm-label">Overall Collection</div>
-    <div class="lm-value" style="color:#0f172a;"><span class="lm-currency">PKR</span> ${num(collected).toLocaleString()}</div>
-    <div class="lm-sub">${fullyPaid} cleared &middot; ${all.length - fullyPaid} pending</div>
-  </div>
-
-  <div class="lm-card">
-    <div class="lm-label">Collection Rate</div>
-    <div class="lm-value" style="color:#10b981;">${(collected + (isBeforeAugust ? totalArrears : pending)) > 0 ? Math.round(collected / (collected + (isBeforeAugust ? totalArrears : pending)) * 100) : 0}%</div>
-    <div class="lm-sub">Overall collection efficiency</div>
-  </div>
+<div class="ledger-metrics fu" id="fee-ledger-metrics">
+  ${renderFeeMetricsHtml()}
 </div>
 ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ? `
 <div class="card fu" style="border: 1px solid #fde68a; background: #fffdf5; border-radius:12px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
@@ -8786,7 +8975,7 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
       </select>
       <select id="fee-status-filter" class="fi" onchange="filterFeeTable()" style="padding:7px 10px; width:145px; font-size:0.78rem; font-weight:600; border-radius:8px; border:1px solid #cbd5e1; background-color:#ffffff;">
         <option value="">All Status</option>
-        <option value="oct-unpaid">Oct Unpaid</option>
+        <option value="oct-unpaid">Oct Unpaid / Due</option>
         <option value="oct-paid">Oct Paid</option>
         <option value="sep-unpaid">Sep Unpaid</option>
         <option value="both-paid">Sep & Oct Paid</option>
@@ -8811,72 +9000,8 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
       <th style="padding:12px 14px; text-align:left; font-size:0.70rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.06em; background:#f8fafc; border-bottom:1px solid #e2e8f0;">Payable Due</th>
       <th style="padding:12px 20px; text-align:right; font-size:0.70rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.06em; background:#f8fafc; border-bottom:1px solid #e2e8f0;">Actions</th>
     </tr></thead>
-    <tbody id="fees-tbody">${all.map(s => {
-      const sum = studentFeeSummary(s.id);
-      const cls = DB.classes.find(c => c.id === s.classId);
-      const augRow = DB.fees.monthlyLedger?.[s.id]?.['2026-08'];
-      const sepRow = DB.fees.monthlyLedger?.[s.id]?.['2026-09'];
-      const octRow = DB.fees.monthlyLedger?.[s.id]?.['2026-10'];
-      const augPaid = augRow ? augRow.paid : false;
-      const sepPaid = sepRow ? sepRow.paid : false;
-      const octPaid = octRow ? octRow.paid : false;
-      const mFee = monthlyFeeAmount(s) + num(s.vanFee || 0);
-      const sibs = getFamilySiblings(s);
-      const hasSiblings = sibs && sibs.length > 1;
-      const initials = (s.name || '').split(' ').map(n => n[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'ST';
-      const stuWA = getStudentWA(s);
-
-      return `<tr class="fee-table-row" data-aug="${augPaid ? 'paid' : 'unpaid'}" data-sep="${sepPaid ? 'paid' : 'unpaid'}" data-oct="${octPaid ? 'paid' : 'unpaid'}" data-arrears="${sum.pendingArrears > 0 ? 'yes' : 'no'}">
-        <td style="padding:12px 16px; vertical-align:middle;">
-          <div style="display:flex; align-items:center; gap:10px;">
-            <div class="stu-table-avatar">${initials}</div>
-            <div style="overflow:hidden;">
-              <div style="font-weight:700; font-size:0.86rem; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escHtml(s.name)}</div>
-              <div style="font-size:0.71rem; color:#64748b; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                Roll: <b style="color:#334155;">${escHtml(s.roll || '-')}</b>
-                ${s.father ? ` &bull; <span style="color:#64748b;">${escHtml(s.father)}</span>` : ''}
-              </div>
-            </div>
-          </div>
-        </td>
-        <td style="padding:12px 14px; vertical-align:middle; white-space:nowrap;">
-          <span class="fee-class-badge" title="${escHtml(cls?.name || '-')}">${escHtml(cls?.name || '-')}</span>
-        </td>
-        <td style="padding:12px 14px; vertical-align:middle; white-space:nowrap;">
-          <div style="font-weight:700; font-size:0.84rem; color:#0f172a;">${fmtMoney(mFee)} <span style="font-size:0.68rem; color:#64748b; font-weight:400;">/mo</span></div>
-          <div style="margin-top:4px; display:flex; gap:5px; align-items:center;">
-            <span class="fee-status-badge ${sepPaid ? 'paid' : 'unpaid'}">Sep: ${sepPaid ? 'PAID' : 'DUE'}</span>
-            <span class="fee-status-badge ${octPaid ? 'paid' : 'unpaid'}">Oct: ${octPaid ? 'PAID' : 'DUE'}</span>
-          </div>
-        </td>
-        <td style="padding:12px 14px; vertical-align:middle; white-space:nowrap;">
-          <div style="font-weight:800; color:${sum.dueAmount > 0 ? '#dc2626' : '#16a34a'}; font-size:0.92rem; letter-spacing:-0.01em;">
-            ${fmtMoney(sum.dueAmount)}
-          </div>
-          ${sum.pendingArrears > 0 
-            ? `<div style="font-size:0.70rem; color:#dc2626; margin-top:2px; font-weight:500;">Arrears: PKR ${num(sum.pendingArrears).toLocaleString()}</div>` 
-            : `<div style="font-size:0.68rem; color:#94a3b8; margin-top:2px;">No past arrears</div>`}
-        </td>
-        <td style="padding:12px 20px 12px 10px; vertical-align:middle; text-align:right; white-space:nowrap;">
-          <div style="display:inline-flex; gap:6px; justify-content:flex-end; align-items:center;">
-            ${hasSiblings ? `
-              <button class="fee-row-btn fee-row-btn-sib" title="Family Checkout (${sibs.length} siblings)" onclick="openFamilyFeeModal('${s.id}')">
-                Siblings (${sibs.length})
-              </button>
-            ` : ''}
-            <div class="fee-act-group">
-              <button class="fee-grp-item fee-grp-primary" onclick="openStudentFeeModal('${s.id}')">Manage</button>
-              <button class="fee-grp-item" onclick="openVoucherModal('${s.id}')">Voucher</button>
-              ${stuWA && sum.dueAmount > 0 ? `
-                <button class="fee-grp-item fee-grp-wa" onclick="openFeeReminderModal('${s.id}')">WhatsApp</button>
-              ` : `
-                <button class="fee-grp-item" style="color:#94a3b8; cursor:not-allowed;" title="${!stuWA ? 'No WhatsApp/Phone registered' : 'No balance due'}" onclick="showToast('${!stuWA ? 'Please update phone number in student profile first' : 'Student has zero pending fee'}', 'tw')">WhatsApp</button>
-              `}
-            </div>
-          </div>
-        </td>
-      </tr>`;
-    }).join('')}
+    <tbody id="fees-tbody">
+      ${all.map(s => renderFeeTableRow(s)).join('')}
     </tbody></table></div>
 </div>`;
     }
@@ -8986,6 +9111,26 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
         c.style.borderColor = isTarget ? '#7c3aed' : '#e2e8f0';
         c.style.background = isTarget ? '#f5f3ff' : '#ffffff';
       });
+      const titleEl = document.getElementById('fee-cashier-title');
+      const btnText = document.getElementById('btn-record-fee-text');
+      if (titleEl && btnText) {
+        if (mode === 'full') {
+          titleEl.textContent = 'Full Settlement';
+          btnText.textContent = 'Record Full Payment';
+        } else if (mode === 'arrears') {
+          titleEl.textContent = 'Arrears Clearance';
+          btnText.textContent = 'Clear Previous Arrears';
+        } else if (mode === 'tuition') {
+          titleEl.textContent = 'Monthly Tuition Settlement';
+          btnText.textContent = 'Record Tuition Payment';
+        } else if (mode === 'exam') {
+          titleEl.textContent = 'Examination Fee Settlement';
+          btnText.textContent = 'Record Exam Payment';
+        } else {
+          titleEl.textContent = 'Payment Details';
+          btnText.textContent = 'Record Payment';
+        }
+      }
     }
 
     function updateFeeCalculationRealtime() {
@@ -9031,22 +9176,24 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
       const allocArrearsEl = document.getElementById('fee-alloc-arrears-tag');
       if (allocArrearsEl) {
         if (arrears <= 0) {
-          allocArrearsEl.innerHTML = `<span style="color:#64748b; font-size:0.75rem;">No past arrears</span>`;
+          allocArrearsEl.innerHTML = `<span style="color:#64748b;">No past arrears</span>`;
         } else if (remArrears === 0) {
-          allocArrearsEl.innerHTML = `<span style="color:#059669; font-weight:700; font-size:0.75rem;">✓ Arrears 100% Cleared (${fmtMoney(allocArrears)})</span>`;
+          allocArrearsEl.innerHTML = `<span style="color:#059669; font-weight:700;">✓ Arrears 100% Cleared (${fmtMoney(allocArrears)})</span>`;
         } else {
-          allocArrearsEl.innerHTML = `<span style="color:#d97706; font-weight:600; font-size:0.75rem;">${fmtMoney(allocArrears)} paid • <b style="color:#dc2626;">${fmtMoney(remArrears)} remaining</b></span>`;
+          allocArrearsEl.innerHTML = `<span style="color:#d97706; font-weight:600;">${fmtMoney(allocArrears)} to arrears • <b style="color:#dc2626;">${fmtMoney(remArrears)} left</b></span>`;
         }
       }
       
       const allocMonthEl = document.getElementById('fee-alloc-month-tag');
       if (allocMonthEl) {
-        if (remMonth === 0) {
-          allocMonthEl.innerHTML = `<span style="color:#059669; font-weight:700; font-size:0.75rem;">✓ Month Fully Paid (${fmtMoney(allocMonth)})</span>`;
+        if (monthDue <= 0) {
+          allocMonthEl.innerHTML = `<span style="color:#059669; font-weight:700;">✓ Month Dues Zero</span>`;
+        } else if (remMonth === 0) {
+          allocMonthEl.innerHTML = `<span style="color:#059669; font-weight:700;">✓ Month Fully Paid</span>`;
         } else if (allocMonth > 0) {
-          allocMonthEl.innerHTML = `<span style="color:#d97706; font-weight:600; font-size:0.75rem;">${fmtMoney(allocMonth)} paid • <b style="color:#dc2626;">${fmtMoney(remMonth)} remaining</b></span>`;
+          allocMonthEl.innerHTML = `<span style="color:#2563eb; font-weight:600;">${fmtMoney(allocMonth)} to month • <b style="color:#dc2626;">${fmtMoney(remMonth)} left</b></span>`;
         } else {
-          allocMonthEl.innerHTML = `<span style="color:#94a3b8; font-size:0.75rem;">PKR 0 paid • <b style="color:#dc2626;">${fmtMoney(monthDue)} unpaid</b></span>`;
+          allocMonthEl.innerHTML = `<span style="color:#dc2626; font-weight:600;">${fmtMoney(remMonth)} unpaid</span>`;
         }
       }
       
@@ -9163,6 +9310,7 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
       saveDB();
       pushCloudDB();
       
+      updateFeeSectionLive(sid);
       showToast(`Payment of ${fmtMoney(amountPaid)} recorded successfully!`, 'ts');
       openStudentFeeModal(sid, activeMonth);
     }
@@ -9249,55 +9397,61 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
         const cardBg = isActive ? '#faf5ff' : '#ffffff';
         const cardBorder = isActive ? '1.5px solid #7c3aed' : '1px solid #e2e8f0';
 
+        const feesSubtitle = applicableItems.length > 0 
+          ? (applicableItems.length <= 2 
+              ? applicableItems.map(it => `<span style="background:#f5f3ff; color:#6d28d9; font-size:0.65rem; font-weight:600; padding:1px 5px; border-radius:3px; border:1px solid #ddd6fe;">${escHtml(it.name)}: ${fmtMoney(it.amount)}</span>`).join(' ')
+              : `<span style="background:#f5f3ff; color:#6d28d9; font-size:0.65rem; font-weight:600; padding:1px 5px; border-radius:3px; border:1px solid #ddd6fe;">${escHtml(applicableItems[0].name)}: ${fmtMoney(applicableItems[0].amount)}</span> <span style="background:#f1f5f9; color:#475569; font-size:0.65rem; font-weight:600; padding:1px 5px; border-radius:3px;">+${applicableItems.length - 1} more items</span>`)
+          : '';
+
         return `
-          <div class="glass-month-card" onclick="openStudentFeeModal('${sid}', '${m}')" style="cursor:pointer; position:relative; background:${cardBg}; border:${cardBorder}; border-left:4px solid ${accentBorder}; border-radius:10px; padding:10px 14px; margin-bottom:8px; box-shadow:${isActive ? '0 4px 14px rgba(124,58,237,0.1)' : '0 1px 3px rgba(15,23,42,0.03)'}; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; transition:all 0.15s ease;">
-            <div style="flex:1; min-width:200px;">
-              <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                <span style="font-weight:700; font-size:0.92rem; color:#0f172a;">${mName}</span>
+          <div class="glass-month-card" onclick="openStudentFeeModal('${sid}', '${m}')" style="cursor:pointer; position:relative; background:${cardBg}; border:${cardBorder}; border-left:4px solid ${accentBorder}; border-radius:9px; padding:7px 11px; margin-bottom:6px; box-shadow:${isActive ? '0 3px 10px rgba(124,58,237,0.08)' : '0 1px 2px rgba(15,23,42,0.02)'}; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; transition:all 0.15s ease;">
+            <div style="flex:1; min-width:180px;">
+              <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                <span style="font-weight:700; font-size:0.86rem; color:#0f172a;">${mName}</span>
                 ${isPaid 
                   ? (isPartial
-                      ? `<span style="background:#fffbeb; color:#92400e; border:1px solid #fde68a; font-size:0.68rem; font-weight:700; padding:2px 8px; border-radius:9999px;">PARTIAL (${fmtMoney(paidAmt)})</span>`
-                      : `<span style="background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; font-size:0.68rem; font-weight:700; padding:2px 8px; border-radius:9999px;">PAID</span>`)
-                  : `<span style="background:#fef2f2; color:#991b1b; border:1px solid #fecaca; font-size:0.68rem; font-weight:700; padding:2px 8px; border-radius:9999px;">UNPAID</span>`}
-                ${isActive ? `<span style="background:#7c3aed; color:#fff; font-size:0.63rem; font-weight:700; padding:1px 6px; border-radius:4px;">ACTIVE</span>` : ''}
+                      ? `<span style="background:#fffbeb; color:#92400e; border:1px solid #fde68a; font-size:0.65rem; font-weight:700; padding:1px 6px; border-radius:9999px;">PARTIAL (${fmtMoney(paidAmt)})</span>`
+                      : `<span style="background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; font-size:0.65rem; font-weight:700; padding:1px 6px; border-radius:9999px;">PAID</span>`)
+                  : `<span style="background:#fef2f2; color:#991b1b; border:1px solid #fecaca; font-size:0.65rem; font-weight:700; padding:1px 6px; border-radius:9999px;">UNPAID</span>`}
+                ${isActive ? `<span style="background:#7c3aed; color:#fff; font-size:0.6rem; font-weight:700; padding:1px 5px; border-radius:4px;">ACTIVE</span>` : ''}
               </div>
 
-              <div style="font-size:0.75rem; color:#64748b; margin-top:4px; display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                <span>Monthly Fee: <b style="color:#0f172a;">${fmtMoney(mTotal)}</b></span>
+              <div style="font-size:0.72rem; color:#64748b; margin-top:2px; display:flex; align-items:center; gap:5px; flex-wrap:wrap;">
+                <span>Fee: <b style="color:#0f172a;">${fmtMoney(mTotal)}</b></span>
                 <span style="color:#cbd5e1;">&bull;</span>
                 <span>Tuition: ${fmtMoney(tuition)}</span>
-                ${applicableItems.map(it => `<span style="background:#f5f3ff; color:#6d28d9; font-size:0.68rem; font-weight:600; padding:1px 6px; border-radius:4px; border:1px solid #ddd6fe;">${escHtml(it.name)}: ${fmtMoney(it.amount)}</span>`).join(' ')}
+                ${feesSubtitle}
                 ${isPaid && paidOn ? `<span style="color:#059669; font-weight:600;">&bull; Paid on ${fmtDate(paidOn)}</span>` : ''}
               </div>
             </div>
 
-            <div style="display:flex; gap:6px; align-items:center;" onclick="event.stopPropagation()">
+            <div style="display:flex; gap:5px; align-items:center;" onclick="event.stopPropagation()">
               ${isPaid ? `
-                <button type="button" class="btn btn-xs" style="background:#ffffff; color:#334155; border:1px solid #cbd5e1; font-weight:600; padding:5px 10px; border-radius:7px; font-size:0.73rem; cursor:pointer; display:inline-flex; align-items:center; gap:4px; box-shadow:0 1px 2px rgba(15,23,42,0.03);" onclick="printFeeReceipt('${sid}', '${m}')">
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Receipt
+                <button type="button" class="btn btn-xs" style="background:#ffffff; color:#334155; border:1px solid #cbd5e1; font-weight:600; padding:4px 9px; border-radius:6px; font-size:0.71rem; cursor:pointer; display:inline-flex; align-items:center; gap:3px;" onclick="printFeeReceipt('${sid}', '${m}')">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Receipt
                 </button>
               ` : `
-                <button type="button" class="btn btn-xs" style="background:#0f172a; color:#ffffff; border:none; font-weight:600; padding:5px 11px; border-radius:7px; font-size:0.73rem; cursor:pointer; box-shadow:0 1px 3px rgba(15,23,42,0.18); display:inline-flex; align-items:center; gap:4px;" onclick="toggleMonthPayment('${sid}', '${m}', true, ${mTotal})">
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Mark Full Paid
+                <button type="button" class="btn btn-xs" style="background:#0f172a; color:#ffffff; border:none; font-weight:600; padding:4px 10px; border-radius:6px; font-size:0.71rem; cursor:pointer; display:inline-flex; align-items:center; gap:3px;" onclick="toggleMonthPayment('${sid}', '${m}', true, ${mTotal})">
+                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Mark Full Paid
                 </button>
               `}
 
               <div class="glass-dropdown-wrapper" style="position:relative; display:inline-block;">
-                <button type="button" class="btn btn-xs" style="background:#ffffff; color:#475569; border:1px solid #cbd5e1; font-weight:600; font-size:0.72rem; padding:5px 9px; border-radius:7px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;" onclick="toggleFeeDropdown(event, 'fee-menu-${m}')">
+                <button type="button" class="btn btn-xs" style="background:#ffffff; color:#475569; border:1px solid #cbd5e1; font-weight:600; font-size:0.7rem; padding:4px 8px; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:3px;" onclick="toggleFeeDropdown(event, 'fee-menu-${m}')">
                   <span>Options</span>
-                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                  <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                 </button>
 
-                <div id="fee-menu-${m}" class="glass-fee-dropdown-menu" style="display:none; position:absolute; right:0; top:calc(100% + 6px); min-width:230px; background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; box-shadow:0 10px 25px -4px rgba(15,23,42,0.15); padding:5px; z-index:100; text-align:left;">
-                  <button type="button" style="width:100%; display:flex; justify-content:space-between; padding:7px 10px; border-radius:6px; border:none; background:transparent; cursor:pointer; font-size:0.75rem; font-weight:600; color:#0f172a;" onclick="toggleMonthPayment('${sid}', '${m}', true, ${mTotal}); toggleFeeDropdown(event, 'fee-menu-${m}')">
+                <div id="fee-menu-${m}" class="glass-fee-dropdown-menu" style="display:none; position:absolute; right:0; top:calc(100% + 4px); min-width:210px; background:#ffffff; border:1px solid #e2e8f0; border-radius:9px; box-shadow:0 10px 25px -4px rgba(15,23,42,0.15); padding:4px; z-index:100; text-align:left;">
+                  <button type="button" style="width:100%; display:flex; justify-content:space-between; padding:6px 9px; border-radius:5px; border:none; background:transparent; cursor:pointer; font-size:0.73rem; font-weight:600; color:#0f172a;" onclick="toggleMonthPayment('${sid}', '${m}', true, ${mTotal}); toggleFeeDropdown(event, 'fee-menu-${m}')">
                     <span>Mark Full Paid</span>
                     <span style="color:#059669;">${fmtMoney(mTotal)}</span>
                   </button>
-                  <button type="button" style="width:100%; display:flex; justify-content:space-between; padding:7px 10px; border-radius:6px; border:none; background:transparent; cursor:pointer; font-size:0.75rem; font-weight:600; color:#0f172a;" onclick="toggleMonthPayment('${sid}', '${m}', true, ${tuition}); toggleFeeDropdown(event, 'fee-menu-${m}')">
+                  <button type="button" style="width:100%; display:flex; justify-content:space-between; padding:6px 9px; border-radius:5px; border:none; background:transparent; cursor:pointer; font-size:0.73rem; font-weight:600; color:#0f172a;" onclick="toggleMonthPayment('${sid}', '${m}', true, ${tuition}); toggleFeeDropdown(event, 'fee-menu-${m}')">
                     <span>Tuition Only</span>
                     <span style="color:#2563eb;">${fmtMoney(tuition)}</span>
                   </button>
-                  <button type="button" style="width:100%; display:flex; justify-content:space-between; padding:7px 10px; border-radius:6px; border:none; background:transparent; cursor:pointer; font-size:0.75rem; font-weight:600; color:#dc2626;" onclick="toggleMonthPayment('${sid}', '${m}', false); toggleFeeDropdown(event, 'fee-menu-${m}')">
+                  <button type="button" style="width:100%; display:flex; justify-content:space-between; padding:6px 9px; border-radius:5px; border:none; background:transparent; cursor:pointer; font-size:0.73rem; font-weight:600; color:#dc2626;" onclick="toggleMonthPayment('${sid}', '${m}', false); toggleFeeDropdown(event, 'fee-menu-${m}')">
                     <span>Reset to Unpaid</span>
                   </button>
                 </div>
@@ -9308,363 +9462,368 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
       }).join('');
 
       openModal(`
-        <!-- Student Header -->
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; padding-bottom:14px; border-bottom:1px solid #e2e8f0; margin-bottom:16px;">
-          <div style="display:flex; gap:12px; align-items:center;">
-            <div style="width:46px; height:46px; border-radius:50%; background:#0f172a; color:#ffffff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.1rem; box-shadow:0 3px 8px rgba(15,23,42,0.22); flex-shrink:0;">
-              ${initials}
-            </div>
-            <div>
-              <div style="font-weight:800; font-size:1.12rem; color:#0f172a; line-height:1.2; letter-spacing:-0.2px;">
-                ${escHtml(s.name)}
+        <div style="display:flex; flex-direction:column; flex:1 1 auto; min-height:0; height:100%; box-sizing:border-box;">
+          <!-- Student Header with safe breathing room for close X button -->
+          <div style="flex-shrink:0; display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px; padding-bottom:10px; border-bottom:1px solid #e2e8f0; margin-bottom:10px; padding-right:44px;">
+            <div style="display:flex; gap:12px; align-items:center;">
+              <div style="width:40px; height:40px; border-radius:50%; background:#0f172a; color:#ffffff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1rem; box-shadow:0 3px 8px rgba(15,23,42,0.2); flex-shrink:0;">
+                ${initials}
               </div>
-              <div style="display:flex; gap:8px; align-items:center; margin-top:3px; flex-wrap:wrap;">
-                <span style="color:#64748b; font-size:0.76rem; font-weight:600;">${escHtml(cls?.name || 'Class')}</span>
-                <span style="color:#cbd5e1;">|</span>
-                <span style="color:#64748b; font-size:0.76rem; font-weight:600;">Roll: ${escHtml(s.roll || '-')}</span>
-                <span style="background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; font-size:0.68rem; font-weight:700; padding:1px 8px; border-radius:9999px;">Standard Monthly</span>
-                <span style="font-size:0.82rem; font-weight:700; color:#0f172a; margin-left:2px;">${fmtMoney(tuition + van)}</span>
-              </div>
-            </div>
-          </div>
-
-          <div style="display:flex; gap:8px; align-items:center;">
-            <button type="button" class="btn btn-xs" style="background:#ffffff; color:#059669; border:1px solid #a7f3d0; font-weight:700; padding:6px 12px; border-radius:8px; display:inline-flex; align-items:center; gap:5px; font-size:0.75rem; cursor:pointer; box-shadow:0 1px 2px rgba(15,23,42,0.03);" onclick="markAllMonths('${sid}', true)">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Mark All Paid
-            </button>
-            <button type="button" class="btn btn-xs" style="background:#ffffff; color:#64748b; border:1px solid #cbd5e1; font-weight:700; padding:6px 12px; border-radius:8px; display:inline-flex; align-items:center; gap:5px; font-size:0.75rem; cursor:pointer; box-shadow:0 1px 2px rgba(15,23,42,0.03);" onclick="markAllMonths('${sid}', false)">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Mark All Unpaid
-            </button>
-          </div>
-        </div>
-
-        <!-- 2-Column Responsive Layout -->
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap:22px; align-items:start;">
-          
-          <!-- LEFT COLUMN: FEE LEDGER & BREAKDOWN -->
-          <div>
-            <div style="font-weight:800; font-size:0.74rem; color:#475569; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.8px; display:flex; align-items:center; justify-content:space-between;">
-              <span>Fee Ledger</span>
-              <span style="font-size:0.7rem; color:#94a3b8; font-weight:500; text-transform:none;">Billing Records</span>
-            </div>
-
-            <!-- Month Cards List -->
-            <div style="margin-bottom:16px;">
-              ${monthsHtml}
-            </div>
-
-            <!-- PAYMENT BREAKDOWN -->
-            <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:13px 15px; margin-bottom:14px; box-shadow:0 1px 3px rgba(15,23,42,0.02);">
-              <div style="font-weight:800; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.6px; color:#475569; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                <span>Payment Breakdown (${activeMonthName})</span>
-              </div>
-
-              <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:#475569; padding:5px 0;">
-                <span style="display:flex; align-items:center; gap:6px;">
-                  <span style="color:#2563eb;">🏫</span> Tuition Fee (Monthly)
-                </span>
-                <span style="font-weight:700; color:#0f172a;">${fmtMoney(tuition)}</span>
-              </div>
-
-              ${van > 0 ? `
-              <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:#475569; padding:5px 0;">
-                <span style="display:flex; align-items:center; gap:6px;">
-                  <span style="color:#059669;">🚐</span> Van / Transport Fee
-                </span>
-                <span style="font-weight:700; color:#0f172a;">${fmtMoney(van)}</span>
-              </div>
-              ` : ''}
-
-              ${activeApplicableItems.map(it => `
-              <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:#475569; padding:5px 0;">
-                <span style="display:flex; align-items:center; gap:6px;">
-                  <span style="color:#7c3aed;">🪙</span> ${escHtml(it.name)}
-                </span>
-                <span style="font-weight:700; color:#7c3aed;">${fmtMoney(it.amount)}</span>
-              </div>
-              `).join('')}
-
-              <div style="border-top:1px dashed #e2e8f0; margin:8px 0 6px 0;"></div>
-
-              <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.88rem; font-weight:800; color:#0f172a;">
-                <span>Total Due (${activeMonthName.split(' ')[0]})</span>
-                <span style="font-size:0.95rem;">${fmtMoney(activeMonthDue)}</span>
-              </div>
-            </div>
-
-            <!-- PAYMENT STATUS -->
-            <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:13px 15px; margin-bottom:14px; box-shadow:0 1px 3px rgba(15,23,42,0.02);">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <div style="font-weight:800; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.6px; color:#475569;">Payment Status</div>
-                ${activeIsPaid 
-                  ? (activeIsPartial ? `<span style="background:#fffbeb; color:#92400e; border:1px solid #fde68a; font-size:0.68rem; font-weight:700; padding:2px 8px; border-radius:9999px;">PARTIAL</span>` : `<span style="background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; font-size:0.68rem; font-weight:700; padding:2px 8px; border-radius:9999px;">PAID</span>`)
-                  : `<span style="background:#fef2f2; color:#991b1b; border:1px solid #fecaca; font-size:0.68rem; font-weight:700; padding:2px 8px; border-radius:9999px;">UNPAID</span>`}
-              </div>
-
-              <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.8rem; color:#475569; padding:4px 0;">
-                <span style="border-left:3px solid #10b981; padding-left:7px;">Previous Arrears (Opening Balance):</span>
-                <span style="font-weight:700; color:${prevArrears > 0 ? '#dc2626' : '#334155'}; font-size:0.84rem;">
-                  ${fmtMoney(prevArrears)}
-                </span>
-              </div>
-
-              <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.8rem; color:#475569; padding:4px 0;">
-                <span style="border-left:3px solid #0f172a; padding-left:7px;">Payments Received (${activeMonthName.split(' ')[0]}):</span>
-                <span style="font-weight:700; color:#059669; font-size:0.84rem;">
-                  ${fmtMoney(activePaidAmt)}
-                </span>
-              </div>
-
-              <!-- Big Outstanding Card -->
-              <div style="background:${totalGrossDue > 0 ? '#fff1f2' : '#ecfdf5'}; border:1px solid ${totalGrossDue > 0 ? '#fecdd3' : '#a7f3d0'}; border-radius:10px; padding:10px 14px; margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
-                <div style="font-weight:800; font-size:0.88rem; color:#0f172a;">
-                  Total Outstanding
-                  <div style="font-size:0.68rem; font-weight:500; color:#64748b;">Arrears + Current Month Remaining</div>
+              <div>
+                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                  <span style="font-weight:800; font-size:1.08rem; color:#0f172a; line-height:1.2; letter-spacing:-0.2px;">${escHtml(s.name)}</span>
+                  <span style="background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; font-size:0.67rem; font-weight:700; padding:1px 8px; border-radius:9999px;">Standard Monthly</span>
+                  <span style="font-size:0.82rem; font-weight:800; color:#0f172a;">${fmtMoney(tuition + van)}</span>
                 </div>
-                <div style="font-size:1.25rem; font-weight:800; color:${totalGrossDue > 0 ? '#dc2626' : '#059669'};">
-                  ${fmtMoney(totalGrossDue)}
+                <div style="display:flex; gap:8px; align-items:center; margin-top:2px; flex-wrap:wrap;">
+                  <span style="color:#64748b; font-size:0.74rem; font-weight:600;">${escHtml(cls?.name || 'Class')}</span>
+                  <span style="color:#cbd5e1;">|</span>
+                  <span style="color:#64748b; font-size:0.74rem; font-weight:600;">Roll: ${escHtml(s.roll || '-')}</span>
                 </div>
               </div>
             </div>
 
-            <!-- Trust Badges -->
-            <div style="display:flex; flex-direction:column; gap:8px;">
-              <div style="display:flex; gap:8px; align-items:start; font-size:0.73rem; color:#64748b; background:#f8fafc; border:1px solid #f1f5f9; padding:8px 12px; border-radius:8px;">
-                <span style="color:#0284c7; font-size:0.95rem;">ℹ</span>
-                <div><b>Payment Notes:</b> All payments are recorded with date, method, and transaction reference for complete transparency.</div>
-              </div>
-              <div style="display:flex; gap:8px; align-items:start; font-size:0.73rem; color:#64748b; background:#f8fafc; border:1px solid #f1f5f9; padding:8px 12px; border-radius:8px;">
-                <span style="color:#059669; font-size:0.95rem;">🛡</span>
-                <div><b>Secure & Reliable:</b> School financial records are audited, synced in real-time, and backed up securely.</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- RIGHT COLUMN: CASHIER DESK & REAL-TIME ARREARS CALCULATION -->
-          <div>
-            <div style="font-weight:800; font-size:0.74rem; color:#475569; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.8px; display:flex; align-items:center; gap:6px;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-              <span>Payment Options</span>
-            </div>
-
-            <!-- Quick Action Cards -->
-            <div style="display:flex; flex-direction:column; gap:7px; margin-bottom:14px;">
-              <!-- 1. Mark Full Paid -->
-              <div class="fee-quick-card" data-mode="full" onclick="setFeeQuickAmount(${totalGrossDue}, 'full')" style="cursor:pointer; background:#f0fdf4; border:1.5px solid #86efac; border-radius:10px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; transition:all 0.15s ease;">
-                <div style="display:flex; gap:10px; align-items:center;">
-                  <div style="width:24px; height:24px; border-radius:50%; background:#10b981; color:#fff; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800;">✓</div>
-                  <div>
-                    <div style="font-weight:700; font-size:0.84rem; color:#0f172a;">Mark Full Paid</div>
-                    <div style="font-size:0.7rem; color:#15803d;">Pay complete amount (${fmtMoney(totalGrossDue)})</div>
-                  </div>
-                </div>
-                <div style="font-weight:700; color:#059669; font-size:0.88rem;">&rsaquo;</div>
-              </div>
-
-              <!-- 2. Clear Arrears Only (if arrears > 0) -->
-              ${prevArrears > 0 ? `
-              <div class="fee-quick-card" data-mode="arrears" onclick="setFeeQuickAmount(${prevArrears}, 'arrears')" style="cursor:pointer; background:#fffbeb; border:1.5px solid #fde68a; border-radius:10px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; transition:all 0.15s ease;">
-                <div style="display:flex; gap:10px; align-items:center;">
-                  <div style="width:24px; height:24px; border-radius:50%; background:#f59e0b; color:#fff; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800;">!</div>
-                  <div>
-                    <div style="font-weight:700; font-size:0.84rem; color:#0f172a;">Clear Previous Arrears Only</div>
-                    <div style="font-size:0.7rem; color:#b45309;">Overdue balance (${fmtMoney(prevArrears)})</div>
-                  </div>
-                </div>
-                <div style="font-weight:700; color:#d97706; font-size:0.88rem;">&rsaquo;</div>
-              </div>
-              ` : ''}
-
-              <!-- 3. Monthly Tuition Only -->
-              <div class="fee-quick-card" data-mode="tuition" onclick="setFeeQuickAmount(${tuition}, 'tuition')" style="cursor:pointer; background:#ffffff; border:1.5px solid #e2e8f0; border-radius:10px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; transition:all 0.15s ease;">
-                <div style="display:flex; gap:10px; align-items:center;">
-                  <div style="width:24px; height:24px; border-radius:7px; background:#eff6ff; color:#2563eb; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800;">🏫</div>
-                  <div>
-                    <div style="font-weight:700; font-size:0.84rem; color:#0f172a;">Monthly Tuition Only</div>
-                    <div style="font-size:0.7rem; color:#64748b;">${fmtMoney(tuition)}</div>
-                  </div>
-                </div>
-                <div style="font-weight:700; color:#64748b; font-size:0.88rem;">&rsaquo;</div>
-              </div>
-
-              <!-- 4. Examination Fee Only (if exists) -->
-              ${examAmt > 0 ? `
-              <div class="fee-quick-card" data-mode="exam" onclick="setFeeQuickAmount(${examAmt}, 'exam')" style="cursor:pointer; background:#ffffff; border:1.5px solid #e2e8f0; border-radius:10px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; transition:all 0.15s ease;">
-                <div style="display:flex; gap:10px; align-items:center;">
-                  <div style="width:24px; height:24px; border-radius:7px; background:#f5f3ff; color:#7c3aed; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800;">🪙</div>
-                  <div>
-                    <div style="font-weight:700; font-size:0.84rem; color:#0f172a;">Examination Fee Only</div>
-                    <div style="font-size:0.7rem; color:#64748b;">${fmtMoney(examAmt)}</div>
-                  </div>
-                </div>
-                <div style="font-weight:700; color:#64748b; font-size:0.88rem;">&rsaquo;</div>
-              </div>
-              ` : ''}
-
-              <!-- 5. Custom Amount Received -->
-              <div class="fee-quick-card" data-mode="custom" onclick="document.getElementById('fee-input-amount').focus()" style="cursor:pointer; background:#faf5ff; border:1.5px solid #d8b4fe; border-radius:10px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; transition:all 0.15s ease;">
-                <div style="display:flex; gap:10px; align-items:center;">
-                  <div style="width:24px; height:24px; border-radius:7px; background:#f3e8ff; color:#7c3aed; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:800;">📝</div>
-                  <div>
-                    <div style="font-weight:700; font-size:0.84rem; color:#0f172a;">Custom Amount Received</div>
-                    <div style="font-size:0.7rem; color:#7c3aed;">Partial payment / flexible entry</div>
-                  </div>
-                </div>
-                <div style="font-weight:700; color:#7c3aed; font-size:0.88rem;">&rsaquo;</div>
-              </div>
-            </div>
-
-            <!-- INTERACTIVE CASHIER DESK FORM -->
-            <div style="background:#fdfcff; border:1.5px solid #ede9fe; border-radius:12px; padding:15px; box-shadow:0 2px 6px rgba(124,58,237,0.04);">
-              <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
-                <div style="width:28px; height:28px; border-radius:8px; background:#7c3aed; color:#fff; display:flex; align-items:center; justify-content:center; font-size:0.85rem;">💳</div>
-                <div>
-                  <div style="font-weight:800; font-size:0.86rem; color:#0f172a;">Payment Details</div>
-                  <div style="font-size:0.69rem; color:#64748b;">Enter the amount received and payment details.</div>
-                </div>
-              </div>
-
-              <!-- Amount Received Input -->
-              <div style="margin-bottom:11px;">
-                <label style="display:block; font-size:0.75rem; font-weight:700; color:#334155; margin-bottom:4px;">
-                  Amount Received (PKR) <span style="color:#ef4444;">*</span>
-                </label>
-                <div style="position:relative; display:flex; align-items:center;">
-                  <input type="number" id="fee-input-amount" 
-                    data-total-gross-due="${totalGrossDue}" 
-                    data-prev-arrears="${prevArrears}" 
-                    data-month-due="${activeMonthRemDue}" 
-                    value="${totalGrossDue > 0 ? totalGrossDue : activeMonthDue}" 
-                    placeholder="Enter amount" 
-                    oninput="updateFeeCalculationRealtime()" 
-                    style="width:100%; padding:9px 52px 9px 12px; font-size:1.05rem; font-weight:800; color:#0f172a; border:1.5px solid #cbd5e1; border-radius:8px; outline:none; background:#ffffff; transition:border 0.15s;" 
-                    onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#cbd5e1'"/>
-                  <span style="position:absolute; right:10px; font-weight:700; font-size:0.78rem; color:#64748b; background:#f1f5f9; padding:2px 8px; border-radius:5px;">PKR</span>
-                </div>
-              </div>
-
-              <!-- Payment Method & Date in Row -->
-              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:11px;">
-                <div>
-                  <label style="display:block; font-size:0.73rem; font-weight:700; color:#334155; margin-bottom:4px;">
-                    Payment Method <span style="color:#ef4444;">*</span>
-                  </label>
-                  <select id="fee-input-method" style="width:100%; padding:8px 10px; font-size:0.82rem; font-weight:600; color:#0f172a; border:1px solid #cbd5e1; border-radius:8px; outline:none; background:#ffffff; cursor:pointer;">
-                    <option value="Cash">Cash 💵</option>
-                    <option value="Bank Transfer">Bank Transfer 🏦</option>
-                    <option value="EasyPaisa">EasyPaisa 📱</option>
-                    <option value="JazzCash">JazzCash 📱</option>
-                    <option value="Cheque">Cheque 🧾</option>
-                  </select>
-                </div>
-                <div>
-                  <label style="display:block; font-size:0.73rem; font-weight:700; color:#334155; margin-bottom:4px;">
-                    Payment Date <span style="color:#ef4444;">*</span>
-                  </label>
-                  <input type="date" id="fee-input-date" value="${today()}" style="width:100%; padding:7px 10px; font-size:0.82rem; font-weight:600; color:#0f172a; border:1px solid #cbd5e1; border-radius:8px; outline:none; background:#ffffff;"/>
-                </div>
-              </div>
-
-              <!-- Reference & Notes -->
-              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:11px;">
-                <div>
-                  <label style="display:block; font-size:0.73rem; font-weight:700; color:#334155; margin-bottom:4px;">
-                    Transaction Reference <span style="font-weight:400; color:#94a3b8;">(Optional)</span>
-                  </label>
-                  <input type="text" id="fee-input-ref" placeholder="e.g. Receipt #123, Trx ID" style="width:100%; padding:7px 10px; font-size:0.8rem; border:1px solid #cbd5e1; border-radius:8px; outline:none; background:#ffffff;"/>
-                </div>
-                <div>
-                  <label style="display:block; font-size:0.73rem; font-weight:700; color:#334155; margin-bottom:4px;">
-                    Notes / Remarks <span style="font-weight:400; color:#94a3b8;">(Optional)</span>
-                  </label>
-                  <input type="text" id="fee-input-notes" placeholder="e.g. Received from father" style="width:100%; padding:7px 10px; font-size:0.8rem; border:1px solid #cbd5e1; border-radius:8px; outline:none; background:#ffffff;"/>
-                </div>
-              </div>
-
-              <!-- Arrears Waiver / Concession Discount (Optional) -->
-              <div style="margin-bottom:13px;">
-                <label style="display:flex; justify-content:space-between; font-size:0.73rem; font-weight:700; color:#334155; margin-bottom:4px;">
-                  <span>Arrears Concession / Waiver <span style="font-weight:400; color:#94a3b8;">(Optional)</span></span>
-                  <span style="font-weight:500; font-size:0.69rem; color:#7c3aed;">Reduces outstanding balance</span>
-                </label>
-                <input type="number" id="fee-input-discount" value="0" placeholder="0" oninput="updateFeeCalculationRealtime()" style="width:100%; padding:7px 10px; font-size:0.85rem; font-weight:600; color:#0f172a; border:1px solid #cbd5e1; border-radius:8px; outline:none; background:#ffffff;"/>
-              </div>
-
-              <!-- REAL-TIME CALCULATION CARD -->
-              <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:11px 13px; margin-bottom:14px; box-shadow:0 1px 3px rgba(15,23,42,0.02);">
-                <div style="display:flex; justify-content:space-between; font-size:0.76rem; color:#64748b; padding:2px 0;">
-                  <span>Total Due (${prevArrears > 0 ? 'Arrears + Month' : activeMonthName.split(' ')[0]}):</span>
-                  <span style="font-weight:700; color:#0f172a;">${fmtMoney(totalGrossDue)}</span>
-                </div>
-                <div style="display:flex; justify-content:space-between; font-size:0.76rem; color:#64748b; padding:2px 0;">
-                  <span>Amount Received:</span>
-                  <span style="font-weight:700; color:#059669;" id="fee-realtime-received">${fmtMoney(totalGrossDue > 0 ? totalGrossDue : activeMonthDue)}</span>
-                </div>
-                
-                <div style="border-top:1px dashed #e2e8f0; margin:6px 0;"></div>
-                
-                <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.86rem; font-weight:800; color:#0f172a;">
-                  <span>Remaining Balance:</span>
-                  <span id="fee-realtime-remaining" style="color:#059669; font-size:1.05rem;">PKR 0 (Fully Cleared ✓)</span>
-                </div>
-
-                <!-- Waterfall Allocation Preview -->
-                <div style="border-top:1px solid #f1f5f9; margin-top:8px; padding-top:8px;">
-                  <div style="font-size:0.68rem; font-weight:700; color:#94a3b8; text-transform:uppercase; margin-bottom:4px; letter-spacing:0.5px;">Live Allocation Waterfall:</div>
-                  <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.73rem; margin-bottom:2px;">
-                    <span style="color:#475569;">1. Past Arrears (${fmtMoney(prevArrears)}):</span>
-                    <span id="fee-alloc-arrears-tag">${prevArrears > 0 ? `<span style="color:#059669; font-weight:700; font-size:0.75rem;">✓ Arrears 100% Cleared</span>` : `<span style="color:#64748b; font-size:0.75rem;">No past arrears</span>`}</span>
-                  </div>
-                  <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.73rem;">
-                    <span style="color:#475569;">2. ${activeMonthName.split(' ')[0]} Dues (${fmtMoney(activeMonthRemDue)}):</span>
-                    <span id="fee-alloc-month-tag"><span style="color:#059669; font-weight:700; font-size:0.75rem;">✓ Month Fully Paid</span></span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Submit Payment Button -->
-              <button type="button" id="btn-record-fee" onclick="submitCustomFeePayment('${sid}', '${activeMonth}')" style="width:100%; padding:11px 16px; background:linear-gradient(135deg, #7c3aed, #6d28d9); color:#ffffff; font-weight:800; font-size:0.9rem; border:none; border-radius:9px; box-shadow:0 4px 14px rgba(109,40,217,0.35); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:7px; transition:transform 0.1s ease;" onmousedown="this.style.transform='scale(0.99)'" onmouseup="this.style.transform='scale(1)'">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                <span id="btn-record-fee-text">Record Payment</span>
+            <div style="display:flex; gap:6px; align-items:center;">
+              <button type="button" class="btn btn-xs" style="background:#ffffff; color:#059669; border:1px solid #a7f3d0; font-weight:700; padding:5px 10px; border-radius:7px; display:inline-flex; align-items:center; gap:4px; font-size:0.71rem; cursor:pointer; box-shadow:0 1px 2px rgba(15,23,42,0.03);" onclick="markAllMonths('${sid}', true)">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Mark All Paid
+              </button>
+              <button type="button" class="btn btn-xs" style="background:#ffffff; color:#64748b; border:1px solid #cbd5e1; font-weight:700; padding:5px 10px; border-radius:7px; display:inline-flex; align-items:center; gap:4px; font-size:0.71rem; cursor:pointer; box-shadow:0 1px 2px rgba(15,23,42,0.03);" onclick="markAllMonths('${sid}', false)">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Mark All Unpaid
               </button>
             </div>
           </div>
-        </div>
 
-        <!-- Footer Buttons -->
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; padding-top:16px; border-top:1px solid #f1f5f9; margin-top:18px;">
-          <div style="display:flex; gap:8px;">
-            <button type="button" class="btn" style="background:#0f172a; color:#ffffff; font-weight:700; font-size:0.8rem; padding:8px 16px; border-radius:8px; border:none; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 5px rgba(15,23,42,0.18); cursor:pointer;" onclick="openVoucherModal('${sid}')">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Issue Fee Challan
-            </button>
-            ${getStudentWA(s) ? `
-            <button type="button" class="btn" style="background:#16a34a; color:#ffffff; font-weight:700; font-size:0.8rem; padding:8px 16px; border-radius:8px; border:none; display:inline-flex; align-items:center; gap:6px; box-shadow:0 2px 5px rgba(22,163,74,0.24); cursor:pointer;" onclick="sendVoucherWhatsApp('${sid}', '${activeMonth}')">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg> WhatsApp ${activeMonthName.split(' ')[0]} Challan
-            </button>
-            ` : ''}
+          <!-- Middle Scrollable 2-Column Responsive Layout -->
+          <div style="flex:1 1 auto; min-height:0; overflow-y:auto; padding-right:4px;">
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap:14px; align-items:start;">
+              
+              <!-- LEFT COLUMN: FEE LEDGER & BREAKDOWN -->
+              <div>
+                <div style="font-weight:800; font-size:0.72rem; color:#475569; margin-bottom:7px; text-transform:uppercase; letter-spacing:0.8px; display:flex; align-items:center; justify-content:space-between;">
+                  <span>Fee Ledger</span>
+                  <span style="font-size:0.67rem; color:#94a3b8; font-weight:500; text-transform:none;">Billing Records</span>
+                </div>
+
+                <!-- Month Cards List -->
+                <div style="margin-bottom:10px;">
+                  ${monthsHtml}
+                </div>
+
+                <!-- PAYMENT BREAKDOWN -->
+                <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:9px; padding:9px 12px; margin-bottom:9px; box-shadow:0 1px 2px rgba(15,23,42,0.02);">
+                  <div style="font-weight:800; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.6px; color:#475569; margin-bottom:6px; display:flex; align-items:center; gap:5px;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                    <span>Payment Breakdown (${activeMonthName})</span>
+                  </div>
+
+                  <div style="display:flex; justify-content:space-between; font-size:0.76rem; color:#475569; padding:2px 0;">
+                    <span style="display:flex; align-items:center; gap:5px;">
+                      <span style="color:#2563eb;">🏫</span> Tuition Fee (Monthly)
+                    </span>
+                    <span style="font-weight:700; color:#0f172a;">${fmtMoney(tuition)}</span>
+                  </div>
+
+                  ${van > 0 ? `
+                  <div style="display:flex; justify-content:space-between; font-size:0.76rem; color:#475569; padding:2px 0;">
+                    <span style="display:flex; align-items:center; gap:5px;">
+                      <span style="color:#059669;">🚐</span> Van / Transport Fee
+                    </span>
+                    <span style="font-weight:700; color:#0f172a;">${fmtMoney(van)}</span>
+                  </div>
+                  ` : ''}
+
+                  ${activeApplicableItems.map(it => `
+                  <div style="display:flex; justify-content:space-between; font-size:0.76rem; color:#475569; padding:2px 0;">
+                    <span style="display:flex; align-items:center; gap:5px;">
+                      <span style="color:#7c3aed;">🪙</span> ${escHtml(it.name)}
+                    </span>
+                    <span style="font-weight:700; color:#7c3aed;">${fmtMoney(it.amount)}</span>
+                  </div>
+                  `).join('')}
+
+                  <div style="border-top:1px dashed #e2e8f0; margin:5px 0;"></div>
+
+                  <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.82rem; font-weight:800; color:#0f172a;">
+                    <span>Total Due (${activeMonthName.split(' ')[0]})</span>
+                    <span style="font-size:0.88rem;">${fmtMoney(activeMonthDue)}</span>
+                  </div>
+                </div>
+
+                <!-- PAYMENT STATUS -->
+                <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:9px; padding:9px 12px; margin-bottom:9px; box-shadow:0 1px 2px rgba(15,23,42,0.02);">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <div style="font-weight:800; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.6px; color:#475569;">Payment Status</div>
+                    ${activeIsPaid 
+                      ? (activeIsPartial ? `<span style="background:#fffbeb; color:#92400e; border:1px solid #fde68a; font-size:0.65rem; font-weight:700; padding:1px 6px; border-radius:9999px;">PARTIAL</span>` : `<span style="background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; font-size:0.65rem; font-weight:700; padding:1px 6px; border-radius:9999px;">PAID</span>`)
+                      : `<span style="background:#fef2f2; color:#991b1b; border:1px solid #fecaca; font-size:0.65rem; font-weight:700; padding:1px 6px; border-radius:9999px;">UNPAID</span>`}
+                  </div>
+
+                  <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; color:#475569; padding:2px 0;">
+                    <span style="border-left:3px solid #10b981; padding-left:6px;">Previous Arrears (Opening Balance):</span>
+                    <span style="font-weight:700; color:${prevArrears > 0 ? '#dc2626' : '#334155'}; font-size:0.78rem;">
+                      ${fmtMoney(prevArrears)}
+                    </span>
+                  </div>
+
+                  <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; color:#475569; padding:2px 0;">
+                    <span style="border-left:3px solid #0f172a; padding-left:6px;">Payments Received (${activeMonthName.split(' ')[0]}):</span>
+                    <span style="font-weight:700; color:#059669; font-size:0.78rem;">
+                      ${fmtMoney(activePaidAmt)}
+                    </span>
+                  </div>
+
+                  <!-- Compact Outstanding Card -->
+                  <div style="background:${totalGrossDue > 0 ? '#fff1f2' : '#ecfdf5'}; border:1px solid ${totalGrossDue > 0 ? '#fecdd3' : '#a7f3d0'}; border-radius:7px; padding:6px 10px; margin-top:6px; display:flex; justify-content:space-between; align-items:center;">
+                    <div style="font-weight:800; font-size:0.8rem; color:#0f172a;">
+                      Total Outstanding
+                      <div style="font-size:0.64rem; font-weight:500; color:#64748b;">Arrears + Month Remainder</div>
+                    </div>
+                    <div style="font-size:1.1rem; font-weight:800; color:${totalGrossDue > 0 ? '#dc2626' : '#059669'};">
+                      ${fmtMoney(totalGrossDue)}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Trust Badges -->
+                <div style="display:flex; flex-direction:column; gap:4px;">
+                  <div style="display:flex; gap:6px; align-items:center; font-size:0.67rem; color:#64748b; background:#f8fafc; border:1px solid #f1f5f9; padding:5px 9px; border-radius:6px;">
+                    <span style="color:#0284c7; font-size:0.8rem;">ℹ</span>
+                    <div><b>Payment Notes:</b> All payments are logged with date, method, and reference.</div>
+                  </div>
+                  <div style="display:flex; gap:6px; align-items:center; font-size:0.67rem; color:#64748b; background:#f8fafc; border:1px solid #f1f5f9; padding:5px 9px; border-radius:6px;">
+                    <span style="color:#059669; font-size:0.8rem;">🛡</span>
+                    <div><b>Secure & Reliable:</b> School financial records are audited, live synced, and secure.</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- RIGHT COLUMN: CASHIER DESK & REAL-TIME ARREARS CALCULATION -->
+              <div>
+                <div style="font-weight:800; font-size:0.72rem; color:#475569; margin-bottom:7px; text-transform:uppercase; letter-spacing:0.8px; display:flex; align-items:center; gap:5px;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                  <span>Payment Options</span>
+                </div>
+
+                <!-- Quick Action Cards (Compact 2-Column Grid) -->
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:5px; margin-bottom:7px;">
+                  <!-- 1. Mark Full Paid -->
+                  <div class="fee-quick-card" data-mode="full" onclick="setFeeQuickAmount(${totalGrossDue}, 'full')" style="cursor:pointer; background:#f0fdf4; border:1.5px solid #86efac; border-radius:8px; padding:5px 8px; display:flex; justify-content:space-between; align-items:center; transition:all 0.15s ease;">
+                    <div style="display:flex; gap:7px; align-items:center; min-width:0; overflow:hidden;">
+                      <div style="width:18px; height:18px; border-radius:50%; background:#10b981; color:#fff; display:flex; align-items:center; justify-content:center; font-size:0.65rem; font-weight:800; flex-shrink:0;">✓</div>
+                      <div style="min-width:0; overflow:hidden;">
+                        <div style="font-weight:700; font-size:0.75rem; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Mark Full Paid</div>
+                        <div style="font-size:0.63rem; color:#15803d; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Pay all (${fmtMoney(totalGrossDue)})</div>
+                      </div>
+                    </div>
+                    <div style="font-weight:700; color:#059669; font-size:0.8rem; flex-shrink:0; margin-left:4px;">&rsaquo;</div>
+                  </div>
+
+                  <!-- 2. Clear Arrears Only (if arrears > 0) -->
+                  ${prevArrears > 0 ? `
+                  <div class="fee-quick-card" data-mode="arrears" onclick="setFeeQuickAmount(${prevArrears}, 'arrears')" style="cursor:pointer; background:#fffbeb; border:1.5px solid #fde68a; border-radius:8px; padding:5px 8px; display:flex; justify-content:space-between; align-items:center; transition:all 0.15s ease;">
+                    <div style="display:flex; gap:7px; align-items:center; min-width:0; overflow:hidden;">
+                      <div style="width:18px; height:18px; border-radius:50%; background:#f59e0b; color:#fff; display:flex; align-items:center; justify-content:center; font-size:0.65rem; font-weight:800; flex-shrink:0;">!</div>
+                      <div style="min-width:0; overflow:hidden;">
+                        <div style="font-weight:700; font-size:0.75rem; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Clear Arrears Only</div>
+                        <div style="font-size:0.63rem; color:#b45309; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Balance (${fmtMoney(prevArrears)})</div>
+                      </div>
+                    </div>
+                    <div style="font-weight:700; color:#d97706; font-size:0.8rem; flex-shrink:0; margin-left:4px;">&rsaquo;</div>
+                  </div>
+                  ` : ''}
+
+                  <!-- 3. Monthly Tuition Only -->
+                  <div class="fee-quick-card" data-mode="tuition" onclick="setFeeQuickAmount(${tuition}, 'tuition')" style="cursor:pointer; background:#ffffff; border:1.5px solid #e2e8f0; border-radius:8px; padding:5px 8px; display:flex; justify-content:space-between; align-items:center; transition:all 0.15s ease;">
+                    <div style="display:flex; gap:7px; align-items:center; min-width:0; overflow:hidden;">
+                      <div style="width:18px; height:18px; border-radius:5px; background:#eff6ff; color:#2563eb; display:flex; align-items:center; justify-content:center; font-size:0.65rem; flex-shrink:0;">🏫</div>
+                      <div style="min-width:0; overflow:hidden;">
+                        <div style="font-weight:700; font-size:0.75rem; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Monthly Tuition</div>
+                        <div style="font-size:0.63rem; color:#64748b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${fmtMoney(tuition)}</div>
+                      </div>
+                    </div>
+                    <div style="font-weight:700; color:#64748b; font-size:0.8rem; flex-shrink:0; margin-left:4px;">&rsaquo;</div>
+                  </div>
+
+                  <!-- 4. Examination Fee Only (if exists) -->
+                  ${examAmt > 0 ? `
+                  <div class="fee-quick-card" data-mode="exam" onclick="setFeeQuickAmount(${examAmt}, 'exam')" style="cursor:pointer; background:#ffffff; border:1.5px solid #e2e8f0; border-radius:8px; padding:5px 8px; display:flex; justify-content:space-between; align-items:center; transition:all 0.15s ease;">
+                    <div style="display:flex; gap:7px; align-items:center; min-width:0; overflow:hidden;">
+                      <div style="width:18px; height:18px; border-radius:5px; background:#f5f3ff; color:#7c3aed; display:flex; align-items:center; justify-content:center; font-size:0.65rem; flex-shrink:0;">🪙</div>
+                      <div style="min-width:0; overflow:hidden;">
+                        <div style="font-weight:700; font-size:0.75rem; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Examination Fee</div>
+                        <div style="font-size:0.63rem; color:#64748b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${fmtMoney(examAmt)}</div>
+                      </div>
+                    </div>
+                    <div style="font-weight:700; color:#64748b; font-size:0.8rem; flex-shrink:0; margin-left:4px;">&rsaquo;</div>
+                  </div>
+                  ` : ''}
+
+                  <!-- 5. Custom Amount Received -->
+                  <div class="fee-quick-card" data-mode="custom" onclick="document.getElementById('fee-input-amount').focus()" style="cursor:pointer; background:#faf5ff; border:1.5px solid #d8b4fe; border-radius:8px; padding:5px 8px; display:flex; justify-content:space-between; align-items:center; transition:all 0.15s ease;">
+                    <div style="display:flex; gap:7px; align-items:center; min-width:0; overflow:hidden;">
+                      <div style="width:18px; height:18px; border-radius:5px; background:#f3e8ff; color:#7c3aed; display:flex; align-items:center; justify-content:center; font-size:0.65rem; flex-shrink:0;">📝</div>
+                      <div style="min-width:0; overflow:hidden;">
+                        <div style="font-weight:700; font-size:0.75rem; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Custom Amount</div>
+                        <div style="font-size:0.63rem; color:#7c3aed; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Flexible entry</div>
+                      </div>
+                    </div>
+                    <div style="font-weight:700; color:#7c3aed; font-size:0.8rem; flex-shrink:0; margin-left:4px;">&rsaquo;</div>
+                  </div>
+                </div>
+
+                <!-- INTERACTIVE CASHIER DESK FORM (Compact Purple) -->
+                <div style="background:#fdfcff; border:1.5px solid #ede9fe; border-radius:9px; padding:10px; box-shadow:0 2px 5px rgba(124,58,237,0.04);">
+                  <div style="display:flex; align-items:center; gap:6px; margin-bottom:7px;">
+                    <div style="width:22px; height:22px; border-radius:6px; background:#7c3aed; color:#fff; display:flex; align-items:center; justify-content:center; font-size:0.75rem;">💳</div>
+                    <div>
+                      <div style="font-weight:800; font-size:0.81rem; color:#0f172a;" id="fee-cashier-title">Payment Details</div>
+                      <div style="font-size:0.65rem; color:#64748b;">Enter the amount received and payment details.</div>
+                    </div>
+                  </div>
+
+                  <!-- Amount Received Input -->
+                  <div style="margin-bottom:7px;">
+                    <label style="display:block; font-size:0.7rem; font-weight:700; color:#334155; margin-bottom:2px;">
+                      Amount Received (PKR) <span style="color:#ef4444;">*</span>
+                    </label>
+                    <div style="position:relative; display:flex; align-items:center;">
+                      <input type="number" id="fee-input-amount" 
+                        data-total-gross-due="${totalGrossDue}" 
+                        data-prev-arrears="${prevArrears}" 
+                        data-month-due="${activeMonthRemDue}" 
+                        value="${totalGrossDue > 0 ? totalGrossDue : activeMonthDue}" 
+                        placeholder="Enter amount" 
+                        oninput="updateFeeCalculationRealtime()" 
+                        style="width:100%; padding:6px 45px 6px 10px; font-size:0.95rem; font-weight:800; color:#0f172a; border:1.5px solid #cbd5e1; border-radius:6px; outline:none; background:#ffffff; transition:border 0.15s;" 
+                        onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#cbd5e1'"/>
+                      <span style="position:absolute; right:7px; font-weight:700; font-size:0.72rem; color:#64748b; background:#f1f5f9; padding:1px 6px; border-radius:4px;">PKR</span>
+                    </div>
+                  </div>
+
+                  <!-- Payment Method & Date in Row -->
+                  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:7px; margin-bottom:7px;">
+                    <div>
+                      <label style="display:block; font-size:0.69rem; font-weight:700; color:#334155; margin-bottom:2px;">
+                        Payment Method <span style="color:#ef4444;">*</span>
+                      </label>
+                      <select id="fee-input-method" style="width:100%; padding:5px 7px; font-size:0.76rem; font-weight:600; color:#0f172a; border:1px solid #cbd5e1; border-radius:6px; outline:none; background:#ffffff; cursor:pointer;">
+                        <option value="Cash">Cash 💵</option>
+                        <option value="Bank Transfer">Bank Transfer 🏦</option>
+                        <option value="EasyPaisa">EasyPaisa 📱</option>
+                        <option value="JazzCash">JazzCash 📱</option>
+                        <option value="Cheque">Cheque 🧾</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label style="display:block; font-size:0.69rem; font-weight:700; color:#334155; margin-bottom:2px;">
+                        Payment Date <span style="color:#ef4444;">*</span>
+                      </label>
+                      <input type="date" id="fee-input-date" value="${today()}" style="width:100%; padding:4px 7px; font-size:0.76rem; font-weight:600; color:#0f172a; border:1px solid #cbd5e1; border-radius:6px; outline:none; background:#ffffff;"/>
+                    </div>
+                  </div>
+
+                  <!-- Reference & Notes -->
+                  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:7px; margin-bottom:7px;">
+                    <div>
+                      <label style="display:block; font-size:0.69rem; font-weight:700; color:#334155; margin-bottom:2px;">
+                        Transaction Ref <span style="font-weight:400; color:#94a3b8;">(Opt)</span>
+                      </label>
+                      <input type="text" id="fee-input-ref" placeholder="e.g. Receipt #123" style="width:100%; padding:4px 7px; font-size:0.75rem; border:1px solid #cbd5e1; border-radius:6px; outline:none; background:#ffffff;"/>
+                    </div>
+                    <div>
+                      <label style="display:block; font-size:0.69rem; font-weight:700; color:#334155; margin-bottom:2px;">
+                        Notes / Remarks <span style="font-weight:400; color:#94a3b8;">(Opt)</span>
+                      </label>
+                      <input type="text" id="fee-input-notes" placeholder="e.g. From father" style="width:100%; padding:4px 7px; font-size:0.75rem; border:1px solid #cbd5e1; border-radius:6px; outline:none; background:#ffffff;"/>
+                    </div>
+                  </div>
+
+                  <!-- Arrears Waiver / Concession Discount -->
+                  <div style="margin-bottom:7px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
+                      <label style="font-size:0.69rem; font-weight:700; color:#334155;">Arrears Concession / Waiver <span style="font-weight:400; color:#94a3b8;">(Optional)</span></label>
+                      <span style="font-weight:600; font-size:0.65rem; color:#7c3aed;">Reduces balance</span>
+                    </div>
+                    <input type="number" id="fee-input-discount" value="0" placeholder="0" oninput="updateFeeCalculationRealtime()" style="width:100%; padding:4px 7px; font-size:0.77rem; font-weight:600; color:#0f172a; border:1px solid #cbd5e1; border-radius:6px; outline:none; background:#ffffff;"/>
+                  </div>
+
+                  <!-- EMBEDDED REAL-TIME CALCULATION SUMMARY (Directly in Cashier Desk) -->
+                  <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:7px; padding:7px 10px; margin-bottom:8px;">
+                    <div style="display:flex; justify-content:space-between; font-size:0.73rem; color:#64748b; padding:1px 0;">
+                      <span>Total Due (${prevArrears > 0 ? 'Arrears + Month' : activeMonthName.split(' ')[0]}):</span>
+                      <span style="font-weight:700; color:#0f172a;">${fmtMoney(totalGrossDue)}</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:0.73rem; color:#64748b; padding:1px 0;">
+                      <span>Amount Received:</span>
+                      <span style="font-weight:700; color:#059669;" id="fee-realtime-received">${fmtMoney(totalGrossDue > 0 ? totalGrossDue : activeMonthDue)}</span>
+                    </div>
+                    
+                    <div style="border-top:1px dashed #e2e8f0; margin:4px 0;"></div>
+                    
+                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.79rem; font-weight:800; color:#0f172a;">
+                      <span>Remaining Balance:</span>
+                      <span id="fee-realtime-remaining" style="color:#059669; font-size:0.9rem;">PKR 0 (Fully Cleared ✓)</span>
+                    </div>
+
+                    <!-- Waterfall Allocation Preview -->
+                    <div style="border-top:1px solid #f8fafc; margin-top:4px; padding-top:3px; font-size:0.67rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px;">
+                      <span id="fee-alloc-arrears-tag">${prevArrears > 0 ? `<span style="color:#059669; font-weight:700;">✓ Arrears 100% Cleared</span>` : `<span style="color:#64748b;">No past arrears</span>`}</span>
+                      <span id="fee-alloc-month-tag"><span style="color:#059669; font-weight:700;">✓ Month Fully Paid</span></span>
+                    </div>
+                  </div>
+
+                  <!-- Submit Payment Button -->
+                  <button type="button" id="btn-record-fee" onclick="submitCustomFeePayment('${sid}', '${activeMonth}')" style="width:100%; padding:8px 12px; background:linear-gradient(135deg, #7c3aed, #6d28d9); color:#ffffff; font-weight:800; font-size:0.84rem; border:none; border-radius:7px; box-shadow:0 3px 10px rgba(109,40,217,0.3); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:transform 0.1s ease;" onmousedown="this.style.transform='scale(0.99)'" onmouseup="this.style.transform='scale(1)'">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    <span id="btn-record-fee-text">Record Payment</span>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
-          <button type="button" class="btn" style="background:#f1f5f9; color:#334155; border:1px solid #e2e8f0; font-weight:700; font-size:0.8rem; padding:8px 18px; border-radius:8px; cursor:pointer;" onclick="closeModal()">
-            Close
-          </button>
+
+          <!-- Sticky Footer Buttons -->
+          <div style="flex-shrink:0; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; padding-top:9px; border-top:1px solid #f1f5f9; margin-top:8px;">
+            <div style="display:flex; gap:7px;">
+              <button type="button" class="btn btn-sm" style="background:#0f172a; color:#ffffff; font-weight:700; font-size:0.76rem; padding:6px 13px; border-radius:7px; border:none; display:inline-flex; align-items:center; gap:5px; box-shadow:0 1px 3px rgba(15,23,42,0.18); cursor:pointer;" onclick="openVoucherModal('${sid}')">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Issue Fee Challan
+              </button>
+              ${getStudentWA(s) ? `
+              <button type="button" class="btn btn-sm" style="background:#16a34a; color:#ffffff; font-weight:700; font-size:0.76rem; padding:6px 13px; border-radius:7px; border:none; display:inline-flex; align-items:center; gap:5px; box-shadow:0 1px 3px rgba(22,163,74,0.2); cursor:pointer;" onclick="sendVoucherWhatsApp('${sid}', '${activeMonth}')">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg> WhatsApp ${activeMonthName.split(' ')[0]} Challan
+              </button>
+              ` : ''}
+            </div>
+            <button type="button" class="btn btn-sm" style="background:#f8fafc; color:#334155; border:1px solid #cbd5e1; font-weight:700; font-size:0.76rem; padding:6px 14px; border-radius:7px; cursor:pointer;" onclick="closeModal()">
+              Close
+            </button>
+          </div>
         </div>
       `);
 
       const modalEl = document.querySelector('.modal');
       if (modalEl) {
         modalEl.classList.add('modal-glass');
-        modalEl.style.maxWidth = '1040px';
-        modalEl.style.width = '96%';
-        modalEl.style.maxHeight = '92vh';
+        modalEl.style.maxWidth = '1000px';
+        modalEl.style.width = '95%';
+        modalEl.style.maxHeight = 'calc(100vh - 28px)';
+        modalEl.style.height = 'auto';
         modalEl.style.display = 'flex';
         modalEl.style.flexDirection = 'column';
         modalEl.style.borderRadius = '16px';
+        modalEl.style.overflow = 'hidden';
+        modalEl.style.margin = 'auto';
+        modalEl.style.boxSizing = 'border-box';
       }
       const bodyEl = document.getElementById('modal-body');
       if (bodyEl) {
-        bodyEl.style.maxHeight = 'calc(92vh - 20px)';
-        bodyEl.style.overflowY = 'auto';
-        bodyEl.style.paddingRight = '4px';
+        bodyEl.style.flex = '1 1 auto';
+        bodyEl.style.minHeight = '0';
+        bodyEl.style.display = 'flex';
+        bodyEl.style.flexDirection = 'column';
+        bodyEl.style.overflow = 'hidden';
+        bodyEl.style.padding = '10px 16px 8px';
+        bodyEl.style.boxSizing = 'border-box';
       }
 
       // Initialize live calculation with default prefilled value
@@ -9720,8 +9879,9 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
       s.fees = getLedgerArrears(sid, getNextMonth(monthKey())) <= 0 ? 'Paid' : 'Pending';
       
       saveDB();
+      pushCloudDB();
+      updateFeeSectionLive(sid);
       showToast(isPaid ? `${monthName} marked as PAID` : `${monthName} marked as UNPAID`);
-      goPage('fees');
       openStudentFeeModal(sid, month);
     }
 
@@ -9770,8 +9930,9 @@ ${(DB.paymentSubmissions || []).filter(p => p.status === 'pending').length > 0 ?
       s.fees = getLedgerArrears(sid, getNextMonth(monthKey())) <= 0 ? 'Paid' : 'Pending';
       
       saveDB();
+      pushCloudDB();
+      updateFeeSectionLive(sid);
       showToast(isPaid ? 'All session months marked as PAID' : 'All session months marked as UNPAID');
-      goPage('fees');
       openStudentFeeModal(sid);
     }
 
@@ -12911,8 +13072,10 @@ ${(() => {
       s.fees = mRow.paid ? 'Paid' : 'Pending';
       
       saveDB();
+      pushCloudDB();
       showToast('Payment verified and recorded!', 'ts');
       goPage('fees');
+      updateFeeSectionLive(sid);
     }
 
     function rejectPaymentSubmission(id) {
@@ -13716,9 +13879,26 @@ ${DB.school.name}`;
       if (m) {
         m.classList.remove('modal-wide');
         m.classList.remove('modal-glass');
+        m.style.maxWidth = '';
+        m.style.width = '';
+        m.style.maxHeight = '';
+        m.style.borderRadius = '';
+        m.style.overflow = '';
+        m.style.margin = '';
+        m.style.display = '';
+        m.style.flexDirection = '';
       }
       const body = document.getElementById('modal-body');
-      if (body) body.innerHTML = '';
+      if (body) {
+        body.innerHTML = '';
+        body.style.maxHeight = '';
+        body.style.overflowY = '';
+        body.style.padding = '';
+        body.style.paddingRight = '';
+      }
+      if (typeof curPage !== 'undefined' && curPage === 'fees' && typeof updateFeeSectionLive === 'function') {
+        updateFeeSectionLive();
+      }
     }
 
     // Global keyboard Escape dismiss handler for modals, scanners, and panels
